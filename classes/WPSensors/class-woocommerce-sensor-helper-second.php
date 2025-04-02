@@ -1581,11 +1581,11 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 				$editor_link['name'] => $editor_link['value'],
 			);
 
-			$event_data['new_value']     = $data['_download_expiry'];
-			$event_data['product_name']  = $data['post_title'];
-			$event_data['ID']            = $data['post_ID'];
-			$event_data['ProductStatus'] = $data['post_status'];
-			$event_data['PostStatus']    = $data['post_status'];
+			$event_data['new_value']     = ( $data['_download_expiry'] ) ?? '';
+			$event_data['product_name']  = ( $data['post_title'] ) ?? '';
+			$event_data['ID']            = ( $data['post_ID'] ) ?? '';
+			$event_data['ProductStatus'] = ( $data['post_status'] ) ?? '';
+			$event_data['PostStatus']    = ( $data['post_status'] ) ?? '';
 
 			if ( isset( $oldpost['_download_limit'] ) && intval( $oldpost['_download_limit'][0] ) < 0 ) {
 				$oldpost['_download_limit'][0] = __( 'Unlimited', 'wp-security-audit-log' );

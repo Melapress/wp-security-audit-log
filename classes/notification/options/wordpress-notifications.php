@@ -9,6 +9,7 @@
 
 use WSAL\Views\Notifications;
 use WSAL\Controllers\Constants;
+use WSAL\Controllers\Slack\Slack;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Twilio\Twilio;
 use WSAL\Helpers\Settings\Settings_Builder;
@@ -29,6 +30,13 @@ if ( Notifications::is_default_twilio_set() ) {
 	$defaults              .= esc_html__( ' Currently default phone is set to: ', 'wp-security-audit-log' ) . $current_default_twilio;
 } else {
 	$defaults .= Notification_Helper::no_default_phone_is_set();
+}
+
+if ( Notifications::is_default_slack_set() ) {
+	$current_default_twilio = Notifications::get_default_slack();
+	$defaults              .= esc_html__( ' Currently default slack channel is set to: ', 'wp-security-audit-log' ) . $current_default_twilio;
+} else {
+	$defaults .= Notification_Helper::no_default_slack_is_set();
 }
 
 $notifications = array();

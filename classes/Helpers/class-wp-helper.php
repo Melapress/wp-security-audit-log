@@ -202,6 +202,24 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
+		 * Returns WOO product statuses as array
+		 *
+		 * @return array
+		 *
+		 * @since 5.3.4
+		 */
+		public static function get_woo_product_statuses() {
+			$post_statuses               = array();
+			$post_statuses['publish']    = 'publish';
+			$post_statuses['private']    = 'private';
+			$post_statuses['future']     = 'future';
+			$post_statuses['auto-draft'] = 'auto-draft';
+			$post_statuses['draft']      = 'draft';
+
+			return $post_statuses;
+		}
+
+		/**
 		 * Check is this is a multisite setup.
 		 *
 		 * @return bool
@@ -777,7 +795,24 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			return \is_plugin_active( $plugin );
+			$is_active = \is_plugin_active( $plugin );
+
+			if ( ! $is_active && self::is_multisite() ) {
+				// Check if the plugin is active on any of the multisite blogs.
+				$sites = self::get_multi_sites();
+				foreach ( $sites as $site ) {
+					\switch_to_blog( $site->blog_id );
+
+					if ( in_array( $plugin, (array) \get_option( 'active_plugins', array() ) ) ) {
+						$is_active = true;
+						return $is_active;
+					}
+
+					\restore_current_blog();
+				}
+			}
+
+			return $is_active;
 		}
 
 		/**

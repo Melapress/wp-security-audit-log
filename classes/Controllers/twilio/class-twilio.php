@@ -30,13 +30,11 @@ if ( ! class_exists( '\WSAL\Controllers\Twilio\Twilio' ) ) {
 	 */
 	class Twilio {
 
-		const SETTINGS_NAME = WSAL_PREFIX . 'twilio';
+		public const SETTINGS_NAME = WSAL_PREFIX . 'twilio';
 
-		const NONCE_NAME = WSAL_PREFIX . 'twilio';
+		public const NONCE_NAME = WSAL_PREFIX . 'twilio';
 
-		const POLICY_SETTINGS_NAME = 'enable_twilio';
-
-		const TWILIO_USER_KEY = WSAL_PREFIX . 'twilio_data';
+		public const POLICY_SETTINGS_NAME = 'enable_twilio';
 
 		/**
 		 * Twilio Account SID

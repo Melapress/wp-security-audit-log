@@ -13,7 +13,6 @@ namespace WSAL\Utils;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
-use WSAL_Ext_MirrorLogger;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Views\Notifications;
 use WSAL\Controllers\Cron_Jobs;
@@ -24,8 +23,10 @@ use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Entities\Occurrences_Entity;
 use WSAL\Controllers\Plugin_Extensions;
+use WSAL\Loggers\WSAL_Ext_MirrorLogger;
 use WSAL\Helpers\Plugin_Settings_Helper;
 use WSAL\Entities\Generated_Reports_Entity;
+use WSAL\Entities\Custom_Notifications_Entity;
 use WSAL\Reports\Controllers\Statistic_Reports;
 
 use function Crontrol\Event\get;
@@ -632,11 +633,11 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			// phpcs:disable
 			// phpcs:enable
 
-			if ( class_exists( 'WSAL_Ext_MirrorLogger' ) && method_exists( '\WSAL\Helpers\Settings_Helper', 'get_working_dir_path_static' ) ) {
+			if ( class_exists( '\WSAL\Loggers\WSAL_Ext_MirrorLogger' ) && method_exists( '\WSAL\Helpers\Settings_Helper', 'get_working_dir_path_static' ) ) {
 
 				$working_dir_path = Settings_Helper::get_working_dir_path_static();
 
-				if ( file_exists( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.json' ) ) {
+				if ( file_exists( $working_dir_path . \WSAL\Loggers\WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.json' ) ) {
 					rename( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.json', $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php' );
 
 					$line = fgets(
@@ -1053,6 +1054,15 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 */
 		public static function migrate_up_to_5300() {
 			Migrate_53::migrate_up_to_5300();
+
+			if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
+				$options = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
+
+				$options['daily_summary_notification']  = false;
+				$options['weekly_summary_notification'] = false;
+
+				Settings_Helper::set_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, $options );
+			}
 		}
 
 		/**
@@ -1067,16 +1077,9 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 * @since 5.3.2
 		 */
 		public static function migrate_up_to_5320() {
-
-			if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
-				$options = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
-
-				$options['daily_summary_notification']  = false;
-				$options['weekly_summary_notification'] = false;
-
-				Settings_Helper::set_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, $options );
-			}
+			// Code from here is moved to 5300 migration method.
 		}
+
 		/**
 		 * Migration for version upto 5.3.3
 		 *
@@ -1092,6 +1095,55 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 			Cron_Jobs::remove_cron_option( 'wsal_daily_summary_report' );
 		}
+		/**
+		 * Migration for version upto 5.3.4
+		 *
+		 * Migrates notification settings
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.4
+		 */
+		public static function migrate_up_to_5340() {
+			$disabled_alerts = Settings_Helper::get_option_value( 'disabled-alerts', array() );
+
+			$disabled_alerts[] = 6066;
+			$disabled_alerts[] = 6067;
+			$disabled_alerts[] = 6068;
+			$disabled_alerts[] = 6069;
+			$disabled_alerts[] = 6070;
+			$disabled_alerts[] = 6071;
+			$disabled_alerts[] = 6072;
+
+			$disabled_alerts = \array_unique( $disabled_alerts );
+
+			Settings_Helper::set_option_value( 'disabled-alerts', $disabled_alerts );
+
+			if ( \class_exists( '\WSAL\Entities\Custom_Notifications_Entity', false ) ) {
+
+				// If one of the new columns exists there is no need to alter the table.
+				$column_exists = Custom_Notifications_Entity::check_column(
+					Custom_Notifications_Entity::get_table_name(),
+					'notification_slack_template',
+					'longtext'
+				);
+
+				if ( ! $column_exists ) {
+					$upgrade_sql = Custom_Notifications_Entity::get_upgrade_query();
+					Custom_Notifications_Entity::get_connection()->query( $upgrade_sql );
+				}
+			}
+
+			$settings = Notifications::get_global_notifications_setting();
+
+			if ( isset( $settings['notification_summary_number_of_events_included'] ) && $settings['notification_summary_number_of_events_included'] ) {
+				$settings['notification_events_included']                   = true;
+				$settings['notification_summary_number_of_events_included'] = 10;
+				Notifications::set_global_notifications_setting( $settings );
+			}
+		}
 
 		/**
 		 * Previous version of the plugin do not store username or user_id consistently, that method fixed that (in the best way possible) - if there is no user with that username 0 is stored as user_id, if user with that id does not exist anymore 'Deleted' is stored as username (check update_user_name_and_user_id method)
@@ -1100,7 +1152,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		public static function migrate_users() {
+		private static function migrate_users() {
 			$updated_records = self::update_user_name_and_user_id( Occurrences_Entity::get_connection() );
 
 			$hooks_array = array(

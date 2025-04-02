@@ -522,6 +522,47 @@ $doc.ready(function () {
     });
 
     /**
+     * Stores the provided Slack API key
+     * 
+     */
+    $doc.on('click', '#slack_notification_store_settings_ajax', function (e) {
+        const auth = (jQuery('#slack_notification_auth_token').length) ? jQuery('#slack_notification_auth_token').val() : null;
+        const nonceValue = jQuery('#slack_notification_nonce').val();
+
+        if (!auth) {
+            alert('Please fill in all required fields.');
+        } else {
+
+            $wsalBody.addClass('has-overlay');
+            $saveAlert.fadeIn();
+            $saveAlert.removeClass('is-success is-failed');
+
+            jQuery.ajax({
+                url: ajaxurl,
+                data: {
+                    action: 'wsal_store_slack_api_key',
+                    slack_auth: auth,
+                    _wpnonce: nonceValue
+                },
+                success: function (data) {
+                    if (data.success) {
+
+                        $saveAlert.addClass('is-success').delay(900).fadeOut(700);
+                        setTimeout(function () { $wsalBody.removeClass('has-overlay'); }, 1200);
+
+                        location.reload();
+
+                    } else {
+                        $saveAlert.addClass('is-failed').delay(900).fadeOut(700);
+                        setTimeout(function () { $wsalBody.removeClass('has-overlay'); }, 1200);
+                        alert(data.data);
+                    }
+                },
+            });
+        }
+    });
+
+    /**
      * Sends test email
      * 
      */
@@ -640,6 +681,76 @@ $doc.ready(function () {
                     url: ajaxurl,
                     data: {
                         action: 'wsal_send_notifications_test_sms',
+                        email_body: email_body,
+                        number: number,
+                        _wpnonce: nonceValue
+                    },
+                    success: function (data) {
+                        if (data.success) {
+
+                            $saveAlert.addClass('is-success').delay(900).fadeOut(700);
+                            setTimeout(function () { $wsalBody.removeClass('has-overlay'); }, 1200);
+
+                        } else {
+                            $saveAlert.addClass('is-failed').delay(900).fadeOut(700);
+                            setTimeout(function () { $wsalBody.removeClass('has-overlay'); }, 1200);
+                            alert(data.data);
+                        }
+                    },
+                });
+            }
+        }
+    });
+
+    /**
+     * Sends test slack
+     * 
+     */
+    $doc.on('click', '#test_slack_notification_settings_ajax', function (e) {
+        
+        const auth = (jQuery('#slack_notification_auth_token').length) ? jQuery('#slack_notification_auth_token').val() : null;
+        
+        const nonceValue = jQuery('#slack_notification_nonce').val();
+
+        if (!auth) {
+            
+            if (!auth) {
+                alert('Please provide Twilio AUTH.');
+            }
+            
+        } else {
+
+            var inputid = 'slack_notifications_body';
+
+            var email_body;
+
+            var textArea = jQuery('textarea#' + inputid);
+            if (textArea.length > 0 && textArea.is(':visible')) {
+                email_body = textArea.val();
+            } else {
+                email_body = null;
+            }
+
+            const number = (jQuery('#notification_default_slack_channel').length) ? jQuery('#notification_default_slack_channel').val() : null;
+            
+            if (!email_body || !number) {
+                if (!email_body) {
+                    alert('Please provide Slack text.');
+                }
+                if (!number) {
+                    alert('Please provide Slack channel to send test message to - use the default settings for this.');
+                }
+            } else {
+
+                $wsalBody.addClass('has-overlay');
+                $saveAlert.fadeIn();
+                $saveAlert.removeClass('is-success is-failed');
+
+                jQuery.ajax({
+                    method: 'POST',
+                    url: ajaxurl,
+                    data: {
+                        action: 'wsal_send_notifications_test_slack',
                         email_body: email_body,
                         number: number,
                         _wpnonce: nonceValue

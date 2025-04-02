@@ -413,9 +413,9 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 					$str .= $report_data['custom_title'];
 
 					unset( $report_data['custom_title'] );
-				} else {
+				} /* else {
 					$str .= esc_html__( 'Report from', 'wp-security-audit-log' ) . ' ' . \get_bloginfo( 'name' ) . ' ' . esc_html__( 'website', 'wp-security-audit-log' );
-				}
+				} */
 				$str .= '</h1>';
 
 				$str .= '</div>';

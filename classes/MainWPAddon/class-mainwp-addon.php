@@ -157,7 +157,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function check_mainwp_plugin_active(): bool {
-			if ( ! \is_plugin_active( 'mainwp/mainwp.php' ) ) {
+			if ( ! WP_Helper::is_plugin_active( 'mainwp/mainwp.php' ) ) {
 				return false;
 			}
 

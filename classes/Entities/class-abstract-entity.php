@@ -186,7 +186,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			string $table_name,
 			string $col_name,
 			string $col_type,
-			bool $is_null = null,
+			?bool $is_null = null,
 			$key = null,
 			$default = null,
 			$extra = null
@@ -222,6 +222,29 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 
 					return true;
 				} // End if found our column.
+			}
+
+			return false;
+		}
+
+		/**
+		 * Checks if the given index exists in the table
+		 *
+		 * @param string $index - The index to check for (text).
+		 *
+		 * @return boolean
+		 *
+		 * @since 5.3.4
+		 */
+		public static function check_index_exists( string $index ): bool {
+			$index = \sanitize_text_field( $index );
+
+			$results = static::get_connection()->get_results( 'SHOW INDEX FROM ' . self::get_table_name(), \ARRAY_A );
+
+			foreach ( $results as $row ) {
+				if ( isset( $row['Key_name'] ) && $row['Key_name'] === $index ) {
+					return true;
+				}
 			}
 
 			return false;

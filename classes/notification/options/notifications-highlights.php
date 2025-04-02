@@ -30,6 +30,13 @@ if ( Notifications::is_default_twilio_set() ) {
 	$defaults .= Notification_Helper::no_default_phone_is_set();
 }
 
+if ( Notifications::is_default_slack_set() ) {
+	$current_default_twilio = Notifications::get_default_slack();
+	$defaults              .= esc_html__( ' Currently default slack channel is set to: ', 'wp-security-audit-log' ) . $current_default_twilio;
+} else {
+	$defaults .= Notification_Helper::no_default_slack_is_set();
+}
+
 $notifications = array();
 foreach ( $built_in_notifications as $name => $value ) {
 	$notifications[ 'notification_' . $name ] = $value;
@@ -165,4 +172,4 @@ if ( isset( $notifications['notification_weekly_email_address'] ) && ! empty( $n
 // phpcs:enable
 ?>
 
-<input type="hidden" name="<?php echo Notifications::NOTIFICATIONS_SETTINGS_NAME; ?>[]" value="0" />
+<input type="hidden" name="<?php echo Notifications::NOTIFICATIONS_SETTINGS_NAME;  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>[]" value="0" />

@@ -2206,6 +2206,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					esc_html__( 'A new order has been placed.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Order name', 'wp-security-audit-log' ) => '%OrderTitle%',
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
 					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
@@ -2218,7 +2219,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					WSAL_INFORMATIONAL,
 					esc_html__( 'WooCommerce order status changed', 'wp-security-audit-log' ),
 					esc_html__( 'Marked the order %OrderTitle% as %OrderStatus%.', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
+					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
 					),
@@ -2230,7 +2233,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					WSAL_MEDIUM,
 					esc_html__( 'User moved a WooCommerce order to trash', 'wp-security-audit-log' ),
 					esc_html__( 'Moved the order %OrderTitle% to trash', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
+					),
 					array(),
 					'woocommerce-order',
 					'deleted',
@@ -2240,7 +2245,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					WSAL_LOW,
 					esc_html__( 'User moved a WooCommerce order out of trash', 'wp-security-audit-log' ),
 					esc_html__( 'Restored the order %OrderTitle% out of the trash.', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
+					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
 					),
@@ -2252,7 +2259,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					WSAL_LOW,
 					esc_html__( 'User permanently deleted a WooCommerce order', 'wp-security-audit-log' ),
 					esc_html__( 'Permanently deleted the order %OrderTitle%.', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
+					),
 					array(),
 					'woocommerce-order',
 					'deleted',
@@ -2262,7 +2271,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					WSAL_MEDIUM,
 					esc_html__( 'User edited a WooCommerce order', 'wp-security-audit-log' ),
 					esc_html__( 'Changed the details in order %OrderTitle%.', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
+					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
 					),
@@ -2279,6 +2290,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 						esc_html__( 'Order date', 'wp-security-audit-log' ) => '%OrderDate%',
 						esc_html__( 'Refund amount', 'wp-security-audit-log' ) => '%RefundedAmount%',
 						esc_html__( 'Refund reason', 'wp-security-audit-log' ) => '%Reason%',
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
 					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
@@ -2294,6 +2306,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					array(
 						esc_html__( 'Product ID', 'wp-security-audit-log' ) => '%ProductID%',
 						esc_html__( 'Product SKU', 'wp-security-audit-log' ) => '%SKU%',
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
 					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
@@ -2311,6 +2324,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 						esc_html__( 'Previous quantity', 'wp-security-audit-log' ) => '%OldQuantity%',
 						esc_html__( 'Product ID', 'wp-security-audit-log' ) => '%ProductID%',
 						esc_html__( 'Product SKU', 'wp-security-audit-log' ) => '%SKU%',
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
 					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
@@ -2325,6 +2339,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					esc_html__( 'Added/Removed a fee in order %OrderTitle%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Fee amount', 'wp-security-audit-log' ) => '%FeeAmount%',
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
 					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
@@ -2340,6 +2355,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					array(
 						esc_html__( 'New fee amount', 'wp-security-audit-log' ) => '%FeeAmount%',
 						esc_html__( 'Previous fee amount', 'wp-security-audit-log' ) => '%OldFeeAmount%',
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
 					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
@@ -2352,7 +2368,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					WSAL_HIGH,
 					esc_html__( 'User added/removed a coupon from an order', 'wp-security-audit-log' ),
 					esc_html__( 'Added/Removed a coupon %CouponName% in order %OrderTitle%.', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
+					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
 					),
@@ -2365,7 +2383,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					WSAL_HIGH,
 					esc_html__( 'User added/removed a tax from an order', 'wp-security-audit-log' ),
 					esc_html__( 'Added/Removed the tax %TaxName% in order %OrderTitle%.', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
+					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
 					),
@@ -2393,7 +2413,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					WSAL_HIGH,
 					esc_html__( 'User added/removed shipping from an order', 'wp-security-audit-log' ),
 					esc_html__( 'Added/Removed shipping in order %OrderTitle%.', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
+					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
 					),
@@ -2422,6 +2444,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					esc_html__( 'Added a note in order %OrderTitle%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Note Type', 'wp-security-audit-log' ) => '%NoteType%',
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
 					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
@@ -2436,6 +2459,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					esc_html__( 'Removed a note in order %OrderTitle%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Note Type', 'wp-security-audit-log' ) => '%NoteType%',
+						esc_html__( 'Order ID', 'wp-security-audit-log' ) => '%OrderID%',
 					),
 					array(
 						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',

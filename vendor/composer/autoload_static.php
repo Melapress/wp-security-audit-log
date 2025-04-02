@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit26866
+class ComposerStaticInit30239
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -37,6 +37,8 @@ class ComposerStaticInit26866
         'WSAL\\Controllers\\Database_Manager' => __DIR__ . '/../..' . '/classes/Controllers/class-database-manager.php',
         'WSAL\\Controllers\\Plugin_Extensions' => __DIR__ . '/../..' . '/classes/Controllers/class-plugin-extensions.php',
         'WSAL\\Controllers\\Sensors_Load_Manager' => __DIR__ . '/../..' . '/classes/Controllers/class-sensors-load-manager.php',
+        'WSAL\\Controllers\\Slack\\Slack' => __DIR__ . '/../..' . '/classes/Controllers/slack/class-slack.php',
+        'WSAL\\Controllers\\Slack\\Slack_API' => __DIR__ . '/../..' . '/classes/Controllers/slack/class-slack-api.php',
         'WSAL\\Controllers\\Twilio\\Twilio' => __DIR__ . '/../..' . '/classes/Controllers/twilio/class-twilio.php',
         'WSAL\\Controllers\\Twilio\\Twilio_API' => __DIR__ . '/../..' . '/classes/Controllers/twilio/class-twilio-api.php',
         'WSAL\\Controllers\\WP_CLI\\WP_CLI_Commands' => __DIR__ . '/../..' . '/classes/Controllers/WP_CLI/class-wp-cli-commands.php',
@@ -162,9 +164,9 @@ class ComposerStaticInit26866
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit26866::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit26866::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit26866::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit30239::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit30239::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit30239::$classMap;
 
         }, null, ClassLoader::class);
     }

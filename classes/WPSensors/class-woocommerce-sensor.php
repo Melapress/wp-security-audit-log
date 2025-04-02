@@ -1053,6 +1053,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 							'SKU'                => esc_attr( self::get_product_sku( $new_post->ID ) ),
 							'ProductStatus'      => sanitize_text_field( $new_post->post_status ),
 							'PostStatus'         => sanitize_text_field( $new_post->post_status ),
+							'OldStatus'          => sanitize_text_field( $old_post->post_status ),
 							$editor_link['name'] => $editor_link['value'],
 						)
 					);
@@ -1065,6 +1066,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 							'PostID'             => esc_attr( $new_post->ID ),
 							'ProductStatus'      => sanitize_text_field( $new_post->post_status ),
 							'PostStatus'         => sanitize_text_field( $new_post->post_status ),
+							'OldStatus'          => sanitize_text_field( $old_post->post_status ),
 							'SKU'                => esc_attr( self::get_product_sku( $new_post->ID ) ),
 							$editor_link['name'] => $editor_link['value'],
 						)

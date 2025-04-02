@@ -13,6 +13,8 @@
 namespace WSAL\Extensions\Helpers;
 
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Controllers\Slack\Slack;
+use WSAL\Controllers\Slack\Slack_API;
 use WSAL\Controllers\Twilio\Twilio;
 use WSAL\Controllers\Twilio\Twilio_API;
 use WSAL\Entities\Metadata_Entity;
@@ -124,6 +126,36 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 					'interpolate' => '___QWE_POST_ID_QWE___',
 					'type'        => 'integer',
 					'label'       => esc_html__( 'Post ID', 'wp-security-audit-log' ),
+					'operators'   => "'equal', 'not_equal'",
+				),
+				'orderid'            => array(
+					'interpolate' => '___QWE_ORDER_ID_QWE___',
+					'type'        => 'integer',
+					'label'       => esc_html__( 'Order ID', 'wp-security-audit-log' ),
+					'operators'   => "'equal', 'not_equal'",
+				),
+				'productid'          => array(
+					'interpolate' => '___QWE_PRODUCT_ID_QWE___',
+					'type'        => 'integer',
+					'label'       => esc_html__( 'Product ID', 'wp-security-audit-log' ),
+					'operators'   => "'equal', 'not_equal'",
+				),
+				'couponid'           => array(
+					'interpolate' => '___QWE_COUPON_ID_QWE___',
+					'type'        => 'integer',
+					'label'       => esc_html__( 'Coupon ID', 'wp-security-audit-log' ),
+					'operators'   => "'equal', 'not_equal'",
+				),
+				'productstatus'      => array(
+					'interpolate' => '___QWE_PRODUCT_STATUS_QWE___',
+					'type'        => 'string',
+					'label'       => esc_html__( 'Product Status', 'wp-security-audit-log' ),
+					'operators'   => "'equal', 'not_equal'",
+				),
+				'sku'                => array(
+					'interpolate' => '___QWE_SKU_QWE___',
+					'type'        => 'string',
+					'label'       => esc_html__( 'Product SKU', 'wp-security-audit-log' ),
 					'operators'   => "'equal', 'not_equal'",
 				),
 				'clientip'           => array(
@@ -334,6 +366,15 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 		}
 
 		/**
+		 * Returns no default slack channel is set text.
+		 *
+		 * @since 5.3.4
+		 */
+		public static function no_default_slack_is_set(): string {
+			return '<span style="color:red">' . esc_html__( ' Currently no default slack channel is set.', 'wp-security-audit-log' ) . '</span>';
+		}
+
+		/**
 		 * Email settings array function.
 		 *
 		 * @param string $id            - The name of the id of the field.
@@ -347,7 +388,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 				'id'            => $id,
 				'type'          => 'text',
 				'pattern'       => '([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,4}[,]{0,}){0,}',
-				'hint'          => esc_html__( 'You can enter multiple email addresses, separated by commas.', 'wp-security-audit-log' ),
+				'hint'          => esc_html__( 'You can enter multiple email addresses separated by commas. Do not use a space in between the email addresses and commas. For example: support@melapress.com,info@melapress.com', 'wp-security-audit-log' ),
 				'settings_name' => $settings_name,
 			);
 			if ( '' === $name ) {
@@ -402,6 +443,53 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 				'id'            => $id,
 				'type'          => 'error',
 				'text'          => '<span class="extra-text">' . esc_html__( 'In order to send notifications via SMS messages please configure the Twilio integration in the ', 'wp-security-audit-log' ) . '<a class="inner_links" href="#" data-section="twilio-notification-settings" data-url="wsal-options-tab-notification-settings">' . esc_html__( 'settings.', 'wp-security-audit-log' ) . ' </a></span>',
+				'settings_name' => $settings_name,
+			);
+
+			return $options;
+		}
+
+
+		/**
+		 * Slack settings default array function.
+		 *
+		 * @param string $id            - The name of the id of the field.
+		 * @param string $settings_name - The name of the setting to use.
+		 * @param string $name          - The name (title) of the field.
+		 *
+		 * @since 5.3.4
+		 */
+		public static function slack_settings_array( string $id, string $settings_name, string $name = '' ): array {
+			$options = array(
+				'id'            => $id,
+				'type'          => 'text',
+				'max_chars'     => 20,
+				'placeholder'   => esc_html__( 'WSAL notifications', 'wp-security-audit-log' ),
+				'hint'          => esc_html__( 'Leave empty if you want to use default one.', 'wp-security-audit-log' ),
+				'settings_name' => $settings_name,
+			);
+			if ( '' === $name ) {
+				$name = esc_html__( 'Slack channel: ', 'wp-security-audit-log' );
+			}
+
+			$options['name'] = $name;
+
+			return $options;
+		}
+
+		/**
+		 * Returns the default slack settings error array.
+		 *
+		 * @param string $id            - The name of the id of the field.
+		 * @param string $settings_name - The name of the setting to use.
+		 *
+		 * @since 5.3.4
+		 */
+		public static function slack_settings_error_array( string $id, string $settings_name ): array {
+			$options = array(
+				'id'            => $id,
+				'type'          => 'error',
+				'text'          => '<span class="extra-text">' . esc_html__( 'In order to send notifications via Slack messages please configure the Slack integration in the ', 'wp-security-audit-log' ) . '<a class="inner_links" href="#" data-section="slack-notification-settings" data-url="wsal-options-tab-notification-settings">' . esc_html__( 'settings.', 'wp-security-audit-log' ) . ' </a></span>',
 				'settings_name' => $settings_name,
 			);
 

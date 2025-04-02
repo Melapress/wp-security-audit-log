@@ -55,10 +55,13 @@ if ( ! class_exists( '\WSAL\Utils\Migrate_53' ) ) {
 		 */
 		public static function migrate_up_to_5300() {
 
-			$upgrade_sql = Occurrences_Entity::get_users_index_query();
-			Occurrences_Entity::get_connection()->suppress_errors( true );
-			Occurrences_Entity::get_connection()->query( $upgrade_sql );
-			Occurrences_Entity::get_connection()->suppress_errors( false );
+			if ( ! Occurrences_Entity::check_index_exists( 'wsal_users' ) ) {
+				// Add index to user_id column.
+				$upgrade_sql = Occurrences_Entity::get_users_index_query();
+				Occurrences_Entity::get_connection()->suppress_errors( true );
+				Occurrences_Entity::get_connection()->query( $upgrade_sql );
+				Occurrences_Entity::get_connection()->suppress_errors( false );
+			}
 
 
 			Settings_Helper::delete_option_value( Notices::EBOOK_NOTICE );
@@ -168,6 +171,8 @@ if ( ! class_exists( '\WSAL\Utils\Migrate_53' ) ) {
 
 			if ( Settings_Helper::get_option_value( 'daily-summary-email', \get_bloginfo( 'admin_email' ) ) ) {
 				$options['daily_email_address'] = \sanitize_text_field( \wp_unslash( Settings_Helper::get_option_value( 'daily-summary-email', \get_bloginfo( 'admin_email' ) ) ) );
+
+				$options['daily_email_address'] = self::generate_email_string( $options['daily_email_address'] );
 
 				$options['weekly_email_address'] = $options['daily_email_address'];
 			}
@@ -599,12 +604,8 @@ if ( ! class_exists( '\WSAL\Utils\Migrate_53' ) ) {
 				}
 
 				$report_options['notification_query'] = \json_encode( array( 'sql' => $sql ) );
-				// $report_options['notification_query_sql'] = Query_Builder_Parser::parse( $report_options['notification_query'] );
-				$report_options['notification_query_sql'] = ( ( isset( $sql ) ) ? ( \esc_sql( Notifications::obscure_query( $sql ) ) ) : '' );
 
-				// $report_options['notification_query']     = \json_encode( $notification_array );
-				// $report_options['notification_query_sql'] = Query_Builder_Parser::parse( $report_options['notification_query'] );
-				// $report_options['notification_query_sql'] = ( ( isset( $report_options['notification_query_sql'] ) ) ? ( \esc_sql( Notifications::obscure_query( $report_options['notification_query_sql'] ) ) ) : '' );
+				$report_options['notification_query_sql'] = ( ( isset( $sql ) ) ? ( \esc_sql( Notifications::obscure_query( $sql ) ) ) : '' );
 
 				if ( ! empty( $report_options['notification_query_sql'] ) ) {
 					$report_options['notification_query_sql'] = Notification_Helper::normalize_query( $report_options['notification_query_sql'] );
