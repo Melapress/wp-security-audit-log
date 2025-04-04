@@ -805,6 +805,9 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 
 					if ( in_array( $plugin, (array) \get_option( 'active_plugins', array() ) ) ) {
 						$is_active = true;
+
+						\restore_current_blog();
+
 						return $is_active;
 					}
 
