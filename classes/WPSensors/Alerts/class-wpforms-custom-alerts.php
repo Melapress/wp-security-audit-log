@@ -42,7 +42,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( WPForms_Helper::is_wpforms_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
+			if ( \method_exists( WPForms_Helper::class, 'load_alerts_for_sensor' ) && WPForms_Helper::load_alerts_for_sensor() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					esc_html__( 'WPForms', 'wp-security-audit-log' ) => array(
 						esc_html__( 'Form Content', 'wp-security-audit-log' ) => self::get_alerts_array(),
@@ -210,7 +210,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					esc_html__( 'Plugin access settings were changed', 'wp-security-audit-log' ),
 					esc_html__( 'Changed the WPForms access setting %setting_name%.', 'wp-security-audit-log' ),
 					array(
-						esc_html__( 'Type', 'wp-security-audit-log' ) => '%setting_type%',
 						esc_html__( 'Previous privileges', 'wp-security-audit-log' ) => '%old_value%',
 						esc_html__( 'New privileges', 'wp-security-audit-log' ) => '%new_value%',
 					),
@@ -266,7 +265,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
 						esc_html__( 'Form ID', 'wp-security-audit-log' )   => '%form_id%',
 					),
-					array(),
+					array(
+						esc_html__( 'View entry in the editor', 'wp-security-audit-log' ) => '%EditorLinkForm%',
+					),
 					'wpforms_forms',
 					'enabled',
 				),
@@ -400,6 +401,73 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					),
 					array(),
 					'wpforms_confirmations',
+					'modified',
+				),
+
+				5524 => array(
+					5524,
+					\WSAL_MEDIUM,
+					esc_html__(
+						'Changed the status of the setting Store spam entries in the database.',
+						'wp-security-audit-log'
+					),
+					__(
+						'Changed the status of the setting <strong>Store spam entries in the database</strong.',
+						'wp-security-audit-log'
+					),
+					array(
+						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
+						esc_html__( 'Form ID', 'wp-security-audit-log' )   => '%form_id%',
+					),
+					array(
+						esc_html__( 'View entry in the editor', 'wp-security-audit-log' ) => '%EditorLinkForm%',
+					),
+					'wpforms_forms',
+					'enabled',
+				),
+
+				5525 => array(
+					5525,
+					\WSAL_MEDIUM,
+					esc_html__(
+						'Changed the status of the setting Enable minimum time to submit.',
+						'wp-security-audit-log'
+					),
+					__(
+						'Changed the status of the setting <strong>Enable minimum time to submit</strong>.',
+						'wp-security-audit-log'
+					),
+					array(
+						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
+						esc_html__( 'Form ID', 'wp-security-audit-log' )   => '%form_id%',
+					),
+					array(
+						esc_html__( 'View entry in the editor', 'wp-security-audit-log' ) => '%EditorLinkForm%',
+					),
+					'wpforms_forms',
+					'enabled',
+				),
+
+				5526 => array(
+					5526,
+					\WSAL_MEDIUM,
+					esc_html__(
+						'Changed the Minimum time to submit.',
+						'wp-security-audit-log'
+					),
+					__(
+						'Changed the <strong>Minimum time to submit</strong> to %new_value% seconds.',
+						'wp-security-audit-log'
+					),
+					array(
+						esc_html__( 'Previous configured time', 'wp-security-audit-log' ) => '%old_value%%',
+						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
+						esc_html__( 'Form ID', 'wp-security-audit-log' )   => '%form_id%',
+					),
+					array(
+						esc_html__( 'View entry in the editor', 'wp-security-audit-log' ) => '%EditorLinkForm%',
+					),
+					'wpforms_forms',
 					'modified',
 				),
 			);

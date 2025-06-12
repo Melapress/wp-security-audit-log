@@ -76,7 +76,7 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 			if ( in_array( $file, self::get_class_map(), true ) ) {
 				$class = array_search( $file, self::get_class_map(), true );
 
-				if ( class_exists( $class ) ) {
+				if ( \class_exists( $class ) ) {
 					return $class;
 				}
 			}

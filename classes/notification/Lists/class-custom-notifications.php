@@ -21,6 +21,7 @@ use WSAL\Helpers\Settings_Helper;
 use WSAL\Views\Notifications;
 use WSAL\Helpers\DateTime_Formatter_Helper;
 use WSAL\Entities\Custom_Notifications_Entity;
+use WSAL\Extensions\Helpers\Notification_Helper;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/template.php';

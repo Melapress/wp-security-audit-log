@@ -44,7 +44,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( WP_2FA_Helper::is_wp2fa_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
+			if ( \method_exists( WP_2FA_Helper::class, 'load_alerts_for_sensor' ) && WP_2FA_Helper::load_alerts_for_sensor() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					esc_html__( 'WP 2FA', 'wp-security-audit-log' ) => array(
 						esc_html__( 'WP 2FA Settings', 'wp-security-audit-log' )    =>

@@ -110,53 +110,52 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function early_init() {
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
-				array( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper', 'wsal_gravityforms_add_custom_event_objects' ),
+				array( GravityForms_Helper::class, 'wsal_gravityforms_add_custom_event_objects' ),
 				10,
 				2
 			);
-			if ( GravityForms_Helper::is_gravityforms_active() ) {
-				add_filter(
-					'wsal_save_settings_disabled_events',
-					array(
-						'\WSAL\WP_Sensors\Helpers\GravityForms_Helper',
-						'save_settings_disabled_events',
-					),
-					10,
-					4
-				);
-				add_filter(
-					'wsal_event_type_data',
-					array( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper', 'wsal_gravityforms_add_custom_event_type' ),
-					10,
-					2
-				);
-				add_filter(
-					'wsal_togglealerts_sub_category_events',
-					array( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper', 'wsal_gravityforms_extension_togglealerts_sub_category_events' )
-				);
-				add_filter(
-					'wsal_togglealerts_sub_category_titles',
-					array( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper', 'wsal_gravityforms_extension_togglealerts_sub_category_titles' ),
-					10,
-					2
-				);
-				add_filter(
-					'wsal_load_public_sensors',
-					array( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper', 'wsal_gravityforms_extension_load_public_sensors' )
-				);
-				add_action(
-					'wsal_togglealerts_append_content_to_toggle',
-					array( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper', 'append_content_to_toggle' )
-				);
-				add_filter(
-					'wsal_load_on_frontend',
-					array( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper', 'wsal_gravityforms_allow_sensor_on_frontend' ),
-					10,
-					2
-				);
-			}
+
+			\add_filter(
+				'wsal_save_settings_disabled_events',
+				array(
+					GravityForms_Helper::class,
+					'save_settings_disabled_events',
+				),
+				10,
+				4
+			);
+			\add_filter(
+				'wsal_event_type_data',
+				array( GravityForms_Helper::class, 'wsal_gravityforms_add_custom_event_type' ),
+				10,
+				2
+			);
+			\add_filter(
+				'wsal_togglealerts_sub_category_events',
+				array( GravityForms_Helper::class, 'wsal_gravityforms_extension_togglealerts_sub_category_events' )
+			);
+			\add_filter(
+				'wsal_togglealerts_sub_category_titles',
+				array( GravityForms_Helper::class, 'wsal_gravityforms_extension_togglealerts_sub_category_titles' ),
+				10,
+				2
+			);
+			\add_filter(
+				'wsal_load_public_sensors',
+				array( GravityForms_Helper::class, 'wsal_gravityforms_extension_load_public_sensors' )
+			);
+			\add_action(
+				'wsal_togglealerts_append_content_to_toggle',
+				array( GravityForms_Helper::class, 'append_content_to_toggle' )
+			);
+			\add_filter(
+				'wsal_load_on_frontend',
+				array( GravityForms_Helper::class, 'wsal_gravityforms_allow_sensor_on_frontend' ),
+				10,
+				2
+			);
 		}
 
 		/**
@@ -1221,17 +1220,19 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function event_form_entry_deleted( $entry_id ) {
-			$entry      = \GFAPI::get_entry( $entry_id );
-			$form       = \GFAPI::get_form( $entry['form_id'] );
-			$entry_name = self::determine_entry_name( $entry );
+			$entry = \GFAPI::get_entry( $entry_id );
+			if ( ! \is_wp_error( $entry ) ) {
+				$form       = \GFAPI::get_form( $entry['form_id'] );
+				$entry_name = self::determine_entry_name( $entry );
 
-			$variables = array(
-				'EventType'   => 'deleted',
-				'entry_title' => $entry_name,
-				'form_name'   => $form['title'],
-				'form_id'     => $form['id'],
-			);
-			Alert_Manager::trigger_event( 5713, $variables );
+				$variables = array(
+					'EventType'   => 'deleted',
+					'entry_title' => $entry_name,
+					'form_name'   => $form['title'],
+					'form_id'     => $form['id'],
+				);
+				Alert_Manager::trigger_event( 5713, $variables );
+			}
 		}
 
 		/**
@@ -1248,56 +1249,60 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		public static function event_form_entry_trashed( $entry_id, $property_value, $previous_value ) {
 			if ( $previous_value !== $property_value && 'trash' === $property_value ) {
 				$entry      = \GFAPI::get_entry( $entry_id );
-				$form       = \GFAPI::get_form( $entry['form_id'] );
-				$entry_name = self::determine_entry_name( $entry );
+				if ( ! \is_wp_error( $entry ) ) {
+					$form       = \GFAPI::get_form( $entry['form_id'] );
+					$entry_name = self::determine_entry_name( $entry );
 
-				$editor_link = esc_url(
-					add_query_arg(
-						array(
-							'view' => 'entry',
-							'id'   => $entry['form_id'],
-							'lid'  => $entry_id,
-						),
-						admin_url( 'admin.php?page=gf_entries' )
-					)
-				);
+					$editor_link = esc_url(
+						add_query_arg(
+							array(
+								'view' => 'entry',
+								'id'   => $entry['form_id'],
+								'lid'  => $entry_id,
+							),
+							admin_url( 'admin.php?page=gf_entries' )
+						)
+					);
 
-				$variables = array(
-					'EventType'   => 'deleted',
-					'event_desc'  => esc_html__( 'moved to trash', 'wp-security-audit-log' ),
-					'entry_title' => $entry_name,
-					'form_name'   => $form['title'],
-					'form_id'     => $form['id'],
-					'EntryLink'   => $editor_link,
-				);
-				Alert_Manager::trigger_event( 5712, $variables );
+					$variables = array(
+						'EventType'   => 'deleted',
+						'event_desc'  => esc_html__( 'moved to trash', 'wp-security-audit-log' ),
+						'entry_title' => $entry_name,
+						'form_name'   => $form['title'],
+						'form_id'     => $form['id'],
+						'EntryLink'   => $editor_link,
+					);
+					Alert_Manager::trigger_event( 5712, $variables );
+				}
 			}
 
 			if ( $previous_value !== $property_value && 'active' === $property_value ) {
 				$entry      = \GFAPI::get_entry( $entry_id );
-				$form       = \GFAPI::get_form( $entry['form_id'] );
-				$entry_name = self::determine_entry_name( $entry );
+				if ( ! \is_wp_error( $entry ) ) {
+					$form       = \GFAPI::get_form( $entry['form_id'] );
+					$entry_name = self::determine_entry_name( $entry );
 
-				$editor_link = esc_url(
-					add_query_arg(
-						array(
-							'view' => 'entry',
-							'id'   => $entry['form_id'],
-							'lid'  => $entry_id,
-						),
-						admin_url( 'admin.php?page=gf_entries' )
-					)
-				);
+					$editor_link = esc_url(
+						add_query_arg(
+							array(
+								'view' => 'entry',
+								'id'   => $entry['form_id'],
+								'lid'  => $entry_id,
+							),
+							admin_url( 'admin.php?page=gf_entries' )
+						)
+					);
 
-				$variables = array(
-					'EventType'   => 'restored',
-					'event_desc'  => esc_html__( 'restored', 'wp-security-audit-log' ),
-					'entry_title' => $entry_name,
-					'form_name'   => $form['title'],
-					'form_id'     => $form['id'],
-					'EntryLink'   => $editor_link,
-				);
-				Alert_Manager::trigger_event( 5712, $variables );
+					$variables = array(
+						'EventType'   => 'restored',
+						'event_desc'  => esc_html__( 'restored', 'wp-security-audit-log' ),
+						'entry_title' => $entry_name,
+						'form_name'   => $form['title'],
+						'form_id'     => $form['id'],
+						'EntryLink'   => $editor_link,
+					);
+					Alert_Manager::trigger_event( 5712, $variables );
+				}
 			}
 		}
 
@@ -1318,29 +1323,31 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		public static function event_form_entry_note_added( $insert_id, $entry_id, $user_id, $user_name, $note, $note_type ) {
 			if ( 'user' === $note_type ) {
 				$entry      = \GFAPI::get_entry( $entry_id );
-				$form       = \GFAPI::get_form( $entry['form_id'] );
-				$entry_name = self::determine_entry_name( $entry );
+				if ( ! \is_wp_error( $entry ) ) {
+					$form       = \GFAPI::get_form( $entry['form_id'] );
+					$entry_name = self::determine_entry_name( $entry );
 
-				$editor_link = esc_url(
-					add_query_arg(
-						array(
-							'view' => 'entry',
-							'id'   => $entry['form_id'],
-							'lid'  => $entry_id,
-						),
-						admin_url( 'admin.php?page=gf_entries' )
-					)
-				);
+					$editor_link = esc_url(
+						add_query_arg(
+							array(
+								'view' => 'entry',
+								'id'   => $entry['form_id'],
+								'lid'  => $entry_id,
+							),
+							admin_url( 'admin.php?page=gf_entries' )
+						)
+					);
 
-				$variables = array(
-					'EventType'   => 'added',
-					'entry_note'  => $note,
-					'entry_title' => $entry_name,
-					'form_name'   => $form['title'],
-					'form_id'     => $form['id'],
-					'EntryLink'   => $editor_link,
-				);
-				Alert_Manager::trigger_event( 5714, $variables );
+					$variables = array(
+						'EventType'   => 'added',
+						'entry_note'  => $note,
+						'entry_title' => $entry_name,
+						'form_name'   => $form['title'],
+						'form_id'     => $form['id'],
+						'EntryLink'   => $editor_link,
+					);
+					Alert_Manager::trigger_event( 5714, $variables );
+				}
 			}
 		}
 
@@ -1354,30 +1361,32 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		 */
 		public static function event_form_entry_note_deleted( $note_id, $lead_id ) {
 			$entry      = \GFAPI::get_entry( $lead_id );
-			$form       = \GFAPI::get_form( $entry['form_id'] );
-			$note       = \GFAPI::get_note( $note_id );
-			$entry_name = self::determine_entry_name( $entry );
+			if ( ! \is_wp_error( $entry ) ) {
+				$form       = \GFAPI::get_form( $entry['form_id'] );
+				$note       = \GFAPI::get_note( $note_id );
+				$entry_name = self::determine_entry_name( $entry );
 
-			$editor_link = esc_url(
-				add_query_arg(
-					array(
-						'view' => 'entry',
-						'id'   => $entry['form_id'],
-						'lid'  => $lead_id,
-					),
-					admin_url( 'admin.php?page=gf_entries' )
-				)
-			);
+				$editor_link = esc_url(
+					add_query_arg(
+						array(
+							'view' => 'entry',
+							'id'   => $entry['form_id'],
+							'lid'  => $lead_id,
+						),
+						admin_url( 'admin.php?page=gf_entries' )
+					)
+				);
 
-			$variables = array(
-				'EventType'   => 'deleted',
-				'entry_note'  => $note->value,
-				'entry_title' => $entry_name,
-				'form_name'   => $form['title'],
-				'form_id'     => $form['id'],
-				'EntryLink'   => $editor_link,
-			);
-			Alert_Manager::trigger_event( 5714, $variables );
+				$variables = array(
+					'EventType'   => 'deleted',
+					'entry_note'  => $note->value,
+					'entry_title' => $entry_name,
+					'form_name'   => $form['title'],
+					'form_id'     => $form['id'],
+					'EntryLink'   => $editor_link,
+				);
+				Alert_Manager::trigger_event( 5714, $variables );
+			}
 		}
 
 		/**

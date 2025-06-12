@@ -66,6 +66,16 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) && class_exists(
 			$this->action .= $action;
 
 			parent::__construct();
+
+			if ( ! wp_next_scheduled( $this->cron_hook_identifier ) ) {
+				$job_info = array(
+					'start_time'             => current_time( 'timestamp' ), // phpcs:ignore
+					'processed_events_count' => 0,
+					'batch_size'             => 50,
+					'connection'             => $action,
+				);
+					$this->task( $job_info );
+			}
 		}
 
 		/**
@@ -94,17 +104,17 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) && class_exists(
 				return;
 			}
 			?>
-		<div class="notice notice-info">
-			<div class="notice-content-wrapper">
-				<p>
-					<strong><?php esc_html_e( 'Activity log database update in progress.', 'wp-security-audit-log' ); ?></strong>
-					<br />
-					<?php
-					echo \__( '<strong>UPGRADE notice: </strong> WP Activity Log is updating the database tables where the activity log is stored. The duration of this process varies depending on the size of the activity log. The upgrade is running in the background and won\'t affect your website. For more information please refer to this <a href="https://melapress.com/support/kb/upgrade-database-process-442/" target="_blank">knowledge base entry</a>.', 'wp-security-audit-log' );
-					?>
-				</p>
+			<div class="notice notice-info">
+				<div class="notice-content-wrapper">
+					<p>
+						<strong><?php esc_html_e( 'Activity log database update in progress.', 'wp-security-audit-log' ); ?></strong>
+						<br />
+						<?php
+						echo \__( '<strong>UPGRADE notice: </strong> WP Activity Log is updating the database tables where the activity log is stored. The duration of this process varies depending on the size of the activity log. The upgrade is running in the background and won\'t affect your website. For more information please refer to this <a href="https://melapress.com/support/kb/upgrade-database-process-442/" target="_blank">knowledge base entry</a>.', 'wp-security-audit-log' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						?>
+					</p>
+				</div>
 			</div>
-		</div>
 			<?php
 		}
 

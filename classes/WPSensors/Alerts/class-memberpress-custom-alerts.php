@@ -42,7 +42,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Memberpress_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( MemberPress_Helper::is_memberpress_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
+			if ( \method_exists( MemberPress_Helper::class, 'load_alerts_for_sensor' ) && MemberPress_Helper::load_alerts_for_sensor() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					esc_html__( 'Memberpress', 'wp-security-audit-log' ) => array(
 						esc_html__( 'Memberships', 'wp-security-audit-log' )      =>

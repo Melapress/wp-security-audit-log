@@ -109,7 +109,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 			<style>
 				@font-face {
 					font-family: 'Quicksand';
-					src: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/fonts/Quicksand-VariableFont_wght.woff2') format('woff2');
+					src: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/fonts/Quicksand-VariableFont_wght.woff2') format('woff2');
 					font-weight: 100 900; /* This indicates that the variable font supports weights from 100 to 900 */
 					font-style: normal;
 				}
@@ -124,7 +124,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 				}
 
 				.wsal-features h1 strong {
-					background: url("<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/highlight.svg") no-repeat;
+					background: url("<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/highlight.svg") no-repeat;
 					background-position: center bottom;
 					background-size: 100% 17%;
 				}
@@ -224,7 +224,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 				<h1><strong><?php echo esc_html__( 'Premium features', 'wp-security-audit-log' ); ?></strong></h1>	
 				<ul class="wsal-feature-list">
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/wsal-instant-alert.svg" alt="instant alerts">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-instant-alert.svg" alt="instant alerts">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Receive instant SMS &#38; email alerts', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -233,7 +233,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/wsal-user-sessions.svg" alt="WordPress activity log reports">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-user-sessions.svg" alt="WordPress activity log reports">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Generate activity log reports', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -242,7 +242,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/wp-activity-log-user-sessions.svg" alt="WP Activity Log user sessions">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wp-activity-log-user-sessions.svg" alt="WP Activity Log user sessions">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Manage users sessions in real-time', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -251,7 +251,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/wsal-easy-search.svg" alt="easy activity log search">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-easy-search.svg" alt="easy activity log search">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Easily track down specific activity', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -259,7 +259,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 							</div>
 						</div>
 					</li>
-					<li><img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/database.svg" alt="activity log database">
+					<li><img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/database.svg" alt="activity log database">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Store the logs in an external database', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -268,7 +268,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/manage-the-logs.svg" alt="manage logs activity">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/manage-the-logs.svg" alt="manage logs activity">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Archive old activity log data', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -276,7 +276,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 							</div>
 						</div>
 					</li>
-					<li><img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/integration-with-log-managment.svg" alt="integration with log management">
+					<li><img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/integration-with-log-managment.svg" alt="integration with log management">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Logs &#38; business systems integration', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -285,7 +285,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/mirror-the-log-files.svg" alt="mirror the log files">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/mirror-the-log-files.svg" alt="mirror the log files">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Mirror the activity log to log files', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -294,7 +294,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/wsal-send-activity-log.svg" alt="wsal send activity log">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-send-activity-log.svg" alt="wsal send activity log">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Send activity logs directly to third party systems', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -303,7 +303,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/plugin-setting-configuration.svg" alt="plugin setting configuration">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/plugin-setting-configuration.svg" alt="plugin setting configuration">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Export &#38; import plugin settings configuration', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -312,7 +312,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/wsal-specific-activity.svg" alt="wsal specific activity">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-specific-activity.svg" alt="wsal specific activity">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Delete specific activity log data', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -321,7 +321,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Views/assets/images/premium-support.svg" alt="premium support">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/premium-support.svg" alt="premium support">
 						<div class="wsal-feature-content">
 							<h2><?php echo esc_html__( 'Premium support', 'wp-security-audit-log' ); ?></h2>
 							<div>
@@ -330,7 +330,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 				</ul>
-				<p class="wsal-cta"><a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank" class="wsal-cta-link">Get WP Activity Log Premium</a></p>
+				<p class="wsal-cta"><a href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=premium-features-page-cta" target="_blank" class="wsal-cta-link">Get WP Activity Log Premium</a></p>
 			</section>
 			<?php
 		}

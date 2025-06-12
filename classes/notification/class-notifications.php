@@ -15,6 +15,7 @@ namespace WSAL\Views;
 
 use Tools\Select2_WPWS;
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\Email_Helper;
 use WSAL\Helpers\View_Manager;
 use WSAL\Controllers\Slack\Slack;
 use WSAL\Helpers\Settings_Helper;
@@ -292,9 +293,9 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				// phpcs:enable
 			}
 
-				$current_settings = Settings_Helper::get_option_value( self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
+			$current_settings = Settings_Helper::get_option_value( self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
 
-				/** Set defaults */
+			/** Set defaults */
 			if ( empty( $current_settings ) ) {
 				self::build_in_check_and_save( array( 'notification_weekly_summary_notification' => true ), true );
 			}
@@ -462,7 +463,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 
 			\wp_enqueue_style(
 				'wsal-notifications-admin-style',
-				WSAL_BASE_URL . '/classes/Helpers/settings/admin/style.css',
+				WSAL_BASE_URL . 'classes/Helpers/settings/admin/style.css',
 				array(),
 				WSAL_VERSION,
 				'all'
@@ -521,15 +522,13 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			\wp_enqueue_media();
 
 			$settings_tabs = array(
-				'notifications-highlights'  => array(
+				'notifications-highlights' => array(
 					'icon'  => 'email-alt',
 					'title' => \esc_html__( 'Activity log highlights', 'wp-security-audit-log' ),
 				),
-				// phpcs:disable
-				// phpcs:enable
-				// phpcs:disable
-				// phpcs:enable
 			);
+			// phpcs:disable
+			// phpcs:enable
 
 			if ( ! WP_Helper::is_multisite() ) {
 				unset( $settings_tabs['multisite-notifications'] );
@@ -734,13 +733,10 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				$email_from = 'weekly_email_address';
 			}
 
-			if ( empty( $summary_emails ) ) {
-				$summary_emails = \get_bloginfo( 'admin_email' );
-			} elseif ( isset( $summary_emails[ $email_from ] ) ) {
+			if ( isset( $summary_emails[ $email_from ] ) ) {
 				$summary_emails = $summary_emails[ $email_from ];
-			} else {
-				$summary_emails = \get_bloginfo( 'admin_email' );
 			}
+
 			$summary_emails = explode( ',', $summary_emails );
 			$result         = false;
 			if ( $summary_emails && isset( $report['subject'] ) && isset( $report['body'] ) ) {
@@ -1124,7 +1120,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				);
 			}
 
-			$report_options['daily_email_address'] = ( ( isset( $post_array['notification_daily_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_daily_email_address'] ) ) : \get_bloginfo( 'admin_email' ) );
+			$report_options['daily_email_address'] = ( ( isset( $post_array['notification_daily_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_daily_email_address'] ) ) : Email_Helper::get_default_email_to() );
 
 			$current_daily_mail_address = isset( $current_settings['daily_email_address'] ) ? $current_settings['daily_email_address'] : '';
 			if ( $report_options['daily_email_address'] !== $current_daily_mail_address ) {
@@ -1154,7 +1150,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				);
 			}
 
-			$report_options['weekly_email_address'] = ( ( isset( $post_array['notification_weekly_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_weekly_email_address'] ) ) : \get_bloginfo( 'admin_email' ) );
+			$report_options['weekly_email_address'] = ( ( isset( $post_array['notification_weekly_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_weekly_email_address'] ) ) : Email_Helper::get_default_email_to() );
 
 			$current_weekly_mail_address = isset( $current_settings['weekly_email_address'] ) ? $current_settings['weekly_email_address'] : '';
 			if ( $report_options['weekly_email_address'] !== $current_weekly_mail_address ) {
@@ -1533,6 +1529,20 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				$report_options['id'] = \absint( (int) $post_array['custom_notifications_id'] );
 			}
 
+			if ( isset( $post_array['store_global_mail'] ) && 'yes' === $post_array['store_global_mail'] ) {
+				$notification_mail = ( ( isset( $post_array['custom_notification_email'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['custom_notification_email'] ) ) : '' );
+
+				if ( ! empty( $notification_mail ) ) {
+
+					$t_options = Settings_Helper::get_option_value( self::NOTIFICATIONS_SETTINGS_NAME, array() );
+
+					$t_options['notification_default_email_address'] = $notification_mail;
+
+					self::set_global_notifications_setting( $t_options );
+
+				}
+			}
+
 			$report_options['notification_status'] = ( ( isset( $post_array['custom_notification_enabled'] ) ) ? filter_var( $post_array['custom_notification_enabled'], FILTER_VALIDATE_BOOLEAN ) : false );
 
 			$report_options['notification_title'] = ( ( isset( $post_array['custom_notification_title'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['custom_notification_title'] ) ) : \esc_html__( 'Custom notification - no name', 'wp-security-audit-log' ) . ' ' . \substr( \str_shuffle( '0123456789' ), 0, 5 ) );
@@ -1594,6 +1604,14 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			}
 
 			$report_options['notification_view_state'] = 1;
+
+			$report_options['notification_settings'] = array();
+
+			$report_options['notification_settings']['custom_notification_send_to_default_email'] = ( ( isset( $post_array['custom_notification_send_to_default_email'] ) ) ? filter_var( $post_array['custom_notification_send_to_default_email'], FILTER_VALIDATE_BOOLEAN ) : false );
+
+			$report_options['notification_settings']['custom_notification_send_to_default_slack'] = ( ( isset( $post_array['custom_notification_send_to_default_slack'] ) ) ? filter_var( $post_array['custom_notification_send_to_default_slack'], FILTER_VALIDATE_BOOLEAN ) : false );
+
+			$report_options['notification_settings']['custom_notification_send_to_default_phone'] = ( ( isset( $post_array['custom_notification_send_to_default_phone'] ) ) ? filter_var( $post_array['custom_notification_send_to_default_phone'], FILTER_VALIDATE_BOOLEAN ) : false );
 
 			$last_id = Custom_Notifications_Entity::save( $report_options );
 

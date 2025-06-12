@@ -80,9 +80,9 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 			$table_name    = self::get_table_name( $connection );
 			$wp_entity_sql = '
 				CREATE TABLE `' . $table_name . '` (
-					`id` bigint(20) NOT NULL AUTO_INCREMENT,
+					`id` bigint NOT NULL AUTO_INCREMENT,
 					`occurrence_id` bigint(20) NOT NULL,
-					`name` varchar(100) NOT NULL,
+					`name` varchar(60) NOT NULL,
 					`value` longtext NOT NULL,
 				PRIMARY KEY (`id`),
 				KEY `occurrence_name` (`occurrence_id`,`name`),

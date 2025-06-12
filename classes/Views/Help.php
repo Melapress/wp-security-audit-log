@@ -155,7 +155,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	public function header() {
 		wp_enqueue_style(
 			'extensions',
-			WSAL_BASE_URL . '/css/extensions.css',
+			WSAL_BASE_URL . 'css/extensions.css',
 			array(),
 			WSAL_VERSION
 		);
@@ -220,9 +220,9 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				<?php esc_html_e( 'For more technical information about the WP Activity Log plugin please visit the plugin’s knowledge base.', 'wp-security-audit-log' ); ?>
 				<?php esc_html_e( 'Refer to the list of WordPress security events for a complete list of Events and IDs that the plugin uses to keep a log of all the changes in the WordPress activity log.', 'wp-security-audit-log' ); ?>
 			</p><p>
-				<a class="button" rel="noopener noreferrer" href="https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
-				<a class="button" rel="noopener noreferrer" href="https://melapress.com/support/kb/?utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
-				<a class="button" rel="noopener noreferrer" href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugin&utm_medium=button&utm_campaign=wsal" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
+				<a class="button" rel="noopener noreferrer" href="https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=wsal&utm_campaign=about-us-website-link" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
+				<a class="button" rel="noopener noreferrer" href="https://melapress.com/support/kb/?utm_source=plugin&utm_medium=wsal&utm_campaign=about-us-kb-link" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
+				<a class="button" rel="noopener noreferrer" href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugin&utm_medium=wsal&utm_campaign=about-us-events-ids-link" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<div class="wsal-help-section">
@@ -304,19 +304,19 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/wp-2fa-img.jpg',
 				'desc' => esc_html__( 'Add an extra layer of security to your login pages with 2FA & require your users to use it.', 'wp-security-audit-log' ),
 				'alt'  => 'WP 2FA',
-				'link' => 'https://melapress.com/wordpress-2fa/?utm_source=plugin&utm_medium=link&utm_campaign=wp2fa',
+				'link' => 'https://melapress.com/wordpress-2fa/?utm_source=plugin&utm_medium=wsal&utm_campaign=about-us-wp2fa-ad',
 			),
 			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/mlr.jpg',
-				'desc' => esc_html__( 'Create, edit, and delete and easily manage WordPerss user roles like a pro', 'wp-security-audit-log' ),
+				'desc' => esc_html__( 'Create, edit, and delete and easily manage WordPress user roles like a pro', 'wp-security-audit-log' ),
 				'alt'  => 'Mellapress Role Editor',
-				'link' => 'https://melapress.com/wordpress-user-roles-editor/?utm_source=plugin&utm_medium=link&utm_campaign=wsal',
+				'link' => 'https://melapress.com/wordpress-user-roles-editor/?utm_source=plugin&utm_medium=wsal&utm_campaign=about-us-mre-ad',
 			),
 			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/password-policy-manager.jpeg',
 				'desc' => esc_html__( 'Boost WordPress security with login & password policies.', 'wp-security-audit-log' ),
 				'alt'  => 'WPassword',
-				'link' => 'https://melapress.com/wordpress-login-security/?utm_source=plugin&utm_medium=link&utm_campaign=mls',
+				'link' => 'https://melapress.com/wordpress-login-security/?utm_source=plugin&utm_medium=wsal&utm_campaign=about-us-mls-ad',
 			),
 		);
 		?>

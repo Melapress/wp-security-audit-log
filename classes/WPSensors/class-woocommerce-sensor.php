@@ -17,6 +17,7 @@ use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\WP_Sensors\Helpers\Woocommerce_Helper;
 use WSAL\WP_Sensors_Helpers\WooCommerce_Sensor_Helper;
+use WSAL\WP_Sensors_Helpers\WooCommerce_Sensor_Helper_Third;
 use WSAL\WP_Sensors_Helpers\WooCommerce_Sensor_Helper_Second;
 
 // Exit if accessed directly.
@@ -230,13 +231,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function early_init() {
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
-				array( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper', 'wsal_woocommerce_extension_add_custom_event_objects' )
+				array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_add_custom_event_objects' )
 			);
 
 			if ( Woocommerce_Helper::is_woocommerce_active() ) {
-				add_filter(
+				\add_filter(
 					'wsal_save_settings_disabled_events',
 					array(
 						Woocommerce_Helper::class,
@@ -245,12 +246,12 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 					10,
 					4
 				);
-				add_action(
+				\add_action(
 					'init',
 					function () {
 
-						if ( current_user_can( 'edit_posts' ) ) {
-							add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
+						if ( \current_user_can( 'edit_posts' ) ) {
+							\add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
 
 						}
 						\add_action( 'woocommerce_update_option', array( __CLASS__, 'woo_option_update' ) );
@@ -322,64 +323,65 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 				/**
 				 * Add our filters.
 				 */
-				add_filter(
+				\add_filter(
 					'wsal_event_type_data',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_add_custom_event_type' ),
 					10,
 					2
 				);
-				add_filter(
+				\add_filter(
 					'wsal_format_custom_meta',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_add_custom_meta_format' ),
 					10,
 					4
 				);
-				add_filter(
+				\add_filter(
 					'wsal_ignored_custom_post_types',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_add_custom_ignored_cpt' )
 				);
-				add_filter(
+				\add_filter(
 					'wsal_load_public_sensors',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_load_public_sensors' )
 				);
-				add_filter(
+				\add_filter(
 					'wsal_togglealerts_sub_category_events',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_togglealerts_sub_category_events' )
 				);
-				add_filter(
+				\add_filter(
 					'wsal_togglealerts_sub_category_titles',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_togglealerts_sub_category_titles' ),
 					10,
 					2
 				);
-				add_action(
+				\add_action(
 					'wsal_togglealerts_append_content_to_toggle',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_append_content_to_toggle' )
 				);
-				add_action(
+				\add_action(
 					'wsal_togglealerts_process_save_settings',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_togglealerts_process_save_settings' ),
 					10,
 					1
 				);
-				add_filter(
+				\add_filter(
 					'wsal_togglealerts_obsolete_events',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_togglealerts_obsolete_events' )
 				);
 
-				add_action(
+				\add_action(
 					'admin_footer',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_togglealerts_js_code' )
 				);
 
 				// Special events.
-				add_action(
+				\add_action(
 					'woocommerce_download_product',
 					array( Woocommerce_Helper::class, 'wsal_woocommerce_extension_detect_file_download' ),
 					10,
 					6
 				);
 
+				WooCommerce_Sensor_Helper_Third::init();
 			}
 		}
 
@@ -567,8 +569,14 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 						$old_webhook = wc_get_webhook( $wc_data->get_id() );
 
 						$editor_link = Woocommerce_Helper::create_webhook_editor_link( $wc_data->get_id() );
+
+						$event_id = 9122;
+
+						if ( \is_array( $changes ) && count( $changes ) === 1 && \key_exists( 'status', $changes ) ) {
+							$event_id = 9178;
+						}
 						Alert_Manager::trigger_event(
-							9122,
+							$event_id,
 							array(
 								'HookName'          => $wc_data->get_name( 'edit' ),
 								'OldHookName'       => $old_webhook->get_name(),

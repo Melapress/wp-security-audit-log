@@ -127,7 +127,11 @@ function wsaldefaults_build_links( $link_aliases = array() ) {
 					break;
 
 				case 'RevisionLink':
-					$result[ esc_html__( 'View the content changes', 'wp-security-audit-log' ) ] = '%RevisionLink%';
+					// if ( defined( 'WP_POST_REVISIONS' ) && ! WP_POST_REVISIONS ) {
+					// 	$result[ esc_html__( 'revisions are not enabled', 'wp-security-audit-log' ) ] = '';
+					// } else {
+						$result[ esc_html__( 'View the content changes', 'wp-security-audit-log' ) ] = '%RevisionLink%';
+					// }
 					break;
 
 				case 'TagLink':

@@ -112,7 +112,7 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			// Add custom schedules for WSAL early otherwise they won't work.
 			\add_filter( 'cron_schedules', array( __CLASS__, 'recurring_schedules' ), PHP_INT_MAX );
 			\add_filter( 'wsal_cron_hooks', array( __CLASS__, 'settings_hooks' ) );
-			\add_filter( 'after_setup_theme', array( __CLASS__, 'initialize_hooks' ) );
+			\add_filter( 'after_setup_theme', array( __CLASS__, 'initialize_hooks' ), 30000 );
 
 			if ( Settings_Helper::get_boolean_option_value( 'pruning-date-e', false ) ) {
 				\add_action( 'wsal_cleanup', array( Occurrences_Entity::class, 'prune_records' ) );
@@ -444,6 +444,10 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 							$hooks_array['wsal_summary_weekly_report']
 						);
 					}
+				}
+
+				if ( ! \is_main_site() ) {
+					unset( $hooks_array['wsal_cleanup_hook'] );
 				}
 			}
 

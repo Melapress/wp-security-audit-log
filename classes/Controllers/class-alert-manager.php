@@ -1677,8 +1677,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				$obsolete_events  = apply_filters( 'wsal_togglealerts_obsolete_events', $obsolete_events );
 				$ms_alerts        = ( ! WP_Helper::is_multisite() ) ? array_keys( self::get_alerts_by_category( 'Multisite Network Sites' ) ) : array();
 				$ms_user_alerts   = ( ! WP_Helper::is_multisite() ) ? array_keys( self::get_alerts_by_sub_category( 'Multisite User Profiles' ) ) : array();
-				$wc_alerts        = ( ! Woocommerce_Helper::is_woocommerce_active() ) ? array_keys( self::get_alerts_by_category( 'WooCommerce' ) ) : array();
-				$yoast_alerts     = ( ! Yoast_SEO_Helper::is_wpseo_active() ) ? array_keys( self::get_alerts_by_category( 'Yoast SEO' ) ) : array();
+				$wc_alerts        = ( ! Woocommerce_Helper::load_alerts_for_sensor() ) ? array_keys( self::get_alerts_by_category( 'WooCommerce' ) ) : array();
+				$yoast_alerts     = ( ! Yoast_SEO_Helper::load_alerts_for_sensor() ) ? array_keys( self::get_alerts_by_category( 'Yoast SEO' ) ) : array();
 				$deprecated_event = self::get_deprecated_events();
 				$always_disabled  = Settings_Helper::get_default_always_disabled_alerts();
 				$events_to_ignore = array_merge( $obsolete_events, $ms_alerts, $always_disabled, $deprecated_event, $ms_user_alerts, $wc_alerts, $yoast_alerts );

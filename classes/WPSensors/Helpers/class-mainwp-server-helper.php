@@ -14,6 +14,8 @@ namespace WSAL\WP_Sensors\Helpers;
 use WSAL\Helpers\WP_Helper;
 use WSAL\MainWP\MainWP_Helper;
 use WSAL\MainWP\MainWP_Settings;
+use WSAL\Controllers\Alert_Manager;
+use WSAL\WP_Sensors\WP_Plugins_Themes_Sensor;
 use WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts;
 
 // Exit if accessed directly.
@@ -213,6 +215,69 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 			}
 
 			return $blog_info;
+		}
+
+		/**
+		 * Log theme updated event.
+		 *
+		 * @param string $theme_name Theme name.
+		 *
+		 * @since 4.5.0
+		 */
+		public static function log_theme_updated_event( $theme_name ) {
+			$theme = WP_Plugins_Themes_Sensor::get_theme_by_name( $theme_name );
+			if ( ! $theme instanceof \WP_Theme ) {
+				return;
+			}
+
+			Alert_Manager::trigger_event(
+				5031,
+				array(
+					'Theme' => (object) array(
+						'Name'                   => $theme->Name, // phpcs:ignore
+						'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore
+						'Description'            => $theme->Description, // phpcs:ignore
+						'Author'                 => $theme->Author, // phpcs:ignore
+						'Version'                => $theme->Version, // phpcs:ignore
+						'get_template_directory' => $theme->get_template_directory(),
+					),
+				)
+			);
+		}
+
+		/**
+		 * Log plugin updated event.
+		 *
+		 * @param string $plugin_file Relative path to the plugin filename.
+		 * @param array  $old_plugins (Optional) Array of old plugins which we can use for comparison.
+		 *
+		 * @since 4.5.0
+		 */
+		public static function log_plugin_updated_event( $plugin_file, $old_plugins = '' ) {
+			if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+				$plugin_file_full = \WP_PLUGIN_DIR . '/' . $plugin_file;
+				$plugin_data      = \get_plugin_data( $plugin_file_full, false, true );
+
+				$old_version = ( isset( $old_plugins[ $plugin_file ] ) ) ? $old_plugins[ $plugin_file ]['Version'] : false;
+				$new_version = $plugin_data['Version'];
+
+				if ( $old_version !== $new_version ) {
+					Alert_Manager::trigger_event(
+						5004,
+						array(
+							'PluginFile' => $plugin_file,
+							'PluginData' => (object) array(
+								'Name'      => $plugin_data['Name'],
+								'PluginURI' => $plugin_data['PluginURI'],
+								'Version'   => $new_version,
+								'Author'    => $plugin_data['Author'],
+								'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+							),
+							'OldVersion' => $old_version,
+						)
+					);
+				}
+			}
 		}
 	}
 }

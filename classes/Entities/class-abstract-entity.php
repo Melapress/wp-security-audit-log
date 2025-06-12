@@ -15,6 +15,7 @@ use WSAL\Helpers\Logger;
 use WSAL\Helpers\Validator;
 use WSAL\Helpers\PHP_Helper;
 use WSAL\Controllers\Connection;
+use WSAL\WP_Sensors\WP_Database_Sensor;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -141,6 +142,11 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					return true;
 				}
 			}
+
+			if ( WP_Database_Sensor::is_sensor_enabled() ) {
+				\remove_filter( 'query', array( WP_Database_Sensor::class, 'event_drop_query' ) );
+			}
+
 			// Didn't find it, so try to create it.
 			$_wpdb->query( $create_ddl );
 
@@ -337,7 +343,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 * @since 4.4.2.1
 		 * @since 4.6.0 - added $connection parameter
 		 */
-		public static function check_table_exists( string $table_name = null, $connection = null ): bool {
+		public static function check_table_exists( ?string $table_name = null, $connection = null ): bool {
 			if ( null !== $connection ) {
 				if ( $connection instanceof \wpdb ) {
 					$_wpdb = $connection;

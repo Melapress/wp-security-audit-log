@@ -237,30 +237,29 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\MemberPress_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function early_init() {
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
-				array( '\WSAL\WP_Sensors\Helpers\MemberPress_Helper', 'wsal_memberpress_add_custom_event_objects' ),
+				array( MemberPress_Helper::class, 'wsal_memberpress_add_custom_event_objects' ),
 				10,
 				2
 			);
-			if ( MemberPress_Helper::is_memberpress_active() ) {
-				add_filter(
-					'wsal_ignored_custom_post_types',
-					array( '\WSAL\WP_Sensors\Helpers\MemberPress_Helper', 'wsal_memberpress_add_custom_ignored_cpt' )
-				);
-				add_filter(
-					'wsal_truncate_alert_value',
-					array( '\WSAL\WP_Sensors\Helpers\MemberPress_Helper', 'data_truncate' ),
-					10,
-					4
-				);
-				add_filter(
-					'wsal_event_type_data',
-					array( '\WSAL\WP_Sensors\Helpers\MemberPress_Helper', 'wsal_memberpress_add_custom_event_type' ),
-					10,
-					2
-				);
-			}
+
+			\add_filter(
+				'wsal_ignored_custom_post_types',
+				array( MemberPress_Helper::class, 'wsal_memberpress_add_custom_ignored_cpt' )
+			);
+			\add_filter(
+				'wsal_truncate_alert_value',
+				array( MemberPress_Helper::class, 'data_truncate' ),
+				10,
+				4
+			);
+			\add_filter(
+				'wsal_event_type_data',
+				array( MemberPress_Helper::class, 'wsal_memberpress_add_custom_event_type' ),
+				10,
+				2
+			);
 		}
 
 		/**

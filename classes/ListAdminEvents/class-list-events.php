@@ -676,10 +676,10 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						: '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 				case 'user':
 					$username = User_Utils::get_username( $item['meta_values'] );
-					//$user     = \get_user_by( 'login', $username );
-					$user     = User_Utils::get_user_object_from_meta( $item['meta_values'] );
-					$roles    = '';
-					$image    = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
+					// $user     = \get_user_by( 'login', $username );
+					$user  = User_Utils::get_user_object_from_meta( $item['meta_values'] );
+					$roles = '';
+					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 
 					// Check if there's a user with given username.
 					if ( $user instanceof \WP_User ) {
@@ -748,7 +748,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					// If there's only one IP...
 					$link = 'https://whatismyipaddress.com/ip/' . $scip . '?utm_source=plugin&utm_medium=referral&utm_campaign=wsal';
-					if ( class_exists( 'WSAL_SearchExtension' ) ) {
+					if ( \class_exists( 'WSAL_SearchExtension' ) ) {
 						$tooltip = esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
 
 						if ( count( $oips ) < 2 ) {
@@ -759,7 +759,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					}
 
 					// If there are many IPs...
-					if ( class_exists( 'WSAL_SearchExtension' ) ) {
+					if ( \class_exists( 'WSAL_SearchExtension' ) ) {
 						$tooltip = esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
 
 						$html = "<a class='search-ip' data-darktooltip='$tooltip' data-ip='$scip' target='_blank' href='https://whatismyipaddress.com/ip/$scip'>" . esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
@@ -866,14 +866,13 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				 *
 				 * Action and action2 are set based on the triggers above or below the table
 				 */
-				$actions = array(
-					// phpcs:disable
-					// phpcs:enable
+				$actions = array();
+				// phpcs:disable
+				// phpcs:enable
 
-					'disable_alerts' => __( 'Disable this type of event IDs', 'wp-security-audit-log' ),
-					'disable_users'  => __( 'Do not keep a log of this user(s)\' actions', 'wp-security-audit-log' ),
-					'disable_ips'    => __( 'Do not keep a log of these IP addresses', 'wp-security-audit-log' ),
-				);
+				$actions['disable_alerts'] = __( 'Disable this type of event IDs', 'wp-security-audit-log' );
+				$actions['disable_users']  = __( 'Do not keep a log of this user(s)\' actions', 'wp-security-audit-log' );
+				$actions['disable_ips']    = __( 'Do not keep a log of these IP addresses', 'wp-security-audit-log' );
 			}
 
 			return $actions;
@@ -955,10 +954,10 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					foreach ( $ids_array as $id ) {
 						$row_data          = $this->table::load( 'id=%d', array( (int) $id ), self::$wsal_db );
-						$disabled_alerts[] = esc_html( $row_data['alert_id'] );
+						$disabled_alerts[] = (int) esc_html( $row_data['alert_id'] );
 					}
 
-					Settings_Helper::set_option_value( 'disabled-alerts', \array_filter( $disabled_alerts ) );
+					Settings_Helper::set_disabled_alerts( \array_filter( $disabled_alerts ) );
 				}
 			}
 

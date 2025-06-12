@@ -291,9 +291,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function early_init() {
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
-				array( '\WSAL\WP_Sensors\Helpers\WP_2FA_Helper', 'add_custom_event_objects' )
+				array( WP_2FA_Helper::class, 'add_custom_event_objects' )
 			);
 		}
 	}

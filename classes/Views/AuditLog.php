@@ -137,9 +137,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Check if any of the extensions are activated.
 		if (
-			! class_exists( 'WSAL_Ext_Plugin' )
-			&& ! class_exists( 'WSAL_SearchExtension' )
-			&& ! class_exists( 'WSAL_UserSessions_Plugin' )
+			! \class_exists( 'WSAL_Ext_Plugin' )
+			&& ! \class_exists( 'WSAL_SearchExtension' )
+			&& ! \class_exists( 'WSAL_UserSessions_Plugin' )
 			&& ( 'anonymous' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) || // Anonymous mode option.
 			'skipped' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) )
 		) {
@@ -483,7 +483,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			<?php
 		endif;
 
-		$is_search_view = class_exists( 'WSAL_SearchExtension' ) && ( ! empty( self::get_page_arguments()['search_filters'] ) || ! empty( self::get_page_arguments()['search_term'] ) );
+		$is_search_view = \class_exists( 'WSAL_SearchExtension' ) && ( ! empty( self::get_page_arguments()['search_filters'] ) || ! empty( self::get_page_arguments()['search_term'] ) );
 		?>
 		<script type="text/javascript">
 			jQuery( document ).ready( function() {
@@ -680,19 +680,19 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Darktooltip styles.
 		wp_enqueue_style(
 			'darktooltip',
-			WSAL_BASE_URL . '/css/darktooltip.css',
+			WSAL_BASE_URL . 'css/darktooltip.css',
 			array(),
-			'0.4.0'
+			WSAL_VERSION
 		);
 
 		// Remodal styles.
-		wp_enqueue_style( 'wsal-remodal', WSAL_BASE_URL . '/css/remodal.css', array(), WSAL_VERSION );
-		wp_enqueue_style( 'wsal-remodal-theme', WSAL_BASE_URL . '/css/remodal-default-theme.css', array(), WSAL_VERSION );
+		wp_enqueue_style( 'wsal-remodal', WSAL_BASE_URL . 'css/remodal.css', array(), WSAL_VERSION );
+		wp_enqueue_style( 'wsal-remodal-theme', WSAL_BASE_URL . 'css/remodal-default-theme.css', array(), WSAL_VERSION );
 
 		// Audit log styles.
 		wp_enqueue_style(
 			'auditlog',
-			WSAL_BASE_URL . '/css/auditlog.css',
+			WSAL_BASE_URL . 'css/auditlog.css',
 			array(),
 			WSAL_VERSION
 		);
@@ -700,7 +700,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Admin notices styles.
 		wp_enqueue_style(
 			'wsal_admin_notices',
-			WSAL_BASE_URL . '/css/admin-notices.css',
+			WSAL_BASE_URL . 'css/admin-notices.css',
 			array(),
 			WSAL_VERSION
 		);
@@ -715,7 +715,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Darktooltip js.
 		wp_enqueue_script(
 			'darktooltip', // Identifier.
-			WSAL_BASE_URL . '/js/jquery.darktooltip.js', // Script location.
+			WSAL_BASE_URL . 'js/jquery.darktooltip.js', // Script location.
 			array( 'jquery' ), // Depends on jQuery.
 			WSAL_VERSION, // Script version.
 			true
@@ -724,7 +724,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Remodal script.
 		wp_enqueue_script(
 			'wsal-remodal-js',
-			WSAL_BASE_URL . '/js/remodal.min.js',
+			WSAL_BASE_URL . 'js/remodal.min.js',
 			array(),
 			WSAL_VERSION,
 			true
@@ -736,7 +736,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Audit log script.
 		wp_register_script(
 			'auditlog',
-			WSAL_BASE_URL . '/js/auditlog.js',
+			WSAL_BASE_URL . 'js/auditlog.js',
 			array(),
 			WSAL_VERSION,
 			true
@@ -828,7 +828,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Add pointers script to queue. Add custom script.
 		wp_enqueue_script(
 			'auditlog-pointer',
-			WSAL_BASE_URL . '/js/auditlog-pointer.js',
+			WSAL_BASE_URL . 'js/auditlog-pointer.js',
 			array( 'wp-pointer' ),
 			WSAL_VERSION,
 			true

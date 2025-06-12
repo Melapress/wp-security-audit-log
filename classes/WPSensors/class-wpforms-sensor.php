@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
+use WPForms\Pro\Access\Capabilities;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\WP_Sensors\Helpers\WPForms_Helper;
 
@@ -44,18 +45,18 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 		 */
 		public static function init() {
 			if ( WPForms_Helper::is_wpforms_active() ) {
-				add_action( 'pre_post_update', array( __CLASS__, 'get_before_post_edit_data' ), 10, 2 );
-				add_action( 'save_post', array( __CLASS__, 'event_form_saved' ), 10, 3 );
-				add_action( 'delete_post', array( __CLASS__, 'event_form_deleted' ), 10, 1 );
-				add_action( 'wpforms_pre_delete', array( __CLASS__, 'event_entry_deleted' ), 10, 1 );
-				add_action( 'wpforms_pro_admin_entries_edit_submit_completed', array( __CLASS__, 'event_entry_modified' ), 5, 4 );
-				add_action( 'updated_option', array( __CLASS__, 'event_settings_updated' ), 10, 3 );
-				add_action( 'added_option', array( __CLASS__, 'event_added_option' ), 10, 2 );
-				add_action( 'wpforms_plugin_activated', array( __CLASS__, 'addon_plugin_activated' ), 10, 1 );
-				add_action( 'wpforms_plugin_deactivated', array( __CLASS__, 'addon_plugin_deactivated' ), 10, 1 );
-				add_action( 'wpforms_plugin_installed', array( __CLASS__, 'addon_plugin_installed' ), 10, 1 );
-				add_action( 'wpforms_process_complete', array( __CLASS__, 'event_entry_added' ), 10, 4 );
-				add_action( 'wpforms_post_delete_entry', array( __CLASS__, 'event_entry_deleted' ), 10, 1 );
+				\add_action( 'pre_post_update', array( __CLASS__, 'get_before_post_edit_data' ), 10, 2 );
+				\add_action( 'save_post', array( __CLASS__, 'event_form_saved' ), 10, 3 );
+				\add_action( 'delete_post', array( __CLASS__, 'event_form_deleted' ), 10, 1 );
+				\add_action( 'wpforms_pre_delete', array( __CLASS__, 'event_entry_deleted' ), 10, 1 );
+				\add_action( 'wpforms_pro_admin_entries_edit_submit_completed', array( __CLASS__, 'event_entry_modified' ), 5, 4 );
+				\add_action( 'updated_option', array( __CLASS__, 'event_settings_updated' ), 10, 3 );
+				\add_action( 'added_option', array( __CLASS__, 'event_added_option' ), 10, 2 );
+				\add_action( 'wpforms_plugin_activated', array( __CLASS__, 'addon_plugin_activated' ), 10, 1 );
+				\add_action( 'wpforms_plugin_deactivated', array( __CLASS__, 'addon_plugin_deactivated' ), 10, 1 );
+				\add_action( 'wpforms_plugin_installed', array( __CLASS__, 'addon_plugin_installed' ), 10, 1 );
+				\add_action( 'wpforms_process_complete', array( __CLASS__, 'event_entry_added' ), 10, 4 );
+				\add_action( 'wpforms_post_delete_entry', array( __CLASS__, 'event_entry_deleted' ), 10, 1 );
 			}
 		}
 
@@ -70,16 +71,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 			/**
 			 * Add our filters.
 			 */
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
-				array( '\WSAL\WP_Sensors\Helpers\WPForms_Helper', 'wsal_wpforms_add_custom_event_objects' )
+				array( WPForms_Helper::class, 'wsal_wpforms_add_custom_event_objects' )
 			);
-			if ( WPForms_Helper::is_wpforms_active() ) {
-				add_filter(
-					'wsal_ignored_custom_post_types',
-					array( '\WSAL\WP_Sensors\Helpers\WPForms_Helper', 'wsal_wpforms_add_custom_ignored_cpt' )
-				);
-			}
+
+			\add_filter(
+				'wsal_ignored_custom_post_types',
+				array( WPForms_Helper::class, 'wsal_wpforms_add_custom_ignored_cpt' )
+			);
 		}
 
 		/**
@@ -242,6 +242,53 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 					$post_modified    = new \DateTime( $post->post_modified_gmt );
 					$editor_link      = self::create_form_post_editor_link( $post_id );
 
+					if ( ( isset( $form_content->settings->antispam_v3 ) && ! isset( $old_form_content->settings->antispam_v3 ) ) || ( isset( $old_form_content->settings->antispam_v3 ) && ! isset( $form_content->settings->antispam_v3 ) ) ) {
+						$alert_code = 5513;
+						$variables  = array(
+							'EventType'      => ( isset( $form_content->settings->antispam_v3 ) ) ? 'enabled' : 'disabled',
+							'form_name'      => sanitize_text_field( $form->post_title ),
+							'form_id'        => $post_id,
+							'EditorLinkForm' => $editor_link,
+						);
+						Alert_Manager::trigger_event( $alert_code, $variables );
+					}
+					if ( ( 1 === (int) $form_content->settings->store_spam_entries && 0 === (int) $old_form_content->settings->store_spam_entries ) || ( 1 === (int) $old_form_content->settings->store_spam_entries && 0 === (int) $form_content->settings->store_spam_entries ) ) {
+						$alert_code = 5525;
+						$variables  = array(
+							'EventType'      => ( isset( $form_content->settings->store_spam_entries ) ) ? 'enabled' : 'disabled',
+							'form_name'      => sanitize_text_field( $form->post_title ),
+							'form_id'        => $post_id,
+							'EditorLinkForm' => $editor_link,
+						);
+						Alert_Manager::trigger_event( $alert_code, $variables );
+					}
+					if ( ( isset( $form_content->settings->anti_spam->time_limit->enable ) && ! isset( $old_form_content->settings->anti_spam->time_limit->enable ) ) || ( isset( $old_form_content->settings->anti_spam->time_limit->enable ) && ! isset( $form_content->settings->anti_spam->time_limit->enable ) ) ) {
+						$alert_code = 5526;
+						$variables  = array(
+							'EventType'      => ( isset( $form_content->settings->anti_spam->time_limit->enable ) ) ? 'enabled' : 'disabled',
+							'form_name'      => sanitize_text_field( $form->post_title ),
+							'form_id'        => $post_id,
+							'EditorLinkForm' => $editor_link,
+						);
+						Alert_Manager::trigger_event( $alert_code, $variables );
+					}
+					if ( isset( $form_content->settings->anti_spam->time_limit->duration ) ) {
+						$new_value = (int) $form_content->settings->anti_spam->time_limit->duration;
+						$old_Value = isset( $old_form_content->settings->anti_spam->time_limit->enable ) ? (int) $old_form_content->settings->anti_spam->time_limit->duration : 0;
+						if ( $new_value !== $old_Value ) {
+
+							$alert_code = 5527;
+							$variables  = array(
+								'new_value'      => (int) $form_content->settings->anti_spam->time_limit->duration,
+
+								'old_value'      => $old_Value,
+								'form_name'      => sanitize_text_field( $form->post_title ),
+								'form_id'        => $post_id,
+								'EditorLinkForm' => $editor_link,
+							);
+							Alert_Manager::trigger_event( $alert_code, $variables );
+						}
+					}
 					if ( isset( $form_content->settings->antispam ) && ! isset( $old_form_content->settings->antispam ) || isset( $old_form_content->settings->antispam ) && ! isset( $form_content->settings->antispam ) ) {
 						$alert_code = 5513;
 						$variables  = array(
@@ -350,8 +397,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 										} elseif ( 'redirect' === $change_type ) {
 											$alert_code = 5521;
 										} elseif ( 'message' === $change_type ) {
-											$alert_code                   = 5522;
-											$confirmation[ $change_type ] = \sanitize_text_field( \wp_strip_all_tags( $confirmation[ $change_type ] ) );
+											$alert_code                       = 5522;
+											$confirmation[ $change_type ]     = \sanitize_text_field( \wp_strip_all_tags( $confirmation[ $change_type ] ) );
 											$new_changed_item[ $change_type ] = \sanitize_text_field( \wp_strip_all_tags( $new_changed_item[ $change_type ] ) );
 										}
 										if ( ! isset( $alert_code ) ) {
@@ -872,8 +919,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 					return;
 				}
 
+				global $wpdb;
+
 				// For access settings, we need to check its the correct thing updateing.
-				if ( 'wp_user_roles' === $option_name ) {
+				if ( $wpdb->prefix . 'user_roles' === $option_name ) {
 					// Gather role names as we need them later.
 					$roles = wp_roles()->get_names();
 					// Array of possible capabilities which wpforms can add/remove from a role.
@@ -881,6 +930,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 					// Create empty arrays to be filled later.
 					$updated_new = array();
 					$updated_old = array();
+
+					$caps = array();
+
+					if ( \class_exists( 'WPForms\Pro\Access\Capabilities' ) ) {
+
+						$w_cap = new Capabilities();
+
+						$caps = $w_cap->get_caps();
+					}
 
 					// Loop through each availble role and build a simple array of the available
 					// wpforms capabilities, assiging applicable roles to each as we find them.
@@ -946,6 +1004,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 							} else {
 								$setting_type = esc_html__( 'N/A', 'wp-security-audit-log' );
 							}
+
+							if ( ! empty( $caps ) && isset( $caps[ $wpforms_capability ] ) ) {
+								$setting_name = $caps[ $wpforms_capability ];
+							}
+
 							// Setup event variables using above.
 							$variables = array(
 								'setting_name' => $setting_name,
@@ -980,15 +1043,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 				// Event 5510 (Integration enabled/disabled).
 				if ( 'wpforms_providers' === $option_name ) {
 
-					$providers = array(
-						'mailchimpv3',
-						'aweber',
-						'constant-contact',
-						'zapier',
-						'getresponse',
-						'drip',
-						'campaign-monitor',
-					);
+					$providers = array();
+
+					if ( function_exists( 'wpforms_get_providers_available' ) ) {
+						$providers = \array_keys( wpforms_get_providers_available() );
+					}
 
 					foreach ( $providers as $provider ) {
 						if ( isset( $value[ $provider ] ) ) {

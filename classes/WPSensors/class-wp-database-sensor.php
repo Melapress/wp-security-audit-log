@@ -104,26 +104,26 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		private static function is_sensor_enabled(): bool {
+		public static function is_sensor_enabled(): bool {
 			if ( null === self::$sensor_enabled ) {
-						$sensor_alerts           = array(
-							5010,
-							5011,
-							5012,
-							5013,
-							5014,
-							5015,
-							5016,
-							5017,
-							5018,
-							5022,
-							5023,
-							5024,
-						);
-						$current_disabled_alerts = Settings_Helper::get_disabled_alerts();
-						$res                     = empty( array_diff( $sensor_alerts, $current_disabled_alerts ) );
+				$sensor_alerts           = array(
+					5010,
+					5011,
+					5012,
+					5013,
+					5014,
+					5015,
+					5016,
+					5017,
+					5018,
+					5022,
+					5023,
+					5024,
+				);
+				$current_disabled_alerts = Settings_Helper::get_disabled_alerts();
+				$res                     = empty( array_diff( $sensor_alerts, $current_disabled_alerts ) );
 
-						self::$sensor_enabled = ! $res;
+				self::$sensor_enabled = ! $res;
 			}
 
 			return self::$sensor_enabled;

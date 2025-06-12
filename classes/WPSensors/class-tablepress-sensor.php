@@ -101,27 +101,23 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function early_init() {
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
-				array( '\WSAL\WP_Sensors\Helpers\TablePress_Helper', 'wsal_tablepress_add_custom_event_objects' ),
+				array( TablePress_Helper::class, 'wsal_tablepress_add_custom_event_objects' ),
 				10,
 				2
 			);
 
-			if ( TablePress_Helper::is_tablepress_active() ) {
-
-				add_filter(
-					'wsal_event_type_data',
-					array( '\WSAL\WP_Sensors\Helpers\TablePress_Helper', 'wsal_tablepress_add_custom_event_type' ),
-					10,
-					2
-				);
-				add_filter(
-					'wsal_ignored_custom_post_types',
-					array( '\WSAL\WP_Sensors\Helpers\TablePress_Helper', 'wsal_tablepress_add_custom_ignored_cpt' )
-				);
-
-			}
+			\add_filter(
+				'wsal_event_type_data',
+				array( TablePress_Helper::class, 'wsal_tablepress_add_custom_event_type' ),
+				10,
+				2
+			);
+			\add_filter(
+				'wsal_ignored_custom_post_types',
+				array( TablePress_Helper::class, 'wsal_tablepress_add_custom_ignored_cpt' )
+			);
 		}
 
 
@@ -166,7 +162,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 				$bool_options = array( 'table_head', 'table_foot', 'alternating_row_colors', 'row_hover', 'use_datatables', 'print_name', 'print_description', 'datatables_sort', 'datatables_filter', 'datatables_paginate', 'datatables_lengthchange', 'datatables_info', 'datatables_scrollx' );
 				$alert_needed = false;
 
-				if ( ! class_exists( '\TablePress_Table_Model' ) ) {
+				if ( ! \class_exists( '\TablePress_Table_Model' ) ) {
 					return;
 				}
 
@@ -405,7 +401,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 				)
 			);
 
-			if ( ! class_exists( 'TablePress_Table_Model' ) ) {
+			if ( ! \class_exists( 'TablePress_Table_Model' ) ) {
 				return;
 			}
 
@@ -444,7 +440,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 				)
 			);
 
-			if ( ! class_exists( '\TablePress_Table_Model' ) ) {
+			if ( ! \class_exists( '\TablePress_Table_Model' ) ) {
 				return;
 			}
 

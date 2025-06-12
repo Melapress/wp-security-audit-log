@@ -8,7 +8,6 @@
  *
  * @package   wsal
  * @subpackage writers
- * @author Stoil Dobrev <stoil@melapress.com>
  */
 
 declare(strict_types=1);
@@ -70,7 +69,7 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function init() {
-			if ( \class_exists( '\WSAL\Extensions\Views\Reports', true ) ) {
+			if ( \class_exists( '\WSAL\Extensions\Views\Reports' ) ) {
 				\add_action( 'wp_ajax_wsal_report_download', array( Reports::class, 'process_report_download' ) );
 			}
 		}
@@ -93,7 +92,7 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 				$output = fopen( self::get_file(), 'a+' );
 			}
 			if ( 1 === $step ) {
-				fputcsv( $output, self::prepare_header() );
+				fputcsv( $output, self::prepare_header(), ',', '"', '\\' );
 			}
 			$enclosure            = '"';
 			$csv_export_separator = ',';
@@ -147,7 +146,7 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 							);
 						}
 					}
-					fputcsv( $output, $current_row, $csv_export_separator, $enclosure );
+					fputcsv( $output, $current_row, $csv_export_separator, $enclosure, '\\' );
 				}
 			} else {
 
@@ -192,7 +191,7 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 							);
 						}
 					}
-					fputcsv( $output, $current_row, $csv_export_separator, $enclosure );
+					fputcsv( $output, $current_row, $csv_export_separator, $enclosure, '\\' );
 				}
 			}
 
@@ -360,8 +359,8 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 				// Switch to Archive DB.
 				$selected_db = WP_Helper::get_transient( 'wsal_wp_selected_db' );
 				if ( $selected_db && 'archive' === $selected_db ) {
-					if ( class_exists( '\WSAL_Extension_Manager' ) ) {
-						if ( class_exists( '\WSAL_Ext_Plugin' ) ) {
+					if ( \class_exists( '\WSAL_Extension_Manager' ) ) {
+						if ( \class_exists( '\WSAL_Ext_Plugin' ) ) {
 							$connection_name = Settings_Helper::get_option_value( 'archive-connection' );
 
 							$wsal_db = Connection::get_connection( $connection_name );

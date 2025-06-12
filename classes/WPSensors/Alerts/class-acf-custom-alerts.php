@@ -40,8 +40,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\ACF_Custom_Alerts' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function get_custom_alerts(): array {
-			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( ACF_Helper::is_acf_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
+			if ( ( \method_exists( ACF_Helper::class, 'load_alerts_for_sensor' ) && ACF_Helper::load_alerts_for_sensor() ) || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					__( 'Advanced Custom Fields', 'wp-security-audit-log' ) => array(
 						__( 'Advanced Custom Fields', 'wp-security-audit-log' ) =>

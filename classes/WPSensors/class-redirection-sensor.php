@@ -115,23 +115,22 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 		 */
 		public static function early_init() {
 
+			\add_filter(
+				'wsal_event_objects',
+				array( Redirection_Helper::class, 'wsal_redirection_add_custom_event_objects' ),
+				10,
+				2
+			);
+
+			\add_filter(
+				'wsal_event_type_data',
+				array( Redirection_Helper::class, 'wsal_redirection_add_custom_event_type' ),
+				10,
+				2
+			);
+
 			if ( Redirection_Helper::is_redirection_active() ) {
 				$self = __CLASS__;
-
-				\add_filter(
-					'wsal_event_objects',
-					array( Redirection_Helper::class, 'wsal_redirection_add_custom_event_objects' ),
-					10,
-					2
-				);
-
-				\add_filter(
-					'wsal_event_type_data',
-					array( Redirection_Helper::class, 'wsal_redirection_add_custom_event_type' ),
-					10,
-					2
-				);
-
 				/**
 				 * Logic here is complicated because Redirection plugin (for whatever reason) doesn't provide the ID of the updated item.
 				 * In order to collect that we have to do our own magic or as follows:
@@ -320,24 +319,24 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 					4
 				);
 
-					\add_action(
-						'redirection_update_redirect',
-						function ( $data ) use ( &$self ) {
+				\add_action(
+					'redirection_update_redirect',
+					function ( $data ) use ( &$self ) {
 
-							if ( isset( self::$redirect_id ) ) {
-								$self::set_redirect_old_object( \Red_Item::get_by_id( self::$redirect_id ) );
-							}
+						if ( isset( self::$redirect_id ) ) {
+							$self::set_redirect_old_object( \Red_Item::get_by_id( self::$redirect_id ) );
+						}
 
-							return $data;
-						},
-						PHP_INT_MAX,
-						1
-					);
+						return $data;
+					},
+					PHP_INT_MAX,
+					1
+				);
 
-					/**
-					 * Redirection plugin is stupidly organized - when redirection is created or updated it fires this hook. The difference is that when redirection is created, first parameter is int, when it is updated it will be of type \Red_Item
-					 */
-					\add_action( 'redirection_redirect_updated', array( __CLASS__, 'create_update_redirect' ), 10, 2 );
+				/**
+				 * Redirection plugin is stupidly organized - when redirection is created or updated it fires this hook. The difference is that when redirection is created, first parameter is int, when it is updated it will be of type \Red_Item
+				 */
+				\add_action( 'redirection_redirect_updated', array( __CLASS__, 'create_update_redirect' ), 10, 2 );
 			}
 		}
 
@@ -429,6 +428,10 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 		 */
 		private static function set_default_redirection_array_values( \Red_Item $data ): array {
 			$group = \Red_Group::get( $data->get_group_id() );
+
+			// $url = new \Red_Url( $data->get_url() );
+
+			// $target_url = $data->match->get_target_url( $data->get_match_url(), $data->get_url() );
 
 			$variables = array(
 				'Status'      => ( $data->is_enabled() ) ? \__( 'Activated', 'wp-security-audit-log' ) : \__( 'Deactivated', 'wp-security-audit-log' ),

@@ -8,7 +8,6 @@
  *
  * @package   wsal
  * @subpackage writers
- * @author Stoil Dobrev <stoil@melapress.com>
  */
 
 declare(strict_types=1);
@@ -278,7 +277,7 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 						margin-bottom: 16px;
 					}
 					#section-1 {
-						width: 200px;
+						width: 361px;
 						margin: 16px auto;
 					}
 					@media (min-width: 540px) {
@@ -413,9 +412,8 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 					$str .= $report_data['custom_title'];
 
 					unset( $report_data['custom_title'] );
-				} /* else {
-					$str .= esc_html__( 'Report from', 'wp-security-audit-log' ) . ' ' . \get_bloginfo( 'name' ) . ' ' . esc_html__( 'website', 'wp-security-audit-log' );
-				} */
+				}
+				
 				$str .= '</h1>';
 
 				$str .= '</div>';

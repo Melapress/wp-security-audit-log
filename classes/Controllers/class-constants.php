@@ -467,7 +467,7 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 				self::$wsal_built_links['ContactSupport'] = array( esc_html__( 'Contact Support', 'wp-security-audit-log' ) => 'https://melapress.com/contact/' );
 
 				self::$wsal_built_links['CommentLink'] = array(
-					esc_html__( 'Comment', 'wp-security-audit-log' ) => array(
+					\esc_html__( 'Comment', 'wp-security-audit-log' ) => array(
 						// Before 4.2.1 the CommentLink meta would contain the full HTML markup for the link, now it
 						// contains only the URL.
 						'url'   => '%CommentLink%',

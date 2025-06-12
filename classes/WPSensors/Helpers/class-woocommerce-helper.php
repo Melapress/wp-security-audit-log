@@ -42,6 +42,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 		private static $plugin_active = null;
 
 		/**
+		 * Class cache to store the state of the plugin for sensors.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.4.1
+		 */
+		private static $plugin_active_for_sensors = null;
+
+		/**
 		 * Ensures our appended setting gets saved when updating via ToggleEvents screen.
 		 *
 		 * @param array $post_data - POSTed settings data.
@@ -109,7 +118,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 			}
 
 			if ( 9019 === $alert_id ) {
-				if ( class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
+				if ( \class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 					$wc_all_stock_changes = Settings_Helper::get_boolean_option_value( 'wc-all-stock-changes', true );
 				}
 
@@ -151,7 +160,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 		 */
 		public static function wsal_woocommerce_extension_add_custom_event_type( $types ) {
 			$new_types = array(
-				'downloaded' => __( 'Downloaded', 'wp-security-audit-log' ),
+				'downloaded'     => __( 'Downloaded', 'wp-security-audit-log' ),
+				'status_changed' => __( 'Status Changed', 'wp-security-audit-log' ),
 			);
 
 			// combine the two arrays.
@@ -515,11 +525,33 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 		 */
 		public static function is_woocommerce_active() {
 			if ( null === self::$plugin_active ) {
-				self::$plugin_active = WP_Helper::is_plugin_active( 'woocommerce/woocommerce.php' );
+
+				if ( \function_exists( 'WC' ) ) {
+					self::$plugin_active = true;
+				} else {
+					self::$plugin_active = false;
+				}
+				// }
 			}
 
 			return self::$plugin_active;
 		}
+
+		/**
+		 * Shall we load custom alerts for sensors?
+		 *
+		 * @return boolean
+		 *
+		 * @since 5.3.4.1
+		 */
+		public static function load_alerts_for_sensor(): bool {
+			if ( null === self::$plugin_active_for_sensors ) {
+				self::$plugin_active_for_sensors = WP_Helper::is_plugin_active( 'woocommerce/woocommerce.php' );
+			}
+
+			return self::$plugin_active_for_sensors;
+		}
+
 
 		/**
 		 * Returns a list of custom post types associated with particular extension.

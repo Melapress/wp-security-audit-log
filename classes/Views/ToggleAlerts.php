@@ -314,7 +314,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													case 'WooCommerce':
 													case 'WooCommerce Products':
 														// Check if WooCommerce plugin exists.
-														if ( ! Woocommerce_Helper::is_woocommerce_active() ) {
+														if ( ! Woocommerce_Helper::load_alerts_for_sensor() ) {
 															$disable_inputs   = 'disabled';
 															$disabled_message = esc_html__( 'Please activate WooCommerce to enable this alert', 'wp-security-audit-log' );
 														}
@@ -322,7 +322,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 													case 'Yoast SEO':
 														// Check if Yoast SEO plugin exists.
-														if ( ! Yoast_SEO_Helper::is_wpseo_active() ) {
+														if ( ! Yoast_SEO_Helper::load_alerts_for_sensor() ) {
 															$disable_inputs   = 'disabled';
 															$disabled_message = esc_html__( 'Please activate the Yoast SEO Plugin', 'wp-security-audit-log' );
 														}

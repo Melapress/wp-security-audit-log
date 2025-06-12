@@ -15,7 +15,7 @@
 /* Melapress brand font 'Quicksand' — There maybe be a preferable way to add this but this seemed the most discrete. */
 @font-face {
 	font-family: 'Quicksand';
-	src: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/fonts/Quicksand-VariableFont_wght.woff2') format('woff2');
+	src: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/fonts/Quicksand-VariableFont_wght.woff2') format('woff2');
 	font-weight: 100 900; /* This indicates that the variable font supports weights from 100 to 900 */
 	font-style: normal;
 }
@@ -74,7 +74,7 @@
 }
 
 .wsal-plugin-update-close {
-	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/close-icon-rev.svg'); /* Path to your close icon */
+	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/close-icon-rev.svg'); /* Path to your close icon */
 	background-size: cover;
 	width: 18px;
 	height: 18px;
@@ -89,7 +89,7 @@
 
 .wsal-plugin-update::before {
 	content: '';
-	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/updated-bg.png'); /* Background image only displayed on desktop */
+	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/updated-bg.png'); /* Background image only displayed on desktop */
 	background-size: 100%;
 	background-repeat: no-repeat;
 	background-position: 100% 51%;

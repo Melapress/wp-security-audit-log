@@ -153,7 +153,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			$bootstrap_hook = array( 'plugins_loaded', 9 );
 
-			Sensors_Load_Manager::load_early_sensors();
+			\add_action( $bootstrap_hook[0], array( Sensors_Load_Manager::class, 'load_early_sensors' ), $bootstrap_hook[1] );
 
 			\add_action( $bootstrap_hook[0], array( __CLASS__, 'setup' ), $bootstrap_hook[1] );
 
@@ -179,10 +179,16 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			\add_action( 'admin_print_scripts', array( WP_Helper::class, 'hide_unrelated_notices' ) );
 
 			\add_action(
-				'init',
+				'after_setup_theme',
 				function () {
+					Migration::migrate();
+
+					self::init_freemius();
+					self::init();
+
 					Alert_Manager::init();
 					Sensors_Load_Manager::load_sensors();
+					self::load_defaults();
 				},
 				0
 			);
@@ -256,7 +262,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			self::includes();
 
-			if ( class_exists( 'WSAL\Migration\Metadata_Migration_440' ) && ! empty( WP_Helper::get_global_option( Metadata_Migration_440::OPTION_NAME_MIGRATION_INFO, array() ) ) ) {
+			if ( \class_exists( 'WSAL\Migration\Metadata_Migration_440' ) && ! empty( WP_Helper::get_global_option( Metadata_Migration_440::OPTION_NAME_MIGRATION_INFO, array() ) ) ) {
 
 				// ( new Metadata_Migration_440( 'local' ) )->task(['connection'=>'local','batch_size'=>50,'processed_events_count'=>0]);
 				new Metadata_Migration_440( 'local' );
@@ -264,15 +270,22 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				new Metadata_Migration_440( 'external' );
 				new Metadata_Migration_440( 'archive' );
 
+				$get_migration_connections = (array) WP_Helper::get_global_option( Metadata_Migration_440::OPTION_NAME_MIGRATION_INFO, array() );
+
+				foreach ( array_keys( $get_migration_connections ) as $connection_name ) {
+					if ( true === in_array( $connection_name, array( 'local', 'external', 'archive' ), true ) ) {
+						continue;
+					}
+
+					new Metadata_Migration_440( $connection_name );
+				}
+
 				\add_action( 'all_admin_notices', array( Metadata_Migration_440::class, 'maybe_display_progress_admin_notice' ) );
 			}
 
 			self::init_hooks();
-			self::load_defaults();
 
 			\add_action( 'after_setup_theme', array( __CLASS__, 'load_wsal' ) );
-
-			self::init();
 		}
 
 		/**
@@ -399,8 +412,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			\add_action( 'wsal_freemius_loaded', array( __CLASS__, 'adjust_freemius_strings' ) );
 
-			self::init_freemius();
-
 			Cron_Jobs::init();
 
 			// Extensions which are only admin based.
@@ -428,7 +439,9 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function load_freemius() {
-			require_once WSAL_BASE_DIR . '/sdk/wsal-freemius.php';
+			if ( file_exists( WSAL_BASE_DIR . '/sdk/wsal-freemius.php' ) ) {
+				require_once WSAL_BASE_DIR . '/sdk/wsal-freemius.php';
+			}
 		}
 
 		/**
@@ -439,7 +452,18 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function is_mainwp_active() {
-			return WP_Helper::is_plugin_active( 'mainwp-child/mainwp-child.php' );
+			$active = WP_Helper::is_plugin_active( 'mainwp-child/mainwp-child.php' );
+
+			if ( WP_Helper::is_multisite() ) {
+				// Check if the plugin is active on the main site.
+				if ( ! defined( '\MAINWP_CHILD_URL' ) ) {
+					$active = false;
+				} else {
+					$active = true;
+				}
+			}
+
+			return $active;
 		}
 
 		/**
@@ -472,11 +496,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			if ( $is_admin_blocking_plugins_support_enabled || is_admin() || WP_Helper::is_login_screen() || self::is_rest_api() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && \WP_CLI ) ) {
 
 				self::load_freemius();
-
-				// Reports.
-				if ( class_exists( Notifications::class ) ) {
-					Notifications::init();
-				}
 
 				// phpcs:disable
 				// phpcs:enable
@@ -715,6 +734,11 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				Widget_Manager::init();
 			}
 
+			// Reports.
+			if ( \class_exists( Notifications::class ) ) {
+				Notifications::init();
+			}
+
 			if ( \is_admin() ) {
 				// phpcs:disable
 
@@ -724,8 +748,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 					\add_filter( 'all_plugins', array( __CLASS__, 'wsal_hide_plugin' ) );
 				}
 			}
-
-			Constants::init();
 
 			global $wsal_class;
 
@@ -738,7 +760,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			 */
 			\do_action( 'wsal_init', $wsal_class );
 
-			\add_action( 'init', array( Migration::class, 'migrate' ), PHP_INT_MAX );
+			// \add_action( 'init', array( Migration::class, 'migrate' ), PHP_INT_MAX );
 
 			if ( defined( '\WP_CLI' ) && \WP_CLI ) {
 				\WP_CLI::add_command( 'wsal_cli_commands', '\WSAL\Controllers\WP_CLI\WP_CLI_Commands' );
@@ -767,7 +789,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			}
 
 			// Send deactivation email.
-			if ( class_exists( '\WSAL\Helpers\Email_Helper', false ) ) {
+			if ( \class_exists( '\WSAL\Helpers\Email_Helper', false ) ) {
 				// Get email template.
 				Email_Helper::send_deactivation_email();
 			}
@@ -863,12 +885,16 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			}
 
 			$s_alerts = Settings_Helper::get_option_value( 'disabled-alerts' );
-			if ( isset( $s_alerts ) && '' !== $s_alerts ) {
-				$s_alerts[] = esc_html( $code );
-			} else {
-				$s_alerts = esc_html( $code );
+
+			if ( is_string( $s_alerts ) ) {
+				$s_alerts = \array_filter( \array_map( 'trim', \explode( ',', $s_alerts ) ) );
 			}
-			Settings_Helper::set_option_value( 'disabled-alerts', $s_alerts );
+
+			if ( isset( $s_alerts ) && '' !== $s_alerts ) {
+				$s_alerts[] = (int) esc_html( $code );
+
+				Settings_Helper::set_disabled_alerts( $s_alerts );
+			}
 
 			echo wp_sprintf(
 				// translators: Alert code which is no longer monitored.
@@ -895,7 +921,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			// Register common script.
 			wp_register_script(
 				'wsal-common',
-				WSAL_BASE_URL . '/js/common.js',
+				WSAL_BASE_URL . 'js/common.js',
 				array( 'jquery' ),
 				WSAL_VERSION,
 				true

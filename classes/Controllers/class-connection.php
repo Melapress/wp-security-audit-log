@@ -237,7 +237,7 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		 *
 		 * @since 4.6.0
 		 */
-		public static function test_connection( array $connection_config = null ) {
+		public static function test_connection( ?array $connection_config = null ) {
 			error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING | E_DEPRECATED ) );
 			if ( ! $connection_config ) {
 				$connection_config = self::get_config();
@@ -442,7 +442,10 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 
 				return $wpdb;
 			}
-			$password   = self::decrypt_string( $connection_config['password'] );
+
+			$password = (string) $connection_config['password'] ?? '';
+
+			$password   = self::decrypt_string( $password );
 			$connection = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_connection
 			if ( array_key_exists( 'baseprefix', $connection_config ) ) {
 				$connection->set_prefix( $connection_config['baseprefix'] );
@@ -634,7 +637,7 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function get_mirrors_by_connection_name( $connection_name ) {
-			$mirrors = \WSAL\Helpers\Settings_Helper::get_all_mirrors();
+			$mirrors = Settings_Helper::get_all_mirrors();
 			$result  = array();
 			if ( ! empty( $mirrors ) ) {
 				foreach ( $mirrors as $mirror ) {
@@ -914,6 +917,32 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 				self::remove_archiving_config();
 				Settings_Helper::delete_option_value( 'archiving-last-created' );
 			}
+		}
+
+		/**
+		 * Returns all the connections currently stored in the options.
+		 *
+		 * @return array
+		 *
+		 * @since 4.4.3
+		 */
+		public static function get_all_connections() {
+			$connections_options = Settings_Helper::get_options_by_prefix( WSAL_CONN_PREFIX, true );
+
+			$connections = array();
+
+			foreach ( $connections_options as $connection ) {
+
+				$connection = \maybe_unserialize( $connection['option_value'] );
+				if ( ! is_array( $connection ) ) {
+					$connection = (array) $connection;
+
+					self::save_connection( $connection );
+				}
+				$connections[] = $connection;
+			}
+
+			return $connections;
 		}
 	}
 }

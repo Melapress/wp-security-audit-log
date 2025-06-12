@@ -324,8 +324,8 @@ abstract class WSAL_AbstractView {
 			// 	$our_footer = \ob_get_clean();
 			// }
 
-			$wsal_footer_link = 'https://melapress.com/?utm_source=plugin&utm_medium=referral&utm_campaign=wsal&utm_content=footer';
-			$wsal_link        = 'https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+			$wsal_footer_link = 'https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-melapress-name-link';
+			$wsal_link        = 'https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-plugin-name-link';
 
 			return $our_footer . \sprintf(
 			/* translators: This text is prepended by a link to Melapress's website, and appended by a link to Melapress's website. */
@@ -351,10 +351,10 @@ abstract class WSAL_AbstractView {
 		global $current_screen;
 
 		if ( isset( $current_screen ) && ( in_array( $current_screen->base, WpSecurityAuditLog::get_plugin_screens_array(), true ) ) ) {
-			$documentation_link = 'https://melapress.com/support/kb/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
-			$support_link       = 'https://melapress.com/support/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
-			$feedback_link      = 'https://melapress.com/contact/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
-			$version_link       = 'https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+			$documentation_link = 'https://melapress.com/support/kb/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-kb-link';
+			$support_link       = 'https://melapress.com/support/kb/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-support-link';
+			$feedback_link      = 'https://melapress.com/contact/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-feedback-link';
+			$version_link       = 'https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-changelog-link';
 
 			return sprintf(
 				'<a href="%s" target="_blank">%s</a> &#8729; <a href="%s" target="_blank">%s</a> &#8729; <a href="%s" target="_blank">%s</a> &#8729; <a href="%s" target="_blank">%s %s</a>',

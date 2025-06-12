@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace WSAL\Views;
 
+use WSAL\Helpers\Email_Helper;
 use WSAL\Helpers\View_Manager;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Helpers\Plugin_Settings_Helper;
@@ -160,7 +161,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 				.wsal_upgrade_icon:after {
 					content: "";
 					display: block;
-						background: url( "<?php echo WSAL_BASE_URL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>/img/add-icon.png") no-repeat;
+						background: url( "<?php echo WSAL_BASE_URL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>img/add-icon.png") no-repeat;
 					width: 34px;
 					height: 34px;
 					float: right;
@@ -224,11 +225,20 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 					'content' => array( __CLASS__, 'wsal_step_summary' ),
 					'save'    => array( __CLASS__, 'wsal_step_summary_save' ),
 				),
-				'finish'        => array(
-					'name'    => __( 'Finish', 'wp-security-audit-log' ),
-					'content' => array( __CLASS__, 'wsal_step_finish' ),
-					'save'    => array( __CLASS__, 'wsal_step_finish_save' ),
-				),
+			);
+
+			if ( 'free' !== \WpSecurityAuditLog::get_plugin_version() ) {
+				$wizard_steps['notifications'] = array(
+					'name'    => __( 'Where should the plugin send your activity log summary?', 'wp-security-audit-log' ),
+					'content' => array( __CLASS__, 'wsal_step_notifications' ),
+					'save'    => array( __CLASS__, 'wsal_step_notifications_save' ),
+				);
+			}
+
+			$wizard_steps['finish'] = array(
+				'name'    => __( 'Finish', 'wp-security-audit-log' ),
+				'content' => array( __CLASS__, 'wsal_step_finish' ),
+				'save'    => array( __CLASS__, 'wsal_step_finish_save' ),
 			);
 
 			/**
@@ -255,7 +265,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			$wizard_css = View_Manager::get_asset_path( 'css/dist/', 'wsal-wizard', 'css', false );
 			wp_enqueue_style(
 				'wsal-wizard-css',
-				WSAL_BASE_URL . '/' . $wizard_css,
+				WSAL_BASE_URL . $wizard_css,
 				array( 'dashicons', 'install', 'forms' ),
 				WSAL_VERSION
 			);
@@ -266,7 +276,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			$wizard_js = View_Manager::get_asset_path( 'js/dist/', 'wsal-wizard', 'js', false );
 			wp_register_script(
 				'wsal-wizard-js',
-				WSAL_BASE_URL . '/' . $wizard_js,
+				WSAL_BASE_URL . $wizard_js,
 				array( 'jquery' ),
 				WSAL_VERSION,
 				false
@@ -337,7 +347,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 				<?php do_action( 'admin_print_styles' ); ?>
 			</head>
 			<body class="wsal-setup wp-core-ui">
-				<h1 id="wsal-logo"><a href="https://melapress.com/?utm_source=plugin&utm_medium=referral&utm_campaign=wsal&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank"><img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wp-activity-log-logo-full-colour-horiz-rgb.svg" alt="WP Activity Log" /></a></h1>
+				<h1 id="wsal-logo"><a href="https://melapress.com/?utm_source=plugin&utm_medium=wsal&utm_campaign=install-wizard-link-1" rel="noopener noreferrer" target="_blank"><img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wp-activity-log-logo-full-colour-horiz-rgb.svg" alt="WP Activity Log" /></a></h1>
 			<?php
 		}
 
@@ -799,7 +809,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 					/* @free:start */
 
 					// Change the help text if premium version of the plugin is active.
-					$step_help = __( 'Upgrade to <a href="https://melapress.com/wordpress-activity-log/features/#utm_source=plugin&amp;utm_medium=referral&amp;utm_campaign=wsal&amp;utm_content=wizard+configuration" rel="nofollow"  target="_blank">WP Activity Log Premium</a> to customize your activity log summary. Include additional details and choose exactly what to track', 'wp-security-audit-log' );
+					$step_help = __( 'Upgrade to <a href="https://melapress.com/wordpress-activity-log/features/?utm_source=plugin&amp;utm_medium=wsal&amp;utm_campaign=install-wizard-link-2" rel="nofollow"  target="_blank">WP Activity Log Premium</a> to customize your activity log summary. Include additional details and choose exactly what to track', 'wp-security-audit-log' );
 
 					echo wp_kses( $step_help, Plugin_Settings_Helper::get_allowed_html_tags() );
 					/* @free:end */
@@ -828,11 +838,107 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 
 			$current_settings = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
 
-			$current_settings['weekly_email_address'] = ( ( isset( $post_array['notification_weekly_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_weekly_email_address'] ) ) : \get_bloginfo( 'admin_email' ) );
+			$current_settings['weekly_email_address'] = ( ( isset( $post_array['notification_weekly_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_weekly_email_address'] ) ) : Email_Helper::get_default_email_to() );
 
 			$current_settings['weekly_summary_notification'] = true;
 
 			Settings_Helper::set_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, $current_settings );
+
+			\wp_safe_redirect( esc_url_raw( self::get_next_step() ) );
+			exit();
+		}
+
+		/**
+		 * Step View: `Summary`
+		 *
+		 * @since 5.3.0
+		 */
+		private static function wsal_step_notifications() {
+			?>
+			<form method="post" class="wsal-setup-form">
+				<?php \wp_nonce_field( 'wsal-step-notifications' ); ?>
+				<h4>
+					<?php esc_html_e( 'Set a Default notifications email address', 'wp-security-audit-log' ); ?>
+				</h4>
+
+				<p class="description">
+					<em>
+						<?php
+						// Step help text.
+						$step_help = __(
+							'In WP Activity Log you can configure email, SMS, or Slack notifications so you are alerted of important activity that occurs on your website — for example, if a user logs in outside of office hours.
+
+							<p>Please provide a default email address where these notifications should be sent. You can update this address at any time from the plugin’s Notifications settings, and you can also configure specific recipients for individual alerts, as well as set a default phone number (for SMS messages) and Slack channel.</p>
+							
+							<p>Enter the email address where you\'d like to receive notifications:</p>',
+							'wp-security-audit-log'
+						);
+
+						echo wp_kses( $step_help, Plugin_Settings_Helper::get_allowed_html_tags() );
+						?>
+					</em>
+				</p>
+				<fieldset>
+					<label for="3"><?php esc_html_e( 'Email address:', 'wp-security-audit-log' ); ?>
+						<input id="notification_default_email_address" name="notifications[notification_default_email_address]" required="required" type="text" value="<?php echo \sanitize_email( \get_bloginfo( 'admin_email' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" pattern="([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,4}[,]{0,}){1,}">
+					</label>
+					<p></p>
+				</fieldset>
+
+				<div class="wsal-setup-actions">
+					<button class="button button-primary"
+						type="submit"
+						name="save_step"
+						value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>">
+						<?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?>
+					</button>
+				</div>
+			</form>
+
+			<p class="description">
+				<em>
+					<?php
+					/* @free:start */
+
+					/*
+					// Change the help text if premium version of the plugin is active.
+					$step_help = __( 'Upgrade to <a href="https://melapress.com/wordpress-activity-log/features/#utm_source=plugin&amp;utm_medium=referral&amp;utm_campaign=wsal&amp;utm_content=wizard+configuration" rel="nofollow"  target="_blank">WP Activity Log Premium</a> to customize your activity log summary. Include additional details and choose exactly what to track', 'wp-security-audit-log' );
+
+					echo wp_kses( $step_help, Plugin_Settings_Helper::get_allowed_html_tags() );
+					*/
+					/* @free:end */
+
+					?>
+				</em>
+			</p>
+			<?php
+		}
+
+		/**
+		 * Step Save: `Summary`
+		 *
+		 * @since 5.3.0
+		 */
+		private static function wsal_step_notifications_save() {
+			// Verify nonce.
+			\check_admin_referer( 'wsal-step-notifications' );
+
+			if ( isset( $_POST[ Notifications::NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ Notifications::NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ Notifications::NOTIFICATIONS_SETTINGS_NAME ] ) ) {
+				$post_array = \stripslashes_deep( $_POST[ Notifications::NOTIFICATIONS_SETTINGS_NAME ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+				$options = Settings_Helper::get_option_value( Notifications::NOTIFICATIONS_SETTINGS_NAME, array() );
+
+				if ( isset( $post_array['notification_default_email_address'] ) ) {
+					$options['notification_default_email_address'] = ( ( isset( $post_array['notification_default_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_default_email_address'] ) ) : '' );
+
+				}
+
+				if ( empty( $options ) ) {
+					Settings_Helper::delete_option_value( Notifications::NOTIFICATIONS_SETTINGS_NAME );
+				} else {
+					Notifications::set_global_notifications_setting( $options );
+				}
+			}
 
 			\wp_safe_redirect( esc_url_raw( self::get_next_step() ) );
 			exit();
@@ -852,27 +958,27 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 
 			<ul>
 				<li>
-					<a href="https://melapress.com/support/kb/wp-activity-log-getting-started/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+					<a href="https://melapress.com/support/kb/wp-activity-log-getting-started/?utm_source=plugin&utm_medium=wsal&utm_campaign=install-wizard-link-3" rel="noopener noreferrer" target="_blank">
 						<?php esc_html_e( 'Getting started with WP Activity Log', 'wp-security-audit-log' ); ?>
 					</a>
 				</li>
 				<li>
-					<a href="https://melapress.com/support/kb/wp-activity-log-event-ids/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+					<a href="https://melapress.com/support/kb/wp-activity-log-event-ids/?utm_source=plugin&utm_medium=wsal&utm_campaign=install-wizard-link-4" rel="noopener noreferrer" target="_blank">
 						<?php esc_html_e( 'What are events and event IDs', 'wp-security-audit-log' ); ?>
 					</a>
 				</li>
 				<li>
-					<a href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+					<a href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugin&utm_medium=wsal&utm_campaign=install-wizard-link-5" rel="noopener noreferrer" target="_blank">
 						<?php esc_html_e( 'The complete list of all the event IDs', 'wp-security-audit-log' ); ?>
 					</a>
 				</li>
 				<li>
-					<a href="https://melapress.com/support/kb/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+					<a href="https://melapress.com/support/kb/?utm_source=plugin&utm_medium=wsal&utm_campaign=install-wizard-link-6" rel="noopener noreferrer" target="_blank">
 						<?php esc_html_e( 'Knowledge base and support documentation', 'wp-security-audit-log' ); ?>
 					</a>
 				</li>
 				<li>
-					<a href="https://melapress.com/wordpress-activity-log/features/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+					<a href="https://melapress.com/wordpress-activity-log/features/?utm_source=plugin&utm_medium=wsal&utm_campaign=install-wizard-link-7" rel="noopener noreferrer" target="_blank">
 						<?php esc_html_e( 'WP Activity Log plugin features', 'wp-security-audit-log' ); ?>
 					</a>
 				</li>
@@ -880,7 +986,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 
 			<?php
 			// Link to contact form.
-			$help_page = 'https://melapress.com/contact/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+			$help_page = 'https://melapress.com/contact/?utm_source=plugin&utm_medium=wsal&utm_campaign=install-wizard-link-8';
 			?>
 
 			<p><?php echo wp_kses( __( 'We are confident WP Activity Log will meet your activity monitoring needs. If you have any questions, feature suggestions, or feedback, feel free to ', 'wp-security-audit-log' ), Plugin_Settings_Helper::get_allowed_html_tags() ); ?>  <a href="<?php echo esc_url( $help_page ); ?>" rel="noopener noreferrer" target="_blank"><?php esc_html_e( 'contact us anytime!', 'wp-security-audit-log' ); ?></a></p>

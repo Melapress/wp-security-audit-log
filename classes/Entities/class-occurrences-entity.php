@@ -80,7 +80,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			'event_type'  => 'varchar(255)',
 			'user_agent'  => 'varchar(255)',
 			'user_roles'  => 'varchar(255)',
-			'username'    => 'varchar(255)',
+			'username'    => 'varchar(60)',
 			'user_id'     => 'bigint',
 			'session_id'  => 'varchar(255)',
 			'post_status' => 'varchar(255)',
@@ -131,7 +131,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			. " ADD event_type VARCHAR(255) NOT NULL DEFAULT '',"
 			. " ADD user_agent VARCHAR(255) NOT NULL DEFAULT '',"
 			. " ADD user_roles VARCHAR(255) NOT NULL DEFAULT '',"
-			. ' ADD username VARCHAR(255) NULL,'
+			. ' ADD username VARCHAR(60) NULL,'
 			. ' ADD user_id BIGINT NULL ,'
 			. " ADD session_id VARCHAR(255) NOT NULL DEFAULT '',"
 			. " ADD post_status VARCHAR(255) NOT NULL DEFAULT '',"
@@ -182,7 +182,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 					`event_type` varchar(255) NOT NULL,
 					`user_agent` varchar(255) NOT NULL,
 					`user_roles` varchar(255) NOT NULL,
-					`username` varchar(255) DEFAULT NULL,
+					`username` varchar(60) DEFAULT NULL,
 					`user_id` bigint DEFAULT NULL,
 					`session_id` varchar(255) NOT NULL,
 					`post_status` varchar(255) NOT NULL,
@@ -618,7 +618,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		public static function get_matching_ips( $limit = null ) {
 			$_wpdb = self::get_connection();
 			$sql   = 'SELECT DISTINCT client_ip FROM ' . self::get_table_name();
-			if ( ! is_null( $limit ) ) {
+			if ( ! is_null( $limit ) && \is_int( $limit ) && \filter_var( $limit, \FILTER_VALIDATE_INT ) ) {
 				$sql .= ' LIMIT ' . $limit;
 			}
 			$ips    = $_wpdb->get_col( $sql );
