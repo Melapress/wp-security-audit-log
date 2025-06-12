@@ -30,22 +30,37 @@ $doc.ready(function () {
     jQuery('.wsal-toggle-option').each(function () {
         var $thisElement = jQuery(this),
             elementType = $thisElement.attr('type'),
-            toggleItems = $thisElement.data('wsal-toggle');
+            toggleItems = $thisElement.data('wsal-toggle'),
+            untoggleItems = $thisElement.data('wsal-untoggle');
 
-        toggleItems = jQuery(toggleItems).hide();
+        toggleItems =  ( toggleItems && toggleItems.length > 0 ) ? jQuery(toggleItems).hide() : '';
+        untoggleItems =  ( untoggleItems && untoggleItems.length > 0 ) ? jQuery(untoggleItems).show() : '';
 
         if (elementType = 'checkbox') {
             if ($thisElement.is(':checked')) {
-                toggleItems.slideDown();
+
+                if ( toggleItems.length > 0 ) {
+                    toggleItems.slideDown();
+                } 
+                if ( untoggleItems.length > 0 ) {
+                    untoggleItems.hide();
+                } 
             };
 
             $thisElement.change(function () {
-                toggleItems.slideToggle('fast');
+                if ( toggleItems.length > 0 ) {
+                    toggleItems.slideToggle('fast');
+                }
+                if ( untoggleItems.length > 0 ) {
+                    untoggleItems.slideToggle('fast');
+                } 
 
                 // CodeMirror
-                toggleItems.find('.CodeMirror').each(function (i, el) {
-                    el.CodeMirror.refresh();
-                });
+                if ( toggleItems.length > 0 ) {
+                    toggleItems.find('.CodeMirror').each(function (i, el) {
+                        el.CodeMirror.refresh();
+                    });
+                }
 
             });
         }
@@ -178,9 +193,60 @@ $doc.ready(function () {
     }
 
     jQuery('#wsal_form').submit(function (evt) {
+        $wsalBody.addClass('has-overlay');
         $saveAlert.fadeIn();
 
         var btnClicked = evt.originalEvent.submitter;
+
+        if (jQuery('#builder-basic').length) {
+
+            let default_email = jQuery('#custom_notification_send_to_default_email').is(":checked");
+            let default_slack = jQuery('#custom_notification_send_to_default_slack').is(":checked");
+            let default_phone = jQuery('#custom_notification_send_to_default_phone').is(":checked");
+            let email = jQuery('#custom_notification_email').val();
+            let slack = jQuery('#custom_notification_slack').val();
+            let phone = jQuery('#custom_notification_phone').val();
+
+            if ( undefined === email ) {
+                email = '';
+            }
+            if ( undefined === slack ) {
+                slack = '';
+            }
+            if ( undefined === phone ) {
+                phone = '';
+            }
+
+            if ( ! default_email ) {
+                var check_mail = false;
+
+                if ( ( ! default_phone && ( phone === null || (typeof phone === "string" && phone.length === 0 ) ) ) && ( ! default_slack && ( slack === null || (typeof slack === "string" && slack.length === 0 ) ) ) ) {
+                    check_mail = true;
+                } else {
+                    check_mail = false;
+                }
+
+                if ( check_mail ) {
+                    if ( email === null || (typeof email === "string" && email.length === 0) ) {
+                        var { __ } = wp.i18n;
+                        $saveAlert.addClass('is-failed').delay(900);
+                        $saveAlert.append('<div class="wsal-error-message">' + __( 'Email can not be empty!', 'wp-security-audit-log' ) + '<p><button id="wsal_remove_error" type="button">Close</button></p></div>');
+
+                        jQuery('#wsal_remove_error').click(function (e) {
+                            $saveAlert.addClass('is-failed').delay(900).fadeOut(700);
+                            $wsalBody.removeClass('has-overlay');
+                            jQuery('.wsal-error-message').remove();
+                        });
+                        // alert( __( 'Email can not be empty!', 'wp-security-audit-log' ) );
+                        // $wsalBody.removeClass('has-overlay');
+                        // $saveAlert.removeClass('is-success is-failed');
+                        // $saveAlert.fadeOut();
+
+                        return false;
+                    }
+                }
+            }
+        }
 
         if (jQuery('#builder-basic').length) {
             var result = jQuery('#builder-basic').queryBuilder('getRules');
@@ -196,16 +262,26 @@ $doc.ready(function () {
 
                 jQuery("<input>").attr({
                     name: "custom-notifications[custom_notification_query_sql]",
-                    id: "hiddenId",
+                    id: "hiddenIdSql",
                     type: "hidden",
                     value: resultSQL.sql,
                 }).appendTo(jQuery(this));
 
                 //alert(JSON.stringify(result, null, 2));
             } else {
-                $wsalBody.removeClass('has-overlay');
-                $saveAlert.removeClass('is-success is-failed');
-                $saveAlert.fadeOut();
+                var { __ } = wp.i18n;
+                $saveAlert.addClass('is-failed').delay(900);
+                $saveAlert.append('<div class="wsal-error-message">' + __( 'There are builder errors that needs to be fixed!', 'wp-security-audit-log' ) + '<p><button id="wsal_remove_error" type="button">Close</button></p></div>');
+
+                jQuery('#wsal_remove_error').click(function (e) {
+                    $saveAlert.addClass('is-failed').delay(900).fadeOut(700);
+                    $wsalBody.removeClass('has-overlay');
+                    jQuery('.wsal-error-message').remove();
+                });
+
+                // $wsalBody.removeClass('has-overlay');
+                // $saveAlert.removeClass('is-success is-failed');
+                // $saveAlert.fadeOut();
                 return false;
             }
         }
@@ -258,10 +334,13 @@ $doc.ready(function () {
                     setTimeout(function () { $wsalBody.removeClass('has-overlay'); }, 1200);
                 }
                 else if (response.data == 2) {
-                    location.reload();
+                    $saveAlert.addClass('is-success').delay(900).fadeOut(700);
+                    setTimeout(function () { $wsalBody.removeClass('has-overlay');  location.reload();}, 1200);
+                   
                 }
                 else if (undefined !== response.data.redirect && response.data.redirect.length) {
-                    location.href = decodeURIComponent(response.data.redirect);
+                    $saveAlert.addClass('is-success').delay(900).fadeOut(700);
+                    setTimeout(function () { location.href = decodeURIComponent(response.data.redirect);}, 1200);
                 }
                 else {
                     $saveAlert.addClass('is-failed').delay(900).fadeOut(700);

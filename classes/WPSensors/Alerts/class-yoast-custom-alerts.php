@@ -42,7 +42,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( Yoast_SEO_Helper::is_wpseo_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
+			if ( \method_exists( Yoast_SEO_Helper::class, 'load_alerts_for_sensor' ) && Yoast_SEO_Helper::load_alerts_for_sensor() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					esc_html__( 'Yoast SEO', 'wp-security-audit-log' ) => array(
 						esc_html__( 'Post Changes', 'wp-security-audit-log' )    =>

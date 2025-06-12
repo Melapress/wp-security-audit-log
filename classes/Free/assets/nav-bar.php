@@ -135,7 +135,7 @@
 
 /* Specific Background Images */
 #wsal-navbar .cta-link::before {
-	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/locked-icon.svg');
+	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/locked-icon.svg');
 	opacity: .6;
 }
 
@@ -198,23 +198,23 @@
 
 	/* Specific Background Images */
 	#wsal-navbar .log-viewer-link::before {
-		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/log-viewer-icon.svg');
+		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/log-viewer-icon.svg');
 	}
 
 	#wsal-navbar .settings-link::before {
-		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/settings-icon.svg');
+		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/settings-icon.svg');
 	}
 
 	#wsal-navbar .enable-disable-link::before {
-		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/enable-disable-icon.svg');
+		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/enable-disable-icon.svg');
 	}
 
 	#wsal-navbar .help-contact-link::before {
-		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/help-contact-icon.svg');
+		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/help-contact-icon.svg');
 	}
 
 	#wsal-navbar .notifications-link::before {
-		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/notifications-icon.svg');
+		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/notifications-icon.svg');
 	}
 }
 /* Styles - END */
@@ -231,7 +231,7 @@ $notifications       = ( in_array( $current_screen->base, array( 'wp-activity-lo
 
 <nav id="wsal-navbar">
 	<a href="https://www.melapress.com/wordpress-activity-log/" target="_blank" class="wsal-logo-link">
-		<img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/wp-activity-log-symbol.svg" alt="WP Activity Log" class="wsal-logo">
+		<img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/wp-activity-log-symbol.svg" alt="WP Activity Log" class="wsal-logo">
 	</a>
 	<div id="wsal-nav" class="nav">
 		<ul class="wsal-nav-left wsal-nav-list">
@@ -308,7 +308,7 @@ $notifications       = ( in_array( $current_screen->base, array( 'wp-activity-lo
 		</ul>
 		<ul class="wsal-nav-right wsal-nav-list">
 			<li class="wsal-nav-item">
-				<a href="https://melapress.com/wordpress-activity-log/pricing/?&utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank" class="wsal-nav-link cta-link"><?php echo esc_html__( 'Unlock extra features with WP Activity Log Premium', 'wp-security-audit-log' ); ?></a>
+				<a href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=header-upgrade-banner" target="_blank" class="wsal-nav-link cta-link"><?php echo esc_html__( 'Unlock extra features with WP Activity Log Premium', 'wp-security-audit-log' ); ?></a>
 			</li>
 		</ul>
 	</div>

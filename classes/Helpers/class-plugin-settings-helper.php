@@ -386,6 +386,19 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		}
 
 		/**
+		 * Stores the option that dicates if url parameters show in admin list view
+		 * for event times. This is always a bool. When it's not a bool it's set
+		 * to `true` to match default.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param mixed $newvalue ideally always bool. If not bool then it's cast to true.
+		 */
+		public static function set_url_parameters( $newvalue ) {
+			Settings_Helper::set_boolean_option_value( 'url_parameters', $newvalue );
+		}
+
+		/**
 		 * Get type of username to display.
 		 *
 		 * @since 5.0.0
@@ -697,14 +710,14 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 					}
 
 					// Connect account notice.
-					if ( class_exists( 'FS_Admin_Notices' ) ) {
+					if ( \class_exists( 'FS_Admin_Notices' ) ) {
 						\FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
 					}
 				}
 
 				if ( ! wsal_freemius()->is_premium() ) {
 					// Remove Freemius trial promotion notice.
-					if ( class_exists( 'FS_Admin_Notices' ) ) {
+					if ( \class_exists( 'FS_Admin_Notices' ) ) {
 						\FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' );
 					}
 				}

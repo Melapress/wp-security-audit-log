@@ -40,7 +40,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function get_custom_alerts(): array {
-			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
 			if ( MainWP_Addon::check_mainwp_plugin_active() || \WpSecurityAuditLog::is_mainwp_active() ) {
 				return array(
 					\esc_html__( 'MainWP Dashboard', 'wp-security-audit-log' ) => array(
@@ -241,6 +240,101 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					array(),
 					'activity-logs',
 					'failed',
+				),
+				7718 => array(
+					7718,
+					\WSAL_MEDIUM,
+					esc_html__( 'A new client was created.', 'wp-security-audit-log' ),
+					esc_html__( 'A new client %ClientName% was created.', 'wp-security-audit-log' ),
+					array(),
+					array(
+						esc_html__( 'View client', 'wp-security-audit-log' ) => '%ClientUrl%',
+					),
+					'mainwp',
+					'created',
+				),
+				7719 => array(
+					7719,
+					\WSAL_MEDIUM,
+					esc_html__( 'Changed the email address of the client', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the email address of the client %ClientName% to %ClientEmail%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous client email address:', 'wp-security-audit-log' ) => '%OldEmail%',
+					),
+					array(
+						esc_html__( 'View client', 'wp-security-audit-log' ) => '%ClientUrl%',
+					),
+					'mainwp',
+					'modified',
+				),
+				7720 => array(
+					7720,
+					\WSAL_MEDIUM,
+					esc_html__( 'Changed the status of the client', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the status of the client %ClientName% to %ClientStatus%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous client status:', 'wp-security-audit-log' ) => '%OldStatus%',
+					),
+					array(
+						esc_html__( 'View client', 'wp-security-audit-log' ) => '%ClientUrl%',
+					),
+					'mainwp',
+					'modified',
+				),
+				7721 => array(
+					7721,
+					\WSAL_HIGH,
+					esc_html__( 'Deleted the client.', 'wp-security-audit-log' ),
+					esc_html__( 'Deleted the client %ClientName%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Email address:', 'wp-security-audit-log' ) => '%OldEmail%',
+					),
+					array(),
+					'mainwp',
+					'deleted',
+				),
+				7722 => array(
+					7722,
+					\WSAL_MEDIUM,
+					esc_html__( 'Added a site to the client.', 'wp-security-audit-log' ),
+					esc_html__( 'Added a site to the client %ClientName%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Site added:', 'wp-security-audit-log' ) => '%AddedSite%',
+					),
+					array(
+						esc_html__( 'View client', 'wp-security-audit-log' ) => '%ClientUrl%',
+					),
+					'mainwp',
+					'added',
+				),
+				7723 => array(
+					7723,
+					\WSAL_MEDIUM,
+					esc_html__( 'Removed a site to the client.', 'wp-security-audit-log' ),
+					esc_html__( 'Removed a site to the client %ClientName%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Site removed:', 'wp-security-audit-log' ) => '%RemovedSite%',
+					),
+					array(
+						esc_html__( 'View client', 'wp-security-audit-log' ) => '%ClientUrl%',
+					),
+					'mainwp',
+					'removed',
+				),
+				7724 => array(
+					7724,
+					\WSAL_HIGH,
+					esc_html__( 'Created a new MainWP REST API key.', 'wp-security-audit-log' ),
+					esc_html__( 'Created a new MainWP REST API key set %API_KEY_NAME%', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Site removed:', 'wp-security-audit-log' ) => '%Status%',
+						esc_html__( 'Permissions:', 'wp-security-audit-log' ) => '%Permissions%',
+					),
+					array(
+						esc_html__( 'View client', 'wp-security-audit-log' ) => '%ClientUrl%',
+					),
+					'mainwp',
+					'created',
 				),
 				7750 => array(
 					7750,

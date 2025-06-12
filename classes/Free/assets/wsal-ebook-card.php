@@ -16,7 +16,7 @@
 /* Melapress brand font 'Quicksand' */
 @font-face {
 	font-family: 'Quicksand';
-	src: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/fonts/Quicksand-VariableFont_wght.woff2') format('woff2');
+	src: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/fonts/Quicksand-VariableFont_wght.woff2') format('woff2');
 	font-weight: 100 900;
 	font-style: normal;
 }
@@ -69,7 +69,7 @@
 }
 
 .wsal-ebook-close {
-	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/close-icon.svg'); /* Path to your close icon */
+	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/close-icon.svg'); /* Path to your close icon */
 	background-size: cover;
 	width: 18px;
 	height: 18px;
@@ -83,7 +83,7 @@
 }
 
 .wsal-ebook {
-	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/wsal-ebook.png'); /* Background image added */
+	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/wsal-ebook.png'); /* Background image added */
 	background-size: 187px 185px;
 	background-repeat: no-repeat;
 	background-position: 50px 51%; /* Adjusted for left side */
@@ -106,7 +106,7 @@
 	
 	.wsal-ebook::before {
 		content: '';
-		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/icon-bg.png'); /* Background image only displayed on desktop */
+		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/icon-bg.png'); /* Background image only displayed on desktop */
 		background-size: contain;
 		background-repeat: no-repeat;
 		background-position: 100% 51%;
@@ -158,7 +158,7 @@
 		<?php echo esc_html__( 'Learn how to leverage ', 'wp-security-audit-log' ); ?><strong>WP Activity Log</strong><?php echo esc_html__( ' and master WordPress oversight to supercharge the administration and security of your websites.', 'wp-security-audit-log' ); ?>
 		</p>
 		<a href="https://melapress.com/ebook-wordpress-oversight/?user-referral=log-ebook-plugin" target="_blank" class="wsal-ebook-cta-link"><?php echo esc_html__( 'Download your free copy today', 'wp-security-audit-log' ); ?></a>
-		<a href="https://www.melapress.com/ebook-wordpress-oversight/?user-referral=log-ebook-plugin" target="_blank" class="wsal-ebook-logo-link"><img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/melapress.svg" width="160" height="31" alt="Melapress"></a>
+		<a href="https://www.melapress.com/ebook-wordpress-oversight/?user-referral=log-ebook-plugin" target="_blank" class="wsal-ebook-logo-link"><img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/melapress.svg" width="160" height="31" alt="Melapress"></a>
 	</div>
 	<button aria-label="Close button" class="wsal-ebook-close wsal-plugin-notice-close"></button>
 </div>

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
@@ -281,7 +282,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 			if ( null === $post ) {
 				return;
 			}
-
 			if ( 'auto-draft' === $post->post_status ) {
 				return;
 			}
@@ -293,6 +293,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 
 			if ( isset( $_POST['action'] ) && 'acp_editing_single_request' === sanitize_text_field( wp_unslash( $_POST['action'] ) ) ) {
 				return;
+			}
+
+			if ( null === self::$old_post && null === self::$old_tags && null === self::$old_cats ) {
+				self::get_before_post_edit_data( $post->ID );
 			}
 
 			if ( 'post_tag' === $taxonomy ) {
@@ -1591,7 +1595,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 					$event_data                         = self::get_post_event_data( $oldpost );
 					$editor_link                        = self::get_editor_link( $oldpost->ID );
 					$event_data[ $editor_link['name'] ] = $editor_link['value'];
-					$event_data['RevisionLink']         = self::get_post_revision( $post_id, $oldpost );
+					$event_data['RevisionLink']         = self::get_post_revision( $post_id, $oldpost, $event );
 
 					// Check excerpt change.
 					$old_post_excerpt = $oldpost->post_excerpt;
@@ -1702,8 +1706,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		private static function get_post_revision( $post_id, $post ) {
-			$revisions = wp_get_post_revisions( $post_id );
+		public static function get_post_revision( $post_id, $post = null, $event = 0 ) {
+
+			if ( \defined( 'WP_POST_REVISIONS' ) && ! WP_POST_REVISIONS ) {
+				if ( 2065 === $event ) {
+					// If the content changed and WP_POST_REVISIONS is set to false, we don't have a revision link.
+					return '';
+				}
+			}
+
+			$revisions = \wp_get_post_revisions( $post_id );
 			if ( ! empty( $revisions ) ) {
 				$revision = array_shift( $revisions );
 				return self::get_revision_link( $revision->ID );
@@ -1720,7 +1732,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		private static function get_revision_link( $revision_id ) {
-			return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, \network_admin_url( 'revision.php' ) ) : null;
+
+			if ( WP_Helper::is_multisite() ) {
+				return ! empty( $revision_id ) ? \add_query_arg( 'revision', $revision_id, \get_admin_url( \get_current_blog_id(), 'revision.php' ) ) : null;
+
+			}
+			return ! empty( $revision_id ) ? \add_query_arg( 'revision', $revision_id, \network_admin_url( 'revision.php' ) ) : null;
 		}
 
 		/**
@@ -1759,7 +1776,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		private static function check_auto_draft( $code, $title ) {
 			$ignore = 0;
 			if ( 2008 === $code && ( 'auto-draft' === $title || 'Auto Draft' === $title ) ) {
-				$ignore = ! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'wp-backend' );
+				$ignore = ! Settings_Helper::get_boolean_option_value( 'wp-backend' );
 			}
 			return $ignore;
 		}

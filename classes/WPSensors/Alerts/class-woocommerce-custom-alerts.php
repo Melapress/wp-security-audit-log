@@ -40,7 +40,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( Woocommerce_Helper::is_woocommerce_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
+			if ( \method_exists( Woocommerce_Helper::class, 'load_alerts_for_sensor' ) && Woocommerce_Helper::load_alerts_for_sensor() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					esc_html__( 'WooCommerce', 'wp-security-audit-log' ) => array(
 						esc_html__( 'Products', 'wp-security-audit-log' ) => self::get_products_array(),
@@ -829,7 +829,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					array(
 						esc_html__( 'View details', 'wp-security-audit-log' ) => '%EditorLinkWebhook%',
 					),
-					'woocommerce-product',
+					'woocommerce-store',
 					'added',
 				),
 
@@ -844,7 +844,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 						esc_html__( 'Status', 'wp-security-audit-log' ) => '%Status%',
 					),
 					array(),
-					'woocommerce-product',
+					'woocommerce-store',
 					'deleted',
 				),
 
@@ -867,8 +867,24 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					array(
 						esc_html__( 'View details', 'wp-security-audit-log' ) => '%EditorLinkWebhook%',
 					),
-					'woocommerce-product',
+					'woocommerce-store',
 					'modified',
+				),
+
+				9178 => array(
+					9178,
+					WSAL_HIGH,
+					esc_html__( 'Changed the Status of the webhook ', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the Status of the webhook %HookName%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Status', 'wp-security-audit-log' ) => '%Status%',
+						esc_html__( 'Previous Status', 'wp-security-audit-log' ) => '%OldStatus%',
+					),
+					array(
+						esc_html__( 'View details', 'wp-security-audit-log' ) => '%EditorLinkWebhook%',
+					),
+					'woocommerce-store',
+					'status_changed',
 				),
 
 				9019 => array(
@@ -1619,6 +1635,106 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					__( 'Changed the <strong>Site visibility status</strong> to %new_status%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous status', 'wp-security-audit-log' ) => '%old_status%',
+					),
+					array(),
+					'woocommerce-store',
+					'modified',
+				),
+				9169 => array(
+					9169,
+					WSAL_HIGH,
+					esc_html__( 'Changed the status of the Manage Stock store setting.', 'wp-security-audit-log' ),
+					__( 'Changed the status of the <strong>Manage Stock</strong> store setting.', 'wp-security-audit-log' ),
+					array(),
+					array(),
+					'woocommerce-store',
+					'enabled',
+				),
+				9170 => array(
+					9170,
+					WSAL_MEDIUM,
+					esc_html__( 'Changed the value of the Hold stock (minutes).', 'wp-security-audit-log' ),
+					__( 'Changed the value of the Hold stock (minutes) setting in the store to %new_value%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous setting', 'wp-security-audit-log' ) => '%old_value%',
+					),
+					array(),
+					'woocommerce-store',
+					'modified',
+				),
+				9171 => array(
+					9171,
+					WSAL_MEDIUM,
+					esc_html__( 'Changed the status of the low stock notification.', 'wp-security-audit-log' ),
+					__( 'Changed the status of the notification <strong>Enable low stock notifications</strong> in the store settings.', 'wp-security-audit-log' ),
+					array(),
+					array(),
+					'woocommerce-store',
+					'enabled',
+				),
+				9172 => array(
+					9172,
+					WSAL_MEDIUM,
+					esc_html__( 'Changed the status of the out of stock notification.', 'wp-security-audit-log' ),
+					__( 'Changed the status of the notification <strong>Enable out of stock notifications</strong> in the store settings.', 'wp-security-audit-log' ),
+					array(),
+					array(),
+					'woocommerce-store',
+					'enabled',
+				),
+				9173 => array(
+					9173,
+					WSAL_MEDIUM,
+					esc_html__( 'Changed the Notifications recipient(s) email address.', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Notifications recipient(s) email address</strong> to %new_value% in the store settings.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous email address was', 'wp-security-audit-log' ) => '%old_value%',
+					),
+					array(),
+					'woocommerce-store',
+					'modified',
+				),
+				9174 => array(
+					9174,
+					WSAL_MEDIUM,
+					esc_html__( 'Changed the value of the Low stock threshold.', 'wp-security-audit-log' ),
+					__( 'Changed the value of the <strong>Low stock threshold</strong> setting in the store to %new_value%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous setting was', 'wp-security-audit-log' ) => '%old_value%',
+					),
+					array(),
+					'woocommerce-store',
+					'modified',
+				),
+				9175 => array(
+					9175,
+					WSAL_MEDIUM,
+					esc_html__( 'Changed the value of the Out of stock threshold.', 'wp-security-audit-log' ),
+					__( 'Changed the value of the <strong>Out of stock threshold</strong> setting in the store to %new_value%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous setting was', 'wp-security-audit-log' ) => '%old_value%',
+					),
+					array(),
+					'woocommerce-store',
+					'modified',
+				),
+				9176 => array(
+					9176,
+					WSAL_MEDIUM,
+					esc_html__( 'Changed the status of the Out of stock visibility.', 'wp-security-audit-log' ),
+					__( 'Changed the status of the notification <strong>Out of stock visibility</strong>in the store settings.', 'wp-security-audit-log' ),
+					array(),
+					array(),
+					'woocommerce-store',
+					'enabled',
+				),
+				9177 => array(
+					9177,
+					WSAL_MEDIUM,
+					esc_html__( 'Changed the Out of stock threshold setting.', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Out of stock threshold</strong> setting setting in the store to %new_value%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous setting was', 'wp-security-audit-log' ) => '%old_value%',
 					),
 					array(),
 					'woocommerce-store',

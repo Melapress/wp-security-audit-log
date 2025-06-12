@@ -2881,3 +2881,8 @@ body.widgets-php #wsal-show-sections-sidebars-wrap h2 {
   border-bottom: none;
   margin-top: 6px;
 }
+
+::placeholder {
+  color: #becbe3;
+  opacity: 0.6;
+}

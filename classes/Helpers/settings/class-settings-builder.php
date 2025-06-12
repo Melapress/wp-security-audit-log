@@ -953,11 +953,13 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			$checked = checked( self::$current_value, true, false );
 
 			$toggle_data  = ! empty( self::$settings['toggle'] ) ? 'data-wsal-toggle="' . self::$settings['toggle'] . '"' : '';
-			$toggle_class = ! empty( self::$settings['toggle'] ) ? 'wsal-toggle-option' : '';
+			$toggle_class = ( ! empty( self::$settings['toggle'] ) || ! empty( self::$settings['untoggle'] ) ) ? 'wsal-toggle-option' : '';
+
+			$untoggle_data  = ! empty( self::$settings['untoggle'] ) ? 'data-wsal-untoggle="' . self::$settings['untoggle'] . '"' : '';
 
 			?>
 				<input <?php echo self::$item_id_attr; ?> <?php echo self::$name_attr; ?>
-					class="wsal-js-switch <?php echo $toggle_class; ?>" <?php echo $toggle_data; ?> type="checkbox" value="true"
+					class="wsal-js-switch <?php echo $toggle_class; ?>" <?php echo $toggle_data; ?>  <?php echo $untoggle_data; ?> type="checkbox" value="true"
 							<?php echo $checked; ?>>
 							<?php
 		}
@@ -972,7 +974,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			?>
 			<div class="option-contents">
 			<?php
-					$i = 0;
+			$i = 0;
 			foreach ( self::$settings['options'] as $option_key => $option ) {
 				++$i;
 
@@ -2093,7 +2095,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 					if ( ! empty( $current_value['img'] ) ) {
 						echo esc_attr( $current_value['img'] );
 					} else {
-						echo WSAL_BASE_URL . '/classes/Helpers/settings/admin/images/empty.png';
+						echo WSAL_BASE_URL . 'classes/Helpers/settings/admin/images/empty.png';
 					}
 					?>
 					" alt="">

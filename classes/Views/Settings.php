@@ -11,6 +11,7 @@
 
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
+use WSAL\Helpers\Email_Helper;
 use WSAL\Controllers\Constants;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
@@ -637,7 +638,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			echo sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'If your website is running behind a web application firewall or reverse proxy, use the setting below to select the HTTP header the plugin should retrieve the end user IP from - %s.', 'wp-security-audit-log' ),
-				'<a href="https://melapress.com/support/kb/wp-activity-log-support-reverse-proxies-web-application-firewalls/?utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank">' . esc_html__( 'learn more', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://melapress.com/support/kb/wp-activity-log-support-reverse-proxies-web-application-firewalls/?utm_source=plugin&utm_medium=wsal&utm_campaign=settings-page-link-1" target="_blank">' . esc_html__( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			);
 			?>
 		</p>
@@ -772,7 +773,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				sprintf(
 					/* translators: Learn more link. */
 					esc_html__( 'By default only users with administrator role (single site) and super administrator role (multisite) can change the settings of the plugin. Though you can restrict the privileges to just your user - %s.', 'wp-security-audit-log' ),
-					'<a href="https://melapress.com/support/kb/wp-activity-log-managing-plugin-privileges/?utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
+					'<a href="https://melapress.com/support/kb/wp-activity-log-managing-plugin-privileges/?utm_source=plugin&utm_medium=wsal&utm_campaign=settings-page-link-2" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
 				),
 				$allowed_tags
 			);
@@ -820,7 +821,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			}
 
 			echo wp_kses(
-				$section_label . ' - <a href="https://melapress.com/support/kb/wp-activity-log-allow-users-read-access-activity-log/?utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>',
+				$section_label . ' - <a href="https://melapress.com/support/kb/wp-activity-log-allow-users-read-access-activity-log/?utm_source=plugin&utm_medium=wsal&utm_campaign=settings-page-link-3" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>',
 				$allowed_tags
 			);
 			?>
@@ -904,7 +905,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<?php $use_email = Settings_Helper::get_option_value( 'use-email', 'default_email' ); ?>
 							<label for="default_email">
 								<input type="radio" name="use-email" id="default_email" value="default_email" <?php checked( $use_email, 'default_email' ); ?> />
-								<?php esc_html_e( 'Use the email address from the WordPress general settings', 'wp-security-audit-log' ); ?>
+								<?php esc_html_e( 'Use the email address ', 'wp-security-audit-log' ); ?>
+								<?php echo ( Email_Helper::get_default_email_address( true ) ); ?>
 							</label>
 							<br>
 							<label for="custom_email">
@@ -914,12 +916,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<br>
 							<label for="FromEmail">
 								<?php esc_html_e( 'Email Address', 'wp-security-audit-log' ); ?>
-								<input type="email" id="FromEmail" name="FromEmail" value="<?php echo esc_attr( WSAL\Helpers\Settings_Helper::get_option_value( 'from-email' ) ); ?>" />
+								<input type="email" id="FromEmail" name="FromEmail" value="<?php echo esc_attr( Settings_Helper::get_option_value( 'from-email' ) ); ?>" />
 							</label>
 							<br>
 							<label for="DisplayName">
 								<?php esc_html_e( 'Display Name', 'wp-security-audit-log' ); ?>&nbsp;
-								<input type="text" id="DisplayName" name="DisplayName" value="<?php echo esc_attr( WSAL\Helpers\Settings_Helper::get_option_value( 'display-name' ) ); ?>" />
+								<input type="text" id="DisplayName" name="DisplayName" value="<?php echo esc_attr( Settings_Helper::get_option_value( 'display-name' ) ); ?>" />
 							</label>
 						</fieldset>
 					</td>
@@ -933,7 +935,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$is_incognito = Settings_Helper::get_boolean_option_value( 'hide-plugin' );
 		?>
 		<h3><?php esc_html_e( 'Do you want to hide the plugin from the list of installed plugins?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'By default all installed plugins are listed in the plugins page. Set this option to Yes remove WP Activity Log from the list of installed plugins for users who are unable to access the WP Activity Log settings.', 'wp-security-audit-log' ); ?></p>
+		<p class="description"><?php esc_html_e( 'By default all installed plugins are listed in the Plugins page. Setting this option to "Yes" will remove WP Activity Log from the list of installed plugins for all users.', 'wp-security-audit-log' ); ?><br><br>
+		<?php esc_html_e( 'NOTE: when a plugin update will be available for the plugin, it will be visible until the plugin is updated.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -1089,6 +1092,27 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</table>
 		<!-- Timestamp -->
 
+		<h3><?php esc_html_e( 'Show the Query string from URLs (URL parameters) in the event metadata?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'Some URLs contain a Query string with URL parameters, such as the UTM parameters. Use the below setting to configure the plugin to show these parameters are event metadata.', 'wp-security-audit-log' ); ?></p>
+		<table class="form-table wsal-tab">
+			<tbody>
+				<tr>
+					<th><label for="url_parameters"><?php esc_html_e( 'Show Query string details in event metadata', 'wp-security-audit-log' ); ?></label></th>
+					<td>
+						<fieldset>
+							<?php $url_parameters = Settings_Helper::get_url_parameters(); ?>
+							<label for="url_parameters">
+								<input type="checkbox" name="url_parameters" id="url_parameters" style="margin-top: -2px;"
+									<?php checked( $url_parameters ); ?> value="yes">
+								
+							</label>
+						</fieldset>
+					</td>
+				</tr>
+				<!-- Alerts Timestamp -->
+			</tbody>
+		</table>
+
 		<h3><?php esc_html_e( 'What user information should be displayed in the WordPress activity log?', 'wp-security-audit-log' ); ?></h3>
 		<p class="description"><?php esc_html_e( 'Usernames might not be the same as a user\'s first and last name so it can be difficult to recognize whose user was that did a change. When there is no first & last name or public display name configured the plugin will revert back to the WordPress username.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
@@ -1170,6 +1194,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		$show_milliseconds = isset( $post_array['show_milliseconds'] ) && 'yes' === $post_array['show_milliseconds'];
 		Plugin_Settings_Helper::set_show_milliseconds( $show_milliseconds );
+
+		$url_parameters = isset( $post_array['url_parameters'] ) && 'yes' === $post_array['url_parameters'];
+		Plugin_Settings_Helper::set_url_parameters( $url_parameters );
 	}
 
 	/**
@@ -1545,7 +1572,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	public function header() {
 		wp_enqueue_style(
 			'settings',
-			WSAL_BASE_URL . '/css/settings.css',
+			WSAL_BASE_URL . 'css/settings.css',
 			array(),
 			WSAL_VERSION
 		);
@@ -1592,7 +1619,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Register settings script.
 		wp_register_script(
 			'settings',
-			WSAL_BASE_URL . '/js/settings.js',
+			WSAL_BASE_URL . 'js/settings.js',
 			array(),
 			WSAL_VERSION,
 			true

@@ -86,6 +86,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		private static $rescheduled_cron = false;
 
 		/**
+		 * Stores the current WP version.
+		 *
+		 * @var string
+		 *
+		 * @since 5.4.0
+		 */
+		private static $wp_core_version = '';
+
+		/**
 		 * Inits the main hooks
 		 *
 		 * @return void
@@ -116,6 +125,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			\add_action( 'delete_option', array( __CLASS__, 'delete_option' ) );
 			// Option is deleted.
 			\add_action( 'deleted_option', array( __CLASS__, 'deleted_option' ) );
+
+			\add_action( '_core_updated_successfully', array( __CLASS__, 'on_core_updated' ) );
+
+			if ( \function_exists('wp_get_wp_version')) {
+
+				self::$wp_core_version = wp_get_wp_version();
+			} else {
+				self::$wp_core_version = \get_bloginfo( 'version' );
+			}
 		}
 
 		/**
@@ -972,22 +990,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				}
 			}
 
-			// Core Update.
-			if ( isset( $get_array['action'] ) && 'do-core-upgrade' === $get_array['action'] && isset( $post_array['version'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'upgrade-core' ) ) {
-				$old_version = get_bloginfo( 'version' );
-				$new_version = \sanitize_text_field( \wp_unslash( $post_array['version'] ) );
-				if ( $old_version !== $new_version ) {
-					Alert_Manager::trigger_event(
-						6004,
-						array(
-							'OldVersion' => $old_version,
-							'NewVersion' => $new_version,
-						)
-					);
-				}
-			}
-
 			// Enable core updates.
 			if ( isset( $get_array['action'] ) && 'core-major-auto-updates-settings' === $get_array['action'] && isset( $get_array['value'] )
 			&& wp_verify_nonce( $get_array['_wpnonce'], 'core-major-auto-updates-nonce' ) ) {
@@ -1305,6 +1307,25 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 					)
 				);
 			}
+		}
+
+		/**
+		 * Triggered when the core is updated.
+		 *
+		 * @param string $new_wp_version - The new WordPress version.
+		 *
+		 * @since 5.4.0
+		 */
+		public static function on_core_updated( $new_wp_version ) {
+
+			// Core Update.
+			Alert_Manager::trigger_event(
+				6004,
+				array(
+					'OldVersion' => self::$wp_core_version,
+					'NewVersion' => $new_wp_version,
+				)
+			);
 		}
 	}
 }

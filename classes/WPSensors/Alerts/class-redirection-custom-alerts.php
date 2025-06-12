@@ -42,7 +42,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Redirection_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( Redirection_Helper::is_redirection_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
+			if ( \method_exists( Redirection_Helper::class, 'load_alerts_for_sensor' ) && Redirection_Helper::load_alerts_for_sensor() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					__( 'Redirection', 'wp-security-audit-log' ) => array(
 						__( 'Monitor redirection', 'wp-security-audit-log' ) =>

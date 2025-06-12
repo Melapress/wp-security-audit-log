@@ -127,7 +127,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		private static $default_always_disabled_alerts = array( 0000, 0001, 0002, 0003, 0004, 0005 );
+		private static $default_always_disabled_alerts = array( 0000, 0001, 0002, 0003, 0004, 0005, 8825, 8845, 8847, 7013, 7014, 7015, 7016, 7017 );
 
 		/**
 		 * Holds the array with the disabled alerts codes.
@@ -269,6 +269,11 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			$connections = self::get_options_by_prefix( WSAL_CONN_PREFIX, true );
 			foreach ( $connections as $key => &$connection ) {
 				$connection['option_value'] = \maybe_unserialize( $connection['option_value'] );
+				if ( ! is_array( $connection['option_value'] ) ) {
+					$connection = (array) $connection;
+
+					Connection::save_connection( $connection );
+				}
 				if ( 'mysql' !== $connection['option_value']['type'] ) {
 					unset( $connections[ $key ] );
 				}
@@ -282,6 +287,12 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			if ( 'archive' === $type ) {
 				if ( ! empty( $external_connection ) ) {
 					foreach ( $connections as $key => &$connection ) {
+						if ( ! is_array( $connection['option_value'] ) ) {
+							$connection = (array) $connection;
+
+							Connection::save_connection( $connection );
+						}
+
 						if ( $external_connection['option_value'] === $connection['option_value']['name'] ) {
 							unset( $connections[ $key ] );
 						}
@@ -290,6 +301,11 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 				}
 			} elseif ( ! empty( $archive_connection ) ) {
 				foreach ( $connections as $key => &$connection ) {
+					if ( ! is_array( $connection['option_value'] ) ) {
+						$connection = (array) $connection;
+
+						Connection::save_connection( $connection );
+					}
 					if ( $archive_connection['option_value'] === $connection['option_value']['name'] ) {
 						unset( $connections[ $key ] );
 					}
@@ -349,25 +365,6 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		}
 
 		/**
-		 * Returns all the connections currently stored in the options.
-		 *
-		 * @return array
-		 *
-		 * @since 4.4.3
-		 */
-		public static function get_all_connections() {
-			$connections_options = self::get_options_by_prefix( WSAL_CONN_PREFIX, true );
-
-			$connections = array();
-
-			foreach ( $connections_options as $connection ) {
-				$connections[] = \maybe_unserialize( $connection['option_value'] );
-			}
-
-			return $connections;
-		}
-
-		/**
 		 * Returns all the connections currently not in use in mirrors.
 		 *
 		 * @param null|string $current_mirror - If is set, (string), that connection will be kept in the array of the connections.
@@ -377,7 +374,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function get_all_not_used_as_mirrors_connections( $current_mirror = null ) {
-			$connections = self::get_all_connections();
+			$connections = Connection::get_all_connections();
 			$mirrors     = self::get_all_mirrors();
 
 			foreach ( $connections as $key => $connection ) {
@@ -404,7 +401,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @since 4.4.3.2
 		 */
 		public static function get_connection_by_name( $connection_name ) {
-			$connections = self::get_all_connections();
+			$connections = Connection::get_all_connections();
 			foreach ( $connections as $connection ) {
 				if ( $connection['name'] === $connection_name ) {
 					return $connection;
@@ -1027,8 +1024,8 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 
 				if ( ! $is_disabled ) {
 					// If the logging is enabled, we don't need to check mirrors.
-					if ( class_exists( 'WSAL_Extension_Manager' ) ) {
-						if ( class_exists( 'WSAL_Ext_Plugin' ) ) {
+					if ( \class_exists( 'WSAL_Extension_Manager' ) ) {
+						if ( \class_exists( 'WSAL_Ext_Plugin' ) ) {
 							self::$database_logging_enabled = true;
 
 							return self::$database_logging_enabled;
@@ -1579,6 +1576,18 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		}
 
 		/**
+		 * Helper method to get the stored setting to determine if url parameters
+		 * appear in the admin list view. This should always be a bool.
+		 *
+		 * @since 5.4.0
+		 *
+		 * @return bool
+		 */
+		public static function get_url_parameters() {
+			return self::get_boolean_option_value( 'url_parameters', true );
+		}
+
+		/**
 		 * Date format based on WordPress date settings. It can be optionally sanitized to get format compatible with
 		 * JavaScript date and time picker widgets.
 		 *
@@ -1606,8 +1615,8 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 *
 		 * @return string
 		 */
-		public static function get_time_format( $sanitize = false ) {
-			$result = get_option( 'time_format' );
+		public static function get_time_format( $sanitize = false ): string {
+			$result = (string) get_option( 'time_format' );
 			if ( $sanitize ) {
 				$search  = array( 'a', 'A', 'T', ' ' );
 				$replace = array( '', '', '', '' );
@@ -1846,8 +1855,8 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 				Alert_Manager::trigger_event(
 					6052,
 					array(
-						'new_setting'      => 'Delete events older than ' . $new_date,
-						'previous_setting' => 'Keep all data',
+						'new_setting'      => esc_html__( 'Delete events older than ', 'wp-security-audit-log' ) . $new_date,
+						'previous_setting' => esc_html__( 'Keep all data', 'wp-security-audit-log' ),
 					)
 				);
 
@@ -1863,8 +1872,8 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 				Alert_Manager::trigger_event(
 					6052,
 					array(
-						'new_setting'      => 'Keep all data',
-						'previous_setting' => 'Delete events older than ' . $old_period,
+						'new_setting'      => esc_html__( 'Keep all data', 'wp-security-audit-log' ),
+						'previous_setting' => esc_html__( 'Delete events older than ', 'wp-security-audit-log' ) . $old_period,
 					)
 				);
 
@@ -1880,8 +1889,8 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 					Alert_Manager::trigger_event(
 						6052,
 						array(
-							'new_setting'      => 'Delete events older than ' . $new_date,
-							'previous_setting' => 'Delete events older than ' . $old_period,
+							'new_setting'      => esc_html__( 'Delete events older than ', 'wp-security-audit-log' ) . $new_date,
+							'previous_setting' => esc_html__( 'Delete events older than ', 'wp-security-audit-log' ) . $old_period,
 						)
 					);
 				}

@@ -227,9 +227,9 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 			$current_settings = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
 
 			if ( $weekly ) {
-				$disable_if_empty = ! (bool) $current_settings['weekly_send_empty_summary_emails']; // Option to disable if no alerts found.
+				$disable_if_empty = isset( $current_settings['weekly_send_empty_summary_emails'] ) ? ! (bool) $current_settings['weekly_send_empty_summary_emails'] : false; // Option to disable if no alerts found.
 			} else {
-				$disable_if_empty = ! (bool) $current_settings['daily_send_empty_summary_emails']; // Option to disable if no alerts found.
+				$disable_if_empty = isset( $current_settings['daily_send_empty_summary_emails'] ) ? ! (bool) $current_settings['daily_send_empty_summary_emails'] : false; // Option to disable if no alerts found.
 			}
 
 			if ( ! $test ) {
@@ -387,7 +387,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 			$options = array(
 				'id'            => $id,
 				'type'          => 'text',
-				'pattern'       => '([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,4}[,]{0,}){0,}',
+				'pattern'       => '([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,20}[,]{0,}){0,}',
 				'hint'          => esc_html__( 'You can enter multiple email addresses separated by commas. Do not use a space in between the email addresses and commas. For example: support@melapress.com,info@melapress.com', 'wp-security-audit-log' ),
 				'settings_name' => $settings_name,
 			);
@@ -406,10 +406,11 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 		 * @param string $id            - The name of the id of the field.
 		 * @param string $settings_name - The name of the setting to use.
 		 * @param string $name          - The name (title) of the field.
+		 * @param string $hint          - The hint text to show under field.
 		 *
 		 * @since 5.3.0
 		 */
-		public static function phone_settings_array( string $id, string $settings_name, string $name = '' ): array {
+		public static function phone_settings_array( string $id, string $settings_name, string $name = '', string $hint = '' ): array {
 			$options = array(
 				'id'            => $id,
 				'type'          => 'text',
@@ -418,7 +419,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 				'title_attr'    => esc_html__( 'Please use the following format: +16175551212', 'wp-security-audit-log' ),
 				'max_chars'     => 20,
 				'placeholder'   => esc_html__( '+16175551212', 'wp-security-audit-log' ),
-				'hint'          => esc_html__( 'Leave empty if you want to use default one. Format you must use is: +16175551212', 'wp-security-audit-log' ),
+				'hint'          => ( empty( $hint ) ) ? esc_html__( 'Leave empty if you want to use default one. Format you must use is: +16175551212', 'wp-security-audit-log' ) : $hint,
 				'settings_name' => $settings_name,
 			);
 			if ( '' === $name ) {
@@ -456,16 +457,17 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 		 * @param string $id            - The name of the id of the field.
 		 * @param string $settings_name - The name of the setting to use.
 		 * @param string $name          - The name (title) of the field.
+		 * @param string $hint          - The hint text to show under field.
 		 *
 		 * @since 5.3.4
 		 */
-		public static function slack_settings_array( string $id, string $settings_name, string $name = '' ): array {
+		public static function slack_settings_array( string $id, string $settings_name, string $name = '', string $hint = '' ): array {
 			$options = array(
 				'id'            => $id,
 				'type'          => 'text',
 				'max_chars'     => 20,
 				'placeholder'   => esc_html__( 'WSAL notifications', 'wp-security-audit-log' ),
-				'hint'          => esc_html__( 'Leave empty if you want to use default one.', 'wp-security-audit-log' ),
+				'hint'          => ( empty( $hint ) ) ? esc_html__( 'Leave empty if you want to use default one.', 'wp-security-audit-log' ) : $hint,
 				'settings_name' => $settings_name,
 			);
 			if ( '' === $name ) {

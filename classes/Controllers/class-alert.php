@@ -17,9 +17,11 @@ namespace WSAL\Controllers;
 
 use WSAL\Helpers\Validator;
 use WSAL\Helpers\Classes_Helper;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Helpers\Formatters\Alert_Formatter;
 use WSAL\Helpers\Formatters\Formatter_Factory;
+use WSAL\WP_Sensors\WP_Content_Sensor;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -167,7 +169,13 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 						} elseif ( substr( $token, 0, 1 ) === '%' && substr( $token, - 1, 1 ) === '%' ) {
 							// Handle complex expressions.
 							$message_parts[ $i ] = self::get_meta_expression_value( substr( $token, 1, - 1 ), $meta_data );
-							$message_parts[ $i ] = Alert_Formatter::format_meta_expression( $token, $message_parts[ $i ], $configuration, $occurrence_id, $meta_data );
+							$message_parts[ $i ] = Alert_Formatter::format_meta_expression(
+								$token,
+								$message_parts[ $i ],
+								$configuration,
+								$occurrence_id,
+								$meta_data
+							);
 						}
 					}
 
@@ -338,6 +346,33 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 				}
 			}
 
+			if ( isset( $alert['links'] ) && ! empty( $alert['links'] ) && \is_array( $alert['links'] ) && \in_array( '%PostUrl%', $alert['links'] ) && Settings_Helper::get_url_parameters() ) {
+				if ( isset( $meta_data['PostUrl'] ) ) {
+					$return = $meta_data['PostUrl'];
+
+					$return = htmlspecialchars_decode( $return, ENT_QUOTES );
+
+					$processed_url = \wp_parse_url( $return );
+
+					if ( $processed_url && isset( $processed_url['query'] ) ) {
+						$params = array();
+						parse_str( $processed_url['query'], $params );
+
+						if ( ! empty( $params ) ) {
+
+							$return_temp = esc_html__( 'Query params:', 'wp-security-audit-log' );
+							$return      = '';
+							foreach ( $params as $key => $value ) {
+								$return .= $key . '=' . $value . ', ';
+							}
+							$return = rtrim( $return, ', ' );
+							$return = $return_temp . ' ' . $configuration['highlight_start_tag'] . $return . $configuration['highlight_end_tag'] . $configuration['end_of_line'];
+							$result = $return . $result;
+						}
+					}
+				}
+			}
+
 			return $result;
 		}
 
@@ -368,8 +403,14 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 							continue;
 						}
 
-						$link_url   = $link_data;
-						$link_title = $link_data;
+						if ( '%RevisionLink%' === $link_data && 2065 === (int) $alert['code'] ) {
+							$link_url   = self::get_post_revision_link( $meta_data['PostID'], $meta_data['RevisionLink'] );
+							$link_title = self::get_revision_link_title();
+							$link_label = self::get_revision_link_title();
+						} else {
+							$link_url   = $link_data;
+							$link_title = $link_data;
+						}
 					} else {
 						$link_url   = $link_data['url'];
 						$link_title = $link_data['label'];
@@ -419,9 +460,39 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 						);
 					}
 				}
+
+				unset( $link_label );
 			}
 
 			return $result;
+		}
+
+		private static function get_revision_link_title(): string {
+			if ( \defined( 'WP_POST_REVISIONS' ) && ! WP_POST_REVISIONS ) {
+				return esc_html__( 'Revisions are not enabled. Enable revisions to view the content changes. Read more.', 'wp-security-audit-log' );
+			} else {
+				return esc_html__( 'View the content changes', 'wp-security-audit-log' );
+			}
+		}
+
+		/**
+		 * Builds the Post revision link
+		 *
+		 * @param int    $post_id - The Post ID to get the link for.
+		 * @param string $url - The Post URL.
+		 *
+		 * @return string
+		 *
+		 * @since 5.4.0
+		 */
+		private static function get_post_revision_link( $post_id, $url ): string {
+			if ( \defined( 'WP_POST_REVISIONS' ) && ! WP_POST_REVISIONS ) {
+				return 'https://melapress.com/wordpress-revisions-posts-pages/#utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+			} elseif ( '' !== $url ) {
+				return (string) WP_Content_Sensor::get_post_revision( $post_id );
+			} else {
+				return '';
+			}
 		}
 	}
 }

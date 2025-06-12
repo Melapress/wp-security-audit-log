@@ -65,16 +65,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 		public static function init() {
 
 			if ( BBPress_Helper::is_bbpress_active() ) {
-				if ( current_user_can( 'edit_posts' ) ) {
-					add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
+				if ( \current_user_can( 'edit_posts' ) ) {
+					\add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
 				}
-				add_action( 'post_updated', array( __CLASS__, 'check_forum_change' ), 10, 3 );
-				add_action( 'delete_post', array( __CLASS__, 'event_forum_deleted' ), 10, 1 );
-				add_action( 'wp_trash_post', array( __CLASS__, 'event_forum_trashed' ), 10, 1 );
-				add_action( 'untrash_post', array( __CLASS__, 'event_forum_untrashed' ) );
-				add_action( 'create_term', array( __CLASS__, 'check_tags_change' ), 10, 3 );
-				add_action( 'delete_topic-tag', array( __CLASS__, 'event_topic_tag_deleted' ), 10, 4 );
-				add_action( 'wp_update_term_data', array( __CLASS__, 'event_topic_tag_updated' ), 10, 4 );
+				\add_action( 'post_updated', array( __CLASS__, 'check_forum_change' ), 10, 3 );
+				\add_action( 'delete_post', array( __CLASS__, 'event_forum_deleted' ), 10, 1 );
+				\add_action( 'wp_trash_post', array( __CLASS__, 'event_forum_trashed' ), 10, 1 );
+				\add_action( 'untrash_post', array( __CLASS__, 'event_forum_untrashed' ) );
+				\add_action( 'create_term', array( __CLASS__, 'check_tags_change' ), 10, 3 );
+				\add_action( 'delete_topic-tag', array( __CLASS__, 'event_topic_tag_deleted' ), 10, 4 );
+				\add_action( 'wp_update_term_data', array( __CLASS__, 'event_topic_tag_updated' ), 10, 4 );
 			}
 		}
 
@@ -86,31 +86,29 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function early_init() {
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
 				array(
-					'\WSAL\WP_Sensors\Helpers\BBPress_Helper',
+					BBPress_Helper::class,
 					'wsal_bbpress_add_custom_event_objects',
 				),
 				10,
 				2
 			);
-			if ( BBPress_Helper::is_bbpress_active() ) {
-				add_filter(
-					'wsal_togglealerts_obsolete_events',
-					array(
-						'\WSAL\WP_Sensors\Helpers\BBPress_Helper',
-						'wsal_bbpress_extension_togglealerts_obsolete_events',
-					)
-				);
-				add_filter(
-					'wsal_ignored_custom_post_types',
-					array(
-						'\WSAL\WP_Sensors\Helpers\BBPress_Helper',
-						'wsal_bbpress_extension_add_custom_ignored_cpt',
-					)
-				);
-			}
+			\add_filter(
+				'wsal_togglealerts_obsolete_events',
+				array(
+					BBPress_Helper::class,
+					'wsal_bbpress_extension_togglealerts_obsolete_events',
+				)
+			);
+			\add_filter(
+				'wsal_ignored_custom_post_types',
+				array(
+					BBPress_Helper::class,
+					'wsal_bbpress_extension_add_custom_ignored_cpt',
+				)
+			);
 		}
 
 		/**

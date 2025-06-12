@@ -158,10 +158,10 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 					 * That is split only for clarity
 					 */
 					if ( false === $disabled_alerts ) {
-						WP_Helper::set_global_option( 'disabled-alerts', $always_disabled_alerts );
+						Settings_Helper::set_disabled_alerts( $always_disabled_alerts );
 					} elseif ( $disabled_alerts !== $always_disabled_alerts ) {
 						$disabled_alerts = array_merge( $disabled_alerts, Settings_Helper::get_default_disabled_alerts() );
-						WP_Helper::update_global_option( 'disabled-alerts', $disabled_alerts );
+						Settings_Helper::set_disabled_alerts( $disabled_alerts );
 					}
 				} elseif ( false === $migration_started ) {
 

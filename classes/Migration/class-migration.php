@@ -29,8 +29,6 @@ use WSAL\Entities\Generated_Reports_Entity;
 use WSAL\Entities\Custom_Notifications_Entity;
 use WSAL\Reports\Controllers\Statistic_Reports;
 
-use function Crontrol\Event\get;
-
 /**
  * Migration class
  */
@@ -125,9 +123,9 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			 * That is split only for clarity
 			 */
 			if ( false === $disabled_alerts ) {
-				WP_Helper::set_global_option( 'disabled-alerts', $always_disabled_alerts );
+				Settings_Helper::set_disabled_alerts( $always_disabled_alerts );
 			} elseif ( $disabled_alerts !== $always_disabled_alerts ) {
-				WP_Helper::update_global_option( 'disabled-alerts', $disabled_alerts );
+				Settings_Helper::set_disabled_alerts( $disabled_alerts );
 			}
 
 			self::remove_notice( 'wsal-notice-wsal-privacy-notice-3.2' );
@@ -190,7 +188,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			// phpcs:disable
 			// phpcs:enable
 
-			if ( class_exists( '\WSAL_Extension_Manager' ) ) {
+			if ( \class_exists( '\WSAL_Extension_Manager' ) ) {
 				\WSAL_Extension_Manager::include_extension( 'external-db' );
 
 				// Delete cron jobs related to mirror scheduling.
@@ -259,11 +257,11 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 			// If AWS SDK is not available and an AWS CLoudWatch connection is present, let's create
 			// a notice to nudge the user.
-			if ( ! class_exists( '\Aws\CloudWatchLogs\CloudWatchLogsClient' ) && ( ! defined( 'WSAL_LOAD_AWS_SDK' ) || ! \WSAL_LOAD_AWS_SDK ) ) {
+			if ( ! \class_exists( '\Aws\CloudWatchLogs\CloudWatchLogsClient' ) && ( ! defined( 'WSAL_LOAD_AWS_SDK' ) || ! \WSAL_LOAD_AWS_SDK ) ) {
 
-				if ( class_exists( '\WSAL\Extensions\ExternalDB\Mirrors\WSAL_Ext_Mirrors_AWSCloudWatchConnection' ) ) {
+				if ( \class_exists( '\WSAL\Extensions\ExternalDB\Mirrors\WSAL_Ext_Mirrors_AWSCloudWatchConnection' ) ) {
 
-					$connections = Settings_Helper::get_all_connections();
+					$connections = Connection::get_all_connections();
 					if ( ! empty( $connections ) ) {
 						foreach ( $connections as $connection ) {
 							if ( \WSAL\Extensions\ExternalDB\Mirrors\WSAL_Ext_Mirrors_AWSCloudWatchConnection::get_type() === $connection['type'] ) {
@@ -420,7 +418,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			}
 
 			// Extension manager will be available only if the license is already active.
-			if ( class_exists( '\WSAL_Extension_Manager' ) ) {
+			if ( \class_exists( '\WSAL_Extension_Manager' ) ) {
 				if ( ! \WSAL_Extension_Manager::is_messaging_available() || ! \WSAL_Extension_Manager::is_mirroring_available() ) {
 					// Check if SMS notifications or any external mirrors are setup + force plugin to show a notice.
 					$mirrors_in_use = false;
@@ -430,6 +428,13 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 					$notifications_in_use = false;
 
 					global $wpdb;
+
+					if ( ! \defined( 'WSAL_OPT_PREFIX' ) ) {
+						/**
+						 * Holds the option prefix
+						 */
+						define( 'WSAL_OPT_PREFIX', 'notification-' );
+					}
 
 					$opt_prefix     = WSAL_PREFIX . WSAL_OPT_PREFIX;
 					$prepared_query = $wpdb->prepare( // phpcs:ignore
@@ -464,9 +469,9 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			 * Premium or not does not matter. User can had premium but in time of the upgrade, their license could be expired,
 			 * that does not mean that they will never switch back to the premium version.
 			 */
-			$table_exists = \WSAL\Entities\Occurrences_Entity::check_table_exists( $wpdb->base_prefix . 'wsal_sessions' );
+			$table_exists = Occurrences_Entity::check_table_exists( $wpdb->base_prefix . 'wsal_sessions' );
 			if ( $table_exists ) {
-				$column_exists = \WSAL\Entities\Occurrences_Entity::check_column(
+				$column_exists = Occurrences_Entity::check_column(
 					$wpdb->base_prefix . 'wsal_sessions',
 					'session_token',
 					'varchar( 255 )'
@@ -480,26 +485,26 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 				}
 			}
 
-			\WSAL\Entities\Occurrences_Entity::destroy_connection();
+			Occurrences_Entity::destroy_connection();
 
 			// First check if the table exists, if not then we can execute the migration process.
-			if ( ! \WSAL\Entities\Occurrences_Entity::check_table_exists() ) {
-				\WSAL\Entities\Occurrences_Entity::create_table();
+			if ( ! Occurrences_Entity::check_table_exists() ) {
+				Occurrences_Entity::create_table();
 				// Remove metatdata table if one exists and recreate it.
 				Metadata_Entity::drop_table();
 				Metadata_Entity::create_table();
 			} else {
 
 				// If one of the new columns exists there is no need to alter the table.
-				$column_exists = \WSAL\Entities\Occurrences_Entity::check_column(
-					\WSAL\Entities\Occurrences_Entity::get_table_name(),
+				$column_exists = Occurrences_Entity::check_column(
+					Occurrences_Entity::get_table_name(),
 					'client_ip',
 					'varchar( 255 )'
 				);
 
 				if ( ! $column_exists ) {
-					$upgrade_sql = \WSAL\Entities\Occurrences_Entity::get_upgrade_query();
-					\WSAL\Entities\Occurrences_Entity::get_connection()->query( $upgrade_sql );
+					$upgrade_sql = Occurrences_Entity::get_upgrade_query();
+					Occurrences_Entity::get_connection()->query( $upgrade_sql );
 
 					$connection = WP_Helper::get_global_option( 'adapter-connection' );
 					if ( empty( $connection ) ) {
@@ -528,27 +533,27 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			// Archive is in use.
 			$connection = WP_Helper::get_global_option( 'archive-connection' );
 			if ( ! empty( $connection ) ) {
-				\WSAL\Entities\Occurrences_Entity::set_connection(
+				Occurrences_Entity::set_connection(
 					Connection::get_connection( $connection )
 				);
 
 				// First check if the table exists, if not then we can execute the migration process.
-				if ( ! \WSAL\Entities\Occurrences_Entity::check_table_exists() ) {
-					\WSAL\Entities\Occurrences_Entity::create_table();
+				if ( ! Occurrences_Entity::check_table_exists() ) {
+					Occurrences_Entity::create_table();
 					// Remove metatdata table if one exists and recreate it.
 					Metadata_Entity::drop_table();
 					Metadata_Entity::create_table();
 				} else {
 
 					// If one of the new columns exists there is no need to alter the table.
-					$column_exists = \WSAL\Entities\Occurrences_Entity::check_column(
-						\WSAL\Entities\Occurrences_Entity::get_table_name(),
+					$column_exists = Occurrences_Entity::check_column(
+						Occurrences_Entity::get_table_name(),
 						'client_ip',
 						'varchar( 255 )'
 					);
 					if ( ! $column_exists ) {
-						$upgrade_sql = \WSAL\Entities\Occurrences_Entity::get_upgrade_query();
-						\WSAL\Entities\Occurrences_Entity::get_connection()->query( $upgrade_sql );
+						$upgrade_sql = Occurrences_Entity::get_upgrade_query();
+						Occurrences_Entity::get_connection()->query( $upgrade_sql );
 
 						// Create a background job to migrate the metadata.
 						$job_info = array(
@@ -594,14 +599,14 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			 * Premium or not does not matter. User can had premium but in time of the upgrade, their license could be expired,
 			 * that does not mean that they will never switch back to the premium version.
 			 */
-			$table_exists = \WSAL\Entities\Occurrences_Entity::check_table_exists( $wpdb->base_prefix . 'wsal_sessions' );
+			$table_exists = Occurrences_Entity::check_table_exists( $wpdb->base_prefix . 'wsal_sessions' );
 			if ( $table_exists ) {
-				$column_exists    = \WSAL\Entities\Occurrences_Entity::check_column(
+				$column_exists    = Occurrences_Entity::check_column(
 					$wpdb->base_prefix . 'wsal_sessions',
 					'sites',
 					'longtext'
 				);
-				$column_exists_id = \WSAL\Entities\Occurrences_Entity::check_column(
+				$column_exists_id = Occurrences_Entity::check_column(
 					$wpdb->base_prefix . 'wsal_sessions',
 					'id',
 					'bigint'
@@ -612,7 +617,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 					$wpdb->query( $alter_query ); // phpcs:ignore
 
-					if ( class_exists( '\WSAL\Adapter\User_Sessions' ) ) {
+					if ( \class_exists( '\WSAL\Adapter\User_Sessions' ) ) {
 						\WSAL\Adapter\User_Sessions::create_table();
 					}
 				}
@@ -633,7 +638,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			// phpcs:disable
 			// phpcs:enable
 
-			if ( class_exists( '\WSAL\Loggers\WSAL_Ext_MirrorLogger' ) && method_exists( '\WSAL\Helpers\Settings_Helper', 'get_working_dir_path_static' ) ) {
+			if ( \class_exists( '\WSAL\Loggers\WSAL_Ext_MirrorLogger' ) && method_exists( '\WSAL\Helpers\Settings_Helper', 'get_working_dir_path_static' ) ) {
 
 				$working_dir_path = Settings_Helper::get_working_dir_path_static();
 
@@ -670,7 +675,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 */
 		protected static function migrate_up_to_4500() {
 			Metadata_Entity::create_indexes();
-			\WSAL\Entities\Occurrences_Entity::create_indexes();
+			Occurrences_Entity::create_indexes();
 		}
 
 		/**
@@ -753,7 +758,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 			self::migrate_users();
 
-			if ( \class_exists( Generated_Reports_Entity::class, false ) ) {
+			if ( \class_exists( Generated_Reports_Entity::class ) ) {
 				/**
 				 * Migrate generated reports - if there are any.
 				 */
@@ -1107,7 +1112,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 * @since 5.3.4
 		 */
 		public static function migrate_up_to_5340() {
-			$disabled_alerts = Settings_Helper::get_option_value( 'disabled-alerts', array() );
+			$disabled_alerts = (array) Settings_Helper::get_option_value( 'disabled-alerts', array() );
 
 			$disabled_alerts[] = 6066;
 			$disabled_alerts[] = 6067;
@@ -1119,9 +1124,9 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 			$disabled_alerts = \array_unique( $disabled_alerts );
 
-			Settings_Helper::set_option_value( 'disabled-alerts', $disabled_alerts );
+			Settings_Helper::set_disabled_alerts( $disabled_alerts );
 
-			if ( \class_exists( '\WSAL\Entities\Custom_Notifications_Entity', false ) ) {
+			if ( \class_exists( '\WSAL\Entities\Custom_Notifications_Entity' ) && \method_exists( Custom_Notifications_Entity::class, 'get_upgrade_query_slack_template' ) ) {
 
 				// If one of the new columns exists there is no need to alter the table.
 				$column_exists = Custom_Notifications_Entity::check_column(
@@ -1131,7 +1136,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 				);
 
 				if ( ! $column_exists ) {
-					$upgrade_sql = Custom_Notifications_Entity::get_upgrade_query();
+					$upgrade_sql = Custom_Notifications_Entity::get_upgrade_query_slack_template();
 					Custom_Notifications_Entity::get_connection()->query( $upgrade_sql );
 				}
 			}
@@ -1142,6 +1147,92 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 				$settings['notification_events_included']                   = true;
 				$settings['notification_summary_number_of_events_included'] = 10;
 				Notifications::set_global_notifications_setting( $settings );
+			}
+		}
+
+		/**
+		 * Migration for version upto 5.3.4.1
+		 *
+		 * Migrates notification settings
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.4.1
+		 */
+		public static function migrate_up_to_5341() {
+			self::remove_old_data();
+		}
+
+		/**
+		 * Migration for version upto 5.4.0
+		 *
+		 * Migrates notification settings
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.4.0
+		 */
+		public static function migrate_up_to_5400() {
+
+			if ( \class_exists( '\WSAL\Entities\Custom_Notifications_Entity' ) && \method_exists( Custom_Notifications_Entity::class, 'get_upgrade_query_settings_field' ) ) {
+				// If one of the new columns exists there is no need to alter the table.
+				$column_exists = Custom_Notifications_Entity::check_column(
+					Custom_Notifications_Entity::get_table_name(),
+					'notification_settings',
+					'longtext'
+				);
+
+				if ( ! $column_exists ) {
+					$upgrade_sql = Custom_Notifications_Entity::get_upgrade_query_settings_field();
+					Custom_Notifications_Entity::get_connection()->query( $upgrade_sql );
+				}
+			}
+		}
+
+		/**
+		 * Migration for version upto 5.3.5.0
+		 *
+		 * Migrates notification settings
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.5
+		 */
+		public static function migrate_up_to_5350() {
+			self::remove_old_data();
+		}
+
+		/**
+		 * Remove some very old data from the database.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.4.1
+		 */
+		public static function remove_old_data(): void {
+			WP_Helper::delete_global_option( 'admin-blocking-plugins-support' );
+			WP_Helper::delete_global_option( 'archiving-date-e' );
+			WP_Helper::delete_global_option( 'wsal_columns' );
+			WP_Helper::delete_global_option( 'filter-internal-ip' );
+			WP_Helper::delete_global_option( 'log-404-limit' );
+			WP_Helper::delete_global_option( 'log-visitor-404-limit' );
+			WP_Helper::delete_global_option( 'scan-file-changes' );
+			WP_Helper::delete_global_option( 'site_content' );
+			WP_Helper::delete_global_option( 'usersessions_policy_administrator' );
+
+			$connections = Connection::get_all_connections();
+			foreach ( $connections as $connection ) {
+				if ( $connection instanceof \stdClass ) {
+					$connection = (array) $connection;
+
+					Connection::save_connection( $connection );
+				}
 			}
 		}
 

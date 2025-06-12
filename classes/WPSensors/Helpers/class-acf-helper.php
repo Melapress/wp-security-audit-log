@@ -41,6 +41,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\ACF_Helper' ) ) {
 		private static $plugin_active = null;
 
 		/**
+		 * Class cache to store the state of the plugin for sensors.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.4.1
+		 */
+		private static $plugin_active_for_sensors = null;
+
+		/**
 		 * Register a custom event object within WSAL.
 		 *
 		 * @param array $objects array of objects current registered within WSAL.
@@ -90,10 +99,35 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\ACF_Helper' ) ) {
 		 */
 		public static function is_acf_active() {
 			if ( null === self::$plugin_active ) {
-				self::$plugin_active = WP_Helper::is_plugin_active( 'advanced-custom-fields/acf.php' );
+				// self::$plugin_active = WP_Helper::is_plugin_active( 'advanced-custom-fields/acf.php' );
+
+				// if ( WP_Helper::is_multisite() ) {
+					// Check if the plugin is active on the main site.
+				if ( \class_exists( '\ACF', \false ) ) {
+					self::$plugin_active = true;
+				} else {
+					self::$plugin_active = false;
+				}
+				// }
 			}
 
 			return self::$plugin_active;
 		}
+
+		/**
+		 * Shall we load custom alerts for sensors?
+		 *
+		 * @return boolean
+		 *
+		 * @since 5.3.4.1
+		 */
+		public static function load_alerts_for_sensor(): bool {
+			if ( null === self::$plugin_active_for_sensors ) {
+				self::$plugin_active_for_sensors = ( WP_Helper::is_plugin_active( 'advanced-custom-fields/acf.php' ) || WP_Helper::is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) );
+			}
+
+			return self::$plugin_active_for_sensors;
+		}
+
 	}
 }

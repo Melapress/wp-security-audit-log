@@ -265,7 +265,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 						*/
 						function () {
 							return ! Alert_Manager::will_or_has_triggered( 2131 )
-								&& ! Alert_Manager::will_or_has_triggered( 2132 );
+								&& ! Alert_Manager::will_or_has_triggered( 2132 )
+								&& ! Alert_Manager::will_or_has_triggered( 10702 )
+								&& ! Alert_Manager::will_or_has_triggered( 10703 )
+								&& ! Alert_Manager::will_or_has_triggered( 10704 )
+								&& ! Alert_Manager::will_or_has_triggered( 10705 )
+								&& ! Alert_Manager::will_or_has_triggered( 10714 );
 						}
 					);
 				}
@@ -671,21 +676,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 			}
 
 			foreach ( $custom_fields as $field ) {
-				if ( false !== strpos( $field, '*' ) ) {
+				if ( false !== \mb_strpos( $field, '*' ) ) {
 					// Wildcard str[any_character] when you enter (str*).
-					if ( '*' === substr( $field, - 1 ) ) {
-						$field = rtrim( $field, '*' );
-						if ( preg_match( "/^$field/", $custom ) ) {
-							return true;
-						}
-					}
 
-					// Wildcard [any_character]str when you enter (*str).
-					if ( '*' === substr( $field, 0, 1 ) ) {
-						$field = ltrim( $field, '*' );
-						if ( preg_match( "/$field$/", $custom ) ) {
-							return true;
-						}
+					$field = str_replace( '*', '.*', $field );
+
+					if ( preg_match( "/^$field/", $custom ) ) {
+						return true;
 					}
 				}
 			}

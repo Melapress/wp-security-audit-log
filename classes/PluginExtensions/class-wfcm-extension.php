@@ -123,7 +123,7 @@ if ( ! class_exists( '\WSAL\PluginExtensions\WFCM_Extension' ) ) {
 
 			$media_check = trailingslashit( WSAL_BASE_URL ) . 'img/mails/daily-notification/alert-icon.png';
 
-			if ( class_exists( 'Website_File_Changes_Monitor' ) ) {
+			if ( \class_exists( 'Website_File_Changes_Monitor' ) ) {
 				// File changes.
 				if ( ! empty( $files_added ) || ! empty( $files_modified ) || ! empty( $files_deleted ) ) {
 					$body .= '<!-- Website File Changes Start --><tr><td><table width="100%" cellpadding="0" cellspacing="0" border="0"><!-- Title Start --><tr><td style="font-family: Verdana, sans-serif; font-weight: bold; font-size: 20px; line-height: 28px; color: #404040; text-align: left; padding-bottom: 13px;">Website File Changes</td></tr><!-- Title End --><!-- Desc Start --><!-- Table Border Start --><tr><td style="padding-bottom: 40px;"><table width="100%" cellpadding="0" cellspacing="0" border="0">';

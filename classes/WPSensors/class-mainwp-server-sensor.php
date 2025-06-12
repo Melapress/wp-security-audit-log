@@ -19,6 +19,8 @@ use WSAL\MainWP\MainWP_Helper;
 use WSAL\MainWP\MainWP_Settings;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
+use MainWP\Dashboard\MainWP_DB_Client;
+use WSAL\WP_Sensors\Helpers\MainWP_Server_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -79,6 +81,42 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		private static $current_user = null;
 
 		/**
+		 * Class cache for old client data.
+		 *
+		 * @var \StdClass|null
+		 *
+		 * @since 5.4.0
+		 */
+		private static $old_client_data = null;
+
+		/**
+		 * Class cache for old sites.
+		 *
+		 * @var array
+		 *
+		 * @since 5.4.0
+		 */
+		private static $old_sites = null;
+
+		/**
+		 * Class cache for new sites.
+		 *
+		 * @var array
+		 *
+		 * @since 5.4.0
+		 */
+		private static $new_sites = null;
+
+		/**
+		 * Class cache for old REST API keys.
+		 *
+		 * @var array
+		 *
+		 * @since 5.4.0
+		 */
+		private static $old_api_keys = array();
+
+		/**
 		 * Hook Events
 		 *
 		 * Listening to events using hooks.
@@ -99,7 +137,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 				\add_action( 'activated_plugin', array( __CLASS__, 'mwp_extension_activated' ), 10, 2 );
 				\add_action( 'deactivated_plugin', array( __CLASS__, 'mwp_extension_deactivated' ), 10, 2 );
 				\add_action( 'deleted_plugin', array( __CLASS__, 'mwp_extension_deleted' ), 10, 2 );
-				\add_filter( 'upgrader_post_install', array( __CLASS__, 'mwp_extension_installed' ), 10, 3 );
+				\add_filter( 'upgrader_process_complete', array( __CLASS__, 'mwp_extension_installed' ), 10, 2 );
+
+				\add_action( 'mainwp_client_deleted', array( __CLASS__, 'client_deleted' ) );
+				\add_action( 'mainwp_client_suspend', array( __CLASS__, 'client_suspended' ), 10, 2 );
+				\add_action( 'mainwp_client_updated', array( __CLASS__, 'client_updated' ), 10, 2 );
+
+				\add_action( 'wp_ajax_mainwp_clients_add_client', array( __CLASS__, 'store_old_cliet_data' ), -1 );
 
 				// Check if Advanced Uptime Monitor Extension is active.
 				if ( WP_Helper::is_plugin_active( 'advanced-uptime-monitor-extension/advanced-uptime-monitor-extension.php' ) ) {
@@ -120,32 +164,31 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function early_init() {
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
-				array( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper', 'wsal_mainwp_server_add_custom_event_objects' ),
+				array( MainWP_Server_Helper::class, 'wsal_mainwp_server_add_custom_event_objects' ),
 				10,
 				2
 			);
-			if ( MainWP_Addon::check_mainwp_plugin_active() ) {
-				add_filter(
-					'wsal_event_type_data',
-					array( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper', 'wsal_mainwp_server_add_custom_event_type' ),
-					10,
-					2
-				);
-				add_filter(
-					'wsal_database_site_id_value',
-					array( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper', 'wsal_mainwp_server_event_store_proper_site_id' ),
-					10,
-					2
-				);
-				add_filter(
-					'wsal_get_site_details',
-					array( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper', 'wsal_mainwp_server_check_site_id_and_get_info' ),
-					10,
-					3
-				);
-			}
+
+			\add_filter(
+				'wsal_event_type_data',
+				array( MainWP_Server_Helper::class, 'wsal_mainwp_server_add_custom_event_type' ),
+				10,
+				2
+			);
+			\add_filter(
+				'wsal_database_site_id_value',
+				array( MainWP_Server_Helper::class, 'wsal_mainwp_server_event_store_proper_site_id' ),
+				10,
+				2
+			);
+			\add_filter(
+				'wsal_get_site_details',
+				array( MainWP_Server_Helper::class, 'wsal_mainwp_server_check_site_id_and_get_info' ),
+				10,
+				3
+			);
 		}
 
 		/**
@@ -365,14 +408,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		/**
 		 * MainWP Extension Activated
 		 *
-		 * @param bool  $response   Installation response.
-		 * @param array $hook_extra Extra arguments passed to hooked filters.
-		 * @param array $result     Installation result data.
+		 * @param \Plugin_Upgrader $plugin_upgrader_instance Plugin_Upgrader instance. In other contexts, $this, might.
 		 *
 		 * @since 5.0.0
 		 */
-		public static function mwp_extension_installed( $response, $hook_extra, $result ) {
-			self::extension_log_event( 7705, $result['destination_name'] );
+		public static function mwp_extension_installed( $plugin_upgrader_instance ) {
+			self::extension_log_event( 7705, $plugin_upgrader_instance, $plugin_upgrader_instance->result );
 		}
 
 		/**
@@ -383,7 +424,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function mwp_extension_activated( $extension ) {
-			self::extension_log_event( 7706, $extension );
+			self::extension_log_other_event( 7706, $extension );
 		}
 
 		/**
@@ -394,7 +435,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function mwp_extension_deactivated( $extension ) {
-			self::extension_log_event( 7707, $extension );
+			self::extension_log_other_event( 7707, $extension );
 		}
 
 		/**
@@ -405,7 +446,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function mwp_extension_deleted( $extension ) {
-			self::extension_log_event( 7708, $extension );
+			self::extension_log_other_event( 7708, $extension );
 		}
 
 		/**
@@ -416,7 +457,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		private static function extension_log_event( $event, $extension ) {
+		private static function extension_log_other_event( $event, $extension ) {
 			$extension_dir = explode( '/', $extension );
 			$extension_dir = isset( $extension_dir[0] ) ? $extension_dir[0] : false;
 
@@ -449,7 +490,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 				} else {
 					// Get extension data.
 					$plugin_file = trailingslashit( WP_PLUGIN_DIR ) . $extension;
-					if ( \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+					if ( \is_wp_error( \validate_plugin( $extension ) ) ) {
 						return;
 					}
 					$plugin_data = get_plugin_data( $plugin_file );
@@ -463,6 +504,86 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 							'Author'          => $plugin_data['Author'],
 							'Network'         => $plugin_data['Network'] ? 'True' : 'False',
 							'plugin_dir_path' => $plugin_file,
+						),
+					);
+				}
+
+				// Log the event.
+				Alert_Manager::trigger_event( $event, $event_data );
+			}
+		}
+
+		/**
+		 * Add Extension Event
+		 *
+		 * @param string           $event     – Event ID.
+		 * @param \Plugin_Upgrader $plugin_upgrader_instance Plugin_Upgrader instance. In other contexts, $this, might.
+		 * @param string           $extension – Name of extension.
+		 *
+		 * @since 5.0.0
+		 */
+		private static function extension_log_event( $event, $plugin_upgrader_instance, $extension ) {
+			// $extension_dir = explode( '/', $extension );
+
+			if ( ! \is_array( $extension ) || ! \key_exists( 'destination_name', $extension ) ) {
+				return;
+			}
+			$extension_dir = $extension['destination_name'];
+
+			if ( ! $extension_dir ) {
+				return;
+			}
+
+			// Get MainWP extensions data.
+			$mwp_extensions = \MainWP\Dashboard\MainWP_Extensions_View::get_available_extensions( 'all' );
+			$extension_ids  = array_keys( $mwp_extensions );
+			if ( ! in_array( $extension_dir, $extension_ids, true ) ) {
+				return;
+			}
+
+			if ( $event ) {
+				// Event data.
+				$event_data = array();
+
+				// Ensure to pass with leading slash.
+				$plugin = get_plugins( '/' . $extension_dir );
+				if ( empty( $plugin ) ) {
+					return false;
+				}
+
+				// Assume the requested plugin is the first in the list.
+				$pluginfiles = array_keys( $plugin );
+
+				$plugin = $extension_dir . '/' . $pluginfiles[0];
+
+				$plugin_path = \WP_PLUGIN_DIR . \DIRECTORY_SEPARATOR . $plugin;
+
+				if ( 7708 === $event ) {
+					// Get extension data.
+					$plugin_file = trailingslashit( WP_PLUGIN_DIR ) . $extension;
+					$event_data  = array(
+						'mainwp_dash'    => true,
+						'extension_name' => isset( $mwp_extensions[ $extension_dir ]['title'] ) ? $mwp_extensions[ $extension_dir ]['title'] : false,
+						'PluginFile'     => $plugin_file,
+						'PluginData'     => (object) array(
+							'Name' => isset( $mwp_extensions[ $extension_dir ]['title'] ) ? $mwp_extensions[ $extension_dir ]['title'] : false,
+						),
+					);
+				} else {
+
+					// Get extension data.
+
+					$plugin_data = get_plugin_data( $plugin_path );
+					$event_data  = array(
+						'mainwp_dash'    => true,
+						'extension_name' => isset( $mwp_extensions[ $extension_dir ]['title'] ) ? $mwp_extensions[ $extension_dir ]['title'] : false,
+						'Plugin'         => (object) array(
+							'Name'            => $plugin_data['Name'],
+							'PluginURI'       => $plugin_data['PluginURI'],
+							'Version'         => $plugin_data['Version'],
+							'Author'          => $plugin_data['Author'],
+							'Network'         => $plugin_data['Network'] ? 'True' : 'False',
+							'plugin_dir_path' => $plugin_path,
 						),
 					);
 				}
@@ -579,6 +700,211 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 			Alert_Manager::trigger_event(
 				7754,
 				array( 'mainwp_dash' => true )
+			);
+		}
+
+		/**
+		 * Called when a client is deleted.
+		 *
+		 * @param \StdClass $current - The object containing the current client data.
+		 *
+		 * @return void
+		 *
+		 * @since 5.4.0
+		 */
+		public static function client_deleted( $current ) {
+			$alert_id = 7721;
+
+			$data = array(
+				'ClientName'  => $current->name,
+				'ClientEmail' => ( isset( $current->client_email ) && ! empty( $current->client_email ) ) ? $current->client_email : __( 'not set', 'wp-security-audit-log' ),
+			);
+
+			Alert_Manager::trigger_event(
+				$alert_id,
+				$data,
+			);
+		}
+
+		/**
+		 * Called when client is updated.
+		 *
+		 * @param \StdClass $current - The object containing the current client data.
+		 * @param bool      $add_new - Set to true when a new client is added. Otherwise the event is triggered when a client is updated.
+		 *
+		 * @return void
+		 *
+		 * @since 5.4.0
+		 */
+		public static function client_updated( $current, $add_new ) {
+
+			$event_type = 'updated';
+
+			if ( $add_new ) {
+				$alert_id   = 7718;
+				$event_type = 'created';
+			}
+
+			$data = array(
+				'ClientName'   => $current->name,
+				'ClientEmail'  => $current->client_email,
+				'EventType'    => $event_type,
+				'ClientStatus' => self::get_client_status( $current->suspended ),
+				'ClientUrl'    => self::get_client_url( (int) $current->client_id ),
+			);
+
+			if ( ! $add_new ) {
+				$data['OldEmail'] = '';
+				if ( null !== self::$old_client_data && \property_exists( self::$old_client_data, 'client_email' ) ) {
+					$data['OldEmail'] = self::$old_client_data->client_email;
+				}
+
+				if ( $current->client_email !== $data['OldEmail'] ) {
+					$alert_id = 7719;
+				}
+			}
+
+			if ( isset( $alert_id ) ) {
+				Alert_Manager::trigger_event(
+					$alert_id,
+					$data,
+				);
+			}
+
+			if ( ! $add_new ) {
+
+				if ( null !== self::$old_client_data && \property_exists( self::$old_client_data, 'suspended' ) ) {
+
+					if ( $current->suspended !== self::$old_client_data->suspended ) {
+						$alert_id          = 7720;
+						$data['OldStatus'] = self::get_client_status( self::$old_client_data->suspended );
+						Alert_Manager::trigger_event(
+							$alert_id,
+							$data,
+						);
+					}
+				}
+			}
+
+			if ( ! $add_new ) {
+				$old_sites = self::$old_sites;
+				$new_sites = self::$new_sites;
+
+				if ( ! empty( $old_sites ) || ! empty( $new_sites ) ) {
+					$added_sites   = array_diff( $new_sites, $old_sites );
+					$removed_sites = array_diff( $old_sites, $new_sites );
+
+					if ( ! empty( $added_sites ) ) {
+						foreach ( $added_sites as $key => $site_id ) {
+							$site = MainWP_Settings::get_mwp_site_by( (string) $site_id, 'id' );
+							if ( false !== $site ) {
+								$data['AddedSite'] = $site['url'];
+
+								Alert_Manager::trigger_event(
+									7722,
+									$data,
+								);
+							}
+						}
+					}
+
+					if ( ! empty( $removed_sites ) ) {
+						foreach ( $removed_sites as $key => $site_id ) {
+							$site = MainWP_Settings::get_mwp_site_by( (string) $site_id, 'id' );
+							if ( false !== $site ) {
+								$data['RemovedSite'] = $site['url'];
+								Alert_Manager::trigger_event(
+									7723,
+									$data,
+								);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/**
+		 * Retusns the client status based on the status code.
+		 *
+		 * @param int $status - The integer representation of the client status.
+		 *
+		 * @return string
+		 *
+		 * @since 5.4.0
+		 */
+		private static function get_client_status( $status ) {
+			switch ( $status ) {
+				default:
+				case 0:
+					return __( 'Active', 'wp-security-audit-log' );
+				case 1:
+					return __( 'Suspended', 'wp-security-audit-log' );
+				case 2:
+					return __( 'Lead', 'wp-security-audit-log' );
+				case 3:
+					return __( 'Lost', 'wp-security-audit-log' );
+			}
+		}
+
+		/**
+		 * Called when a client is suspended.
+		 *
+		 * @param \StdClass $current - The object containing the current client data.
+		 * @param [type]    $suspended
+		 *
+		 * @return void
+		 *
+		 * @since 5.4.0
+		 */
+		public static function client_suspended( $current, $suspended ) {
+		}
+
+		/**
+		 * Tries to extract the old client data from the request.
+		 *
+		 * @return void
+		 *
+		 * @since 5.4.0
+		 */
+		public static function store_old_cliet_data() {
+			$selected_sites = ( isset( $_POST['selected_sites'] ) && is_array( $_POST['selected_sites'] ) ) ? array_map( 'sanitize_text_field', \wp_unslash( $_POST['selected_sites'] ) ) : array(); //phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$client_fields  = isset( $_POST['client_fields'] ) ? \wp_unslash( $_POST['client_fields'] ) : array(); //phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			$client_id = isset( $client_fields['client_id'] ) ? intval( $client_fields['client_id'] ) : 0;
+
+			self::$new_sites = array_unique( $selected_sites );
+
+			self::$new_sites = \array_map(
+				function ( $site ) {
+					return (int) $site;
+				},
+				self::$new_sites
+			);
+
+			if ( $client_id ) {
+				self::$old_client_data = MainWP_DB_Client::instance()->get_wp_client_by( 'client_id', $client_id );
+
+				self::$old_sites = \array_keys( MainWP_DB_Client::instance()->get_websites_by_client_ids( array( $client_id ) ) );
+			}
+		}
+
+		/**
+		 * Builds the client URL.
+		 *
+		 * @param int $client_id - The client ID.
+		 *
+		 * @return string
+		 *
+		 * @since 5.4.0
+		 */
+		public static function get_client_url( int $client_id ): string {
+			return \add_query_arg(
+				array(
+					'page'      => 'ClientAddNew',
+					'client_id' => $client_id,
+				),
+				\network_admin_url( 'admin.php' )
 			);
 		}
 	}

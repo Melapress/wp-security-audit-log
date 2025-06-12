@@ -31,6 +31,24 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\WP_2FA_Helper' ) ) {
 	class WP_2FA_Helper {
 
 		/**
+		 * Class cache to store the state of the plugin.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.4.1
+		 */
+		private static $plugin_active = null;
+
+		/**
+		 * Class cache to store the state of the plugin for sensors.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.4.1
+		 */
+		private static $plugin_active_for_sensors = null;
+
+		/**
 		 * Adds new custom event objects for our plugin
 		 *
 		 * @method add_custom_event_objects
@@ -59,7 +77,36 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\WP_2FA_Helper' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function is_wp2fa_active() {
-			return ( WP_Helper::is_plugin_active( 'wp-2fa/wp-2fa.php' ) || WP_Helper::is_plugin_active( 'wp-2fa-premium/wp-2fa.php' ) );
+			if ( null === self::$plugin_active ) {
+				// self::$plugin_active = ( WP_Helper::is_plugin_active( 'wp-2fa/wp-2fa.php' ) || WP_Helper::is_plugin_active( 'wp-2fa-premium/wp-2fa.php' ) );
+
+				// if ( WP_Helper::is_multisite() ) {
+					// Check if WooCommerce is active on the current site.
+
+				if ( class_exists( '\WP2FA\WP2FA', \false ) ) {
+					self::$plugin_active = true;
+				} else {
+					self::$plugin_active = false;
+				}
+				// }
+			}
+
+			return self::$plugin_active;
+		}
+
+		/**
+		 * Shall we load custom alerts for sensors?
+		 *
+		 * @return boolean
+		 *
+		 * @since 5.3.4.1
+		 */
+		public static function load_alerts_for_sensor(): bool {
+			if ( null === self::$plugin_active_for_sensors ) {
+				self::$plugin_active_for_sensors = ( WP_Helper::is_plugin_active( 'wp-2fa/wp-2fa.php' ) || WP_Helper::is_plugin_active( 'wp-2fa-premium/wp-2fa.php' ) );
+			}
+
+			return self::$plugin_active_for_sensors;
 		}
 
 		/**

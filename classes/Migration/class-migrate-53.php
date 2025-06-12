@@ -25,6 +25,7 @@ use WSAL\Controllers\Twilio\Twilio_API;
 use WSAL\Entities\Query_Builder_Parser;
 use WSAL\Entities\Custom_Notifications_Entity;
 use WSAL\Extensions\Helpers\Notification_Helper;
+use WSAL\Helpers\Email_Helper;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
@@ -169,8 +170,8 @@ if ( ! class_exists( '\WSAL\Utils\Migrate_53' ) ) {
 
 			$options = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
 
-			if ( Settings_Helper::get_option_value( 'daily-summary-email', \get_bloginfo( 'admin_email' ) ) ) {
-				$options['daily_email_address'] = \sanitize_text_field( \wp_unslash( Settings_Helper::get_option_value( 'daily-summary-email', \get_bloginfo( 'admin_email' ) ) ) );
+			if ( Settings_Helper::get_option_value( 'daily-summary-email', Email_Helper::get_default_email_to() ) ) {
+				$options['daily_email_address'] = \sanitize_text_field( \wp_unslash( Settings_Helper::get_option_value( 'daily-summary-email', Email_Helper::get_default_email_to() ) ) );
 
 				$options['daily_email_address'] = self::generate_email_string( $options['daily_email_address'] );
 

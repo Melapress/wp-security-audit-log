@@ -39,7 +39,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( BBPress_Helper::is_bbpress_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
+			if ( \method_exists( BBPress_Helper::class, 'load_alerts_for_sensor' ) && BBPress_Helper::load_alerts_for_sensor() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					__( 'bbPress Forums', 'wp-security-audit-log' ) => array(
 						__( 'Forums', 'wp-security-audit-log' ) => self::get_forum_changes_array(),

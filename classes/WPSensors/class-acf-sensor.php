@@ -82,14 +82,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 			 */
 			\add_filter(
 				'wsal_event_objects',
-				array( '\WSAL\WP_Sensors\Helpers\ACF_Helper', 'add_custom_event_objects' )
+				array( ACF_Helper::class, 'add_custom_event_objects' )
 			);
-			if ( ACF_Helper::is_acf_active() ) {
-				\add_filter(
-					'wsal_ignored_custom_post_types',
-					array( '\WSAL\WP_Sensors\Helpers\ACF_Helper', 'add_custom_ignored_cpt' )
-				);
-			}
+
+			\add_filter(
+				'wsal_ignored_custom_post_types',
+				array( ACF_Helper::class, 'add_custom_ignored_cpt' )
+			);
 		}
 
 		/**

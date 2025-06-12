@@ -16,6 +16,7 @@ namespace WSAL\WP_Sensors;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Helpers\Plugin_Settings_Helper;
+use WSAL\WP_Sensors\Helpers\MainWP_Server_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -78,6 +79,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 
 				// Update theme/plugin from MainWP dashboard.
 				\add_action( 'upgrader_process_complete', array( __CLASS__, 'mainwp_child_update_assets' ), 10, 2 );
+
 			}
 			\add_action( 'deactivated_plugin', array( __CLASS__, 'reset_stealth_mode' ), 10, 1 );
 		}
@@ -106,7 +108,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function event_admin_init() {
-			self::$old_themes = wp_get_themes();
+			self::$old_themes = \wp_get_themes();
 		}
 
 		/**
@@ -128,7 +130,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 				&& isset( $mainwpsignature ) && ! empty( $mainwpsignature )
 				) {
 					if ( empty( self::$old_themes ) ) {
-						self::$old_themes = wp_get_themes();
+						self::$old_themes = \wp_get_themes();
 					}
 				}
 			}
@@ -173,7 +175,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 				if ( isset( $args['type'] ) && 'theme' === $args['type'] ) { // Installing theme.
 					// Get theme name & object.
 					$theme_slug = isset( $args['slug'] ) ? $args['slug'] : false;
-					$theme_obj  = wp_get_theme( $theme_slug );
+					$theme_obj  = \wp_get_theme( $theme_slug );
 
 					// Check if theme exists.
 					if ( $theme_obj->exists() ) {
@@ -424,7 +426,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 					}
 
 					foreach ( $site_themes as $theme_name ) {
-						WP_Plugins_Themes_Sensor::log_theme_updated_event( $theme_name );
+						MainWP_Server_Helper::log_theme_updated_event( $theme_name );
 					}
 				} elseif ( 'plugin' === $args['type'] ) {
 					// Site plugins updated.
@@ -435,7 +437,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 
 					$plugins = $args['plugins'];
 					foreach ( $plugins as $plugin_file ) {
-						WP_Plugins_Themes_Sensor::log_plugin_updated_event( $plugin_file );
+						MainWP_Server_Helper::log_plugin_updated_event( $plugin_file );
 					}
 				}
 			}

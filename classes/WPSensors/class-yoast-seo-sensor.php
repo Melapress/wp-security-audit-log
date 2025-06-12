@@ -103,37 +103,35 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function early_init() {
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
 				array( Yoast_SEO_Helper::class, 'wsal_yoast_seo_extension_add_custom_event_objects' )
 			);
 
-			if ( Yoast_SEO_Helper::is_wpseo_active() ) {
-				// Yoast SEO blog option default change alerts.
-				add_action(
-					'add_option_wpseo',
-					array( __CLASS__, 'yoast_blog_options_trigger' ),
-					10,
-					2
-				);
+			// Yoast SEO blog option default change alerts.
+			\add_action(
+				'add_option_wpseo',
+				array( __CLASS__, 'yoast_blog_options_trigger' ),
+				10,
+				2
+			);
 
-				add_filter(
-					'wsal_togglealerts_sub_category_events',
-					array( Yoast_SEO_Helper::class, 'wsal_yoast_seo_extension_togglealerts_sub_category_events' )
-				);
+			\add_filter(
+				'wsal_togglealerts_sub_category_events',
+				array( Yoast_SEO_Helper::class, 'wsal_yoast_seo_extension_togglealerts_sub_category_events' )
+			);
 
-				add_filter(
-					'wsal_togglealerts_sub_category_titles',
-					array( Yoast_SEO_Helper::class, 'wsal_yoast_seo_extension_togglealerts_sub_category_titles' ),
-					10,
-					2
-				);
+			\add_filter(
+				'wsal_togglealerts_sub_category_titles',
+				array( Yoast_SEO_Helper::class, 'wsal_yoast_seo_extension_togglealerts_sub_category_titles' ),
+				10,
+				2
+			);
 
-				add_filter(
-					'wsal_togglealerts_obsolete_events',
-					array( '\WSAL\WP_Sensors\Helpers\Yoast_SEO_Helper', 'wsal_yoast_seo_extension_togglealerts_obsolete_events' )
-				);
-			}
+			\add_filter(
+				'wsal_togglealerts_obsolete_events',
+				array( Yoast_SEO_Helper::class, 'wsal_yoast_seo_extension_togglealerts_obsolete_events' )
+			);
 		}
 
 		/**
@@ -162,7 +160,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 		/**
 		 * Get editor link.
 		 *
-		 * @param stdClass $post_id - Post id.
+		 * @param int $post_id - Post id.
+		 *
 		 * @return array $editor_link - Name and value link.
 		 */
 		private static function get_editor_link( $post_id ) {
@@ -399,13 +398,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 			// Get old title value.
 			$old_index = (int) self::get_post_seo_data( 'meta-robots-noindex' );
 
-			if ( 1 === $old_index ) {
+			if ( 1 === (int) $old_index ) {
 				$old_index = 'No';
 			} else {
 				$old_index = 'Yes';
 			}
 
-			if ( 1 === $index ) {
+			if ( 1 === (int) $index ) {
 				$index = 'No';
 			} else {
 				$index = 'Yes';

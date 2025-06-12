@@ -257,7 +257,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 					return new \WP_Error( 'MainWP_error', $site_data[ $site_id ]['error'] );
 				}
 
-				if ( ( isset( $site_data[ $site_id ]['events'] ) || isset( $site_data[ $site_id ]['incompatible__skipped'] ) ) ) {
+				if ( ( isset( $site_data[ $site_id ] ) ) ) {
 					// Extension is ready after retrieving.
 					Alert_Manager::trigger_event(
 						7712,

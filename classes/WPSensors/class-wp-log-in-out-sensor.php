@@ -235,8 +235,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				// convert excluded usernames into IDs.
 				if ( ! empty( $excluded_users ) && is_array( $excluded_users ) ) {
 					foreach ( $excluded_users as $excluded_user ) {
-						$user                = get_user_by( 'login', $excluded_user );
-						$excluded_user_ids[] = $user->ID;
+						$user                = \get_user_by( 'login', $excluded_user );
+						if ( $user && is_a( $user, '\WP_User' ) ) {
+							$excluded_user_ids[] = $user->ID;
+						}
 					}
 				}
 				// bail early if this user is in the excluded ids list.

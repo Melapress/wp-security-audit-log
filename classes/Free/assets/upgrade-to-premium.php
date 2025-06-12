@@ -40,7 +40,7 @@
 
 .wsal-persistent-cta::before {
 	content: '';
-	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/features-bg.png'); /* Background image only displayed on desktop */
+	background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/features-bg.png'); /* Background image only displayed on desktop */
 	background-size: 860px;
 	background-repeat: no-repeat;
 	background-position: -2rem 52%; /* Moved to the left */
@@ -132,7 +132,7 @@
 <div class="wsal-persistent-cta">
 	<div class="wsal-persistent-cta-content">
 		<h2 class="wsal-persistent-cta-title">
-			<img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/wp-activity-log-stacked.svg" alt="WP Activity Log Premium" class="wsal-persistent-cta-image">
+			<img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/wp-activity-log-stacked.svg" alt="WP Activity Log Premium" class="wsal-persistent-cta-image">
 		</h2>
 		<p class="wsal-persistent-cta-text">
 			<?php
@@ -152,7 +152,7 @@
 			</ul>'
 			?>
 		</p>
-		<p class="wsal-persistent-cta-link"><a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank" class="cta-link"><?php echo \esc_html__( 'Get WP Activity Log Premium', 'wp - security - audit - log' ); ?></a></p>
+		<p class="wsal-persistent-cta-link"><a href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-upgrade-banner" target="_blank" class="cta-link"><?php echo \esc_html__( 'Get WP Activity Log Premium', 'wp - security - audit - log' ); ?></a></p>
 			</div>
 			</div>
 			<!-- Copy END -->

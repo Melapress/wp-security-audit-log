@@ -40,6 +40,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper' ) ) {
 		private static $plugin_active = null;
 
 		/**
+		 * Class cache to store the state of the plugin for sensors.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.4.1
+		 */
+		private static $plugin_active_for_sensors = null;
+
+		/**
 		 * Addes our plugin to the list of allowed public sensors.
 		 *
 		 * @param  array $value - Allowed sensors.
@@ -198,10 +207,35 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper' ) ) {
 		 */
 		public static function is_gravityforms_active() {
 			if ( null === self::$plugin_active ) {
-				self::$plugin_active = ( WP_Helper::is_plugin_active( 'gravityforms/gravityforms.php' ) );
+				// self::$plugin_active = ( WP_Helper::is_plugin_active( 'gravityforms/gravityforms.php' ) );
+
+				// if ( WP_Helper::is_multisite() ) {
+					// Check if the plugin is active on the main site.
+				if ( \class_exists( '\GFAPI', \false ) ) {
+					// bbPress is enabled, run your code...
+					self::$plugin_active = true;
+				} else {
+					self::$plugin_active = false;
+				}
+				// }
 			}
 
 			return self::$plugin_active;
+		}
+
+		/**
+		 * Shall we load custom alerts for sensors?
+		 *
+		 * @return boolean
+		 *
+		 * @since 5.3.4.1
+		 */
+		public static function load_alerts_for_sensor(): bool {
+			if ( null === self::$plugin_active_for_sensors ) {
+				self::$plugin_active_for_sensors = ( WP_Helper::is_plugin_active( 'gravityforms/gravityforms.php' ) );
+			}
+
+			return self::$plugin_active_for_sensors;
 		}
 
 		/**
