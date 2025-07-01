@@ -509,7 +509,8 @@ jQuery( document ).ready( function() {
 		var origText = jQuery( this ).text();
 		jQuery( this ).attr( 'data-orig-text', origText );
 		jQuery( this ).attr( 'data-panel-number', count );
-		jQuery( this ).closest( 'tr' ).after( '<div class="event-data-panel panel-'+ count +'"></div><div class="panel-'+ count +'-fill"></div>' );
+		let colspan = (jQuery( this ).closest( 'tr' ).children('td').length)+1;
+		jQuery( this ).closest( 'tr' ).after( '<tr class="event-data-panel row-detail-'+ count +'"><td colspan="'+colspan+'" class="panel-'+ count +'"><div class="panel-'+ count +'-fill"></div></td></tr>' );
 
 		jQuery( jQuery( '.panel-'+ count ) ).load( jQuery( this ).attr( 'href' ), function() {
 			jQuery( '.panel-'+ count + ' .event-content-wrapper' ).slideDown( 300 );
@@ -522,11 +523,13 @@ jQuery( document ).ready( function() {
 
 	jQuery( document ).on( 'click', '.data-event-inspector-link.inspector-active', function(event) {
         event.preventDefault();
+		var targetRow = '.row-detail-' + jQuery( this ).attr( 'data-panel-number');
 		var targetPanel = '.panel-' + jQuery( this ).attr( 'data-panel-number');
 		var origText =  jQuery( this ).attr( 'data-orig-text' );		
 		jQuery( '.panel-'+ jQuery( this ).attr( 'data-panel-number') + ' .event-content-wrapper' ).slideUp( 200 );
 
 		setTimeout(function() { 
+			jQuery( targetRow ).remove();
 			jQuery( targetPanel ).remove();
 			jQuery( targetPanel + '-fill').remove();
 		}, 300);

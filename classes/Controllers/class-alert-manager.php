@@ -1352,6 +1352,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					'sent'         => esc_html__( 'Sent', 'wp-security-audit-log' ),
 					'executed'     => esc_html__( 'Executed', 'wp-security-audit-log' ),
 					'failed'       => esc_html__( 'Failed', 'wp-security-audit-log' ),
+					'denied'       => esc_html__( 'Denied', 'wp-security-audit-log' ),
 				);
 				// sort the types alphabetically.
 				asort( self::$event_types );

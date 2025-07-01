@@ -208,6 +208,13 @@ if ( ! class_exists( '\WSAL\Utils\Migrate_53' ) ) {
 					$options['event_1002_notification_phone']         = $not_info->phone;
 					$options['event_1002_failed_more_than']           = $not_info->failUser;
 
+					if ( 2 > $options['event_1002_failed_more_than'] ) {
+						$options['event_1002_failed_more_than'] = 2;
+					}
+					if ( 30 < $options['event_1002_failed_more_than'] ) {
+						$options['event_1002_failed_more_than'] = 30;
+					}
+
 					$options['notification_ids'][] = 1002;
 				}
 			}
@@ -222,6 +229,13 @@ if ( ! class_exists( '\WSAL\Utils\Migrate_53' ) ) {
 					$options['event_1003_notification_email_address'] = self::generate_email_string( $not_info->email );
 					$options['event_1003_notification_phone']         = $not_info->phone;
 					$options['event_1003_failed_more_than']           = $not_info->failNotUser;
+
+					if ( 2 > $options['event_1003_failed_more_than'] ) {
+						$options['event_1003_failed_more_than'] = 2;
+					}
+					if ( 30 < $options['event_1003_failed_more_than'] ) {
+						$options['event_1003_failed_more_than'] = 30;
+					}
 
 					$options['notification_ids'][] = 1003;
 				}

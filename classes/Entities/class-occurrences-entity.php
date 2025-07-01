@@ -775,5 +775,58 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 
 			$main_items = Delete_Records::delete( array(), 0, array( 'created_on <= %s' => intval( $max_stamp ) ) );
 		}
+
+		/**
+		 * Returns array with all found records for the past 24 hours based on type parameter
+		 *
+		 * @param string $type - The type of records to extract data for. Possible types are 'total', 'logins', 'changes'. Total returns all events, logins returns all of the logins and changes returns all the changes for plugins and / or themes.
+		 *
+		 * @return int|void
+		 *
+		 * @since 5.4.2
+		 */
+		public static function get_last24_records( string $type = 'total' ) {
+			$date_obj = new \DateTime();
+			$date_obj->setTime( 0, 0 ); // Set time of the object to 00:00:00.
+			$date_string = $date_obj->format( 'U' ); // Get the date in UNIX timestamp.
+
+			$start_date = strtotime( '-1 day +1 second', (int) $date_string ); // Get yesterday's starting timestamp.
+			$end_date   = strtotime( '-1 second', (int) $date_string ); // Get yesterday's ending timestamp.
+			$sql        = self::get_connection()->prepare(
+				'SELECT * FROM ' . self::get_table_name() .
+				' WHERE created_on >= %d AND created_on <= %d',
+				array( $start_date, $end_date )
+			);
+			if ( \in_array( $type, array( 'total', 'logins', 'changes' ), true ) ) {
+
+				if ( 'logins' === $type ) {
+					$login_ids = '1000,1005';
+
+					$sql = self::get_connection()->prepare(
+						'SELECT * FROM ' . self::get_table_name() .
+						' WHERE created_on >= %d AND created_on <= %d 
+             AND FIND_IN_SET(alert_id, %s) > 0',
+						array( $start_date, $end_date, $login_ids )
+					);
+				}
+				if ( 'changes' === $type ) {
+					$plugin_ids = '5000,5001,5002,5003,5004,5005,5006,5007,5030,5031';
+
+					$sql = self::get_connection()->prepare(
+						'SELECT * FROM ' . self::get_table_name() .
+						' WHERE created_on >= %d AND created_on <= %d 
+             AND FIND_IN_SET(alert_id, %s) > 0',
+						array( $start_date, $end_date, $plugin_ids )
+					);
+				}
+			} else {
+				return;
+			}
+
+			return count( self::load_query( $sql ) );
+		}
+
+		// phpcs:disable
+		// phpcs:enable
 	}
 }

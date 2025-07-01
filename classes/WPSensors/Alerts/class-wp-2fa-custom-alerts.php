@@ -38,7 +38,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 		/**
 		 * Returns the structure of the alerts for extension.
 		 *
-		 * @return array - Currentl registered alers.
+		 * @return array - Currently registered alerts.
 		 *
 		 * @since 5.0.0
 		 */

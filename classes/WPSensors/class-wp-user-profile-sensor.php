@@ -58,7 +58,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		public static function init() {
+		public static function early_init() {
 			add_action( 'profile_update', array( __CLASS__, 'event_user_updated' ), 10, 2 );
 			add_action( 'set_user_role', array( __CLASS__, 'event_user_role_changed' ), 10, 3 );
 			add_action( 'delete_user', array( __CLASS__, 'event_user_deleted' ) );
@@ -71,8 +71,40 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 			add_action( 'update_user_meta', array( __CLASS__, 'event_application_password_added' ), 10, 4 );
 			add_action( 'retrieve_password', array( __CLASS__, 'event_password_reset_link_sent' ), 10, 1 );
 
+			add_action( 'admin_page_access_denied', array( __CLASS__, 'event_admin_page_access_denied' ), 10 );
+
 			// We hook into action 'user_register' because it is part of the function 'wp_insert_user'.
 			add_action( 'user_register', array( __CLASS__, 'on_user_register' ), 10, 1 );
+		}
+
+		/**
+		 * Fires when trying to access admin page was denied.
+		 *
+		 * @return void
+		 *
+		 * @since 5.4.2
+		 */
+		public static function event_admin_page_access_denied() {
+			$admin_page = '';
+
+			$admin_page = sanitize_text_field( wp_unslash( $_GET['page'] ?? '' ) );
+
+			// Get the current admin page file.
+			$pagenow = $GLOBALS['pagenow'] ?? '';
+
+			// Construct full page path.
+			$full_page = $pagenow;
+			if ( $admin_page ) {
+				$full_page .= '?page=' . $admin_page;
+			}
+
+			Alert_Manager::trigger_event(
+				1011,
+				array(
+
+					'URL' => $full_page,
+				)
+			);
 		}
 
 		/**

@@ -354,6 +354,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 
 					$processed_url = \wp_parse_url( $return );
 
+					$result = \str_replace( array( 'http://%PostUrl%', 'https://%PostUrl%' ), $meta_data['PostUrl'], $result );
+
 					if ( $processed_url && isset( $processed_url['query'] ) ) {
 						$params = array();
 						parse_str( $processed_url['query'], $params );
@@ -367,7 +369,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 							}
 							$return = rtrim( $return, ', ' );
 							$return = $return_temp . ' ' . $configuration['highlight_start_tag'] . $return . $configuration['highlight_end_tag'] . $configuration['end_of_line'];
-							$result = $return . $result;
+
+							$result = $return . \str_replace( array( 'http://%PostUrl%', 'https://%PostUrl%' ), $meta_data['PostUrl'], $result );
 						}
 					}
 				}

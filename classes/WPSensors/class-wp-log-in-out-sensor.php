@@ -84,14 +84,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		public static function init() {
-			\add_action( 'set_auth_cookie', array( __CLASS__, 'event_login' ), 10, 6 );
+		public static function early_init() {
 
 			\add_action( 'wp_logout', array( __CLASS__, 'event_logout' ), 5 );
 			\add_action( 'password_reset', array( __CLASS__, 'event_password_reset' ), 10, 2 );
 			\add_action( 'wp_login_failed', array( __CLASS__, 'event_login_failure' ) );
 			\add_action( 'clear_auth_cookie', array( __CLASS__, 'get_current_user' ), 10 );
 			\add_action( 'lostpassword_post', array( __CLASS__, 'event_user_requested_pw_reset' ), 10, 2 );
+			\add_action( 'set_auth_cookie', array( __CLASS__, 'event_login' ), 10, 6 );
 			\add_action( 'shutdown', array( __CLASS__, 'shutdown_empty_queue' ), 7 );
 
 			if ( WP_Helper::is_plugin_active( 'user-switching/user-switching.php' ) ) {
@@ -235,7 +235,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				// convert excluded usernames into IDs.
 				if ( ! empty( $excluded_users ) && is_array( $excluded_users ) ) {
 					foreach ( $excluded_users as $excluded_user ) {
-						$user                = \get_user_by( 'login', $excluded_user );
+						$user = \get_user_by( 'login', $excluded_user );
 						if ( $user && is_a( $user, '\WP_User' ) ) {
 							$excluded_user_ids[] = $user->ID;
 						}

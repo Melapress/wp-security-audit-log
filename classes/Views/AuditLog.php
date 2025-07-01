@@ -11,10 +11,11 @@
 
 use WSAL\Helpers\WP_Helper;
 use WSAL\Writers\CSV_Writer;
+use WSAL\Helpers\View_Manager;
+use WSAL\Controllers\Constants;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Occurrences_Entity;
-use WSAL\Helpers\View_Manager;
 use WSAL\ListAdminEvents\List_Events;
 
 // Exit if accessed directly.
@@ -110,8 +111,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Set adverts array.
 		$this->adverts = array(
 			// 0 => array(
-			// 	'head' => esc_html__( 'Upgrade to Premium and enable search filters so you can find the events you need within seconds, get notified via email or SMS about critical website changes, see who is logged-in to your website in real time, manage user sessions, create detailed reports, and much more!', 'wp-security-audit-log' ),
-			// 	'desc' => esc_html__( '', 'wp-security-audit-log' ),
+			// 'head' => esc_html__( 'Upgrade to Premium and enable search filters so you can find the events you need within seconds, get notified via email or SMS about critical website changes, see who is logged-in to your website in real time, manage user sessions, create detailed reports, and much more!', 'wp-security-audit-log' ),
+			// 'desc' => esc_html__( '', 'wp-security-audit-log' ),
 			// ),
 			1 => array(
 				'head' => esc_html__( 'Instant SMS & email alerts, search & filters, reports, users sessions management and much more!', 'wp-security-audit-log' ),
@@ -156,9 +157,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'https://melapress.com/features/'
 			);
 
-			if ( current_user_can( 'manage_options' ) && $is_current_view ) : 
+			if ( current_user_can( 'manage_options' ) && $is_current_view ) :
 
-				/* ?>
+				/*
+				?>
 				<div class="updated wsal_notice">
 					<div class="wsal_notice__wrapper">
 						<div class="wsal_notice__content">
@@ -345,7 +347,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			return;
 		}
 
-		if ( ! in_array( $page, ['wsal-auditlog', 'Extensions-Wp-Security-Audit-Log-Premium', 'Extensions-Wp-Security-Audit-Log'] ) ) { // Page is admin.php, now check auditlog page.
+		if ( ! in_array( $page, array( 'wsal-auditlog', 'Extensions-Wp-Security-Audit-Log-Premium', 'Extensions-Wp-Security-Audit-Log' ) ) ) { // Page is admin.php, now check auditlog page.
 			return; // Return if the current page is not auditlog's.
 		}
 
@@ -354,9 +356,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			check_admin_referer( 'bulk-logs' );
 		}
 
-		$wpnonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : false; // View nonce.
-		$search      = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false; // Search.
-		$site_id     = isset( $_GET['wsal-cbid'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['wsal-cbid'] ) ) : false; // Site id.
+		$wpnonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : false; // View nonce.
+		$search  = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false; // Search.
+		$site_id = isset( $_GET['wsal-cbid'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['wsal-cbid'] ) ) : false; // Site id.
 
 		$search_save = ( isset( $_REQUEST['wsal-save-search-name'] ) && ! empty( $_REQUEST['wsal-save-search-name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['wsal-save-search-name'] ) ) ) : false;
 
@@ -428,7 +430,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				 * @since 3.2.3
 				 */
 				do_action( 'wsal_search_filters_list', 'top' );
-
 
 				?>
 		<?php
@@ -523,6 +524,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			if ( $value ) {
 				if ( is_array( $value ) || is_object( $value ) ) {
 					$value = var_export( $value, true );
+				}
+				if ( 'severity' === mb_strtolower( $item ) ) {
+					$value .= ' (' . ( Constants::get_severity_by_code( (int) $value ) ['text'] ?? '' ) . ')';
 				}
 				echo '<strong>' . \esc_html( $item ) . ':</strong> <span style="opacity: 0.7;"><pre style="display:inline">' . \esc_html( $value ) . '</pre></span></br>';
 			}
@@ -743,7 +747,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		);
 
 		$audit_log_data = array(
-			'page'                 => isset( self::get_page_arguments()['page'] ) ? self::get_page_arguments()['page']: false,
+			'page'                 => isset( self::get_page_arguments()['page'] ) ? self::get_page_arguments()['page'] : false,
 			'siteId'               => isset( self::get_page_arguments()['site_id'] ) ? self::get_page_arguments()['site_id'] : false,
 			'orderBy'              => isset( self::get_page_arguments()['order_by'] ) ? self::get_page_arguments()['order_by'] : false,
 			'order'                => isset( self::get_page_arguments()['order'] ) ? self::get_page_arguments()['order'] : false,
@@ -752,12 +756,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			'closeInspectorString' => esc_html__( 'Close inspector', 'wp-security-audit-log' ),
 			'viewerNonce'          => wp_create_nonce( 'wsal_auditlog_viewer_nonce' ),
 			'installAddonStrings'  => array(
-				'defaultButton'    => esc_html__( 'Install and activate extension', 'wp-security-audit-log' ),
-				'installingText'   => esc_html__( 'Installing extension', 'wp-security-audit-log' ),
-				'otherInstalling'  => esc_html__( 'Other extension installing', 'wp-security-audit-log' ),
-				'addonInstalled'   => esc_html__( 'Installed', 'wp-security-audit-log' ),
-				'installedReload'  => esc_html__( 'Installed... reloading page', 'wp-security-audit-log' ),
-				'buttonError'      => esc_html__( 'Problem enabling', 'wp-security-audit-log' ),
+				'defaultButton'   => esc_html__( 'Install and activate extension', 'wp-security-audit-log' ),
+				'installingText'  => esc_html__( 'Installing extension', 'wp-security-audit-log' ),
+				'otherInstalling' => esc_html__( 'Other extension installing', 'wp-security-audit-log' ),
+				'addonInstalled'  => esc_html__( 'Installed', 'wp-security-audit-log' ),
+				'installedReload' => esc_html__( 'Installed... reloading page', 'wp-security-audit-log' ),
+				'buttonError'     => esc_html__( 'Problem enabling', 'wp-security-audit-log' ),
 			),
 		);
 		wp_localize_script( 'auditlog', 'wsalAuditLogArgs', $audit_log_data );

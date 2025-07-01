@@ -30,6 +30,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 	class WP_2FA_Sensor {
 
 		/**
+		 * Keeps old user meta data to compare with new values.
+		 *
+		 * @var array
+		 *
+		 * @since 5.4.2
+		 */
+		private static $old_user_meta = array();
+
+		/**
 		 * Inits the main hooks
 		 *
 		 * @return void
@@ -42,8 +51,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 				if ( WP_Helper::is_multisite() ) {
 					\add_action( 'update_site_option', array( __CLASS__, 'settings_trigger' ), 10, 3 );
 				}
-				\add_action( 'update_user_meta', array( __CLASS__, 'user_trigger' ), 10, 4 );
-				\add_action( 'delete_user_meta', array( __CLASS__, 'user_deletions_trigger' ), 10, 4 );
+				// \add_action( 'update_user_meta', array( __CLASS__, 'user_trigger' ), 10, 4 );
+				// \add_action( 'delete_user_meta', array( __CLASS__, 'user_deletions_trigger' ), 10, 4 );
+
+				// \add_action( 'wp_2fa_user_is_unlocked', array( __CLASS__, 'user_unlock_trigger' ) );
 			}
 		}
 
@@ -116,44 +127,51 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 					Alert_Manager::trigger_event( $alert_code, $variables );
 				}
 
-				if ( $old_value['enable_email'] !== $new_value['enable_email'] ) {
-					$alert_code = 7804;
-					$variables  = array(
-						'method'    => 'One-time code via email (HOTP)',
-						'EventType' => ! empty( $new_value['enable_email'] ) ? 'enabled' : 'disabled',
-					);
-					Alert_Manager::trigger_event( $alert_code, $variables );
+				if ( \class_exists( '\WP2FA\Admin\Controllers\Settings' ) ) {
+					$providers = \WP2FA\Admin\Controllers\Settings::get_providers();
+					$names     = \WP2FA\Admin\Controllers\Settings::get_providers_translate_names();
+
+					foreach ( $providers as $class => $provider ) {
+						$policy_name = '';
+						if ( is_string( $class ) && \class_exists( (string) $class ) ) {
+							try {
+								if ( constant( $class . '::POLICY_SETTINGS_NAME' ) ) {
+
+									$policy_name = $class::POLICY_SETTINGS_NAME;
+								}
+							} catch ( \Error $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+								// Do nothing.
+							}
+						} else {
+							// 2FA is still older version fallback to array key.
+							$methods = array(
+								'totp'         => 'enable_totp',
+								'oob'          => 'enable_oob_email',
+								'email'        => 'enable_email',
+								'yubico'       => 'enable_yubico',
+								'clickatell'   => 'enable_clickatell',
+								'twilio'       => 'enable_twilio',
+								'authy'        => 'enable_authy',
+								'passkeys'     => 'enable_passkeys',
+								'backup_codes' => 'backup_codes_enabled',
+								'backup_email' => 'enable-email-backup',
+							);
+
+							$policy_name = ( isset( $methods[ $provider ] ) ) ? $methods[ $provider ] : '';
+						}
+
+						if ( ! empty( $policy_name ) && ( ! isset( $old_value[ $policy_name ] ) || $old_value[ $policy_name ] !== $new_value[ $policy_name ] ) ) {
+							$alert_code = 7804;
+							$variables  = array(
+								'method'    => $names[ $provider ],
+								'EventType' => ! empty( $new_value[ $policy_name ] ) ? 'enabled' : 'disabled',
+							);
+							Alert_Manager::trigger_event( $alert_code, $variables );
+						}
+					}
 				}
 
-				if ( $old_value['enable_totp'] !== $new_value['enable_totp'] ) {
-					$alert_code = 7804;
-					$variables  = array(
-						'method'    => 'One-time code via 2FA App (TOTP)',
-						'EventType' => ! empty( $new_value['enable_totp'] ) ? 'enabled' : 'disabled',
-					);
-					Alert_Manager::trigger_event( $alert_code, $variables );
-				}
-
-				if ( isset( $new_value['enable_oob_email'] ) && isset( $old_value['enable_oob_email'] ) && $old_value['enable_oob_email'] !== $new_value['enable_oob_email'] ) {
-					$alert_code = 7804;
-					$variables  = array(
-						'method'    => 'Link via email',
-						'EventType' => ! empty( $new_value['enable_oob_email'] ) ? 'enabled' : 'disabled',
-					);
-					Alert_Manager::trigger_event( $alert_code, $variables );
-				}
-
-				// User changes.
-				if ( $old_value['backup_codes_enabled'] !== $new_value['backup_codes_enabled'] ) {
-					$alert_code = 7804;
-					$variables  = array(
-						'method'    => 'Backup Codes',
-						'EventType' => ! empty( $new_value['backup_codes_enabled'] ) ? 'enabled' : 'disabled',
-					);
-					Alert_Manager::trigger_event( $alert_code, $variables );
-				}
-
-				if ( isset( $new_value['enable_trusted_devices'] ) && isset( $old_value['enable_trusted_devices'] ) && $old_value['enable_trusted_devices'] !== $new_value['enable_trusted_devices'] ) {
+				if ( ( isset( $new_value['enable_trusted_devices'] ) && ! isset( $old_value['enable_trusted_devices'] ) ) || ( isset( $new_value['enable_trusted_devices'] ) && isset( $old_value['enable_trusted_devices'] ) && isset( $old_value['enable_trusted_devices'] ) && $old_value['enable_trusted_devices'] !== $new_value['enable_trusted_devices'] ) ) {
 					$alert_code = 7805;
 					$variables  = array(
 						'EventType' => ! empty( $new_value['enable_trusted_devices'] ) ? 'enabled' : 'disabled',
@@ -161,10 +179,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 					Alert_Manager::trigger_event( $alert_code, $variables );
 				}
 
-				if ( isset( $new_value['trusted-devices-period'] ) && isset( $old_value['trusted-devices-period'] ) && $old_value['trusted-devices-period'] !== $new_value['trusted-devices-period'] ) {
+				if ( ( isset( $new_value['trusted-devices-period'] ) && ! isset( $old_value['trusted-devices-period'] ) ) || ( isset( $new_value['trusted-devices-period'] ) && isset( $old_value['trusted-devices-period'] ) && $old_value['trusted-devices-period'] !== $new_value['trusted-devices-period'] ) ) {
 					$alert_code = 7806;
 					$variables  = array(
-						'old_value' => $old_value['trusted-devices-period'],
+						'old_value' => $old_value['trusted-devices-period'] ?? '',
 						'new_value' => $new_value['trusted-devices-period'],
 					);
 					Alert_Manager::trigger_event( $alert_code, $variables );
@@ -192,36 +210,19 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 		 */
 		public static function user_trigger( $meta_id, $user_id, $meta_key, $_meta_value ) {
 
-			// Filter global arrays for security.
-			$server_array = filter_input_array( INPUT_SERVER );
-			if ( ! isset( $server_array['HTTP_REFERER'] ) || ! isset( $server_array['REQUEST_URI'] ) ) {
-				return;
-			}
-
-			// Check the page which is performing this change.
-			$referer_check = pathinfo( $server_array['HTTP_REFERER'] );
-			$referer_check = $referer_check['filename'];
-			$referer_check = ( strpos( $referer_check, '.' ) !== false ) ? strstr( $referer_check, '.', true ) : $referer_check;
-
-			$is_correct_referer_and_action = false;
-
-			if ( 'profile' === $referer_check || 'user-edit' === $referer_check ) {
-				$is_correct_referer_and_action = true;
-			}
-
 			if ( 'wp_2fa_enabled_methods' === $meta_key ) {
-				if ( ! get_user_meta( $user_id, 'wp_2fa_enabled_methods', true ) || empty( get_user_meta( $user_id, 'wp_2fa_enabled_methods', true ) ) ) {
-					$alert_code = 7808;
+				if ( isset( self::$old_user_meta['wp_2fa_enabled_methods'] ) && ! empty( self::$old_user_meta['wp_2fa_enabled_methods'] ) ) {
+					$alert_code = 7809;
 					$variables  = array(
-						'method'       => get_user_meta( $user_id, 'wp_2fa_enabled_methods', true ),
+						'new_method'   => $_meta_value,
+						'old_method'   => self::$old_user_meta['wp_2fa_enabled_methods'],
 						'EditUserLink' => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 					);
 					Alert_Manager::trigger_event( $alert_code, $variables );
 				} else {
-					$alert_code = 7809;
+					$alert_code = 7808;
 					$variables  = array(
-						'new_method'   => $_meta_value,
-						'old_method'   => get_user_meta( $user_id, 'wp_2fa_enabled_methods', true ),
+						'method'       => $_meta_value,
 						'EditUserLink' => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 					);
 					Alert_Manager::trigger_event( $alert_code, $variables );
@@ -247,23 +248,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function user_deletions_trigger( $meta_id, $user_id, $meta_key, $_meta_value ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-
-			// Filter global arrays for security.
-			$server_array = filter_input_array( INPUT_SERVER );
-			if ( ! isset( $server_array['HTTP_REFERER'] ) || ! isset( $server_array['REQUEST_URI'] ) ) {
-				return;
-			}
-
-			// Check the page which is performing this change.
-			$referer_check = pathinfo( $server_array['HTTP_REFERER'] );
-			$referer_check = $referer_check['filename'];
-			$referer_check = ( strpos( $referer_check, '.' ) !== false ) ? strstr( $referer_check, '.', true ) : $referer_check;
-
-			$is_correct_referer_and_action = false;
-
-			if ( 'profile' === $referer_check || 'user-edit' === $referer_check ) {
-				$is_correct_referer_and_action = true;
-			}
 
 			if ( 'wp_2fa_2fa_status' === $meta_key ) {
 				$alert_code = 7810;
@@ -295,6 +279,49 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 				'wsal_event_objects',
 				array( WP_2FA_Helper::class, 'add_custom_event_objects' )
 			);
+
+			if ( WP_2FA_Helper::is_wp2fa_active() ) {
+				\add_action( 'update_user_metadata', array( __CLASS__, 'store_user_meta' ), 1, 4 );
+				\add_action( 'add_user_metadata', array( __CLASS__, 'store_user_meta' ), 1, 4 );
+				\add_action( 'updated_user_meta', array( __CLASS__, 'user_trigger' ), 10, 4 );
+				\add_action( 'added_user_meta', array( __CLASS__, 'user_trigger' ), 10, 4 );
+				\add_action( 'delete_user_meta', array( __CLASS__, 'user_deletions_trigger' ), 10, 4 );
+			}
 		}
+
+		/**
+		 * Keeps old metadata of the user for comparison.
+		 *
+		 * @param int    $meta_id ID of the metadata entry to update.
+		 * @param int    $user_id ID of the user metadata is for.
+		 * @param string $meta_key Metadata key.
+		 * @param mixed  $_meta_value Metadata value. Serialized if non-scalar.
+		 *
+		 * @since 5.4.2
+		 */
+		public static function store_user_meta( $meta_id, $user_id, $meta_key, $_meta_value ) {
+
+			if ( 'wp_2fa_enabled_methods' === $meta_key ) {
+				self::$old_user_meta['wp_2fa_enabled_methods'] = \get_user_meta( $user_id, 'wp_2fa_enabled_methods', true );
+			}
+		}
+
+		// /**
+		// * Fires when user is unlocked.
+		// *
+		// * @param \WP_User $user - The user object of the user being unlocked.
+		// *
+		// * @return void
+		// *
+		// * @since 5.4.2
+		// */
+		// public static function user_unlock_trigger( $user ) {
+
+		// $alert_code = 7812;
+		// $variables  = array(
+		// 'EditUserLink' => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
+		// );
+		// Alert_Manager::trigger_event( $alert_code, $variables );
+		// }
 	}
 }

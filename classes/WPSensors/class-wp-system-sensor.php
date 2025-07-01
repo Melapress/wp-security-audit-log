@@ -128,7 +128,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 
 			\add_action( '_core_updated_successfully', array( __CLASS__, 'on_core_updated' ) );
 
-			if ( \function_exists('wp_get_wp_version')) {
+			if ( \function_exists( 'wp_get_wp_version' ) ) {
 
 				self::$wp_core_version = wp_get_wp_version();
 			} else {
@@ -463,11 +463,17 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 
 				if ( false !== $cron && \is_object( $cron ) ) {
 					if ( $cron->schedule ) {
-						$alert                = 6072;
-						$data['schedule']     = $cron->schedule;
-						$schedule_info        = \wp_get_schedules()[ $cron->schedule ];
-						$data['interval']     = $schedule_info['interval'];
-						$data['display_name'] = $schedule_info['display'];
+						$alert            = 6072;
+						$data['schedule'] = $cron->schedule;
+						$schedules        = \wp_get_schedules();
+						if ( isset( $schedules[ $cron->schedule ] ) ) {
+							$schedule_info        = $schedules[ $cron->schedule ];
+							$data['interval']     = $schedule_info['interval'];
+							$data['display_name'] = $schedule_info['display'];
+						} else {
+							$data['interval']     = __( 'Unknown', 'wp-security-audit-log' );
+							$data['display_name'] = __( 'Unknown', 'wp-security-audit-log' );
+						}
 
 						Alert_Manager::trigger_event(
 							$alert,
