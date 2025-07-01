@@ -647,8 +647,9 @@ input#wsal_as_widget_event::-webkit-outer-spin-button {
 
 .event-content-wrapper {
 	display: none;
-	width: 100pc;
+	max-width: 100%;
 	padding: 20px;
+	overflow-y: auto;
 }
 
 .event-data-panel {

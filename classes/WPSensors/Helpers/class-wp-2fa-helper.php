@@ -78,17 +78,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\WP_2FA_Helper' ) ) {
 		 */
 		public static function is_wp2fa_active() {
 			if ( null === self::$plugin_active ) {
-				// self::$plugin_active = ( WP_Helper::is_plugin_active( 'wp-2fa/wp-2fa.php' ) || WP_Helper::is_plugin_active( 'wp-2fa-premium/wp-2fa.php' ) );
 
-				// if ( WP_Helper::is_multisite() ) {
-					// Check if WooCommerce is active on the current site.
-
-				if ( class_exists( '\WP2FA\WP2FA', \false ) ) {
+				if ( defined( 'WP_2FA_VERSION' ) ) {
 					self::$plugin_active = true;
 				} else {
 					self::$plugin_active = false;
 				}
-				// }
 			}
 
 			return self::$plugin_active;

@@ -475,7 +475,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 							if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
 								// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 								$show_free_link = true;
-							} elseif ($number_of_logins && ! empty( $login_events )) {
+							} elseif ( $number_of_logins && ! empty( $login_events ) ) {
 								$filters_string = '';
 								foreach ( $login_events_ids as $key => $event_id ) {
 									$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -672,7 +672,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 						';
 
 							if ( ( isset( $current_settings['notification_summary_password_user_change_own_password'] ) && $current_settings['notification_summary_password_user_change_own_password'] ) || ! isset( $current_settings['notification_summary_password_user_change_own_password'] ) ) {
-								if ( true /*! empty( $password_changes ) */) {
+								if ( true /*! empty( $password_changes ) */ ) {
 									$password_changes_string = sprintf(
 									// translators: singular or plural form of a login total count.
 										_n( 'was %d password change on your site (user changed their own password)', 'were %d password changes on your site (user changed their own password)', count( $password_changes ), 'wp-security-audit-log' ),
@@ -722,7 +722,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 									if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
 										// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 										$show_free_link = true;
-									} elseif (! empty( $password_changes )) {
+									} elseif ( ! empty( $password_changes ) ) {
 										$filters_string = '';
 										foreach ( $password_changes_events as $key => $event_id ) {
 											$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -782,7 +782,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 												continue;
 											}
 
-											if ( is_array( $user_data) ) {
+											if ( is_array( $user_data ) ) {
 												$user_data = (object) $user_data;
 											}
 
@@ -805,7 +805,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 							if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
 								// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 								$show_free_link = true;
-							} elseif (! empty( $forced_password_changes ) ) {
+							} elseif ( ! empty( $forced_password_changes ) ) {
 								$filters_string = '';
 								foreach ( $forced_password_changes_events as $key => $event_id ) {
 									$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -855,7 +855,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 							$user_profile_changes_string
 						);
 
-						if ( ( isset( $current_settings['notification_summary_number_of_events_included'] ) && $current_settings['notification_summary_number_of_events_included'] )&& ! empty( $user_profile_changes ) ) {
+						if ( ( isset( $current_settings['notification_summary_number_of_events_included'] ) && $current_settings['notification_summary_number_of_events_included'] ) && ! empty( $user_profile_changes ) ) {
 							$body .= __( 'Below is a list of important user profile changes that happened on your website:', 'wp-security-audit-log' );
 							$body .= '</td></tr>
 							<tr>
@@ -870,7 +870,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 									$user_data = ( ( isset( $event['meta_values']['NewUserData'] ) ) ? $event['meta_values']['NewUserData'] : false );
 									if ( $user_data ) {
 
-										if ( is_array( $user_data) ) {
+										if ( is_array( $user_data ) ) {
 											$user_data = (object) $user_data;
 										}
 
@@ -882,7 +882,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 									$user_data = ( ( isset( $event['meta_values']['NewUserData'] ) ) ? $event['meta_values']['NewUserData'] : false );
 									if ( $user_data ) {
 
-										if ( is_array( $user_data) ) {
+										if ( is_array( $user_data ) ) {
 											$user_data = (object) $user_data;
 										}
 
@@ -902,7 +902,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 									$user_data = ( ( isset( $event['meta_values']['TargetUserData'] ) ) ? $event['meta_values']['TargetUserData'] : false );
 									if ( $user_data ) {
 
-										if ( is_array( $user_data) ) {
+										if ( is_array( $user_data ) ) {
 											$user_data = (object) $user_data;
 										}
 
@@ -921,7 +921,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 						if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
 							// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 							$show_free_link = true;
-						} elseif (! empty( $user_profile_changes )) {
+						} elseif ( ! empty( $user_profile_changes ) ) {
 							$filters_string = '';
 							foreach ( $user_profile_events as $key => $event_id ) {
 								$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -1161,7 +1161,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 								// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 
 								$show_free_link = true;
-							} elseif (! empty( $plugin_activity )) {
+							} elseif ( ! empty( $plugin_activity ) ) {
 								$filters_string = '';
 								foreach ( $plugin_events as $key => $event_id ) {
 									$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -1261,7 +1261,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 								// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 
 								$show_free_link = true;
-							} elseif (! empty( $system_activity )) {
+							} elseif ( ! empty( $system_activity ) ) {
 								$filters_string = '';
 								foreach ( $system_activity_events as $key => $event_id ) {
 									$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -1310,7 +1310,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 											<td style="font-family: \'Helvetica Neue\', Helvetica, Arial, \'Lucida Grande\', sans-serif; font-weight: normal; font-size: 18px; line-height: 24px; color: #1A3060; text-align: left;">';
 
 						// Posts Published.
-						if ( ( isset( $current_settings['notification_summary_published_posts'] ) && $current_settings['notification_summary_published_posts'] ) || ! isset( $current_settings['notification_summary_published_posts'] )) {
+						if ( ( isset( $current_settings['notification_summary_published_posts'] ) && $current_settings['notification_summary_published_posts'] ) || ! isset( $current_settings['notification_summary_published_posts'] ) ) {
 							if ( true /* ! empty( $posts_published ) */ ) {
 								$posts_published_string = sprintf(
 									// translators: singular or plural form of a login total count.
@@ -1324,20 +1324,20 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 									$posts_published_string
 								);
 
-								if ( ( isset( $current_settings['notification_summary_number_of_events_included'] ) && $current_settings['notification_summary_number_of_events_included'] ) && (! empty( $posts_published )
+								if ( ( isset( $current_settings['notification_summary_number_of_events_included'] ) && $current_settings['notification_summary_number_of_events_included'] ) && ( ! empty( $posts_published )
 								|| ! empty( $posts_trashed )
 								|| ! empty( $posts_deleted )
 								|| ! empty( $posts_modified )
-								|| ! empty( $posts_status_changed ))  ) {
+								|| ! empty( $posts_status_changed ) ) ) {
 									$body .= __( 'These posts were published:', 'wp-security-audit-log' );
 								}
 								$body .= '</td></tr>';
 
-								if ( ( isset( $current_settings['notification_summary_number_of_events_included'] ) && $current_settings['notification_summary_number_of_events_included'] ) && (! empty( $posts_published )
+								if ( ( isset( $current_settings['notification_summary_number_of_events_included'] ) && $current_settings['notification_summary_number_of_events_included'] ) && ( ! empty( $posts_published )
 								|| ! empty( $posts_trashed )
 								|| ! empty( $posts_deleted )
 								|| ! empty( $posts_modified )
-								|| ! empty( $posts_status_changed ))  ) {
+								|| ! empty( $posts_status_changed ) ) ) {
 									$body .= '<tr>
 										<td style="padding-top: 20px; padding-bottom: 40px;">
 											<table class="zebra-striped" width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #D9E4FD; border-radius: 2px;">';
@@ -1373,7 +1373,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 									|| ! empty( $posts_trashed )
 									|| ! empty( $posts_deleted )
 									|| ! empty( $posts_modified )
-									|| ! empty( $posts_status_changed )) {
+									|| ! empty( $posts_status_changed ) ) {
 										$filters_string = '';
 										foreach ( $posts_published_events as $key => $event_id ) {
 											$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -1449,7 +1449,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 										// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 
 										$show_free_link = true;
-									} elseif ( ! empty( $posts_trashed )) {
+									} elseif ( ! empty( $posts_trashed ) ) {
 										$filters_string = '';
 										foreach ( $posts_trashed_events as $key => $event_id ) {
 											$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -1488,7 +1488,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 									$posts_deleted_string
 								);
 
-								if ( ( isset( $current_settings['notification_summary_number_of_events_included'] ) && $current_settings['notification_summary_number_of_events_included'] ) && ! empty( $posts_deleted )) {
+								if ( ( isset( $current_settings['notification_summary_number_of_events_included'] ) && $current_settings['notification_summary_number_of_events_included'] ) && ! empty( $posts_deleted ) ) {
 									$body .= __( 'These posts were deleted:', 'wp-security-audit-log' );
 								}
 								$body .= '</td></tr>';
@@ -1525,7 +1525,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 										// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 
 										$show_free_link = true;
-									} elseif (! empty( $posts_deleted )) {
+									} elseif ( ! empty( $posts_deleted ) ) {
 										$filters_string = '';
 										foreach ( $posts_deleted_events as $key => $event_id ) {
 											$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -1602,7 +1602,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 										// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 
 										$show_free_link = true;
-									} elseif (! empty( $posts_modified )) {
+									} elseif ( ! empty( $posts_modified ) ) {
 										$filters_string = '';
 										foreach ( $posts_modified_events as $key => $event_id ) {
 											$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -1678,7 +1678,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 										// $body .= '<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=email&utm_campaign=product_email&utm_content=cta_main" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>';
 
 										$show_free_link = true;
-									} elseif (! empty( $posts_status_changed )) {
+									} elseif ( ! empty( $posts_status_changed ) ) {
 										$filters_string = '';
 										foreach ( $posts_status_changed_events as $key => $event_id ) {
 											$filters_string .= '&filters%5B' . $key . '%5D=event%3A' . $event_id;
@@ -1713,7 +1713,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 				$body = apply_filters( 'wsal_append_dailynotification_email_content', $body, $events );
 
 				// File changes.
-				if ( true /*! empty( $files_added ) || ! empty( $files_modified ) || ! empty( $files_deleted ) */) {
+				if ( true /*! empty( $files_added ) || ! empty( $files_modified ) || ! empty( $files_deleted ) */ ) {
 					$body .= '<!-- File Changes Start -->
 					<table role="presentation" width="640" border="0" cellpadding="0" cellspacing="0" role="presentation" class="responsive">
 						<tr>

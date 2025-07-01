@@ -49,7 +49,7 @@ Settings_Builder::set_current_options( $notifications );
 
 Settings_Builder::build_option(
 	array(
-		'title'         => esc_html__( 'WordPress notification settings', 'wp-security-audit-log' ),
+		'title'         => esc_html__( 'Built-in WordPress notifications', 'wp-security-audit-log' ),
 		'id'            => 'built-in-notification-settings-tab',
 		'type'          => 'tab-title',
 		'settings_name' => Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME,

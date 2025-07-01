@@ -292,6 +292,16 @@ function set_wsal_alerts() {
 					'user',
 					'submitted',
 				),
+				array(
+					1011,
+					WSAL_INFORMATIONAL,
+					esc_html__( ' User was denied access to the page', 'wp-security-audit-log' ),
+					esc_html__( 'Was denied access to the page %URL%.', 'wp-security-audit-log' ),
+					array(),
+					array(),
+					'user',
+					'denied',
+				),
 			),
 		),
 

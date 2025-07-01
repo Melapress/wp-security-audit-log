@@ -618,6 +618,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 
 				/** The Option */
 				switch ( self::$option_type ) {
+					case 'error_text':
+						self::error_text();
+						break;
+
 					case 'text':
 						self::text();
 						break;
@@ -771,9 +775,16 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 */
 		private static function hint() {
 
-			if ( ! empty( self::$settings['hint'] ) ) {
+			if ( ! empty( self::$settings['hint'] ) && 'error_text' !== self::$option_type ) {
 				?>
 				<span class="extra-text">
+				<?php echo self::$settings['hint']; ?>
+				</span>
+				<?php
+			}
+			if ( ! empty( self::$settings['hint'] ) && 'error_text' === self::$option_type ) {
+				?>
+				<span>
 				<?php echo self::$settings['hint']; ?>
 				</span>
 				<?php
@@ -835,6 +846,15 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 						<?php self::hint(); ?>
 			</div>
 			<?php
+		}
+
+		/**
+		 * Text
+		 *
+		 * @since 5.4.2
+		 */
+		private static function error_text() {
+			self::notice_message();
 		}
 
 		/**
@@ -955,7 +975,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			$toggle_data  = ! empty( self::$settings['toggle'] ) ? 'data-wsal-toggle="' . self::$settings['toggle'] . '"' : '';
 			$toggle_class = ( ! empty( self::$settings['toggle'] ) || ! empty( self::$settings['untoggle'] ) ) ? 'wsal-toggle-option' : '';
 
-			$untoggle_data  = ! empty( self::$settings['untoggle'] ) ? 'data-wsal-untoggle="' . self::$settings['untoggle'] . '"' : '';
+			$untoggle_data = ! empty( self::$settings['untoggle'] ) ? 'data-wsal-untoggle="' . self::$settings['untoggle'] . '"' : '';
 
 			?>
 				<input <?php echo self::$item_id_attr; ?> <?php echo self::$name_attr; ?>
@@ -1539,15 +1559,19 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 
 			self::$custom_class .= ' wsal-message-hint';
 
-			if ( 'error' === self::$option_type ) {
+			$style = '';
+
+			if ( 'error' === self::$option_type || 'error_text' === self::$option_type ) {
 				self::$custom_class .= ' wsal-message-error';
+
+				$style = ' style="display: inline-block; width: 74%;" ';
 			} elseif ( 'success' === self::$option_type ) {
 				self::$custom_class .= ' wsal-message-success';
 			}
 
 			?>
-			<p <?php echo self::$item_id_wrap; ?> class="<?php echo self::$custom_class; ?>">
-						<?php echo self::$settings['text']; ?>
+			<p <?php echo self::$item_id_wrap; ?> class="<?php echo self::$custom_class; ?>" <?php echo $style; ?>>
+				<?php echo self::$settings['text']; ?>
 			</p>
 			<?php
 		}
@@ -1563,7 +1587,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 
 			?>
 			<p <?php echo self::$item_id_wrap; ?> class="<?php echo self::$custom_class; ?>">
-						<?php echo self::$settings['text']; ?>
+				<?php echo self::$settings['text']; ?>
 			</p>
 			<?php
 		}

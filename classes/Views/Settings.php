@@ -513,37 +513,40 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<?php
 				$disabled = '';
 				$label    = esc_html__( 'Admin bar notification', 'wp-security-audit-log' );
-				if ( wsal_freemius()->is_free_plan() ) {
-					$disabled = 'disabled';
-					$label    = esc_html__( 'Admin bar notification', 'wp-security-audit-log' );
+				if ( ! wsal_freemius()->is_free_plan() ) {
+					// $disabled = 'disabled';
+					// $label    = esc_html__( 'Admin bar notification', 'wp-security-audit-log' );
+
+					?>
+					<th><label for="admin_bar_notif_on"><?php echo esc_html( $label ); ?></label></th>
+					<td>
+						<fieldset <?php echo esc_attr( $disabled ); ?>>
+							<?php $abn = ! Settings_Helper::get_boolean_option_value( 'disable-admin-bar-notif', true ); ?>
+							<label for="admin_bar_notif_on">
+								<input type="radio" name="admin_bar_notif" id="admin_bar_notif_on" style="margin-top: -2px;" <?php checked( $abn ); ?> value="1">
+								<span><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></span>
+							</label>
+							<br/>
+							<label for="admin_bar_notif_off">
+								<input type="radio" name="admin_bar_notif" id="admin_bar_notif_off" style="margin-top: -2px;" <?php checked( $abn, false ); ?>  value="0">
+								<span><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></span>
+							</label>
+						</fieldset>
+					</td>
+					<?php
 				}
 				?>
-				<th><label for="admin_bar_notif_on"><?php echo esc_html( $label ); ?></label></th>
-				<td>
-					<fieldset <?php echo esc_attr( $disabled ); ?>>
-						<?php $abn = ! Settings_Helper::get_boolean_option_value( 'disable-admin-bar-notif', true ); ?>
-						<label for="admin_bar_notif_on">
-							<input type="radio" name="admin_bar_notif" id="admin_bar_notif_on" style="margin-top: -2px;" <?php checked( $abn ); ?> value="1">
-							<span><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></span>
-						</label>
-						<br/>
-						<label for="admin_bar_notif_off">
-							<input type="radio" name="admin_bar_notif" id="admin_bar_notif_off" style="margin-top: -2px;" <?php checked( $abn, false ); ?>  value="0">
-							<span><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></span>
-						</label>
-					</fieldset>
-				</td>
 			</tr>
-			<!-- / Admin Bar Notification -->
+			<!-- // Admin Bar Notification -->
 
 			<tr>
 				<?php
 				$disabled = '';
 				$label    = esc_html__( 'Admin bar notification updates', 'wp-security-audit-log' );
-				if ( wsal_freemius()->is_free_plan() ) {
-					$disabled = 'disabled';
-					$label    = esc_html__( 'Admin bar notification updates', 'wp-security-audit-log' );
-				}
+				if ( ! wsal_freemius()->is_free_plan() ) {
+					// $disabled = 'disabled';
+					// $label    = esc_html__( 'Admin bar notification updates', 'wp-security-audit-log' );
+				
 				?>
 				<th><label for="admin_bar_notif_refresh"><?php echo esc_html( $label ); ?></label></th>
 				<td>
@@ -560,6 +563,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</label>
 					</fieldset>
 				</td>
+				<?php } ?>
 			</tr>
 			<!-- / Admin Bar Notification Updates -->
 			</tbody>
@@ -1692,7 +1696,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Get roles.
 		$roles = array();
 		foreach ( get_editable_roles() as $role_name => $role_info ) {
-			if ( strpos( $role_name, \sanitize_text_field( \wp_unslash( $get_array['term'] ) )) !== false ) {
+			if ( strpos( $role_name, \sanitize_text_field( \wp_unslash( $get_array['term'] ) ) ) !== false ) {
 				array_push( $roles, $role_name );
 			}
 		}

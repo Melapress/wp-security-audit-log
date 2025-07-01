@@ -1209,6 +1209,21 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		}
 
 		/**
+		 * Migration for version upto 5.4.2
+		 *
+		 * Migrates notification settings
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.4.2
+		 */
+		public static function migrate_up_to_5420() {
+			Settings_Helper::set_boolean_option_value( 'notification-modal-dismissed', true, false );
+		}
+
+		/**
 		 * Remove some very old data from the database.
 		 *
 		 * @return void

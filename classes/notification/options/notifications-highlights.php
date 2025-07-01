@@ -54,6 +54,29 @@ Settings_Builder::build_option(
 	)
 );
 
+
+$settings_url = \add_query_arg(
+	array(
+		'page' => Notifications::get_safe_view_name(),
+	),
+	\network_admin_url( 'admin.php' )
+) . '#wsal-options-tab-notification-settings';
+
+// phpcs:disable
+// phpcs:enable
+
+Settings_Builder::build_option(
+	array(
+		'id'      => 'general-settings-tab',
+		'type'    => 'html',
+		'content' => '<p>' . \wp_sprintf(
+			esc_html__( 'Use this section to configure a daily or weekly activity log summary, or both. This gives you a regular overview of key events.', 'wp-security-audit-log' ) . '</p>' .
+
+			'<p>' . esc_html__( 'Customize your summary notifications by selecting which highlights to include and specifying the email address(es) where the summaries should be sent. This helps you stay informed about important activity on your site without needing to review the full log.', 'wp-security-audit-log' ) . '</p>'
+		),
+	)
+);
+
 Settings_Builder::build_option(
 	array(
 		'title'         => esc_html__( 'Daily Activity log highlights email', 'wp-security-audit-log' ),

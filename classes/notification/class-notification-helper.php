@@ -388,11 +388,11 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 				'id'            => $id,
 				'type'          => 'text',
 				'pattern'       => '([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,20}[,]{0,}){0,}',
-				'hint'          => esc_html__( 'You can enter multiple email addresses separated by commas. Do not use a space in between the email addresses and commas. For example: support@melapress.com,info@melapress.com', 'wp-security-audit-log' ),
+				'hint'          => esc_html__( 'Leave empty if you want to use default one. You can enter multiple email addresses separated by commas. Do not use a space in between the email addresses and commas. For example: support@melapress.com,info@melapress.com', 'wp-security-audit-log' ),
 				'settings_name' => $settings_name,
 			);
 			if ( '' === $name ) {
-				$name = esc_html__( 'Email address: ', 'wp-security-audit-log' );
+				$name = esc_html__( 'Email address(es): ', 'wp-security-audit-log' );
 			}
 
 			$options['name'] = $name;
@@ -423,7 +423,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 				'settings_name' => $settings_name,
 			);
 			if ( '' === $name ) {
-				$name = esc_html__( 'Phone: ', 'wp-security-audit-log' );
+				$name = esc_html__( 'Phone number: ', 'wp-security-audit-log' );
 			}
 
 			$options['name'] = $name;
@@ -441,9 +441,10 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 		 */
 		public static function phone_settings_error_array( string $id, string $settings_name ): array {
 			$options = array(
+				'name'          => esc_html__( 'Phone number: ', 'wp-security-audit-log' ),
 				'id'            => $id,
-				'type'          => 'error',
-				'text'          => '<span class="extra-text">' . esc_html__( 'In order to send notifications via SMS messages please configure the Twilio integration in the ', 'wp-security-audit-log' ) . '<a class="inner_links" href="#" data-section="twilio-notification-settings" data-url="wsal-options-tab-notification-settings">' . esc_html__( 'settings.', 'wp-security-audit-log' ) . ' </a></span>',
+				'type'          => 'error_text',
+				'text'          => '<span>' . esc_html__( 'In order to send notifications via SMS messages please configure the Twilio integration in the ', 'wp-security-audit-log' ) . '<a class="inner_links" href="#" data-section="twilio-notification-settings" data-url="wsal-options-tab-notification-settings">' . esc_html__( 'settings.', 'wp-security-audit-log' ) . ' </a></span>',
 				'settings_name' => $settings_name,
 			);
 
@@ -489,13 +490,49 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 		 */
 		public static function slack_settings_error_array( string $id, string $settings_name ): array {
 			$options = array(
+				'name'          => esc_html__( 'Slack channel: ', 'wp-security-audit-log' ),
 				'id'            => $id,
-				'type'          => 'error',
-				'text'          => '<span class="extra-text">' . esc_html__( 'In order to send notifications via Slack messages please configure the Slack integration in the ', 'wp-security-audit-log' ) . '<a class="inner_links" href="#" data-section="slack-notification-settings" data-url="wsal-options-tab-notification-settings">' . esc_html__( 'settings.', 'wp-security-audit-log' ) . ' </a></span>',
+				'type'          => 'error_text',
+				'text'          => '<span>' . esc_html__( 'In order to send notifications via Slack messages please configure the Slack integration in the ', 'wp-security-audit-log' ) . '<a class="inner_links" href="#" data-section="slack-notification-settings" data-url="wsal-options-tab-notification-settings">' . esc_html__( 'settings.', 'wp-security-audit-log' ) . ' </a></span>',
 				'settings_name' => $settings_name,
 			);
 
 			return $options;
+		}
+
+		/**
+		 * Default channel hint for email, phone and slack.
+		 *
+		 * @return string
+		 *
+		 * @since 5.4.2
+		 */
+		public static function default_hint_channels_set() {
+
+			$defaults = '';
+			if ( Notifications::is_default_mail_set() ) {
+				return '';
+				$current_default_mail = Notifications::get_default_mail();
+				$defaults            .= esc_html__( ' Currently default email is set to: ', 'wp-security-audit-log' ) . $current_default_mail;
+			} else {
+				$defaults .= self::no_default_email_is_set();
+			}
+
+			if ( Notifications::is_default_twilio_set() ) {
+				$current_default_twilio = Notifications::get_default_twilio();
+				$defaults              .= esc_html__( ' Currently default phone is set to: ', 'wp-security-audit-log' ) . $current_default_twilio;
+			} else {
+				$defaults .= self::no_default_phone_is_set();
+			}
+
+			if ( Notifications::is_default_slack_set() ) {
+				$current_default_twilio = Notifications::get_default_slack();
+				$defaults              .= esc_html__( ' Currently default slack channel is set to: ', 'wp-security-audit-log' ) . $current_default_twilio;
+			} else {
+				$defaults .= self::no_default_slack_is_set();
+			}
+
+			return \esc_html__( 'You can set default email / phone for all notifications in ', 'wp-security-audit-log' ) . '<a class="inner_links" href="#" data-section="notification-default-settings" data-url="wsal-options-tab-notification-settings">' . \esc_html__( 'settings', 'wp-security-audit-log' ) . '</a>, ' . \esc_html__( 'or check this and specify ones for this event', 'wp-security-audit-log' ) . $defaults;
 		}
 	}
 }

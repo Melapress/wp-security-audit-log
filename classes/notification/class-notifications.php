@@ -1172,7 +1172,13 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 
 				if ( isset( $post_array[ 'notification_event_' . $event_id . '_failed_more_than' ] ) ) {
 					$int = filter_var( $post_array[ 'notification_event_' . $event_id . '_failed_more_than' ], \FILTER_VALIDATE_INT );
-					$report_options[ 'event_' . $event_id . '_failed_more_than' ] = ( $int && $int > 0 ) ? $int : 10;
+					if ( 2 > $int ) {
+						$int = 2;
+					}
+					if ( 30 < $int ) {
+						$int = 30;
+					}
+					$report_options[ 'event_' . $event_id . '_failed_more_than' ] = ( $int && $int > 0 ) ? $int : 2;
 				}
 
 				$report_options[ 'event_' . $event_id . '_notification_custom_message' ] = ( ( isset( $post_array[ 'notification_event_' . $event_id . '_notification_custom_message' ] ) ) ? filter_var( $post_array[ 'notification_event_' . $event_id . '_notification_custom_message' ], FILTER_VALIDATE_BOOLEAN ) : false );

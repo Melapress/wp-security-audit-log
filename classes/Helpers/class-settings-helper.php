@@ -1051,7 +1051,14 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 */
 		public static function get_excluded_post_meta_fields() {
 			if ( empty( self::$excluded_post_meta ) ) {
-				self::$excluded_post_meta = array_unique( array_filter( explode( ',', self::get_option_value( 'excluded-post-meta', '' ) ) ) );
+
+				$stored_excluded_post_meta = self::get_option_value( 'excluded-post-meta', '' );
+				if ( \is_array( $stored_excluded_post_meta ) ) {
+					self::$excluded_post_meta = array_unique( array_filter( $stored_excluded_post_meta ) );
+				} else {
+					self::$excluded_post_meta = array_unique( array_filter( explode( ',', $stored_excluded_post_meta ) ) );
+				}
+
 				asort( self::$excluded_post_meta );
 			}
 
