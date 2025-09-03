@@ -105,6 +105,7 @@ return array(
     'WSAL\\WP_Sensors\\Helpers\\Termly_Helper' => $baseDir . '/classes/WPSensors/Helpers/class-termly-helper.php',
     'WSAL\\WP_Sensors\\Helpers\\WPForms_Helper' => $baseDir . '/classes/WPSensors/Helpers/class-wpforms-helper.php',
     'WSAL\\WP_Sensors\\Helpers\\WP_2FA_Helper' => $baseDir . '/classes/WPSensors/Helpers/class-wp-2fa-helper.php',
+    'WSAL\\WP_Sensors\\Helpers\\WP_Plugins_Themes_Helper' => $baseDir . '/classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php',
     'WSAL\\WP_Sensors\\Helpers\\Woocommerce_Helper' => $baseDir . '/classes/WPSensors/Helpers/class-woocommerce-helper.php',
     'WSAL\\WP_Sensors\\Helpers\\Yoast_SEO_Helper' => $baseDir . '/classes/WPSensors/Helpers/class-yoast-seo-helper.php',
     'WSAL\\WP_Sensors\\MainWP_Server_Sensor' => $baseDir . '/classes/WPSensors/class-mainwp-server-sensor.php',

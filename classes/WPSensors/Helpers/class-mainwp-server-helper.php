@@ -166,7 +166,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 					 */
 					public function __construct() {
 						$this->blogname = \get_bloginfo( 'name' );
-						$this->siteurl = \esc_url( \network_admin_url( 'admin.php' ) );
+						$this->siteurl  = \esc_url( \network_admin_url( 'admin.php' ) );
 					}
 				} );
 			}
@@ -258,6 +258,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 				$plugin_file_full = \WP_PLUGIN_DIR . '/' . $plugin_file;
 				$plugin_data      = \get_plugin_data( $plugin_file_full, false, true );
 
+				$plugin_slug = dirname( $plugin_file );
+
 				$old_version = ( isset( $old_plugins[ $plugin_file ] ) ) ? $old_plugins[ $plugin_file ]['Version'] : false;
 				$new_version = $plugin_data['Version'];
 
@@ -267,11 +269,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 						array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
-								'Name'      => $plugin_data['Name'],
-								'PluginURI' => $plugin_data['PluginURI'],
-								'Version'   => $new_version,
-								'Author'    => $plugin_data['Author'],
-								'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+								'Name'          => $plugin_data['Name'],
+								'PluginURI'     => $plugin_data['PluginURI'],
+								'PluginRepoUrl' => WP_Plugins_Themes_Sensor::get_plugin_wp_repo_url( $plugin_slug ),
+								'Version'       => $new_version,
+								'Author'        => $plugin_data['Author'],
+								'Network'       => $plugin_data['Network'] ? 'True' : 'False',
 							),
 							'OldVersion' => $old_version,
 						)

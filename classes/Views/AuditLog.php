@@ -96,6 +96,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'admin_init', array( $this, 'handle_form_submission' ) );
 
 		add_action( 'wp_ajax_wsal_export_csv_results', array( '\WSAL\Writers\CSV_Writer', 'write_csv_ajax' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'add_plugin_install_script' ) );
 
 		CSV_Writer::init();
 
@@ -935,4 +936,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 	// phpcs:disable
 	// phpcs:enable
+
+	/**
+	 * If the plugin-install script from core is not enqueued, add it
+	 *
+	 * ! This script is from the WP core and is necessary to handle the responsive resize of the thickbox modal.
+	 * ! The modal is used in events associated with plugins on the 'View plugin information' link.
+	 */
+	public static function add_plugin_install_script() {
+		if ( ! wp_script_is( 'plugin-install', 'enqueued' ) ) {
+			wp_enqueue_script( 'plugin-install' );
+		}
+	}
 }

@@ -376,11 +376,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 					if ( isset( $plugins[ $plugin_file ] ) ) {
 						$plugin = $plugins[ $plugin_file ];
 
+						$plugin_slug = dirname( $plugin_file );
+
 						// Set alert options.
-						$alert_options['Plugin'] = (object) array(
-							'Name'      => $plugin['Name'],
-							'PluginURI' => $plugin['PluginURI'],
-							'Version'   => $plugin['Version'],
+						$alert_options['PluginData'] = (object) array(
+							'Name'          => $plugin['Name'],
+							'PluginURI'     => $plugin['PluginURI'],
+							'PluginRepoUrl' => WP_Plugins_Themes_Sensor::get_plugin_wp_repo_url( $plugin_slug ),
+							'Version'       => $plugin['Version'],
 						);
 					} else {
 						$plugin_name = basename( $plugin_file, '.php' );
@@ -392,7 +395,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 							$plugin_name = self::determine_recently_activated_plugin();
 						}
 
-						$alert_options['Plugin'] = (object) array( 'Name' => $plugin_name );
+						$alert_options['PluginData'] = (object) array( 'Name' => $plugin_name );
 					}
 					break;
 				case 'themes':

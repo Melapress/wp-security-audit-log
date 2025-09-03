@@ -275,6 +275,12 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 				// Please do not report this code as a PHP 7 incompatibility. Observe the surrounding logic.
 				$code = mysql_errno( $_wpdb->dbh ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_errno
 			}
+
+			// WP Playground SQLite compatibility fix.
+			if ( $_wpdb instanceof \WP_SQLite_DB ) {
+				$code = 1146;
+			}
+
 			return $code;
 		}
 
@@ -323,13 +329,42 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			$table_name = self::get_table_name( $_wpdb );
 
 			if ( self::check_table_exists( $table_name, $connection ) ) {
-
 				static::get_connection()->query( 'TRUNCATE ' . $table_name );
 
 				return true;
 			}
 
 			return false;
+		}
+
+		/**
+		 * Count records in the table using primary index 'id'.
+		 * Adds a LIMIT for performance.
+		 *
+		 * @param \wpdb $connection Optional DB connection.
+		 *
+		 * @return int
+		 *
+		 * @since 5.5.0
+		 */
+		public static function count_records( $connection = null ): int {
+			if ( null !== $connection ) {
+				if ( $connection instanceof \wpdb ) {
+					$_wpdb = $connection;
+				}
+			} else {
+				$_wpdb = static::get_connection();
+			}
+
+			$table_name = self::get_table_name();
+
+			if ( ! self::check_table_exists( $table_name, $connection ) ) {
+					return 0;
+			}
+
+			$sql = 'SELECT count(id) FROM ' . self::get_table_name( $_wpdb ) . ' LIMIT 1';
+
+			return (int) $_wpdb->get_var( $sql );
 		}
 
 		/**

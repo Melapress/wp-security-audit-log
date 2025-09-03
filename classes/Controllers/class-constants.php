@@ -467,10 +467,21 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 				self::$wsal_built_links['ContactSupport'] = array( esc_html__( 'Contact Support', 'wp-security-audit-log' ) => 'https://melapress.com/contact/' );
 
 				self::$wsal_built_links['CommentLink'] = array(
-					\esc_html__( 'Comment', 'wp-security-audit-log' ) => array(
+					\esc_html__( 'View Comment', 'wp-security-audit-log' ) => array(
 						// Before 4.2.1 the CommentLink meta would contain the full HTML markup for the link, now it
 						// contains only the URL.
 						'url'   => '%CommentLink%',
+						'label' => '%CommentDate%',
+					),
+				);
+
+				/**
+				 * CommentLinkWpAdmin is used to build a link to a comment in the WP admin UI.
+				 * Used for comments that are not available in the front end, for example, spam comments.
+				 */
+				self::$wsal_built_links['CommentLinkWpAdmin'] = array(
+					\esc_html__( 'View Comment', 'wp-security-audit-log' ) => array(
+						'url'   => '%CommentLinkWpAdmin%',
 						'label' => '%CommentDate%',
 					),
 				);
@@ -498,6 +509,13 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 				self::$wsal_built_links['RevisionLink'] = array( esc_html__( 'View the content changes', 'wp-security-audit-log' ) => '%RevisionLink%' );
 
 				self::$wsal_built_links['TagLink'] = array( esc_html__( 'View tag', 'wp-security-audit-log' ) => '%RevisionLink%' );
+
+				self::$wsal_built_links['PluginRepoUrl'] = array(
+					esc_html__( 'View plugin information', 'wp-security-audit-log' )  => array(
+						'url'   => '%PluginData->PluginRepoUrl%',
+						'label' => '%PluginData->Name%',
+					),
+				);
 
 				/*
 				* All these links are formatted using WSAL_AlertFormatter (including any label) because they

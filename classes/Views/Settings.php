@@ -16,6 +16,7 @@ use WSAL\Controllers\Constants;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Entities\Occurrences_Entity;
 use WSAL\Controllers\Database_Manager;
 use WSAL\Helpers\Plugin_Settings_Helper;
 use WSAL\Entities\Archive\Delete_Records;
@@ -899,7 +900,16 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- Can View Events -->
 
 		<h3><?php esc_html_e( 'Which email address should the plugin use as a from address?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'By default when the plugin sends an email notification it uses the email address specified in this website’s general settings. Though you can change the email address and display name from this section.', 'wp-security-audit-log' ); ?></p>
+		<p class="description">
+				<?php
+				echo sprintf(
+					// translators: 1 - domain name derived from site URL.
+					\esc_html__( 'By default, the plugin sends emails from wp-activity-log@%1$s. You can customize both the “From” email address and display name using the settings below.', 'wp-security-audit-log' ),
+					\wp_parse_url( \network_home_url(), PHP_URL_HOST ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				);
+				?>
+		</p>
+		<p class="description"><?php esc_html_e( 'If you are using an SMTP plugin or an external email service, ensure the email address you configure here is allowed by your provider. Some providers may reject or block emails if the “From” address does not match the authenticated sending account.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -1912,11 +1922,19 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			wp_send_json_error( esc_html__( 'Nonce Verification Failed.', 'wp-security-audit-log' ) );
 		}
 
+		$total = Occurrences_Entity::count_records();
+
+
 		$result = Database_Manager::purge_activity();
 
 		if ( $result ) {
 			// Log purge activity event.
-			Alert_Manager::trigger_event( 6034 );
+			Alert_Manager::trigger_event(
+				6034,
+				array(
+					'PurgedCount' => $total,
+				)
+			);
 			wp_send_json_success( esc_html__( 'Tables has been reset.', 'wp-security-audit-log' ) );
 		} else {
 			wp_send_json_error( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );

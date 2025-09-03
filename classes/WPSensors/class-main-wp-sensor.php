@@ -139,7 +139,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 		/**
 		 * Get removed themes.
 		 *
-		 * @return WP_Theme[] List of WP_Theme objects.
+		 * @return \WP_Theme[] List of WP_Theme objects.
 		 *
 		 * @since 4.5.0
 		 */
@@ -204,9 +204,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 					Alert_Manager::trigger_event(
 						5000,
 						array(
-							'Plugin' => (object) array(
+							'PluginData' => (object) array(
 								'Name'            => $plugin['Name'],
 								'PluginURI'       => $plugin['PluginURI'],
+								'PluginRepoUrl'   => WP_Plugins_Themes_Sensor::get_plugin_wp_repo_url( $plugin_slug ),
 								'Version'         => $plugin['Version'],
 								'Author'          => $plugin['Author'],
 								'Network'         => $plugin['Network'] ? 'True' : 'False',
@@ -248,6 +249,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 				// Get plugin name.
 				$plugin_name = $args['Name'];
 
+				$plugin_slug = dirname( $plugin_name );
+
 				// Get plugin filename.
 				$plugin_filename = WP_Plugins_Themes_Sensor::get_plugin_file_name( $plugin_name );
 
@@ -257,7 +260,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 						array(
 							'PluginFile' => $plugin_filename,
 							'PluginData' => (object) array(
-								'Name' => $plugin_name,
+								'Name'          => $plugin_name,
+								'PluginRepoUrl' => WP_Plugins_Themes_Sensor::get_plugin_wp_repo_url( $plugin_slug ),
 							),
 						)
 					);
@@ -331,6 +335,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 				return;
 			}
 
+			$plugin_slug = dirname( $plugin );
+
 			// Get MainWP post data.
 			$post_array = filter_input_array( INPUT_POST );
 
@@ -352,18 +358,21 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 					$event = 5002;
 				}
 
-				$plugin      = WP_PLUGIN_DIR . '/' . $plugin;
+				$plugin = WP_PLUGIN_DIR . '/' . $plugin;
+
 				$plugin_data = get_plugin_data( $plugin, false, true );
+
 				Alert_Manager::trigger_event(
 					$event,
 					array(
 						'PluginFile' => $plugin,
 						'PluginData' => (object) array(
-							'Name'      => $plugin_data['Name'],
-							'PluginURI' => $plugin_data['PluginURI'],
-							'Version'   => $plugin_data['Version'],
-							'Author'    => $plugin_data['Author'],
-							'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+							'Name'          => $plugin_data['Name'],
+							'PluginURI'     => $plugin_data['PluginURI'],
+							'PluginRepoUrl' => WP_Plugins_Themes_Sensor::get_plugin_wp_repo_url( $plugin_slug ),
+							'Version'       => $plugin_data['Version'],
+							'Author'        => $plugin_data['Author'],
+							'Network'       => $plugin_data['Network'] ? 'True' : 'False',
 						),
 					)
 				);
@@ -381,11 +390,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 					array(
 						'PluginFile' => $plugin,
 						'PluginData' => (object) array(
-							'Name'      => $plugin_data['Name'],
-							'PluginURI' => $plugin_data['PluginURI'],
-							'Version'   => $plugin_data['Version'],
-							'Author'    => $plugin_data['Author'],
-							'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+							'Name'          => $plugin_data['Name'],
+							'PluginURI'     => $plugin_data['PluginURI'],
+							'PluginRepoUrl' => WP_Plugins_Themes_Sensor::get_plugin_wp_repo_url( $plugin_slug ),
+							'Version'       => $plugin_data['Version'],
+							'Author'        => $plugin_data['Author'],
+							'Network'       => $plugin_data['Network'] ? 'True' : 'False',
 						),
 					)
 				);

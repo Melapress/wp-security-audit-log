@@ -19,6 +19,7 @@ use WSAL\Helpers\View_Manager;
 use WSAL\Controllers\Constants;
 use WSAL\Controllers\Cron_Jobs;
 use WSAL\Controllers\Connection;
+use WSAL\EventNotes\Event_Notes;
 use WSAL\Helpers\Plugins_Helper;
 use WSAL\Helpers\Upgrade_Notice;
 use WSAL\Helpers\Widget_Manager;
@@ -411,6 +412,8 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			// add_filter( 'mainwp_child_extra_execution', array( new WSAL_MainWpApi( $this ), 'handle_callback' ), 10, 2 );
 
 			\add_action( 'wsal_freemius_loaded', array( __CLASS__, 'adjust_freemius_strings' ) );
+
+			add_filter( 'plugins_api_result', array( __CLASS__, 'filter_default_no_plugin_error' ), 10, 3 );
 
 			Cron_Jobs::init();
 
@@ -950,10 +953,9 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			// Enqueue script.
 			\wp_enqueue_script( 'wsal-common' );
 
-			// Dont want to add a css file to all admin for the of setting an icon opacity.
 			?>			
 			<style>
-				#adminmenu div.wp-menu-image.svg {
+				#adminmenu #toplevel_page_wsal-auditlog div.wp-menu-image.svg {
 					opacity: 0.6;
 				}
 			</style>
@@ -1441,6 +1443,48 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				'wp-activity-log_page_wsal-notifications',
 				'wp-activity-log_page_wsal-notifications-network',
 			);
+		}
+
+		/**
+		 * Check and filter the error screen when a plugin information is not found.
+		 * Plugin information are not found when:
+		 * - The plugin is not in the official WP plugin repository and is disabled.
+		 * - The plugin is not in the official WP plugin repository and does not include a plugin information screen.
+		 *
+		 * This hook should filter only error screens for URLs like:
+		 *
+		 * /wp-admin/plugin-install.php?tab=plugin-information&plugin=plugin-slug-here&TB_iframe=true&width=640&height=600
+		 *
+		 * @param object|\WP_Error $result - Response object or WP_Error.
+		 * @param string           $action - The type of information being requested from the Plugin Installation API.
+		 * @param object           $args - Plugin API arguments.
+		 */
+		public static function filter_default_no_plugin_error( $result, $action, $args ) {
+			if ( 'plugin_information' !== $action ) {
+					return $result;
+			}
+
+			/**
+			 * Proceed only if the request is coming from our plugin page.
+			 */
+			$requested_from_page = isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
+
+			if ( false === strpos( $requested_from_page, 'page=wsal-auditlog' ) ) {
+				return $result;
+			}
+
+			if ( is_wp_error( $result ) ) {
+				$error_plugin_api_failed = $result->get_error_messages( 'plugins_api_failed' );
+
+				$wsal_message  = 'This plugin was not found on the repository. Most probably this is a premium plugin or a plugin that is not on the WordPress.org repository.';
+				$wsal_message .= '<br><br><a href="https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=wsal&utm_campaign=plugin-not-found-message" target="_blank">WP Activity Log plugin</a>';
+
+				if ( $error_plugin_api_failed && trim( $error_plugin_api_failed[0] ) === 'Plugin not found.' ) {
+					$result->errors['plugins_api_failed'][0] = $wsal_message;
+				}
+			}
+
+			return $result;
 		}
 	}
 }

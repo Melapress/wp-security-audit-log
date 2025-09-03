@@ -108,7 +108,6 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function init() {
-			\add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ), -1 );
 			// Add custom schedules for WSAL early otherwise they won't work.
 			\add_filter( 'cron_schedules', array( __CLASS__, 'recurring_schedules' ), PHP_INT_MAX );
 			\add_filter( 'wsal_cron_hooks', array( __CLASS__, 'settings_hooks' ) );
@@ -117,8 +116,6 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			if ( Settings_Helper::get_boolean_option_value( 'pruning-date-e', false ) ) {
 				\add_action( 'wsal_cleanup', array( Occurrences_Entity::class, 'prune_records' ) );
 			}
-
-			\remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ) );
 		}
 
 		/**
@@ -256,8 +253,6 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			// $wp_actions['after_setup_theme'] = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			// }
 
-			\add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ), -1 );
-
 			$schedules['sixhours']         = array(
 				'interval' => 21600,
 				'display'  => __( 'Every 6 hours', 'wp-security-audit-log' ),
@@ -298,8 +293,6 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			if ( $remove_it ) {
 				unset( $wp_actions['after_setup_theme'] );
 			}
-
-			\remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ) );
 
 			return $schedules;
 		}
@@ -388,19 +381,6 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			if ( $schedule_time ) {
 				\wp_unschedule_event( $schedule_time, $event_name, $args );
 			}
-		}
-
-		/**
-		 * Prevents the PHP error (notice or deprecated) from being triggered for doing it wrong calls.
-		 *
-		 * @param bool $trigger - Should we trigger the error or not?.
-		 *
-		 * @return bool
-		 *
-		 * @since 5.3.0
-		 */
-		public static function maybe_prevent_error( $trigger ) {
-			return false;
 		}
 
 		/**

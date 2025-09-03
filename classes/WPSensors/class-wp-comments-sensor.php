@@ -83,9 +83,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Comments_Sensor' ) ) {
 		/**
 		 * Trigger comment status.
 		 *
-		 * @param string   $new_status - New status.
-		 * @param string   $old_status - Old status.
-		 * @param stdClass $comment - Comment.
+		 * @param string    $new_status - New status.
+		 * @param string    $old_status - Old status.
+		 * @param \stdClass $comment - Comment.
 		 *
 		 * @since 4.5.0
 		 */
@@ -94,14 +94,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Comments_Sensor' ) ) {
 				$post         = get_post( $comment->comment_post_ID );
 				$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment->comment_ID;
 				$fields       = array(
-					'PostTitle'   => $post->post_title,
-					'PostID'      => $post->ID,
-					'PostType'    => $post->post_type,
-					'PostStatus'  => $post->post_status,
-					'CommentID'   => $comment->comment_ID,
-					'Author'      => $comment->comment_author,
-					'Date'        => $comment->comment_date,
-					'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+					'PostTitle'     => $post->post_title,
+					'PostID'        => $post->ID,
+					'PostType'      => $post->post_type,
+					'PostStatus'    => $post->post_status,
+					'CommentID'     => $comment->comment_ID,
+					'CommentStatus' => \wp_get_comment_status( (int) $comment->comment_ID ),
+					'Author'        => $comment->comment_author,
+					'Date'          => $comment->comment_date,
+					'CommentLink'   => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
 				);
 
 				if ( 'approved' === $new_status ) {
@@ -190,13 +191,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Comments_Sensor' ) ) {
 					$post         = get_post( $comment->comment_post_ID );
 					$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
 					$fields       = array(
-						'PostTitle'   => $post->post_title,
-						'PostID'      => $post->ID,
-						'PostType'    => $post->post_type,
-						'PostStatus'  => $post->post_status,
-						'CommentID'   => $comment->comment_ID,
-						'Date'        => $comment->comment_date,
-						'CommentLink' => $comment_link,
+						'PostTitle'     => $post->post_title,
+						'PostID'        => $post->ID,
+						'PostType'      => $post->post_type,
+						'PostStatus'    => $post->post_status,
+						'CommentID'     => $comment->comment_ID,
+						'CommentStatus' => \wp_get_comment_status( (int) $comment->comment_ID ),
+						'Date'          => $comment->comment_date,
+						'CommentLink'   => $comment_link,
 					);
 
 					// Get user data.
@@ -229,14 +231,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Comments_Sensor' ) ) {
 				$post         = get_post( $comment->comment_post_ID );
 				$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
 				$fields       = array(
-					'PostTitle'   => $post->post_title,
-					'PostID'      => $post->ID,
-					'PostType'    => $post->post_type,
-					'PostStatus'  => $post->post_status,
-					'CommentID'   => $comment->comment_ID,
-					'Author'      => $comment->comment_author,
-					'Date'        => $comment->comment_date,
-					'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+					'PostTitle'          => $post->post_title,
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostStatus'         => $post->post_status,
+					'CommentID'          => $comment->comment_ID,
+					'CommentStatus'      => \wp_get_comment_status( (int) $comment->comment_ID ),
+					'Author'             => $comment->comment_author,
+					'Date'               => $comment->comment_date,
+					'CommentLink'        => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+					'CommentLinkWpAdmin' => admin_url( 'comment.php?action=editcomment&c=' . $comment->comment_ID ),
 				);
 
 				if ( 'shop_order' !== $post->post_type && ( property_exists( $comment, 'comment_type' ) && 'order_note' !== $comment->comment_type ) ) {

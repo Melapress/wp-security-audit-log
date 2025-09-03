@@ -788,7 +788,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 				</p>
 				<fieldset>
 					<label for="3"><?php esc_html_e( 'Email address:', 'wp-security-audit-log' ); ?>
-						<input id="notification_weekly_email_address" name="built-in-notifications[notification_weekly_email_address]" required="required" type="text" value="<?php echo \sanitize_email( \get_bloginfo( 'admin_email' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" pattern="([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,4}[,]{0,}){1,}">
+						<input id="notification_weekly_email_address" name="built-in-notifications[notification_weekly_email_address]" required="required" type="text" value="<?php echo \sanitize_email( \get_bloginfo( 'admin_email' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" pattern="([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,20}[,]{0,}){1,}">
 					</label>
 					<p></p>
 				</fieldset>
@@ -880,7 +880,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 				</p>
 				<fieldset>
 					<label for="3"><?php esc_html_e( 'Email address:', 'wp-security-audit-log' ); ?>
-						<input id="notification_default_email_address" name="notifications[notification_default_email_address]" required="required" type="text" value="<?php echo \sanitize_email( \get_bloginfo( 'admin_email' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" pattern="([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,4}[,]{0,}){1,}">
+						<input id="notification_default_email_address" name="notifications[notification_default_email_address]" required="required" type="text" value="<?php echo \sanitize_email( \get_bloginfo( 'admin_email' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" pattern="([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,20}[,]{0,}){1,}">
 					</label>
 					<p></p>
 				</fieldset>

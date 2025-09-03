@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit28457
+class ComposerStaticInit8667
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -125,6 +125,7 @@ class ComposerStaticInit28457
         'WSAL\\WP_Sensors\\Helpers\\Termly_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-termly-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\WPForms_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-wpforms-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\WP_2FA_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-wp-2fa-helper.php',
+        'WSAL\\WP_Sensors\\Helpers\\WP_Plugins_Themes_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\Woocommerce_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-woocommerce-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\Yoast_SEO_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-yoast-seo-helper.php',
         'WSAL\\WP_Sensors\\MainWP_Server_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-mainwp-server-sensor.php',
@@ -171,9 +172,9 @@ class ComposerStaticInit28457
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit28457::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit28457::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit28457::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit8667::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit8667::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit8667::$classMap;
 
         }, null, ClassLoader::class);
     }

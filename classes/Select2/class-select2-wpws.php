@@ -8,6 +8,7 @@
 
 namespace Tools;
 
+use MLS\Reset_Passwords;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Helpers\WP_Helper;
 
@@ -346,7 +347,7 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 				$threshold = intval( $args['remote_source_threshold'] );
 				if ( $threshold > 0 ) {
 					if ( 'user' === $args['data-type'] ) {
-						$users_count = count_users( 'time' )['total_users'];
+						$users_count = Reset_Passwords::count_users();
 						if ( $users_count <= $threshold ) {
 							$args['data'] = self::get_users();
 							unset( $args['data-type'] );

@@ -1,6 +1,90 @@
 var $doc = jQuery(document),
     $window = jQuery(window);
 
+/**
+ * Validate a comma-separated list of email addresses with no spaces.
+ *
+ * @param string emailVal - The email string to validate.
+ *
+ * @returns boolean - True if the email string is valid, false otherwise.
+ *
+ * @since 5.5.0
+ */
+function wsalIsValidEmailList(emailVal) {
+	// Accepts comma-separated emails, no spaces
+	const emailPattern =
+		/^([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,20})(,[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,20})*$/;
+
+	return emailVal.length > 0 && emailPattern.test(emailVal);
+}
+
+/**
+ * Validate a field inside an accordion in the email Notifications section:
+ *
+ * /wp-admin/admin.php?page=wsal-notifications
+ *
+ * @param string emailInputFieldSelector - The jQuery selector for the email input field to validate.
+ *
+ * @since 5.5.0
+ */
+function wsalNotificationEmailValidation(emailInputFieldSelector, checkboxTriggerSelector) {
+  const { __ } = wp.i18n;
+
+	const $emailField = jQuery(emailInputFieldSelector);
+	const $checkboxTrigger = jQuery(checkboxTriggerSelector);
+	const $checkboxToggle = jQuery(checkboxTriggerSelector).find('.switchery');
+
+	const emailErrorNoticeId = emailInputFieldSelector.replace('#', 'wsal-') + '-alert';
+
+  const emailErrorNotice =
+    '<div id="' + emailErrorNoticeId + '"><span style="color:red;" class="extra-text">' +
+    __( 'Please enter one or more valid email addresses separated by commas, with no spaces.', 'wp-security-audit-log' ) +
+    '</span></div>';
+
+	/**
+	 * Listen for input changes. Remove the error message as soon as the input is valid again.
+	 * Unblock the checkbox if necessary.
+	 */
+	$emailField.on('input', function () {
+		const val = $emailField.val().trim();
+		const valid = wsalIsValidEmailList(val);
+
+		if (valid || val.length === 0) {
+			jQuery('#' + emailErrorNoticeId).remove();
+			$checkboxToggle.removeClass('wsal-disabled');
+      $checkboxTrigger.css('pointer-events', '');
+		}
+	});
+
+	/**
+	 * Listen for blur event. Add or remove the error messages needed.
+	 * Block or unblock the checkbox if necessary, to prevent triggering not-focused error in case the input field is not valid.
+	 */
+	$emailField.on('blur', function () {
+		let val = $emailField.val().trim();
+		const valid = wsalIsValidEmailList(val);
+
+		// If field contains only spaces, empty it
+		if (val.replace(/[,\s]/g, '').length === 0) {
+			$emailField.val('');
+			val = '';
+		}
+
+		if (!valid && val.length > 0) {
+			$checkboxToggle.addClass('wsal-disabled');
+      $checkboxTrigger.css('pointer-events', 'none');
+
+			if (jQuery('#' + emailErrorNoticeId).length === 0) {
+				$emailField.after(emailErrorNotice);
+			}
+		} else {
+			jQuery('#' + emailErrorNoticeId).remove();
+			$checkboxToggle.removeClass('wsal-disabled');
+      $checkboxTrigger.css('pointer-events', '');
+		}
+	});
+}
+
 $doc.ready(function () {
 
     var $wsalBody = jQuery('body');
@@ -191,6 +275,9 @@ $doc.ready(function () {
     if (typeof $genAlert === 'undefined') {
         var $saveAlert = jQuery('#wsal-saving-settings');
     }
+
+    wsalNotificationEmailValidation('#notification_daily_email_address', '#notification_daily_summary_notification-item');
+    wsalNotificationEmailValidation('#notification_weekly_email_address' , '#notification_weekly_summary_notification-item');
 
     jQuery('#wsal_form').submit(function (evt) {
         $wsalBody.addClass('has-overlay');

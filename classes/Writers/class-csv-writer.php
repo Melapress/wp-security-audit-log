@@ -263,6 +263,9 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 
 			self::$events = self::query_table( $query, \wp_unslash( $_POST['order'] ), (int) \wp_unslash( $_POST['step'] ), (int) \wp_unslash( $_POST['records'] ) ); // phpcs:ignore -- WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
+			// Count self events, used in client side code to show more accurate progress.
+			$self_events_count = count( self::$events );
+
 			$exports_path = Settings_Helper::get_working_dir_path_static( 'exports' );
 			if ( $exports_path instanceof \WP_Error ) {
 				wp_send_json_error( $exports_path->get_error_message() );
@@ -287,9 +290,10 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 				$progress = self::write_csv( $step );
 				wp_send_json_success(
 					array(
-						'step'      => ++$step,
-						'file_name' => \basename( self::$file_name ),
-						'url'       => $url,
+						'step'         => ++$step,
+						'file_name'    => \basename( self::$file_name ),
+						'url'          => $url,
+						'record_count' => $self_events_count,
 					)
 				);
 			} else {
@@ -369,11 +373,13 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 				}
 			}
 
-			if ( 1 === $step ) {
-				$limit = array( $per_page );
-			} else {
-				$limit = array( $step * $per_page, $per_page );
-			}
+			/**
+			 * Calculate offset for the query, we need to subtract 1 if step > 1 to get the correct offset.
+			 */
+			$offset = max( 0, ( $step > 1 ? ( $step - 1 ) * $per_page : 0 ) );
+
+			// Specify the correct range of records, from $offset to the next $per_page value.
+			$limit = array( $offset, $per_page );
 
 			$events = Occurrences_Entity::build_query(
 				array(),
