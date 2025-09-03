@@ -16,6 +16,7 @@ use WSAL\Helpers\WP_Helper;
 use WSAL\MainWP\MainWP_Helper;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\WP_Sensors\WP_Plugins_Themes_Sensor;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -306,11 +307,11 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 		 * - check if the link is disabled
 		 * - optional URL processing
 		 *
-		 * @param array  $configuration         The configuration rules for formatting which needs to be used.
-		 * @param string $url URL.
-		 * @param string $label Label.
-		 * @param string $title Title.
-		 * @param string $target Target attribute.
+		 * @param array  $configuration - The configuration rules for formatting which needs to be used.
+		 * @param string $url - URL.
+		 * @param string $label - Label.
+		 * @param string $title - Title.
+		 * @param string $target - Target attribute.
 		 *
 		 * @return string
 		 *
@@ -360,22 +361,31 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 		 * we moved to a different implementation. Introducing another link markup would require adding link format with
 		 * placeholders to the formatter configuration.
 		 *
-		 * @param array  $configuration         The configuration rules for formatting which needs to be used.
-		 * @param string $url    URL.
-		 * @param string $label  Label.
-		 * @param string $title  Title.
-		 * @param string $target Target attribute.
+		 * @param array  $configuration - The configuration rules for formatting which needs to be used.
+		 * @param string $url - URL.
+		 * @param string $label - Label.
+		 * @param string $title - Title.
+		 * @param string $target - Target attribute.
 		 *
 		 * @return string
+		 *
+		 * @since 5.5.0 - Added $extra_css_classes parameter to allow passing custom classes for the link.
 		 */
-		private static function build_link_markup( array $configuration, $url, $label, $title = '', $target = '_blank' ) {
+		private static function build_link_markup( array $configuration, $url, $label, $title = '', $target = '_blank', $extra_css_classes = array() ) {
+
+			// This may be expanded in the future. For the moment, just add thickbox class when necessary.
+			$extra_css_classes = WP_Plugins_Themes_Sensor::maybe_add_thickbox_class( $url );
 
 			if ( $configuration['use_html_markup_for_links'] ) {
-				return '<a href="' . \esc_url( $url ) . '" title="' . $title . '" target="' . $target . '">' . $label . '</a>';
+				$classes_attr = $extra_css_classes ? ' class="' . \esc_attr( implode( ' ', $extra_css_classes ) ) . '"' : '';
+				$title_attr   = $title ? ' title="' . \esc_attr( $title ) . '"' : '';
+
+				return '<a ' . $classes_attr . ' href="' . \esc_url( $url ) . '" ' . $title_attr . ' target="' . $target . '">' . $label . '</a>';
 			}
 
 			return $label . ': ' . \esc_url( $url );
 		}
+
 		/**
 		 * Wraps given value in highlight markup.
 		 *

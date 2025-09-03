@@ -466,7 +466,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 			$options = array(
 				'id'            => $id,
 				'type'          => 'text',
-				'max_chars'     => 20,
+				'max_chars'     => 80,
 				'placeholder'   => esc_html__( 'WSAL notifications', 'wp-security-audit-log' ),
 				'hint'          => ( empty( $hint ) ) ? esc_html__( 'Leave empty if you want to use default one.', 'wp-security-audit-log' ) : $hint,
 				'settings_name' => $settings_name,

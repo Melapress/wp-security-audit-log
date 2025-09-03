@@ -176,7 +176,11 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 		 * @param mixed   $value         - Meta value.
 		 * @param integer $occurrence_id - Occurrence_id.
 		 *
+		 * @return int - The ID of the inserted/updated record or 0 on failure.
+		 *
 		 * @since 4.6.0
+		 *
+		 * @since 5.5.0 - Return the value of the ::save method.
 		 */
 		public static function update_by_name_and_occurrence_id( $name, $value, $occurrence_id ) {
 			$meta = self::load_by_name_and_occurrence_id( $name, $occurrence_id );
@@ -188,7 +192,7 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 					'value'         => maybe_serialize( $value ),
 				);
 
-				self::save( $meta_insert );
+				return self::save( $meta_insert );
 			} else {
 
 				$meta_insert = array(
@@ -198,7 +202,7 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 					'value'         => maybe_serialize( $value ),
 				);
 
-				self::save( $meta_insert );
+				return self::save( $meta_insert );
 			}
 		}
 

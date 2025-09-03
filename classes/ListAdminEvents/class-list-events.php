@@ -19,6 +19,7 @@ namespace WSAL\ListAdminEvents;
 
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Utils;
+use WSAL\EventNotes\Event_Notes;
 use WSAL\Controllers\Constants;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
@@ -802,8 +803,13 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					$url     = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
 					$tooltip = esc_attr__( 'View all details of this change', 'wp-security-audit-log' );
 
-					return '<a class="more-info button button-secondary data-event-inspector-link" data-darktooltip="' . $tooltip . '" data-inspector-active-text="' . __( 'Close inspector.', 'wp-security-audit-log' ) . '" title="' . __( 'Event data inspector', 'wp-security-audit-log' ) . '"'
-						. ' href="' . $url . '">' . __( 'More details...', 'wp-security-audit-log' ) . '</a>';
+					$btns = '<a class="more-info button button-secondary data-event-inspector-link" data-darktooltip="' . $tooltip . '" data-inspector-active-text="' . __( 'Close inspector.', 'wp-security-audit-log' ) . '" title="' . __( 'Event data inspector', 'wp-security-audit-log' ) . '"' . ' href="' . $url . '">' . __( 'More details...', 'wp-security-audit-log' ) . '</a>';
+
+					// phpcs:disable
+					// phpcs:enable
+
+					return $btns;
+
 				case 'object':
 					$object = '';
 					if ( isset( $item['object'] ) && ! empty( $item['object'] ) ) {

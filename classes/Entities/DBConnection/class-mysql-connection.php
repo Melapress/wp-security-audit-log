@@ -21,8 +21,6 @@ if ( ! class_exists( '\WSAL\Entities\DBConnection\MySQL_Connection' ) ) {
 	 * It uses wpdb WordPress DB Class.
 	 *
 	 * @package wsal
-	 *
-	 * @phpcs:disable PEAR.NamingConventions.ValidClassName.StartWithCapital
 	 */
 	class MySQL_Connection extends \wpdb {
 
@@ -49,8 +47,9 @@ if ( ! class_exists( '\WSAL\Entities\DBConnection\MySQL_Connection' ) ) {
 		 * @param string $ssl_ca          - Certificate Authority.
 		 * @param string $ssl_cert        - Client Certificate.
 		 * @param string $ssl_key         - Client Key.
+		 * @param string $dbport          - MySQL database host.
 		 */
-		public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key ) {
+		public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key, $dbport = '' ) {
 
 			if ( WP_DEBUG && WP_DEBUG_DISPLAY ) {
 				$this->show_errors();
@@ -70,6 +69,7 @@ if ( ! class_exists( '\WSAL\Entities\DBConnection\MySQL_Connection' ) ) {
 			$this->dbpassword = $dbpassword;
 			$this->dbname     = $dbname;
 			$this->dbhost     = $dbhost;
+			$this->dbport     = $dbport ?? false;
 
 			// wp-config.php creation will manually connect when ready.
 			if ( defined( 'WP_SETUP_CONFIG' ) ) {
@@ -93,6 +93,64 @@ if ( ! class_exists( '\WSAL\Entities\DBConnection\MySQL_Connection' ) ) {
 			}
 
 			$this->db_connect( false );
+		}
+
+		/**
+		 * Return an array with the Port and the Socket values for the MySQL connection.
+		 *
+		 * @return array - an array with the port and socket values.
+		 *
+		 * @since 5.5.0
+		 */
+		private function get_port_and_socket() {
+
+			$port   = null;
+			$socket = null;
+			$host   = $this->dbhost;
+
+			// Check if host contains a colon (old WSAL format was: IP:PORT or IP:/socket).
+			$port_or_socket = strstr( $host, ':' );
+
+			if ( ! empty( $this->dbport ) ) {
+				// Prefer explicit port if provided.
+				if ( is_numeric( $this->dbport ) ) {
+					$port = intval( $this->dbport );
+				} elseif ( strpos( $this->dbport, '/' ) === 0 ) {
+					$socket = $this->dbport;
+				}
+				// Remove port/socket from host if present.
+				if ( ! empty( $port_or_socket ) ) {
+					$host = substr( $host, 0, strpos( $host, ':' ) );
+				}
+			} elseif ( ! empty( $port_or_socket ) ) {
+				// Host contains :PORT or :/socket.
+				$host_part = substr( $host, 0, strpos( $host, ':' ) );
+				$extra     = substr( $port_or_socket, 1 );
+
+				$host = $host_part;
+
+				if ( strpos( $extra, '/' ) === 0 ) {
+					// If this is a socket path.
+					$socket = $extra;
+				} elseif ( is_numeric( $extra ) ) {
+					// If it's a port number.
+					$port = intval( $extra );
+				} else {
+					// Rare case: port:socket (e.g., 3306:/tmp/mysql.sock).
+					$parts = explode( ':', $extra, 2 );
+					if ( is_numeric( $parts[0] ) ) {
+						$port = intval( $parts[0] );
+					}
+					if ( isset( $parts[1] ) && strpos( $parts[1], '/' ) === 0 ) {
+						$socket = $parts[1];
+					}
+				}
+			}
+
+			return array(
+				'port'   => $port,
+				'socket' => $socket,
+			);
 		}
 
 		/**
@@ -122,23 +180,10 @@ if ( ! class_exists( '\WSAL\Entities\DBConnection\MySQL_Connection' ) ) {
 
 				// mysqli_real_connect doesn't support the host param including a port or socket
 				// like mysql_connect does. This duplicates how mysql_connect detects a port and/or socket file.
-				$port           = null;
-				$socket         = null;
-				$host           = $this->dbhost;
-				$port_or_socket = strstr( $host, ':' );
-				if ( ! empty( $port_or_socket ) ) {
-					$host           = substr( $host, 0, strpos( $host, ':' ) );
-					$port_or_socket = substr( $port_or_socket, 1 );
-					if ( 0 !== strpos( $port_or_socket, '/' ) ) {
-						$port         = intval( $port_or_socket );
-						$maybe_socket = strstr( $port_or_socket, ':' );
-						if ( ! empty( $maybe_socket ) ) {
-							$socket = substr( $maybe_socket, 1 );
-						}
-					} else {
-						$socket = $port_or_socket;
-					}
-				}
+				$port_and_socket = $this->get_port_and_socket();
+				$port            = $port_and_socket['port'] ?? null;
+				$socket          = $port_and_socket['socket'] ?? null;
+				$host            = $this->dbhost;
 
 				// Set SSL certs if we want to use secure DB connections.
 				$ssl_opts     = array(

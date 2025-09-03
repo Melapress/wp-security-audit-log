@@ -52,6 +52,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 	 * 6018 Modified the list of keywords for comments blacklisting
 	 * 6061 Email was sent
 	 * 6064 Email was sent
+	 * 6080 WordPress core translation files updated.
 	 *
 	 * @package    wsal
 	 * @subpackage sensors
@@ -134,6 +135,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			} else {
 				self::$wp_core_version = \get_bloginfo( 'version' );
 			}
+
+			\add_action( 'upgrader_process_complete', array( __CLASS__, 'on_core_translation_update' ), 10, 2 );
 		}
 
 		/**
@@ -980,16 +983,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Permalinks changed.
-			if ( $is_permalink_page && ! empty( $post_array['permalink_structure'] ) && isset( $post_array['_wpnonce'] )
+			if ( $is_permalink_page && isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-permalink' ) ) {
 				$old = get_option( 'permalink_structure' );
-				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['permalink_structure'] ) ) );
+				$new = isset( $post_array['permalink_structure'] ) ? trim( \sanitize_text_field( \wp_unslash( $post_array['permalink_structure'] ) ) ) : '';
 				if ( $old !== $new ) {
+					$plain_value = '/%p=123%/';
+					$old_pattern = '' === $old ? $plain_value : $old;
+					$new_pattern = '' === $new ? $plain_value : $new;
+
 					Alert_Manager::trigger_event(
 						6005,
 						array(
-							'OldPattern'    => $old,
-							'NewPattern'    => $new,
+							'OldPattern'    => $old_pattern,
+							'NewPattern'    => $new_pattern,
 							'CurrentUserID' => User_Helper::get_user()->ID,
 						)
 					);
@@ -1333,5 +1340,66 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				)
 			);
 		}
+
+		/**
+		 * Notify when a WordPress core translation is updated.
+		 *
+		 * @param \WP_Upgrader|\Language_Pack_Upgrader $upgrader \WP_Upgrader instance. In other contexts this might be a Theme_Upgrader, Plugin_Upgrader, Core_Upgrade, or Language_Pack_Upgrader instance.
+		 * @param array                                $options  Array of bulk item update data.
+		 *
+		 * @since 5.5.0
+		 */
+		public static function on_core_translation_update( $upgrader, $options ) {
+
+			if ( ! isset( $options['type'] ) || ! isset( $options['action'] ) ) {
+				return;
+			}
+
+			if ( 'translation' !== $options['type'] || 'update' !== $options['action'] ) {
+				return;
+			}
+
+			$translations = $options['translations'];
+
+			foreach ( $translations as $translation ) {
+
+				// Only proceed if the translation is for the core.
+				if ( 'core' !== $translation['type'] ) {
+					continue;
+				}
+
+				/**
+				 * Example of $translation:
+				 * [0] => Array
+				 * (
+				 * [language] => it_IT
+				 * [type] => core
+				 * [slug] => default
+				 * [version] => 6.8.2
+				 * )
+				 */
+
+				$name = '';
+
+				if ( method_exists( $upgrader, 'get_name_for_update' ) ) {
+
+					// Name - e.g. "WordPress".
+					$name = $upgrader->get_name_for_update( (object) $translation );
+				}
+
+				// If name is empty, let's use the slug as a fallback.
+				if ( empty( $name ) && ! empty( $translation['slug'] ) ) {
+					$name = $translation['slug'];
+				}
+			}
+
+			Alert_Manager::trigger_event(
+				6080,
+				array(
+					'language' => $translation['language'],
+				)
+			);
+		}
 	}
+
 }

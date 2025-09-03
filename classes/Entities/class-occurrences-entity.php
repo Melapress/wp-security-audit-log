@@ -757,8 +757,8 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			$max_sdate = Plugin_Settings_Helper::get_pruning_date(); // Pruning date.
 			$archiving = Settings_Helper::is_archiving_set_and_enabled();
 
-		// phpcs:disable
-		// phpcs:enable
+			// phpcs:disable
+			// phpcs:enable
 
 			// Calculate limit timestamp.
 			$max_stamp = $now - ( strtotime( $max_sdate ) - $now );

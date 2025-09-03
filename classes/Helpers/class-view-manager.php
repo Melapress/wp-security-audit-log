@@ -476,7 +476,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					?>
 				</div>
 				<?php
-			} else {
+			} elseif ( $view ) {
 				?>
 				<div class="wrap">
 					<?php

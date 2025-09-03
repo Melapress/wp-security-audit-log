@@ -129,7 +129,8 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 			 * @see WSAL_Ext_Common::get_connection()
 			 */
 			$connection_raw = maybe_unserialize( Settings_Helper::get_option_value( 'connection-' . $connection_name ) );
-			$connection     = ( $connection_raw instanceof \stdClass ) ? json_decode( json_encode( $connection_raw ), true ) : $connection_raw;
+
+			$connection = ( $connection_raw instanceof \stdClass ) ? json_decode( json_encode( $connection_raw ), true ) : $connection_raw;
 			if ( ! is_array( $connection ) || empty( $connection ) ) {
 				return null;
 			}
@@ -249,7 +250,9 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 			}
 			$password = self::decrypt_string( $connection_config['password'] );
 
-			$new_wpdb = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_connection
+			$db_port_value = $connection_config['port'] ?? '';
+
+			$new_wpdb = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'], $db_port_value ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_connection
 
 			if ( isset( $new_wpdb->error ) && isset( $new_wpdb->dbh ) ) {
 				throw new \Exception( $new_wpdb->dbh->error, $new_wpdb->dbh->errno ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -445,8 +448,11 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 
 			$password = (string) $connection_config['password'] ?? '';
 
+			$db_port_value = $connection_config['port'] ?? '';
+
 			$password   = self::decrypt_string( $password );
-			$connection = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_connection
+			$connection = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'], $db_port_value ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_connection
+
 			if ( array_key_exists( 'baseprefix', $connection_config ) ) {
 				$connection->set_prefix( $connection_config['baseprefix'] );
 			}

@@ -327,6 +327,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 		 *
 		 * @return string
 		 * @since 4.2.1
+		 *
+		 * @since 5.5.0 - Added target value to the Alert_Formatter::format_link call.
 		 */
 		public static function get_formatted_hyperlinks( $configuration, $meta_data, $occurrence_id, $alert ) {
 			$result              = '';
@@ -337,7 +339,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 					$link_label       = $link_data['label'];
 					$link_url         = $link_data['url'];
 					$needs_formatting = $link_data['needs_formatting'];
-					$formatted_link   = $needs_formatting ? Alert_Formatter::format_link( $configuration, $link_url, $link_label ) : $link_url;
+					$formatted_link   = $needs_formatting ? Alert_Formatter::format_link( $configuration, $link_url, $link_label, '', '_blank' ) : $link_url;
 					array_push( $links_result_parts, $formatted_link );
 				}
 
@@ -407,7 +409,11 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 						}
 
 						if ( '%RevisionLink%' === $link_data && 2065 === (int) $alert['code'] ) {
-							$link_url   = self::get_post_revision_link( $meta_data['PostID'], $meta_data['RevisionLink'] );
+
+							// Check $revision_link to avoid PHP warnings.
+							$revision_link = $meta_data['RevisionLink'] ?? '';
+
+							$link_url   = self::get_post_revision_link( $meta_data['PostID'], $revision_link );
 							$link_title = self::get_revision_link_title();
 							$link_label = self::get_revision_link_title();
 						} else {

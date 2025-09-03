@@ -1224,6 +1224,44 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		}
 
 		/**
+		 * Migration for version upto 5.5.0
+		 *
+		 * Migrates mysql connections from the old format hostname:port to hostname and port separate fields.
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.5.0
+		 */
+		public static function migrate_up_to_5500() {
+
+			$all_connections = Connection::get_all_connections();
+
+			// Loop all connections.
+			foreach ( $all_connections as $connection ) {
+				if ( 'mysql' === $connection['type'] ) {
+					if ( isset( $connection['port'] ) && ! empty( $connection['port'] ) ) {
+						// Skip this connection if its port port is already set.
+						continue;
+					}
+
+					$parts          = explode( ':', $connection['hostname'] );
+					$clean_hostname = $parts[0];
+					$get_port       = isset( $parts[1] ) ? $parts[1] : '';
+
+					$new_connection = $connection;
+
+					// Add new port value.
+					$new_connection['port']     = ( ! empty( $get_port ) ) ? (int) $get_port : 3306;
+					$new_connection['hostname'] = $clean_hostname;
+
+					Connection::save_connection( $new_connection );
+				}
+			}
+		}
+
+		/**
 		 * Remove some very old data from the database.
 		 *
 		 * @return void
@@ -1258,7 +1296,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		private static function migrate_users() {
+		public static function migrate_users() {
 			$updated_records = self::update_user_name_and_user_id( Occurrences_Entity::get_connection() );
 
 			$hooks_array = array(
