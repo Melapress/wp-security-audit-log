@@ -1298,10 +1298,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 * @since 5.5.0
 		 */
 		public static function on_upgrader_post_install( $response, $hook_extra, $result ) {
+
+			/**
+			 * If $hook_extra['action'] is not set or not equal to 'install', return early.
+			 * This works both for themes and plugins.
+			 */
+			if ( ! isset( $hook_extra['action'] ) || 'install' !== $hook_extra['action'] ) {
+				return $response;
+			}
+
 			if ( isset( $result['destination_name'] ) ) {
 				$folder_name = WP_Plugins_Themes_Helper::trim_folder_name( $result['destination_name'] );
 
 				$is_plugin = WP_Plugins_Themes_Helper::does_dir_or_file_exist( $folder_name, 'plugin' );
+
 				if ( $is_plugin ) {
 					$event_plugin_data = WP_Plugins_Themes_Helper::get_plugin_event_info_from_folder( $folder_name );
 

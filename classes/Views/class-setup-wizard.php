@@ -678,17 +678,17 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 					<br />
 					<label for="6">
 						<input id="6" name="wsal-pruning-limit" type="radio" value="6" />
-						<?php esc_html_e( '6 months', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( '6 months (Older data will be deleted.)', 'wp-security-audit-log' ); ?>
 					</label>
 					<br />
 					<label for="12">
 						<input id="12" name="wsal-pruning-limit" type="radio" value="12" />
-						<?php esc_html_e( '12 months', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( '12 months (Older data will be deleted.)', 'wp-security-audit-log' ); ?>
 					</label>
 					<br />
 					<label for="none">
 						<input id="none" name="wsal-pruning-limit" type="radio" value="none" />
-						<?php esc_html_e( 'Keep all data.', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( 'Keep all data', 'wp-security-audit-log' ); ?>
 					</label>
 				</fieldset>
 

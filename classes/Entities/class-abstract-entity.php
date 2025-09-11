@@ -68,7 +68,6 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 */
 		public static function get_table_name( $connection = null ): string {
 			if ( null !== $connection ) {
-
 				if ( $connection instanceof \wpdb ) {
 					return $connection->base_prefix . static::$table;
 				}
@@ -456,12 +455,21 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 * It checks the given data array against the table fields and determines the types based on that, it stores the values in the table then.
 		 *
 		 * @param array $data - The data to be saved (check above about the format).
+		 * @param \wpdb $connection - \wpdb connection to be used for name extraction.
 		 *
 		 * @return int
 		 *
 		 * @since 4.5.0
+		 * @since 5.5.0 - Added connection parameter.
 		 */
-		public static function save( $data ) {
+		public static function save( $data, $connection = null ) {
+			if ( null !== $connection ) {
+				if ( $connection instanceof \wpdb ) {
+					$_wpdb = $connection;
+				}
+			} else {
+				$_wpdb = static::get_connection();
+			}
 
 			$format      = array();
 			$insert_data = array();
@@ -480,8 +488,6 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			}
 
 			if ( ! empty( $format ) ) {
-				$_wpdb = static::get_connection();
-
 				$_wpdb->suppress_errors( true );
 
 				$_wpdb->replace( self::get_table_name( $_wpdb ), $insert_data, $format );
@@ -540,9 +546,11 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 * @param \wpdb  $connection - \wpdb connection to be used for name extraction.
 		 * @param string $extra - The extra SQL string (if needed).
 		 *
-		 * @return array
+		 * @return array|object|null|void - Database query result or null on failure.
 		 *
 		 * @since 5.0.0
+		 *
+		 * @since 5.5.1 - Changed return comment
 		 */
 		public static function load( $cond = 'id=%d', $args = array( 1 ), $connection = null, $extra = '' ) {
 			if ( null !== $connection ) {

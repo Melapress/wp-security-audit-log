@@ -942,9 +942,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 *
 	 * ! This script is from the WP core and is necessary to handle the responsive resize of the thickbox modal.
 	 * ! The modal is used in events associated with plugins on the 'View plugin information' link.
+	 *
+	 * @param string $hook_suffix The current admin page.
+	 *
+	 * @since 5.5.0
 	 */
-	public static function add_plugin_install_script() {
-		if ( ! wp_script_is( 'plugin-install', 'enqueued' ) ) {
+	public static function add_plugin_install_script( $hook_suffix ) {
+		// Verify that script is not enqueued and if we're in the main Event List View.
+		if ( ! wp_script_is( 'plugin-install', 'enqueued' ) && 'toplevel_page_wsal-auditlog' === $hook_suffix ) {
 			wp_enqueue_script( 'plugin-install' );
 		}
 	}

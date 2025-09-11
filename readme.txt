@@ -5,8 +5,8 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, event log, user tracking, logger, history 
 Requires at least: 5.5
-Tested up to: 6.7.1
-Stable tag: 5.3.1
+Tested up to: 6.8.2
+Stable tag: 5.5.1
 Requires PHP: 7.4
 
 The #1 user-rated activity log plugin for event logging, activity monitoring and change tracking.
@@ -78,7 +78,7 @@ The premium edition of WP Activity Log takes WordPress user activity tracking to
 - See who is logged in and their current activities in real-time
 - Log off any user at the click of a button
 - Generate fully-configurable HTML and CSV reports
-- Get email and SMS notifications with important changes (fully configurable)
+- Get email, SMS and Slack notifications with important changes (fully configurable)
 - Search filters to fine tune the search results and find what you need in seconds
 - Store activity log in an external database to improve security and scalability
 - Mirror the activity log to logs management systems such as AWS CloudWatch, Loggly, and Papertrail in real-time
@@ -143,7 +143,7 @@ Premium plugins include a full year of free updates and dedicated one-to-one pre
 
 #### MAINTAINED & SUPPORTED BY MELAPRESS
 
-Melapress develops high-quality WordPress management and security plugins such as Melapress Login Security, CAPTCHA 4WP, and WP 2FA.
+Melapress develops high-quality WordPress management and security plugins such as Melapress Login Security, WP 2F, and Melapress Role Editor.
 
 Browse our list of [WordPress security and administration plugins](https://melapress.com/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) to see how our plugins can help you better manage and improve the security and administration of your WordPress websites and users.
 
@@ -205,7 +205,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 2. See who is logged in to your WordPress and manage users sessions with Users Sessions Management in the Premium edition.
 3. The plugin settings from where site administrator can configure generic plugin settings such as [reverse proxy support](https://melapress.com/support/kb/wp-activity-log-support-reverse-proxies-web-application-firewalls/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal), who can manage the plugin etc.
 4. Use the event Inspector to see more technical details about each event in the activity log, such as the session ID and UserAgent string.
-5. Configuring WordPress email and instant SMS alerts with the Email & SMS Notifications module in the Premium edition.
+5. Configuring WordPress email and instant SMS or Slack alerts with the Email, SMS & Slack Notifications module in the Premium edition.
 6. Search in the WordPress activity log with the use filters to fine tune the search results.
 7. The Enable/Disable events section from where Administrators can disable or enable activity log events.
 8. The Activity Log Viewer of a Super Admin in a WordPress multisite network installation alllows the admin to view the logs from all the network, or filter the logs of a specific site.
@@ -217,33 +217,15 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= 5.2.2 (2024-11-12) =
-
-**New feature**
-	 * New setting in the users' sessions module to enable a check for existing sessions when a logged in user accesses the login page directly.
+= 5.5.1 (2025-09-10) =
 
  * **Plugin & functionality improvements**
-	 * Bumped up the minimum WordPress version to 5.5.
-	 * Updated the Freemius SDK to the latest version.
-	 * Addressed a number of spelling mistakes in the code notes etc.
-	 * Reviewed again all possible activity log inputs and improved sanitization.
-	 * Improved WooCommerce coverage: plugin now reports correct variable product SKU in the event IDs instead of the parent product SKU.
-	 * Improved the loading order of the text domain etc (reported on the [forums](https://wordpress.org/support/topic/php-notice-filling-logs-with-new-wp6-7/)).
-
-*  * **Security fix**
-	 * Fixed an unauthenticated stored XSS reported by mikemyers.
+	 * Added the option to add notes to activity log events in the archive database.
+	 * Improved the text and the behaviour of the "Add note" modal in the activity log viewer.
 
  * **Bug fixes**
-	 * Fixed a conflict with GiveWP plugin (reported on the [forums](https://wordpress.org/support/topic/wpal-conflict-with-givewp-3-17-2/)).
-	 * Fixed: main dashboard events widget failed to load on a multisite network.
-	 * Fixed a fatal error in class-reports-entity.php which occurs when duplicating reports with numbers in the title.
-	 * Fixed: fatal error reported when updating to 5.2.1 using WordPress core5.5 and MainWP.
-	 * Fixed: Enable / disable events ID page not loading on PHP 7.2 or lower.
-	 * Fixed: some specific scheduled events are returning errors (reported on the [forums](https://wordpress.org/support/topic/scheduled-events-returning-errors/)).
-	 * Fixed an Action Scheduler fatal error reported during migration / upgrade.
-	 * "Send now" option for periodic emails now working in some edge cases.
-	 * Fixed: Fatal error in class-alert-manager.php during upgrade to 5.2.1 on some specific multisite networks.
-	 * Fixed: some plugin settings pages cannot be accessed from the header navigation bar on a multisite network. 
-	 * Fixed: periodic emails are triggered for all sub-sites even when filter is for one sub-site.
+	 * Fixed: Event ID 5000 was incorrectly reported in the logs in some cases on some particular setups.
+	 * Fixed: Activity log event's notes not migrated to the archive database during archiving of logs.
+	 * Fixed: "Upload theme" dialog not working when WP Activity Log is installed.
 
 Refer to the complete [plugin changelog](https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) for more detailed information about what was new, improved and fixed in previous version updates of WP Activity Log.
