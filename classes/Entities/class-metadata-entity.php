@@ -128,12 +128,20 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 		 *
 		 * @param string $meta_name - Meta name.
 		 * @param int    $occurrence_id - Occurrence ID.
+		 * @param \wpdb  $connection - \wpdb connection to be used for name extraction.
 		 *
-		 * @return array
+		 * @return array|null $result - The metadata record as an associative array or null if not found.
 		 *
 		 * @since 4.6.0
 		 */
-		public static function load_by_name_and_occurrence_id( $meta_name, $occurrence_id ) {
+		public static function load_by_name_and_occurrence_id( $meta_name, $occurrence_id, $connection = null ) {
+			if ( null !== $connection ) {
+				if ( $connection instanceof \wpdb ) {
+					$_wpdb = $connection;
+				}
+			} else {
+				$_wpdb = self::get_connection();
+			}
 			// Make sure to grab the migrated meta fields from the occurrence table.
 			if ( in_array( $meta_name, array_keys( Occurrences_Entity::$migrated_meta ), true ) ) {
 				$column_name = Occurrences_Entity::$migrated_meta[ $meta_name ];
@@ -141,7 +149,11 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 				return Occurrences_Entity::get_fields_values()[ $column_name ];
 			}
 
-			return self::load( 'occurrence_id = %d AND name = %s', array( $occurrence_id, $meta_name ) );
+			return self::load(
+				'occurrence_id = %d AND name = %s',
+				array( $occurrence_id, $meta_name ),
+				$_wpdb
+			);
 		}
 
 		/**
@@ -177,32 +189,39 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 		 * @param integer $occurrence_id - Occurrence_id.
 		 *
 		 * @return int - The ID of the inserted/updated record or 0 on failure.
+		 * @param \wpdb   $connection - \wpdb connection to be used for name extraction.
 		 *
 		 * @since 4.6.0
 		 *
 		 * @since 5.5.0 - Return the value of the ::save method.
+		 * @since 5.5.0 - Added connection parameter.
 		 */
-		public static function update_by_name_and_occurrence_id( $name, $value, $occurrence_id ) {
-			$meta = self::load_by_name_and_occurrence_id( $name, $occurrence_id );
+		public static function update_by_name_and_occurrence_id( $name, $value, $occurrence_id, $connection = null ) {
+			if ( null !== $connection ) {
+				if ( $connection instanceof \wpdb ) {
+					$_wpdb = $connection;
+				}
+			} else {
+				$_wpdb = self::get_connection();
+			}
+			$meta = self::load_by_name_and_occurrence_id( $name, $occurrence_id, $_wpdb );
 			if ( empty( $meta ) ) {
-
 				$meta_insert = array(
 					'occurrence_id' => $occurrence_id,
 					'name'          => $name,
-					'value'         => maybe_serialize( $value ),
+					'value'         => \maybe_serialize( $value ),
 				);
 
-				return self::save( $meta_insert );
+				return self::save( $meta_insert, $_wpdb );
 			} else {
-
 				$meta_insert = array(
 					'id'            => $meta['id'],
 					'occurrence_id' => $occurrence_id,
 					'name'          => $name,
-					'value'         => maybe_serialize( $value ),
+					'value'         => \maybe_serialize( $value ),
 				);
 
-				return self::save( $meta_insert );
+				return self::save( $meta_insert, $_wpdb );
 			}
 		}
 
