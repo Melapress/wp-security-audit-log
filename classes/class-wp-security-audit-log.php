@@ -28,6 +28,7 @@ use WSAL\Actions\Plugin_Installer;
 use WSAL\Helpers\Uninstall_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\ListAdminEvents\List_Events;
+use WSAL\CopyEventData\Copy_Event_Data;
 use WSAL\Controllers\Plugin_Extensions;
 use WSAL\WP_Sensors\WP_Database_Sensor;
 use WSAL\Helpers\Plugin_Settings_Helper;
@@ -164,16 +165,10 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			// Plugin Deactivation Actions.
 			\register_deactivation_hook( WSAL_BASE_NAME, array( __CLASS__, 'deactivate_actions' ) );
 
-			// phpcs:disable
-			/* @free:start */
-			// phpcs:enable
+			// @free:start
 			\register_uninstall_hook( WSAL_BASE_NAME, array( Uninstall_Helper::class, 'uninstall' ) );
-			// phpcs:disable
-			/* @free:end */
-			// phpcs:enable
+			// @free:end
 
-			// phpcs:disable
-			// phpcs:enable
 
 			MainWP_Addon::init();
 			// Hide all unrelated to the plugin notices on the plugin admin pages.

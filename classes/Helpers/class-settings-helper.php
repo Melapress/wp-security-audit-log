@@ -121,13 +121,13 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		private static $client_ips = array();
 
 		/**
-		 * Alerts disabled by default - duplication of the above for faster access via static call.
+		 * Alerts disabled by default.
 		 *
 		 * @var int[]
 		 *
 		 * @since 4.5.0
 		 */
-		private static $default_always_disabled_alerts = array( 0000, 0001, 0002, 0003, 0004, 0005, 8825, 8845, 8847, 7013, 7014, 7015, 7016, 7017 );
+		private static $default_always_disabled_alerts = array( 8825, 8845, 8847, 7013 );
 
 		/**
 		 * Holds the array with the disabled alerts codes.

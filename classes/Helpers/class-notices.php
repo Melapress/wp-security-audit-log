@@ -69,10 +69,10 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				// 	}
 				// }
 
-				$survey_2025 = Settings_Helper::get_boolean_option_value( 'survey-2025', false );
-				if ( ! $survey_2025 ) {
-					self::display_survey_2025();
-				}
+				// $survey_2025 = Settings_Helper::get_boolean_option_value( 'survey-2025', false );
+				// if ( ! $survey_2025 ) {
+				// self::display_yearly_security_survey();
+				// }
 			}
 		}
 
@@ -100,12 +100,12 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 			// 	}
 			// }
 
-			$survey_2025 = Settings_Helper::get_boolean_option_value( 'survey-2025', false );
-			if ( ! $survey_2025 ) {
-				\add_action( 'wp_ajax_dismiss_yearly_survey', array( __CLASS__, 'dismiss_yearly_survey' ) );
+			// $survey_2025 = Settings_Helper::get_boolean_option_value( 'survey-2025', false );
+			// if ( ! $survey_2025 ) {
+			// \add_action( 'wp_ajax_dismiss_yearly_survey', array( __CLASS__, 'dismiss_yearly_survey' ) );
 
-				++self::$number_of_notices;
-			}
+			// ++self::$number_of_notices;
+			// }
 		}
 
 		/**
@@ -205,7 +205,7 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 		 *
 		 * @since 5.5.1
 		 */
-		public static function display_survey_2025() {
+		public static function display_yearly_security_survey() {
 
 			// Show only to admins.
 			if ( ! \current_user_can( 'manage_options' ) ) {

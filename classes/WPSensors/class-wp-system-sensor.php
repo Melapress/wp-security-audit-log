@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\User_Helper;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Helpers\DateTime_Formatter_Helper;
 
@@ -52,7 +53,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 	 * 6018 Modified the list of keywords for comments blacklisting
 	 * 6061 Email was sent
 	 * 6064 Email was sent
-	 * 6080 WordPress core translation files updated.
+	 * 6079 WordPress core update available
+	 * 6080 WordPress core translation files updated
 	 *
 	 * @package    wsal
 	 * @subpackage sensors
@@ -137,6 +139,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			\add_action( 'upgrader_process_complete', array( __CLASS__, 'on_core_translation_update' ), 10, 2 );
+
+			\add_action( 'set_site_transient', array( __CLASS__, 'on_available_wp_core_update' ), 10, 3 );
 		}
 
 		/**
@@ -1399,6 +1403,58 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 					'language' => $translation['language'],
 				)
 			);
+		}
+
+		/**
+		 * Notify when a theme update is available.
+		 *
+		 * @param string $transient - The name of the site transient.
+		 * @param mixed  $value - Site transient value.
+		 * @param int    $expiration - Time until expiration in seconds.
+		 *
+		 * @since 5.6.0
+		 */
+		public static function on_available_wp_core_update( $transient, $value, $expiration ) {
+
+			// If this is not the update_plugins transient, return early.
+			if ( 'update_core' !== $transient ) {
+				return;
+			}
+
+			// If there aren't updates, return early.
+			if (
+				! is_array( $value->updates )
+				|| empty( $value->updates[0] )
+				) {
+				return;
+			}
+
+			$new_available_version = $value->updates[0]->version ?? null;
+			$current_version       = \wp_get_wp_version();
+
+			$last_notified_version = Settings_Helper::get_option_value( 'notified_wp_core_update', array() );
+
+			if ( $new_available_version && version_compare( $current_version, $new_available_version, '<' ) ) {
+
+				// Check if this version was already notified, and in that case, skip the event for this plugin.
+				if ( $last_notified_version === $new_available_version ) {
+					return;
+				}
+
+				$update_admin_screen = \esc_url( \network_admin_url( 'update-core.php' ) );
+
+				Alert_Manager::trigger_event(
+					6079,
+					array(
+						'CurrentWPVersion' => $current_version,
+						'NewWPVersion'     => $new_available_version,
+						'UpdateAdminUrl'   => $update_admin_screen,
+					)
+				);
+
+				// Mark this core update as notified, use the current new version as reference.
+				Settings_Helper::set_option_value( 'notified_wp_core_update', $new_available_version );
+			}
 		}
 	}
 

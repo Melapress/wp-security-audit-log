@@ -550,7 +550,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @since 5.0.0
 		 *
-		 * @since 5.5.1 - Changed return comment
+		 * @since 5.5.2 - Changed return comment
 		 */
 		public static function load( $cond = 'id=%d', $args = array( 1 ), $connection = null, $extra = '' ) {
 			if ( null !== $connection ) {

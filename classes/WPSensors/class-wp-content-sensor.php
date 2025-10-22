@@ -150,6 +150,24 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		}
 
 		/**
+		 * List of hooks to run early
+		 *
+		 * @return void
+		 *
+		 * @since 5.5.2
+		 */
+		public static function early_init() {
+			\add_action( 'template_redirect', array( __CLASS__, 'viewing_pass_protected_post' ), 9 );
+
+			\add_filter(
+				'the_password_form_incorrect_password',
+				array( __CLASS__, 'trigger_wrong_post_pass_event' ),
+				10,
+				2
+			);
+		}
+
+		/**
 		 * Get Post Data.
 		 *
 		 * Collect old post data before post update event.
@@ -178,9 +196,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		/**
 		 * Check all the post changes.
 		 *
-		 * @param integer $post_id - Post ID.
-		 * @param WP_Post $post    - WP Post object.
-		 * @param boolean $update  - True if post update, false if post is new.
+		 * @param integer  $post_id - Post ID.
+		 * @param \WP_Post $post    - WP Post object.
+		 * @param boolean  $update  - True if post update, false if post is new.
 		 *
 		 * @since 4.5.0
 		 */
@@ -474,7 +492,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		/**
 		 * Alerts for Editing of Posts, Pages and Custom Post Types.
 		 *
-		 * @param WP_Post $post - Post.
+		 * @param \WP_Post $post - Post.
 		 *
 		 * @since 4.5.0
 		 */
@@ -487,6 +505,107 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		}
 
 		/**
+		 * Track opening of password protected posts.
+		 *
+		 * @since 5.5.2
+		 */
+		public static function viewing_pass_protected_post() {
+			if ( ! \is_singular() || \is_admin() || ! \is_user_logged_in() ) {
+				return;
+			}
+
+			$post = get_queried_object();
+
+			if ( \post_password_required( $post ) ) {
+				return;
+			}
+
+			if ( ! empty( $post->post_title ) ) {
+				$post_data = self::get_post_event_data( $post ); // Get event post data.
+
+				$current_path = isset( $_SERVER['REQUEST_URI'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['REQUEST_URI'] ) ) : false;
+
+				// Update post URL based on current actual path.
+				if ( WP_Helper::is_multisite() && ! \is_subdomain_install() ) {
+					// For multisite using subfolders, remove the subfolder.
+					$subdir_path = parse_url( home_url(), PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+					if ( ! is_null( $subdir_path ) ) {
+						$escaped      = str_replace( '/', '\/', preg_quote( $subdir_path ) ); // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
+						$current_path = preg_replace( '/' . $escaped . '/', '', $current_path );
+					}
+				}
+
+				// Bail if this don't have this, as it's probably an archive.
+				if ( ! isset( $post_data['PostUrl'] ) ) {
+					return;
+				}
+
+				$full_current_path = home_url( $current_path );
+
+				if ( $full_current_path !== $post_data['PostUrl'] ) {
+					$post_data['PostUrl'] = esc_url( $full_current_path );
+				}
+
+				/**
+				 * Set editor link. Alternative to \get_edit_post_link(). This event is triggered
+				 * by regular users viewing a post, so \get_edit_post_link will likely fail the
+				 * capability check and return empty.
+				 */
+				$post_data['EditorLinkPost'] = \admin_url( 'post.php?post=' . $post->ID . '&action=edit' );
+
+				if ( $post->post_password ) {
+					Alert_Manager::trigger_event( 2134, $post_data );
+				}
+			}
+		}
+
+		/**
+		 * Hook into WP incorrect post pass filter to track wrong attempts to access password protected posts.
+		 *
+		 * @param string   $text The message shown to users when entering an invalid password.
+		 * @param \WP_Post $post Post object.
+		 *
+		 * @return string $text - The message shown to users when entering an invalid password.
+		 *
+		 * @since 5.5.2
+		 */
+		public static function trigger_wrong_post_pass_event( $text, $post ) {
+
+			if ( \is_user_logged_in() ) {
+				$post_data = self::get_post_event_data( $post );
+
+				$current_path = isset( $_SERVER['REQUEST_URI'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['REQUEST_URI'] ) ) : false;
+
+				// Update post URL based on current actual path.
+				if ( WP_Helper::is_multisite() && ! \is_subdomain_install() ) {
+					// For multisite using subfolders, remove the subfolder.
+					$subdir_path = parse_url( home_url(), PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+					if ( ! is_null( $subdir_path ) ) {
+						$escaped      = str_replace( '/', '\/', preg_quote( $subdir_path ) ); // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
+						$current_path = preg_replace( '/' . $escaped . '/', '', $current_path );
+					}
+				}
+
+				$full_current_path = home_url( $current_path );
+
+				if ( $full_current_path !== $post_data['PostUrl'] ) {
+					$post_data['PostUrl'] = esc_url( $full_current_path );
+				}
+
+				/**
+				 * Set editor link. Alternative to \get_edit_post_link(). This event is triggered
+				 * by regular users viewing a post, so \get_edit_post_link will likely fail the
+				 * capability check and return empty.
+				 */
+				$post_data['EditorLinkPost'] = \admin_url( 'post.php?post=' . $post->ID . '&action=edit' );
+
+				Alert_Manager::trigger_event( 2135, $post_data );
+			}
+
+			return $text;
+		}
+
+		/**
 		 * Post View Event.
 		 *
 		 * Alerts for Viewing of Posts and Custom Post Types.
@@ -494,6 +613,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function viewing_post() {
+
+			if ( ! is_singular() ) {
+				return;
+			}
+
 			// Retrieve the current post object.
 			$post = get_queried_object();
 
@@ -516,9 +640,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 					// Update post URL based on current actual path.
 					if ( WP_Helper::is_multisite() && ! is_subdomain_install() ) {
 						// For multisite using subfolders, remove the subfolder.
-						$subdir_path = parse_url( home_url(), PHP_URL_PATH ); // phpcs:ignore
+						$subdir_path = parse_url( home_url(), PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
 						if ( ! is_null( $subdir_path ) ) {
-							$escaped      = str_replace( '/', '\/', preg_quote( $subdir_path ) ); // phpcs:ignore
+							$escaped      = str_replace( '/', '\/', preg_quote( $subdir_path ) ); // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
 							$current_path = preg_replace( '/' . $escaped . '/', '', $current_path );
 						}
 					}
@@ -535,7 +659,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 
 					// Set editor link.
 					$post_data[ $edit_link['name'] ] = $edit_link['value'];
-					Alert_Manager::trigger_event( 2101, $post_data );
+
+					if ( empty( $edit_link['value'] ) ) {
+						// Fallback when post edit link is empty due to capability checks.
+						$post_data['EditorLinkPost'] = esc_url( home_url( '/wp-admin/post.php?post=' . $post->ID . '&action=edit' ) );
+					}
+
+					if ( ! Alert_Manager::has_triggered( 2134 ) && false === \post_password_required( $post ) ) {
+						// User viewed a post. Show this only if a password for this post is not required.
+						Alert_Manager::trigger_event( 2101, $post_data );
+					}
 				}
 			}
 		}
@@ -893,7 +1026,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 					$new_user_id = $lock[1];
 
 					if ( $new_user_id ) {
-						if ( $new_editor_user = get_userdata( $new_user_id ) ) { //phpcs:ignore
+						if ( $new_editor_user = get_userdata( $new_user_id ) ) { // phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.Found,Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 							$post        = get_post( $post_id );
 							$editor_link = self::get_editor_link( $post_id );
 							Alert_Manager::trigger_event(
@@ -1134,7 +1267,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		/**
 		 * Return Post Event Data.
 		 *
-		 * @param WP_Post $post - WP Post object.
+		 * @param \WP_Post $post - WP Post object.
 		 * @return array
 		 *
 		 * @since 4.5.0
@@ -1242,8 +1375,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		/**
 		 * Post parent changed.
 		 *
-		 * @param stdClass $oldpost - Old post.
-		 * @param stdClass $newpost - New post.
+		 * @param \stdClass $oldpost - Old post.
+		 * @param \stdClass $newpost - New post.
 		 *
 		 * @since 4.5.0
 		 */
@@ -1784,7 +1917,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		/**
 		 * Post Opened for Editing in WP Editors.
 		 *
-		 * @param WP_Post $post – Post object.
+		 * @param \WP_Post $post – Post object.
 		 *
 		 * @since 4.5.0
 		 */

@@ -196,7 +196,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8825 => array(
 					8825,
 					WSAL_LOW,
-					esc_html__( 'User Enabled/Disabled the advanced or schema settings for authors in the Yoast SEO plugin settings', 'wp-security-audit-log' ),
+					esc_html__( 'User Enabled/Disabled the advanced or schema settings for authors in the Yoast SEO plugin settings (Event disabled and no longer relevant since Yoast 25.0 changes in April 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the setting <strong>Security: advanced or schema settings for authors</strong> in the plugin.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -471,7 +471,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8845 => array(
 					8845,
 					WSAL_MEDIUM,
-					esc_html__( 'Changed the Default Image in the Facebook settings', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the Default Image in the Facebook settings (Event disabled and no longer relevant since Yoast 25.0 changes in April 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the <strong>Default Image</strong> in the Facebook settings to <strong>%image_name%</strong>.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Image path', 'wp-security-audit-log' )          => '%image_path%',
@@ -495,7 +495,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8847 => array(
 					8847,
 					WSAL_MEDIUM,
-					esc_html__( 'Changed the Default card type to use in Twitter settings', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the Default card type to use in Twitter settings (Event disabled and no longer relevant since Yoast 25.0 changes in April 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the <strong>Default card type to use</strong> in Twitter settings to <strong>%new_setting%.</strong>', 'wp-security-audit-log' ),
 					array(
 						__( 'Previous setting', 'wp-security-audit-log' ) => '%old_setting%',
