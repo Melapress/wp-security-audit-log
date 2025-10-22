@@ -26,6 +26,7 @@ use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\CopyEventData\Copy_Event_Data;
 use WSAL\Helpers\DateTime_Formatter_Helper;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
@@ -511,7 +512,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 			self::$query_occ = $this->search( self::$query_occ );
 
-			// phpcs:ignore
 
 			$events = Occurrences_Entity::build_query(
 				array( 'COUNT(*)' => 'COUNT(*)' ),

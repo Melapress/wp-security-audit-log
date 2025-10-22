@@ -835,7 +835,5 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			return count( self::load_query( $sql ) );
 		}
 
-		// phpcs:disable
-		// phpcs:enable
 	}
 }

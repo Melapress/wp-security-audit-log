@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit29544
+class ComposerStaticInit27667
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -87,6 +87,7 @@ class ComposerStaticInit29544
         'WSAL\\MainWP\\MainWP_Helper' => __DIR__ . '/../..' . '/classes/MainWPAddon/class-mainwp-helper.php',
         'WSAL\\MainWP\\MainWP_Settings' => __DIR__ . '/../..' . '/classes/MainWPAddon/class-mainwp-settings.php',
         'WSAL\\Migration\\Metadata_Migration_440' => __DIR__ . '/../..' . '/classes/Migration/class-metadata-migration-440.php',
+        'WSAL\\PMP_Addon_Member_Edit_Panel\\PMP_Addon_Member_Edit_Panel' => __DIR__ . '/../..' . '/classes/PMPAddon/class-pmp-addon-member-edit-panel.php',
         'WSAL\\PluginExtensions\\WFCM_Extension' => __DIR__ . '/../..' . '/classes/PluginExtensions/class-wfcm-extension.php',
         'WSAL\\Utils\\Abstract_Migration' => __DIR__ . '/../..' . '/classes/Migration/class-abstract-migration.php',
         'WSAL\\Utils\\Migrate_53' => __DIR__ . '/../..' . '/classes/Migration/class-migrate-53.php',
@@ -102,6 +103,7 @@ class ComposerStaticInit29544
         'WSAL\\WP_Sensors\\Alerts\\MainWP_Server_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-mainwp-server-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Memberpress_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-memberpress-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Multisite_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-multisite-custom-alerts.php',
+        'WSAL\\WP_Sensors\\Alerts\\Paid_Memberships_Pro_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Rank_Math_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-rank-math-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Redirection_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-redirection-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Tablepress_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-tablepress-custom-alerts.php',
@@ -119,6 +121,7 @@ class ComposerStaticInit29544
         'WSAL\\WP_Sensors\\Helpers\\GravityForms_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-gravityforms-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\MainWP_Server_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-mainwp-server-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\MemberPress_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-memberpress-helper.php',
+        'WSAL\\WP_Sensors\\Helpers\\Paid_Memberships_Pro_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-paid-memberships-pro-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\Rank_Math_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-rank-math-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\Redirection_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-redirection-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\TablePress_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-tablepress-helper.php',
@@ -132,6 +135,7 @@ class ComposerStaticInit29544
         'WSAL\\WP_Sensors\\Main_WP_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-main-wp-sensor.php',
         'WSAL\\WP_Sensors\\MemberPress_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-memberpress-sensor.php',
         'WSAL\\WP_Sensors\\Multisite_Sign_Up_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-multisite-sign-up-sensor.php',
+        'WSAL\\WP_Sensors\\Paid_Memberships_Pro_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-paid-memberships-pro-sensor.php',
         'WSAL\\WP_Sensors\\Rank_Math_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-rank-math-sensor.php',
         'WSAL\\WP_Sensors\\Redirection_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-redirection-sensor.php',
         'WSAL\\WP_Sensors\\TablePress_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-tablepress-sensor.php',
@@ -172,9 +176,9 @@ class ComposerStaticInit29544
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit29544::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit29544::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit29544::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit27667::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit27667::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit27667::$classMap;
 
         }, null, ClassLoader::class);
     }

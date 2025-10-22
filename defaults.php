@@ -158,7 +158,7 @@ function wsaldefaults_build_links( $link_aliases = array() ) {
 }
 
 /**
- * Loads all the events for the core and extentions
+ * Loads all the events for the core and extensions
  *
  * @return void
  *
@@ -710,6 +710,34 @@ function set_wsal_alerts() {
 					Constants::wsaldefaults_build_links( array( 'EditorLinkPost', 'PostUrlIfPublished' ) ),
 					'post',
 					'modified',
+				),
+				array(
+					2134,
+					WSAL_LOW,
+					esc_html__( 'A user accessed a password-protected post', 'wp-security-audit-log' ),
+					esc_html__( 'User accessed the password-protected post %PostTitle%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Post ID', 'wp-security-audit-log' )        => '%PostID%',
+						esc_html__( 'Post type', 'wp-security-audit-log' )      => '%PostType%',
+						esc_html__( 'Post status', 'wp-security-audit-log' )    => '%PostStatus%',
+					),
+					Constants::wsaldefaults_build_links( array( 'PostUrl', 'EditorLinkPost' ) ),
+					'post',
+					'viewed',
+				),
+				array(
+					2135,
+					WSAL_MEDIUM,
+					esc_html__( 'A user entered the wrong password while trying to access a password-protected post', 'wp-security-audit-log' ),
+					esc_html__( 'User entered the wrong password while trying to access the password-protected post %PostTitle%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Post ID', 'wp-security-audit-log' )        => '%PostID%',
+						esc_html__( 'Post type', 'wp-security-audit-log' )      => '%PostType%',
+						esc_html__( 'Post status', 'wp-security-audit-log' )    => '%PostStatus%',
+					),
+					Constants::wsaldefaults_build_links( array( 'PostUrl', 'EditorLinkPost' ) ),
+					'post',
+					'denied',
 				),
 			),
 
@@ -2202,7 +2230,7 @@ function set_wsal_alerts() {
 						esc_html__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 						esc_html__( 'Plugin', 'wp-security-audit-log' )      => '%PluginName%',
 					),
-					Constants::wsaldefaults_build_links( array( 'EditorLinkPage', 'PluginRepoUrl'  ) ),
+					Constants::wsaldefaults_build_links( array( 'EditorLinkPage', 'PluginRepoUrl' ) ),
 					'post',
 					'created',
 				),
@@ -2258,6 +2286,24 @@ function set_wsal_alerts() {
 					array(),
 					'plugin',
 					'failed',
+				),
+				array(
+					5032,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Plugin update available', 'wp-security-audit-log' ),
+					esc_html__( 'Plugin update available for plugin %PluginName%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Available version', 'wp-security-audit-log' )   => '%NewPluginVersion%',
+						esc_html__( 'Installed version', 'wp-security-audit-log' )   => '%CurrentPluginVersion%',
+					),
+					array(
+						esc_html__( 'View all updates', 'wp-security-audit-log' )  => array(
+							'url'   => '%UpdateAdminUrl%',
+							'label' => 'View all updates',
+						),
+					),
+					'plugin',
+					'available',
 				),
 				array(
 					2051,
@@ -2345,6 +2391,24 @@ function set_wsal_alerts() {
 					array(),
 					'file',
 					'modified',
+				),
+				array(
+					5033,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Theme update available', 'wp-security-audit-log' ),
+					esc_html__( 'Theme update available for theme: %ThemeName%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Available version', 'wp-security-audit-log' )     => '%NewThemeVersion%',
+						esc_html__( 'Installed version', 'wp-security-audit-log' )   => '%CurrentThemeVersion%',
+					),
+					array(
+						esc_html__( 'View all updates', 'wp-security-audit-log' )  => array(
+							'url'   => '%UpdateAdminUrl%',
+							'label' => 'View all updates',
+						),
+					),
+					'theme',
+					'available',
 				),
 				array(
 					5035,
@@ -2911,6 +2975,24 @@ function set_wsal_alerts() {
 					array(),
 					'system',
 					'updated',
+				),
+				array(
+					6079,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'WordPress core update available', 'wp-security-audit-log' ),
+					esc_html__( 'WordPress core update available', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Available version', 'wp-security-audit-log' )     => '%NewWPVersion%',
+						esc_html__( 'Installed version', 'wp-security-audit-log' )   => '%CurrentWPVersion%',
+					),
+					array(
+						esc_html__( 'View all updates', 'wp-security-audit-log' )  => array(
+							'url'   => '%UpdateAdminUrl%',
+							'label' => 'View all updates',
+						),
+					),
+					'system',
+					'available',
 				),
 				array(
 					6080,

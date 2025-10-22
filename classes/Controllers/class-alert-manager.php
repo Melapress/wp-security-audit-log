@@ -1005,7 +1005,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 */
 		public static function get_deprecated_events() {
 			if ( empty( self::$deprecated_events ) ) {
-				self::$deprecated_events = apply_filters( 'wsal_deprecated_event_ids', array( 2004, 2005, 2006, 2007, 2009, 2013, 2015, 2018, 2020, 2022, 2026, 2028, 2059, 2060, 2061, 2064, 2066, 2069, 2075, 2087, 2102, 2103, 2113, 2114, 2115, 2116, 2117, 2118, 5020, 5026, 2107, 2003, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037, 2038, 2039, 2040, 2041, 2056, 2057, 2058, 2063, 2067, 2068, 2070, 2072, 2076, 2088, 2104, 2105, 5021, 5027, 2108 ) );
+				self::$deprecated_events = apply_filters( 'wsal_deprecated_event_ids', array( 0000, 0001, 0002, 0003, 0004, 0005, 2004, 2005, 2006, 2007, 2009, 2013, 2015, 2018, 2020, 2022, 2026, 2028, 2059, 2060, 2061, 2064, 2066, 2069, 2075, 2087, 2102, 2103, 2113, 2114, 2115, 2116, 2117, 2118, 5020, 5026, 2107, 2003, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037, 2038, 2039, 2040, 2041, 2056, 2057, 2058, 2063, 2067, 2068, 2070, 2072, 2076, 2088, 2104, 2105, 5021, 5027, 2108, 7014, 7015, 7016, 7017 ) );
 			}
 
 			return self::$deprecated_events;
@@ -1329,6 +1329,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					'created'      => esc_html__( 'Created', 'wp-security-audit-log' ),
 					'modified'     => esc_html__( 'Modified', 'wp-security-audit-log' ),
 					'deleted'      => esc_html__( 'Deleted', 'wp-security-audit-log' ),
+					'assigned'     => esc_html__( 'Assigned', 'wp-security-audit-log' ),
 					'published'    => esc_html__( 'Published', 'wp-security-audit-log' ),
 					'approved'     => esc_html__( 'Approved', 'wp-security-audit-log' ),
 					'unapproved'   => esc_html__( 'Unapproved', 'wp-security-audit-log' ),
@@ -1353,6 +1354,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					'executed'     => esc_html__( 'Executed', 'wp-security-audit-log' ),
 					'failed'       => esc_html__( 'Failed', 'wp-security-audit-log' ),
 					'denied'       => esc_html__( 'Denied', 'wp-security-audit-log' ),
+					'available'    => esc_html__( 'Available', 'wp-security-audit-log' ),
 				);
 				// sort the types alphabetically.
 				asort( self::$event_types );
