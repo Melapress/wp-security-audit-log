@@ -1839,30 +1839,33 @@ msgstr ""
 msgid "Current memory usage: "
 msgstr ""
 
-#: classes/Helpers/class-notices.php:140
-#: classes/Helpers/class-notices.php:158
-#: classes/Helpers/class-notices.php:191
+#: classes/Helpers/class-notices.php:153
+#: classes/Helpers/class-notices.php:171
+#: classes/Helpers/class-notices.php:204
+#: classes/Helpers/class-notices.php:231
 #: classes/Writers/class-csv-writer.php:230
 msgid "nonce is not provided or incorrect"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:197
+#: classes/Helpers/class-notices.php:210
+#: classes/Helpers/class-notices.php:237
 msgid "Failed to dismiss the survey. Please try again."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:228
+#: classes/Helpers/class-notices.php:268
 msgid "Want to know what the state of WordPress security is in 2025?"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:230
+#: classes/Helpers/class-notices.php:270
 msgid "Discover the latest insights in our 2025 WordPress Security Survey Report."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:232
+#: classes/Helpers/class-notices.php:272
 msgid "Read the survey"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:233
+#: classes/Helpers/class-notices.php:273
+#: classes/Helpers/class-notices.php:296
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -13443,6 +13446,14 @@ msgstr ""
 
 #: classes/Helpers/settings/admin/wsal-notification-settings.js:361
 msgid "There are builder errors that needs to be fixed!"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:294
+msgid "Got 2 minutes? Help us shape the future of WP Activity Log"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:295
+msgid "Take the survey"
 msgstr ""
 
 #: classes/WPSensors/Alerts/class-yoast-custom-alerts.php:199
