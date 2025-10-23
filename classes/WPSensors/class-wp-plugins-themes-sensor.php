@@ -1362,7 +1362,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 
 			$notified_updates = Settings_Helper::get_option_value( 'notified_plugin_updates', array() );
 
+			$all_plugins = \get_plugins();
+
 			foreach ( $value->response as $plugin_file => $plugin_data ) {
+
+				// Double check if the plugin file exists.
+				if ( ! isset( $all_plugins[ $plugin_file ] ) ) {
+					continue;
+				}
+
 				$new_available_version = \esc_html( $plugin_data->new_version );
 				$last_notified_version = $notified_updates[ $plugin_file ] ?? null;
 
@@ -1370,8 +1378,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				if ( $last_notified_version && version_compare( $last_notified_version, $new_available_version, '>=' ) ) {
 					continue;
 				}
-
-				$plugin_file = $plugin_data->plugin;
 
 				$plugin_folder_name = self::get_plugin_dir( $plugin_file );
 				$event_plugin_data  = WP_Plugins_Themes_Helper::get_plugin_event_info_from_folder( $plugin_folder_name );

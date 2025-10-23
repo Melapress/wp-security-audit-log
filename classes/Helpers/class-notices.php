@@ -73,6 +73,11 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				// if ( ! $survey_2025 ) {
 				// self::display_yearly_security_survey();
 				// }
+
+				$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
+				if ( ! $melapress_survey_2025 ) {
+					self::display_yearly_wsal_melapress_survey();
+				}
 			}
 		}
 
@@ -106,6 +111,14 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 
 			// ++self::$number_of_notices;
 			// }
+
+			// ! \WpSecurityAuditLog::get_plugin_version() does not work in this hook action, do not use it.
+			$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
+			if ( ! $melapress_survey_2025 ) {
+				\add_action( 'wp_ajax_dismiss_melapress_survey', array( __CLASS__, 'dismiss_melapress_survey' ) );
+
+				++self::$number_of_notices;
+			}
 		}
 
 		/**
@@ -191,7 +204,34 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				\wp_send_json_error( \esc_html_e( 'nonce is not provided or incorrect', 'wp-security-audit-log' ) );
 			}
 
-			$update_yr_setting = settings_helper::set_option_value( 'survey-2025', true );
+			$update_yr_setting = Settings_Helper::set_option_value( 'survey-2025', true );
+
+			if ( ! $update_yr_setting ) {
+				\wp_send_json_error( \esc_html__( 'Failed to dismiss the survey. Please try again.', 'wp-security-audit-log' ) );
+			}
+
+			\wp_send_json_success();
+		}
+
+		/**
+		 * Ajax request handler to dismiss the melapress survey notice. Please note that this is different from the yearly survey, which is for all the version of the plugin.
+		 *
+		 * @return void
+		 *
+		 * @since 5.5.3
+		 */
+		public static function dismiss_melapress_survey() {
+			if ( ! Settings_Helper::current_user_can( 'edit' ) || ! \current_user_can( 'manage_options' ) ) {
+				\wp_send_json_error();
+			}
+
+			$nonce_check = \check_ajax_referer( 'dismiss_melapress_survey', 'nonce' );
+
+			if ( ! $nonce_check ) {
+				\wp_send_json_error( \esc_html_e( 'nonce is not provided or incorrect', 'wp-security-audit-log' ) );
+			}
+
+			$update_yr_setting = Settings_Helper::set_option_value( 'melapress-survey-2025', true );
 
 			if ( ! $update_yr_setting ) {
 				\wp_send_json_error( \esc_html__( 'Failed to dismiss the survey. Please try again.', 'wp-security-audit-log' ) );
@@ -230,6 +270,29 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 						<?php \esc_html_e( 'Discover the latest insights in our 2025 WordPress Security Survey Report.', 'wp-security-audit-log' ); ?>
 					</p>
 					<a href="<?php echo \esc_url( $survey_url ); ?>" target="_blank" rel="noopener" style="background-color: #009344;"  class="button button-primary"><?php \esc_html_e( 'Read the survey', 'wp-security-audit-log' ); ?></a>
+					<button type="button" class="notice-dismiss wsal-plugin-notice-close"><span class="screen-reader-text"><?php \esc_html_e( 'Dismiss this notice.', 'wp-security-audit-log' ); ?></span></button>
+				</div>
+			<?php
+		}
+
+		/**
+		 * Display the 2025 WSAL survey admin notice
+		 *
+		 * @since 5.5.3
+		 */
+		public static function display_yearly_wsal_melapress_survey() {
+			// Show only to admins.
+			if ( ! \current_user_can( 'manage_options' ) ) {
+					return;
+			}
+
+			$melapress_survey_url = 'https://getformly.app/46gDbF';
+
+
+			?>
+				<div style="position: relative; padding-top: 8px; padding-bottom: 8px; border-left-color: #009344;" class="wsal-notice notice notice-info" id="wsal-melapress-survey-notice" data-dismiss-action="dismiss_melapress_survey" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_melapress_survey' ) ); ?>">
+					<p style="font-weight:700; margin-top: 0;"><?php \esc_html_e( 'Got 2 minutes? Help us shape the future of WP Activity Log', 'wp-security-audit-log' ); ?></p>
+					<a href="<?php echo \esc_url( $melapress_survey_url ); ?>" target="_blank" rel="noopener" style="background-color: #009344;"  class="button button-primary"><?php \esc_html_e( 'Take the survey', 'wp-security-audit-log' ); ?></a>
 					<button type="button" class="notice-dismiss wsal-plugin-notice-close"><span class="screen-reader-text"><?php \esc_html_e( 'Dismiss this notice.', 'wp-security-audit-log' ); ?></span></button>
 				</div>
 			<?php
