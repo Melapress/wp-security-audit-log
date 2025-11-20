@@ -402,14 +402,25 @@ $doc.ready(function () {
 
             error: function (xhr, status, error) {
                 if ('undefined' != typeof xhr.status && xhr.status != 200) {
+                    const { __ } = wp.i18n;
+                    let errorMessage = __( 'An error occurred while saving notification settings. Please try again.', 'wp-security-audit-log' );
+
+                    // Handle different error message formats
+                    if (xhr.responseJSON?.data) {
+                      if (typeof xhr.responseJSON.data === 'string') {
+                          errorMessage = xhr.responseJSON.data;
+                      } else if (xhr.responseJSON.data[0]?.message) {
+                          errorMessage = xhr.responseJSON.data[0].message;
+                      }
+                    }
 
                     $saveAlert.addClass('is-failed').delay(900);
-                    $saveAlert.append('<div class="wsal-error-message">' + xhr.responseJSON.data[0].message + '<p><button id="wsal_remove_error" type="button">Close</button></p></div>');
+                    $saveAlert.append('<div class="wsal-error-message">' + errorMessage + '<p><button id="wsal_remove_error" type="button">Close</button></p></div>');
 
                     jQuery('#wsal_remove_error').click(function (e) {
-                        $saveAlert.addClass('is-failed').delay(900).fadeOut(700);
-                        $wsalBody.removeClass('has-overlay');
-                        jQuery('.wsal-error-message').remove();
+                      $saveAlert.addClass('is-failed').delay(900).fadeOut(700);
+                      $wsalBody.removeClass('has-overlay');
+                      jQuery('.wsal-error-message').remove();
                     });
                 }
                 return false;

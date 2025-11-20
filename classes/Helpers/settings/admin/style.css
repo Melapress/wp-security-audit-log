@@ -362,10 +362,6 @@ body.has-overlay #wsal-page-overlay {
   opacity: 0.6;
 }
 
-body:not(.toplevel_page_wsal-plugin-options) #wsal-page-overlay {
-  cursor: zoom-out;
-}
-
 .option-item {
   clear: both;
   padding: 12px 25px;
@@ -933,11 +929,33 @@ body:not(.toplevel_page_wsal-plugin-options) #wsal-page-overlay {
   padding: 15px;
   margin: 20px auto 0;
   border-radius: 5px;
-  font-size: 14px;
+  text-align: center;
+  font-size: 16px;
   line-height: 1.8;
   position: absolute;
   left: -123px;
   width: 300px;
+}
+
+#wsal-saving-settings .wsal-error-message p {
+  margin: 16px 0 0;
+}
+
+#wsal-saving-settings .wsal-error-message button {
+  background-color: #2271b1;
+  border-color: #2271b1;
+  color: #fff;
+  padding: 4px 16px;
+  border-radius: 4px;
+  border: 1px solid;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+#wsal-saving-settings .wsal-error-message button:hover {
+  background-color: #135e96;
+  border-color: #135e96;
 }
 
 @media (min-width: 961px) {

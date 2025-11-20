@@ -127,7 +127,7 @@
 /* Styles - END */
 </style>
 <!-- Copy START -->
-<div class="wsal-plugin-update wsal-notice" data-dismiss-action="wsal_dismiss_upgrade_notice" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_upgrade_notice' ) ); ?>">
+<div class="wsal-plugin-update wsal-notice"<?php echo \WSAL\Helpers\Notices::should_show_black_friday_notice() ? ' style="display: none;"' : ''; ?> data-dismiss-action="wsal_dismiss_upgrade_notice" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_upgrade_notice' ) ); ?>">
 	<div class="wsal-plugin-update-content">
 		<h2 class="wsal-plugin-update-title"><?php echo esc_html__( 'WP Activity Log has been updated to version ', 'wp-security-audit-log' ) . \esc_attr( WSAL_VERSION ); ?></h2>
 		<p class="wsal-plugin-update-text">

@@ -63,10 +63,10 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				}
 
 				// if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
-				// 	$ebook = Settings_Helper::get_boolean_option_value( self::EBOOK_NOTICE, false );
-				// 	if ( ! $ebook ) {
-				// 		self::display_ebook_notice();
-				// 	}
+				// $ebook = Settings_Helper::get_boolean_option_value( self::EBOOK_NOTICE, false );
+				// if ( ! $ebook ) {
+				// self::display_ebook_notice();
+				// }
 				// }
 
 				// $survey_2025 = Settings_Helper::get_boolean_option_value( 'survey-2025', false );
@@ -75,9 +75,15 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				// }
 
 				$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
-				if ( ! $melapress_survey_2025 ) {
+				if ( ! $melapress_survey_2025 && ! self::is_black_friday_campaign_active() ) {
 					self::display_yearly_wsal_melapress_survey();
 				}
+
+				// @free:start
+				if ( self::should_show_black_friday_notice() ) {
+					self::display_black_friday();
+				}
+				// @free:end
 			}
 		}
 
@@ -97,12 +103,13 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				++self::$number_of_notices;
 			}
 
+			// ! \WpSecurityAuditLog::get_plugin_version() does not work in this hook action, do not use it.
 			// if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
-			// 	$ebook = Settings_Helper::get_boolean_option_value( self::EBOOK_NOTICE, false );
-			// 	if ( ! $ebook ) {
-			// 		++self::$number_of_notices;
-			// 		\add_action( 'wp_ajax_wsal_dismiss_ebook_notice', array( __CLASS__, 'dismiss_ebook_notice' ) );
-			// 	}
+			// $ebook = Settings_Helper::get_boolean_option_value( self::EBOOK_NOTICE, false );
+			// if ( ! $ebook ) {
+			// ++self::$number_of_notices;
+			// \add_action( 'wp_ajax_wsal_dismiss_ebook_notice', array( __CLASS__, 'dismiss_ebook_notice' ) );
+			// }
 			// }
 
 			// $survey_2025 = Settings_Helper::get_boolean_option_value( 'survey-2025', false );
@@ -112,13 +119,20 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 			// ++self::$number_of_notices;
 			// }
 
-			// ! \WpSecurityAuditLog::get_plugin_version() does not work in this hook action, do not use it.
 			$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
-			if ( ! $melapress_survey_2025 ) {
+			if ( ! $melapress_survey_2025 && ! self::is_black_friday_campaign_active() ) {
 				\add_action( 'wp_ajax_dismiss_melapress_survey', array( __CLASS__, 'dismiss_melapress_survey' ) );
 
 				++self::$number_of_notices;
 			}
+
+			// @free:start
+			if ( self::should_show_black_friday_notice() ) {
+				\add_action( 'wp_ajax_dismiss_black_friday', array( __CLASS__, 'dismiss_black_friday' ) );
+
+				++self::$number_of_notices;
+			}
+			// @free:end
 		}
 
 		/**
@@ -295,6 +309,312 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 					<a href="<?php echo \esc_url( $melapress_survey_url ); ?>" target="_blank" rel="noopener" style="background-color: #009344;"  class="button button-primary"><?php \esc_html_e( 'Take the survey', 'wp-security-audit-log' ); ?></a>
 					<button type="button" class="notice-dismiss wsal-plugin-notice-close"><span class="screen-reader-text"><?php \esc_html_e( 'Dismiss this notice.', 'wp-security-audit-log' ); ?></span></button>
 				</div>
+			<?php
+		}
+
+		/**
+		 * Get the current date in Y-m-d format (derived from DateTimeImmutable).
+		 *
+		 * @return string
+		 *
+		 * @since 5.5.4
+		 */
+		private static function get_current_date(): string {
+			$current_datetime = \current_datetime();
+
+			return $current_datetime->format( 'Y-m-d' );
+		}
+
+		/**
+		 * Check if the Black Friday campaign is currently active.
+		 *
+		 * @return bool
+		 *
+		 * @since 5.5.4
+		 */
+		public static function is_black_friday_campaign_active(): bool {
+			$current_date = self::get_current_date();
+
+			// Campaign runs from November 21 to December 1.
+			return $current_date >= '2025-11-21' && $current_date <= '2025-12-01';
+		}
+
+		/**
+		 * Check if the Black Friday notice should be displayed.
+		 *
+		 * @return bool
+		 *
+		 * @since 5.5.4
+		 */
+		public static function should_show_black_friday_notice(): bool {
+			// Check if we're within the campaign period.
+			if ( ! self::is_black_friday_campaign_active() ) {
+				return false;
+			}
+
+			$current_date = self::get_current_date();
+
+			// Check dismissal status.
+			$first_dismissal = Settings_Helper::get_option_value( 'black-friday-first-dismiss', '' );
+
+			// If permanently dismissed (second time), never show again.
+			if ( Settings_Helper::get_boolean_option_value( 'black-friday', false ) ) {
+				return false;
+			}
+
+			// Black Friday date (November 28, 2025).
+			$black_friday_date = '2025-11-28';
+
+			// If first dismissal exists and we're before Black Friday, don't show.
+			if ( ! empty( $first_dismissal ) && $current_date < $black_friday_date ) {
+				return false;
+			}
+
+			// If first dismissal exists and we're on or after Black Friday, show again.
+			if ( ! empty( $first_dismissal ) && $current_date >= $black_friday_date ) {
+				return true;
+			}
+
+			// No dismissal yet, show the notice.
+			return true;
+		}
+
+		/**
+		 * Ajax request handler to dismiss the Black Friday notice.
+		 *
+		 * @return void
+		 *
+		 * @since 5.5.4
+		 */
+		public static function dismiss_black_friday() {
+			if ( ! Settings_Helper::current_user_can( 'edit' ) || ! \current_user_can( 'manage_options' ) ) {
+				\wp_send_json_error();
+			}
+
+			$nonce_check = \check_ajax_referer( 'dismiss_black_friday', 'nonce' );
+
+			if ( ! $nonce_check ) {
+				\wp_send_json_error( \esc_html__( 'nonce is not provided or incorrect', 'wp-security-audit-log' ) );
+			}
+
+			$current_date = self::get_current_date();
+
+			// Check if this is the first or second dismissal.
+			$first_dismissal = Settings_Helper::get_option_value( 'black-friday-first-dismiss', '' );
+
+			if ( empty( $first_dismissal ) ) {
+				// First dismissal - save the date.
+				$update_setting = Settings_Helper::set_option_value( 'black-friday-first-dismiss', $current_date );
+			} else {
+				// Second dismissal (on or after Black Friday) - permanently dismiss.
+				$update_setting = Settings_Helper::set_option_value( 'black-friday', true );
+			}
+
+			if ( ! $update_setting ) {
+				\wp_send_json_error( \esc_html__( 'Failed to dismiss the notice. Please try again.', 'wp-security-audit-log' ) );
+			}
+
+			\wp_send_json_success();
+		}
+
+		/**
+		 * Display the Black Friday admin notice.
+		 *
+		 * @return void
+		 *
+		 * @since 5.5.4
+		 */
+		public static function display_black_friday() {
+			if ( ! \current_user_can( 'manage_options' ) ) {
+				return;
+			}
+
+			$offer_url = 'https://melapress.com/black-friday-cyber-monday/?utm_source=plugin&utm_medium=wsal&utm_campaign=BFCM2025';
+
+			?>
+				<div id="wsal-black-friday-notice" class="wsal-notice wsal-black-friday-banner" data-dismiss-action="dismiss_black_friday" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_black_friday' ) ); ?>">
+					<div class="wsal-bf-icon">
+						<img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>img/upgrade-plugin-icon.svg" alt="Black Friday Sale" />
+					</div>
+					<div class="wsal-bf-content">
+						<div class="wsal-bf-title">
+							<?php \esc_html_e( 'Upgrade to premium', 'wp-security-audit-log' ); ?>
+						</div>
+					<div class="wsal-bf-subtitle">
+						<span class="wsal-bf-underline"><?php \esc_html_e( 'Black Friday', 'wp-security-audit-log' ); ?></span> <?php \esc_html_e( 'sale now live!', 'wp-security-audit-log' ); ?>
+					</div>
+						<a href="<?php echo \esc_url( $offer_url ); ?>" target="_blank" rel="noopener" class="button button-primary wsal-bf-button" id="wsal-bf-cta"><?php \esc_html_e( 'Get offer now', 'wp-security-audit-log' ); ?></a>
+					</div>
+					<button type="button" class="notice-dismiss wsal-plugin-notice-close"><span class="screen-reader-text"><?php \esc_html_e( 'Dismiss this notice.', 'wp-security-audit-log' ); ?></span></button>
+				</div>
+
+			<style>
+				@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+				#wsal-black-friday-notice.wsal-black-friday-banner {
+					background-color:  #020E26;
+					border-left: 4px solid #FF8977;
+					position: relative;
+					font-family: 'Inter', sans-serif;
+					display: flex;
+					gap: 52px;
+					margin-left: 0;
+					margin-top: 64px;
+					margin-right: 10px;
+					padding: 16px;
+					justify-content: center;
+				}
+
+				#wsal-black-friday-notice .wsal-bf-icon {
+					background-color: #B6C3F2;
+					display: none;
+					flex-shrink: 0;
+					position: relative;
+				}
+
+				#wsal-black-friday-notice .wsal-bf-icon::after {
+					content: '';
+					position: absolute;
+					top: 0;
+					right: -6px;
+					width: 80px;
+					height: 100%;
+					background-color: #B6C3F2;
+					transform: skewX(-7deg);
+					z-index: 0;
+				}
+
+				#wsal-black-friday-notice .wsal-bf-icon img {
+					display: block;
+					position: relative;
+					padding: 12px 16px 12px 20px;
+					z-index: 1;
+				}
+				
+				#wsal-black-friday-notice .wsal-bf-content {
+					color: #ffffff;
+					margin-top: 13px;
+					margin-bottom: 15px;
+				}
+
+				#wsal-black-friday-notice .wsal-bf-title,
+				#wsal-black-friday-notice .wsal-bf-subtitle {
+					font-weight: 900;
+					text-transform: uppercase;
+				}
+
+				#wsal-black-friday-notice .wsal-bf-title {
+					font-size: 32px;
+					line-height: 1.2;
+					color: #FF8977;
+				}
+
+				#wsal-black-friday-notice .wsal-bf-subtitle {
+					color: #ffffff;
+					font-size: 24px;
+					line-height: 1.5;
+					margin-bottom: 12px;
+				}
+
+				#wsal-black-friday-notice .wsal-bf-underline {
+					position: relative;
+					display: inline-block;
+					text-decoration: none;
+				}
+
+				#wsal-black-friday-notice .wsal-bf-underline::after {
+					content: '';
+					position: absolute;
+					left: 0;
+					bottom: -2px;
+					width: 100%;
+					height: 2px;
+					background-color: currentColor;
+				}
+
+				#wsal-black-friday-notice #wsal-bf-cta.button.button-primary {
+					background-color: #D9E4FD;
+					border-color: #D9E4FD;
+					color: #454BF7;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					font-size: 14px;
+					font-weight: 700;
+					padding: 7px 10px;
+					line-height: 1;
+					transition: background-color 0.3s ease, border-color 0.3s ease;
+				}
+
+				#wsal-black-friday-notice #wsal-bf-cta.button.button-primary:hover,
+				#wsal-black-friday-notice #wsal-bf-cta.button.button-primary:focus {
+					background-color: #B6C3F2;
+					border-color: #B6C3F2;
+				}
+
+				#wsal-black-friday-notice .notice-dismiss {
+					top: 12px;
+					right: 12px;
+					padding: 0;
+				}
+
+				#wsal-black-friday-notice .notice-dismiss:before {
+					color: #ffffff;
+				}
+
+				@media  (min-width: 647px) {
+					#wsal-black-friday-notice.wsal-black-friday-banner {
+						padding: 0;
+						justify-content: flex-start;
+					}
+					
+					#wsal-black-friday-notice #wsal-bf-cta.button.button-primary {
+						display: inline-flex;
+					}
+
+					#wsal-black-friday-notice .wsal-bf-icon {
+						display: block;
+					}
+
+					#wsal-black-friday-notice .wsal-bf-title,
+					#wsal-black-friday-notice .wsal-bf-subtitle {
+						line-height: 1;
+					}
+				}
+
+				@media  (min-width: 790px) {
+					#wsal-black-friday-notice.wsal-black-friday-banner {
+						margin-top: 48px;
+						margin-right: 20px;
+					}
+				}
+			</style>
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+					const wsalBfNotice = document.getElementById('wsal-black-friday-notice');
+					const wsalUpgradeNotice = document.querySelector('.wsal-plugin-update');
+
+					const wsalShowUpgradeNotice = () => {
+						if (wsalUpgradeNotice) {
+							wsalUpgradeNotice.style.display = 'flex';
+						}
+					};
+
+					if (!wsalBfNotice) {
+						// BF not present, show upgrade
+						wsalShowUpgradeNotice();
+					} else {
+						// BF present, listen for dismiss
+						const wsalBfDismissBtn = wsalBfNotice.querySelector('.wsal-plugin-notice-close');
+						if (wsalBfDismissBtn) {
+							wsalBfDismissBtn.addEventListener('click', function() {
+								// Delayed of 300ms, it looks slightly better as the Black Friday notice "swaps" with the upgrade notice.
+								setTimeout(wsalShowUpgradeNotice, 300);
+							});
+						}
+					}
+				});
+			</script>
 			<?php
 		}
 	}
