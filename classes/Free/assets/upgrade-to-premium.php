@@ -6,6 +6,17 @@
  * @package wsal
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Vars to calculate display of Black Friday campaign
+ */
+$now = strtotime( 'now' );
+$black_friday_start = strtotime( '2025-11-21' );
+$black_friday_end   = strtotime( '2025-12-01 23:59:59' );
 ?>
 
 <div id="wsal-persistant-cta" style="position: absolute; top: 2.4rem; left: 0; right: 0;">
@@ -80,8 +91,8 @@
 
 .wsal-persistent-cta-list {
 	margin-top: 1rem;
-    list-style-type: disc;
-    padding: 0;
+	list-style-type: disc;
+	padding: 0;
 }
 	
 .wsal-persistent-cta-link {
@@ -105,7 +116,7 @@
 	background: #0000EE;
 	color: #FF8977;
 }
-	
+
 @media (min-width: 600px)  {
 	.wsal-persistent-cta {
 		margin-right: 1.2rem;
@@ -115,8 +126,8 @@
 
 @media (max-width: 1200px) {
 	.wsal-persistent-cta {
-        justify-content: center;
-    }
+		justify-content: center;
+	}
 	.wsal-persistent-cta::before {
 		display: none;
 	}
@@ -127,9 +138,16 @@
 }
 /* Styles - END */
 </style>
-
+ 
 <!-- Copy START -->	
 <div class="wsal-persistent-cta">
+	<?php
+	if ( $now >= $black_friday_start && $now <= $black_friday_end ) {
+		?>
+		<img style="position: absolute; z-index: 2;	top: 0;	right: 0;" class="wsal-black-friday-offer" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>img/bf-corner-notice.svg" alt="Black Friday Sale" />
+		<?php
+	}
+	?>
 	<div class="wsal-persistent-cta-content">
 		<h2 class="wsal-persistent-cta-title">
 			<img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/wp-activity-log-stacked.svg" alt="WP Activity Log Premium" class="wsal-persistent-cta-image">
@@ -153,8 +171,8 @@
 			?>
 		</p>
 		<p class="wsal-persistent-cta-link"><a href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-upgrade-banner" target="_blank" class="cta-link"><?php echo \esc_html__( 'Get WP Activity Log Premium', 'wp - security - audit - log' ); ?></a></p>
-			</div>
-			</div>
-			<!-- Copy END -->
-			<div class="clear"></div>
-			</div>
+		</div>
+	</div>
+	<!-- Copy END -->
+	<div class="clear"></div>
+</div>

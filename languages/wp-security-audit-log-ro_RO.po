@@ -111,11 +111,11 @@ msgstr "Privat"
 msgid "Learn More"
 msgstr "Aflaţi mai multe"
 
-#: classes/notification/class-notifications.php:667
-#: classes/notification/class-notifications.php:705
-#: classes/notification/class-notifications.php:1098
-#: classes/notification/class-notifications.php:1334
-#: classes/notification/class-notifications.php:1524
+#: classes/notification/class-notifications.php:725
+#: classes/notification/class-notifications.php:779
+#: classes/notification/class-notifications.php:1172
+#: classes/notification/class-notifications.php:1408
+#: classes/notification/class-notifications.php:1598
 #: classes/Views/AuditLog.php:399
 #: classes/Views/Settings.php:343
 #: classes/Views/ToggleAlerts.php:139
@@ -203,7 +203,7 @@ msgstr "Descriere"
 msgid "User"
 msgstr "Utilizator"
 
-#: classes/notification/class-notifications.php:1047
+#: classes/notification/class-notifications.php:1121
 msgid "User logs in"
 msgstr "Autentificările utilizatorilor"
 
@@ -428,7 +428,7 @@ msgstr "Rolul Implicit al Utilizatorului Nou s-a modificat"
 msgid "WordPress Administrator Notification email changed"
 msgstr "E-mailul de Notificare a Administratorului WordPress s-a modificat"
 
-#: classes/notification/class-notifications.php:1032
+#: classes/notification/class-notifications.php:1106
 #: defaults.php:2969
 msgid "WordPress was updated"
 msgstr "WordPress a fost actualizat"
@@ -453,7 +453,7 @@ msgstr "Utilizatorului i s-au revocat privilegiile de Super Administrator"
 msgid "Existing user added to a site"
 msgstr "Utilizator existent adăugat la un site"
 
-#: classes/notification/class-notifications.php:1064
+#: classes/notification/class-notifications.php:1138
 #: defaults.php:2101
 msgid "User removed from site"
 msgstr "Utilizator eliminat de pe site"
@@ -482,12 +482,12 @@ msgstr "Site-ul a fost dezactivat."
 msgid "Existing site deleted from network"
 msgstr "Site existent eliminat din rețea"
 
-#: classes/notification/class-notifications.php:1066
+#: classes/notification/class-notifications.php:1140
 #: defaults.php:2431
 msgid "Activated theme on network"
 msgstr "S-a activat tema în reţea"
 
-#: classes/notification/class-notifications.php:1067
+#: classes/notification/class-notifications.php:1141
 #: defaults.php:2444
 msgid "Deactivated theme from network"
 msgstr "Temă dezactivată din reţea"
@@ -1060,13 +1060,13 @@ msgstr ""
 
 #: classes/Controllers/slack/class-slack.php:99
 #: classes/Controllers/twilio/class-twilio.php:117
-#: classes/notification/class-notifications.php:715
+#: classes/notification/class-notifications.php:789
 msgid "Nonce checking failed"
 msgstr ""
 
 #: classes/Controllers/slack/class-slack.php:102
 #: classes/Controllers/twilio/class-twilio.php:120
-#: classes/notification/class-notifications.php:718
+#: classes/notification/class-notifications.php:792
 msgid "Nonce is not provided"
 msgstr ""
 
@@ -1163,47 +1163,47 @@ msgstr ""
 msgid "Read the release notes"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:143
+#: classes/Free/assets/upgrade-to-premium.php:161
 msgid "Upgrade to Premium and benefit:"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:147
+#: classes/Free/assets/upgrade-to-premium.php:165
 msgid "Quickly find what you need"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:147
+#: classes/Free/assets/upgrade-to-premium.php:165
 msgid " with advanced search filters"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:148
+#: classes/Free/assets/upgrade-to-premium.php:166
 msgid "Stay informed"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:148
+#: classes/Free/assets/upgrade-to-premium.php:166
 msgid " with real-time email and SMS notifications"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:149
+#: classes/Free/assets/upgrade-to-premium.php:167
 msgid "Monitor and manage user sessions"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:149
+#: classes/Free/assets/upgrade-to-premium.php:167
 msgid " in real-time"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:150
+#: classes/Free/assets/upgrade-to-premium.php:168
 msgid "Automate reporting"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:150
+#: classes/Free/assets/upgrade-to-premium.php:168
 msgid " by creating and scheduling activity log reports"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:151
+#: classes/Free/assets/upgrade-to-premium.php:169
 msgid "Seamlessly integrate"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:151
+#: classes/Free/assets/upgrade-to-premium.php:169
 msgid " with Loggly, AWS CloudWatch, and other logging solutions"
 msgstr ""
 
@@ -1243,33 +1243,35 @@ msgstr ""
 msgid "Current memory usage: "
 msgstr ""
 
-#: classes/Helpers/class-notices.php:153
-#: classes/Helpers/class-notices.php:171
-#: classes/Helpers/class-notices.php:204
-#: classes/Helpers/class-notices.php:231
+#: classes/Helpers/class-notices.php:167
+#: classes/Helpers/class-notices.php:185
+#: classes/Helpers/class-notices.php:218
+#: classes/Helpers/class-notices.php:245
+#: classes/Helpers/class-notices.php:397
 #: classes/Writers/class-csv-writer.php:230
 msgid "nonce is not provided or incorrect"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:210
-#: classes/Helpers/class-notices.php:237
+#: classes/Helpers/class-notices.php:224
+#: classes/Helpers/class-notices.php:251
 msgid "Failed to dismiss the survey. Please try again."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:268
+#: classes/Helpers/class-notices.php:282
 msgid "Want to know what the state of WordPress security is in 2025?"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:270
+#: classes/Helpers/class-notices.php:284
 msgid "Discover the latest insights in our 2025 WordPress Security Survey Report."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:272
+#: classes/Helpers/class-notices.php:286
 msgid "Read the survey"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:273
-#: classes/Helpers/class-notices.php:296
+#: classes/Helpers/class-notices.php:287
+#: classes/Helpers/class-notices.php:310
+#: classes/Helpers/class-notices.php:448
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -1340,7 +1342,7 @@ msgstr ""
 msgid "WP Activity Log requires Website File Changes Monitor 1.6.0. Please upgrade that plugin."
 msgstr ""
 
-#: classes/Helpers/class-view-manager.php:356
+#: classes/Helpers/class-view-manager.php:360
 msgid "Get Premium!"
 msgstr ""
 
@@ -2322,147 +2324,147 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-#: classes/notification/class-notifications.php:724
+#: classes/notification/class-notifications.php:798
 msgid "Daily report is empty"
 msgstr ""
 
-#: classes/notification/class-notifications.php:751
+#: classes/notification/class-notifications.php:825
 msgid "The plugin failed to send the email. Is your email set up correctly? Please consult with your website administrator or contact us to assist you with the troubleshooting."
 msgstr ""
 
-#: classes/notification/class-notifications.php:1029
+#: classes/notification/class-notifications.php:1103
 msgid "Failed login for WordPress users"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1030
+#: classes/notification/class-notifications.php:1104
 msgid "Failed login for non existing WordPress users"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1034
+#: classes/notification/class-notifications.php:1108
 msgid "New plugin is installed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1035
+#: classes/notification/class-notifications.php:1109
 msgid "Installed plugin is activated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1036
+#: classes/notification/class-notifications.php:1110
 msgid "Plugin file is modified"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1037
+#: classes/notification/class-notifications.php:1111
 msgid "Installed plugin is deactivated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1038
+#: classes/notification/class-notifications.php:1112
 msgid "A plugin is uninstalled"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1039
+#: classes/notification/class-notifications.php:1113
 msgid "Installed plugin is upgraded"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1041
+#: classes/notification/class-notifications.php:1115
 msgid "New theme is installed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1042
+#: classes/notification/class-notifications.php:1116
 msgid "Installed theme is activated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1043
+#: classes/notification/class-notifications.php:1117
 msgid "Theme file is modified"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1044
+#: classes/notification/class-notifications.php:1118
 msgid "A theme is uninstalled"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1045
+#: classes/notification/class-notifications.php:1119
 msgid "Installed theme is updated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1048
+#: classes/notification/class-notifications.php:1122
 msgid "User changed password"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1050
+#: classes/notification/class-notifications.php:1124
 msgid "User changed email address"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1051
+#: classes/notification/class-notifications.php:1125
 msgid "User's role has changed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1052
+#: classes/notification/class-notifications.php:1126
 msgid "User changed the password of another user"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1053
+#: classes/notification/class-notifications.php:1127
 msgid "New user is created"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1055
+#: classes/notification/class-notifications.php:1129
 msgid "New content is published"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1056
+#: classes/notification/class-notifications.php:1130
 msgid "Content in a post, page or custom post type is changed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1057
+#: classes/notification/class-notifications.php:1131
 msgid "Post is permanently deleted from the trash"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1058
+#: classes/notification/class-notifications.php:1132
 msgid "Post is moved to the trash"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1059
+#: classes/notification/class-notifications.php:1133
 msgid "Anything but content in a post is changed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1061
+#: classes/notification/class-notifications.php:1135
 msgid "User granted super admin"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1062
+#: classes/notification/class-notifications.php:1136
 msgid "User revoked super admin"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1063
+#: classes/notification/class-notifications.php:1137
 msgid "User added to site"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1065
+#: classes/notification/class-notifications.php:1139
 msgid "Site changes"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1069
+#: classes/notification/class-notifications.php:1143
 msgid "Any product change"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1070
+#: classes/notification/class-notifications.php:1144
 msgid "Any store settings change"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1071
+#: classes/notification/class-notifications.php:1145
 msgid "Any coupon code changes"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1072
+#: classes/notification/class-notifications.php:1146
 msgid "Any orders changes"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1074
+#: classes/notification/class-notifications.php:1148
 msgid "Critical event is generated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1297
+#: classes/notification/class-notifications.php:1371
 msgid "Use default"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1554
+#: classes/notification/class-notifications.php:1628
 msgid "Custom notification - no name"
 msgstr ""
 
@@ -4745,6 +4747,7 @@ msgid "Field type"
 msgstr ""
 
 #: classes/WPSensors/Alerts/class-gravity-forms-custom-alerts.php:165
+#: classes/WPSensors/Alerts/class-wpforms-custom-alerts.php:194
 msgid "A form was submitted"
 msgstr ""
 
@@ -8506,10 +8509,6 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-wpforms-custom-alerts.php:445
 #: classes/WPSensors/Alerts/class-wpforms-custom-alerts.php:468
 msgid "View entry in the editor"
-msgstr ""
-
-#: classes/WPSensors/Alerts/class-wpforms-custom-alerts.php:194
-msgid "An form was submitted"
 msgstr ""
 
 #: classes/WPSensors/Alerts/class-wpforms-custom-alerts.php:198
@@ -13463,12 +13462,36 @@ msgstr ""
 msgid "There are builder errors that needs to be fixed!"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:294
+#: classes/Helpers/class-notices.php:308
 msgid "Got 2 minutes? Help us shape the future of WP Activity Log"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:295
+#: classes/Helpers/class-notices.php:309
 msgid "Take the survey"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:414
+msgid "Failed to dismiss the notice. Please try again."
+msgstr ""
+
+#: classes/Helpers/class-notices.php:441
+msgid "Upgrade to premium"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:444
+msgid "Black Friday"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:444
+msgid "sale now live!"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:446
+msgid "Get offer now"
+msgstr ""
+
+#: classes/notification/class-notifications.php:751
+msgid "One or more notification settings could not be enabled because no email was set for them. Please specify custom recipients for all notification settings enabled, or, configure at least one default recipient in the Notification Settings tab."
 msgstr ""
 
 #: classes/WPSensors/Alerts/class-yoast-custom-alerts.php:199
@@ -13551,4 +13574,8 @@ msgstr ""
 
 #: defaults.php:732
 msgid "User entered the wrong password while trying to access the password-protected post %PostTitle%."
+msgstr ""
+
+#: classes/Helpers/settings/admin/wsal-notification-settings.js:406
+msgid "An error occurred while saving notification settings. Please try again."
 msgstr ""

@@ -301,7 +301,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		 * @since 5.2.2
 		 */
 		public static function get_updates_count_html(): string {
-			$count = Notices::get_number_of_notices();
+			$count      = Notices::get_number_of_notices();
 			$count_html = '';
 
 			if ( 0 < $count ) {
@@ -326,10 +326,14 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					}
 				</style>';
 
-				$count_html = $style ;/*. sprintf(
-					' <span id="wsal-notices-menu" class="update-plugins"><span class="update-count">%d</span></span>',
-					\number_format_i18n( $count )
-				);*/
+				$count_html = $style;
+
+				/**
+				 * . sprintf(
+				 * ' <span id="wsal-notices-menu" class="update-plugins"><span class="update-count">%d</span></span>',
+				 * \number_format_i18n( $count )
+				 * );
+				 */
 			}
 
 			return $count_html;

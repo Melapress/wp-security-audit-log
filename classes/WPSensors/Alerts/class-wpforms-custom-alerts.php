@@ -191,7 +191,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 				5523 => array(
 					5523,
 					WSAL_MEDIUM,
-					esc_html__( 'An form was submitted', 'wp-security-audit-log' ),
+					esc_html__( 'A form was submitted', 'wp-security-audit-log' ),
 					esc_html__( 'Submitted the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' )  => '%form_id%',

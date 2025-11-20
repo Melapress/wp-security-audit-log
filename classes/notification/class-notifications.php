@@ -654,11 +654,69 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		}
 
 		/**
+		 * Checks if required email addresses are set for enabled notifications.
+		 *
+		 * @param array $data Array of notification settings from the form.
+		 * @param bool  $has_default_email Whether a default email address is configured.
+		 *
+		 * @return bool True if all required emails are set, false if any are missing.
+		 *
+		 * @since 5.6.0
+		 */
+		private static function check_if_required_data_is_set( array $data, bool $has_default_email ): bool {
+
+			foreach ( self::$events_to_collect as $event_id ) {
+
+				/**
+				 * The main checkbox that enables/disables the entire notification for this event.
+				 *
+				 * E.g. notification_event_4003_notification
+				 */
+				$checkbox_key = 'notification_event_' . $event_id . '_notification';
+
+				/**
+				 * Checkbox to enable a custom email different than the default one set in Notification settings.
+				 * "Use different email address / SMS number / Slack channel"
+				 *
+				 * E.g. notification_event_1003_notification_custom_message
+				 */
+				$check_box_custom_email_key = 'notification_event_' . $event_id . '_notification_custom_message';
+
+				/**
+				 * The email input field that should contain the custom email address(es) for this event.
+				 */
+				$email_key = 'notification_event_' . $event_id . '_notification_email_address';
+
+				// Skip if notification is not enabled upon form submission.
+				if ( ! isset( $data[ $checkbox_key ] ) || false === $data[ $checkbox_key ] ) {
+					continue;
+				}
+
+				if ( isset( $data[ $check_box_custom_email_key ] ) && $data[ $check_box_custom_email_key ] ) {
+
+					// Even if just 1 email is missing AND we don't have the default email, it's enough to throw the error, return false.
+					if ( ! $has_default_email ) {
+						if ( ! isset( $data[ $email_key ] ) || empty( $data[ $email_key ] ) ) {
+							return false;
+						}
+					}
+				} elseif ( ! $has_default_email ) {
+					// If we don't have a custom email, and default email is also falsy, we can't proceed.
+						return false;
+				}
+			}
+
+			return true;
+		}
+
+		/**
 		 * Collects all the submitted reports data and saves them or generates a new report.
 		 *
 		 * @return void
 		 *
 		 * @since 5.1.1
+		 *
+		 * @since 5.6.0 Added check for required email addresses when enabling notifications.
 		 */
 		public static function save_settings_ajax() {
 			if ( \check_ajax_referer( 'notifications-data', 'wsal-security' ) ) {
@@ -669,14 +727,30 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 
 				if ( isset( $_POST[ self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) ) {
 
-					$data = \stripslashes_deep( $_POST[ self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-					self::build_in_check_and_save( $data );
+					$data_data_built_in = array_map( 'sanitize_text_field', \stripslashes_deep( $_POST[ self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) );
+					self::build_in_check_and_save( $data_data_built_in );
 				}
 
 				if ( isset( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ) ) {
 
 					$data = \stripslashes_deep( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					self::settings_check_and_save( $data );
+				}
+
+				$default_email_address_is_set = false;
+
+				if ( isset( $data['notification_default_email_address'] ) ) {
+					$default_email_address_is_set = $data['notification_default_email_address'] ? true : false;
+				}
+
+				$if_required_data_is_set = self::check_if_required_data_is_set( $data_data_built_in, $default_email_address_is_set );
+
+				// Check if built-in notifications were disabled due to missing recipients.
+				if ( ! $if_required_data_is_set ) {
+					\wp_send_json_error(
+						\esc_html__( 'One or more notification settings could not be enabled because no email was set for them. Please specify custom recipients for all notification settings enabled, or, configure at least one default recipient in the Notification Settings tab.', 'wp-security-audit-log' ),
+						400
+					);
 				}
 
 				if ( isset( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ) ) {

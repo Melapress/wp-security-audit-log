@@ -950,8 +950,13 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			?>			
 			<style>
-				#adminmenu #toplevel_page_wsal-auditlog div.wp-menu-image.svg {
+				.toplevel_page_wsal-auditlog.wp-has-submenu div.wp-menu-image.svg {
 					opacity: 0.6;
+				}
+				
+				.toplevel_page_wsal-auditlog.wp-has-submenu.wp-has-current-submenu div.wp-menu-image.svg,
+				.toplevel_page_wsal-auditlog.wp-has-submenu:hover div.wp-menu-image.svg {
+					opacity: 1;
 				}
 			</style>
 			<?php
