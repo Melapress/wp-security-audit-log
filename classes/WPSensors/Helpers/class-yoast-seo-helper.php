@@ -94,11 +94,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Yoast_SEO_Helper' ) ) {
 		 */
 		public static function wsal_yoast_seo_extension_togglealerts_sub_category_titles( $subcat_title, $alert_id ) {
 			if ( 8815 === $alert_id ) {
-				$subcat_title = esc_html_e( 'Features:', 'wp-security-audit-log' );
+				$subcat_title = esc_html__( 'Features:', 'wp-security-audit-log' );
 			} elseif ( 8813 === $alert_id ) {
-				$subcat_title = esc_html_e( 'Search Appearance', 'wp-security-audit-log' );
+				$subcat_title = esc_html__( 'Search Appearance', 'wp-security-audit-log' );
 			} elseif ( 8838 === $alert_id ) {
-				$subcat_title = esc_html_e( 'Multisite network', 'wp-security-audit-log' );
+				$subcat_title = esc_html__( 'Multisite network', 'wp-security-audit-log' );
 			}
 			return $subcat_title;
 		}
