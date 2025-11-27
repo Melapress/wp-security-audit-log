@@ -181,19 +181,19 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper' ) ) {
 		 */
 		public static function wsal_gravityforms_extension_togglealerts_sub_category_titles( $title, $alert_id ) {
 			if ( 5700 === $alert_id ) {
-				$title = esc_html_e( 'Forms', 'wp-security-audit-log' );
+				$title = esc_html__( 'Forms', 'wp-security-audit-log' );
 			}
 			if ( 5705 === $alert_id ) {
-				$title = esc_html_e( 'Form confirmations', 'wp-security-audit-log' );
+				$title = esc_html__( 'Form confirmations', 'wp-security-audit-log' );
 			}
 			if ( 5706 === $alert_id ) {
-				$title = esc_html_e( 'Form notifications', 'wp-security-audit-log' );
+				$title = esc_html__( 'Form notifications', 'wp-security-audit-log' );
 			}
 			if ( 5710 === $alert_id ) {
-				$title = esc_html_e( 'Entries', 'wp-security-audit-log' );
+				$title = esc_html__( 'Entries', 'wp-security-audit-log' );
 			}
 			if ( 5716 === $alert_id ) {
-				$title = esc_html_e( 'Settings', 'wp-security-audit-log' );
+				$title = esc_html__( 'Settings', 'wp-security-audit-log' );
 			}
 			return $title;
 		}
