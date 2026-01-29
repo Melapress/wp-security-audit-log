@@ -388,6 +388,25 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 			// Get user.
 			$user = get_user_by( 'ID', $object_id );
 
+			/**
+			 * WSAL Filter: `wsal_ignore_user_meta_event`
+			 *
+			 * Runs before logging event for user meta created i.e. 4016.
+			 * This filter can be used as check to whether log this event or not.
+			 *
+			 * @since 5.6.0
+			 *
+			 * @param bool   $ignore_event - True if ignore meta event, false if not.
+			 * @param string $meta_key     - Meta key.
+			 * @param mixed  $meta_value   - Meta value.
+			 * @param int    $object_id    - User ID.
+			 */
+			$ignore_event = apply_filters( 'wsal_ignore_user_meta_event', false, $meta_key, $meta_value, $object_id );
+
+			if ( $ignore_event ) {
+				return;
+			}
+
 			Alert_Manager::trigger_event_if(
 				4016,
 				array(
@@ -460,6 +479,26 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 			if ( isset( self::$old_meta[ $meta_id ] ) && ! in_array( $meta_key, $username_meta, true ) ) {
 				// Check change in meta value.
 				if ( self::$old_meta[ $meta_id ]['val'] !== $meta_value ) {
+
+					/**
+					 * WSAL Filter: `wsal_ignore_user_meta_event`
+					 *
+					 * Runs before logging event for user meta updated i.e. 4015.
+					 * This filter can be used as check to whether log this event or not.
+					 *
+					 * @since 5.6.0
+					 *
+					 * @param bool   $ignore_event - True if ignore meta event, false if not.
+					 * @param string $meta_key     - Meta key.
+					 * @param mixed  $meta_value   - Meta value.
+					 * @param int    $object_id    - User ID.
+					 */
+					$ignore_event = apply_filters( 'wsal_ignore_user_meta_event', false, $meta_key, $meta_value, $object_id );
+
+					if ( $ignore_event ) {
+						return;
+					}
+
 					Alert_Manager::trigger_event_if(
 						4015,
 						array(

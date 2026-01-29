@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage utils
- * @copyright  2025 Melapress
+ * @copyright  2026 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  */
@@ -1259,6 +1259,64 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 					Connection::save_connection( $new_connection );
 				}
 			}
+		}
+
+		/**
+		 * Migration for version 5.6.0
+		 *
+		 * Migrates WSAL options from wp_options (of main site) to wp_sitemeta for multisite installs only.
+		 * Fixes the incorrect use of switch_to_blog(get_main_network_id()).
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.0
+		 */
+		protected static function migrate_up_to_5600() {
+			// Only run on multisite.
+			if ( ! WP_Helper::is_multisite() ) {
+				return;
+			}
+
+			global $wpdb;
+
+			// ! Get the get_main_network_id() function: the returning ID was used in WSAL <= 5.5.4 to store options in multisite installs instead of get_main_site_id() or similar.
+			$main_network_id = \get_main_network_id();
+
+			// Build the options table name for the main site.
+			if ( 1 === $main_network_id ) {
+				$options_table_name = $wpdb->prefix . 'options';
+			} else {
+				$options_table_name = $wpdb->prefix . $main_network_id . '_options';
+			}
+
+			/**
+			 * Get all WSAL options from the old location using direct SQL and avoid helper methods during migration.
+			 */
+			$old_options = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT option_name, option_value FROM $options_table_name WHERE option_name LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					'wsal_%'
+				),
+				ARRAY_A
+			);
+
+			// Migrate each option.
+			foreach ( $old_options as $option ) {
+				$option_name  = $option['option_name'];
+				$option_value = \maybe_unserialize( $option['option_value'] );
+
+				// Skip the networkwide_tracker_cpts setting, it's already stored in the correct table.
+				if ( 'wsal_networkwide_tracker_cpts' === $option_name ) {
+					continue;
+				}
+
+				// Write to the new location: sitemeta.
+				\update_network_option( null, $option_name, $option_value );
+			}
+
+			// Mark migration as complete!
+			\update_network_option( null, 'wsal_multisite_options_migrated', true );
+			\update_network_option( null, 'wsal_multisite_options_migrated_date', \current_time( 'mysql' ) );
 		}
 
 		/**

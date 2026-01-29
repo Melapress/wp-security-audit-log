@@ -271,7 +271,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 		/**
 		 * Alerts for editing of product post type for WooCommerce.
 		 *
-		 * @param WP_Post $product - Product post type.
+		 * @param \WP_Post $product - Product post type.
 		 *
 		 * @since 4.6.0
 		 */
@@ -286,7 +286,9 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 				$server_array = filter_input_array( INPUT_SERVER );
 
 				$current_path = isset( $server_array['SCRIPT_NAME'] ) ? \sanitize_text_field( \wp_unslash( $server_array['SCRIPT_NAME'] ) ) . '?post=' . $product->ID : false;
+
 				if ( ! empty( $server_array['HTTP_REFERER'] )
+				&& ! empty( $current_path )
 					&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
 					// Ignore this if we were on the same page so we avoid double audit entries.
 					return $product;
@@ -1697,33 +1699,48 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 		/**
 		 * Trigger alert if change of low stock threshold occurs.
 		 *
-		 * @param WC_Product $product - Old post meta data.
-		 * @param array      $oldpost - Old post.
-		 * @param WC_Product $post    - new post.
+		 * @param \WC_Product $product - Old post meta data.
+		 * @param array       $oldpost - Old post.
+		 * @param \WC_Product $post    - new post.
 		 * @return void
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.0 - Fixed false positives when old and new values are the same. This caused event 9119 to trigger unnecessarily.
 		 */
 		public static function check_low_stock_threshold_change( $product, $oldpost, $post ) {
-			$old_status = ( isset( $oldpost['_low_stock_amount'] ) ) ? $oldpost['_low_stock_amount'][0] : __( 'Store Default', 'wp-security-audit-log' );
-			$status     = ( isset( $post['low_stock_amount'] ) && ! empty( $post['low_stock_amount'] ) ) ? $post['low_stock_amount'] : __( 'Store Default', 'wp-security-audit-log' );
+			// Get raw values, note: empty string means store default.
+			$old_raw = $oldpost['_low_stock_amount'][0] ?? '';
+			$new_raw = $post['low_stock_amount'] ?? '';
 
-			if ( $status !== $old_status ) {
-				$editor_link = self::get_editor_link( $product );
-				Alert_Manager::trigger_event(
-					9119,
-					array(
-						'PostID'               => $product->ID,
-						'SKU'                  => esc_attr( WooCommerce_Sensor::get_product_sku( $product->ID ) ),
-						'ProductTitle'         => $product->post_title,
-						'ProductStatus'        => $product->post_status,
-						'PostStatus'           => $product->post_status,
-						'old_low_stock_amount' => $old_status,
-						'new_low_stock_amount' => $status,
-						$editor_link['name']   => $editor_link['value'],
-					)
-				);
+			// Normalize for comparison: empty = null (store default), otherwise cast to int.
+			$old_normalized = ( '' === $old_raw || '' === trim( (string) $old_raw ) ) ? null : (int) $old_raw;
+			$new_normalized = ( '' === $new_raw || '' === trim( (string) $new_raw ) ) ? null : (int) $new_raw;
+
+			// Return early if we don't have a change.
+			if ( $old_normalized === $new_normalized ) {
+				return;
 			}
+
+			$store_default_label = \esc_html__( 'Store Default', 'wp-security-audit-log' );
+
+			$old_status = null === $old_normalized ? $store_default_label : (string) $old_normalized;
+			$new_status = null === $new_normalized ? $store_default_label : (string) $new_normalized;
+
+			$editor_link = self::get_editor_link( $product );
+
+			Alert_Manager::trigger_event(
+				9119,
+				array(
+					'PostID'               => $product->ID,
+					'SKU'                  => \esc_attr( WooCommerce_Sensor::get_product_sku( $product->ID ) ),
+					'ProductTitle'         => $product->post_title,
+					'ProductStatus'        => $product->post_status,
+					'PostStatus'           => $product->post_status,
+					'old_low_stock_amount' => $old_status,
+					'new_low_stock_amount' => $new_status,
+					$editor_link['name']   => $editor_link['value'],
+				)
+			);
 		}
 
 		/**
@@ -2510,13 +2527,18 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 		 * @since 3.3.1
 		 *
 		 * @param int    $meta_id    - ID of the metadata entry to update.
-		 * @param int    $object_id  - Object ID.
+		 * @param int    $object_id  - Post ID.
 		 * @param string $meta_key   - Meta key.
-		 * @param mixed  $meta_value - Meta value.
+		 * @param mixed  $meta_value - Meta value. This will be a PHP-serialized string representation of the value if the value is an array, an object, or itself a PHP-serialized string.
 		 */
 		public static function detect_stock_level_change( $meta_id, $object_id, $meta_key, $meta_value ) {
 			if ( '_stock' === $meta_key ) {
-				$post           = get_post( $object_id );
+				$post = get_post( $object_id );
+
+				if ( ! $post || ! isset( $post->ID ) ) {
+					return;
+				}
+
 				$editor_link    = self::get_editor_link( $post );
 				$old_stock      = get_post_meta( $object_id, '_stock', true );
 				$product_status = get_post_meta( $object_id, '_stock_status', true );
@@ -2529,7 +2551,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 					array(
 						'PostID'             => $post->ID,
 						'SKU'                => esc_attr( WooCommerce_Sensor::get_product_sku( $post->ID ) ),
-						'ProductTitle'       => $post->post_title,
+						'ProductTitle'       => $post->post_title ?? \esc_html__( 'No product title found', 'wp-security-audit-log' ),
 						'ProductStatus'      => ! $product_status ? $post->post_status : $product_status,
 						'PostStatus'         => ! $product_status ? $post->post_status : $product_status,
 						'OldValue'           => $old_stock,

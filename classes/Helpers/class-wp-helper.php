@@ -7,7 +7,7 @@
  *
  * @since      4.4.2
  *
- * @copyright  2025 Melapress
+ * @copyright  2026 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
@@ -257,23 +257,33 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * Handled option name with and without the prefix for backwards compatibility.
 		 *
-		 * @since  4.0.2
-		 *
 		 * @param string $option_name Name of the option to delete.
 		 *
 		 * @return bool
+		 *
+		 * @since  4.0.2
+		 * @since 5.6.0 - Updated to delete options from the correct multisite db table for settings, sitemeta. And added a fallback to prevent possible errors during the migration phase from 5.5.4 to 5.6.0.
 		 */
 		public static function delete_global_option( $option_name = '' ) {
 			$prefixed_name = self::prefix_name( $option_name );
 
 			if ( self::is_multisite() ) {
-				\switch_to_blog( \get_main_network_id() );
-			}
+				// Try to delete the network option in the new table location: sitemeta (WSAL 5.6.0+).
+				$result = \delete_network_option( null, $prefixed_name );
 
-			$result = \delete_option( $prefixed_name );
+				/**
+				 * Fallback compatibility for migration from 5.5.4 to 5.6.0: if not found in new location,
+				 * try the old location with the wrong get_main_network_id(), present in older WSAL versions.
+				 */
+				if ( false === $result ) {
+					\switch_to_blog( \get_main_network_id() );
 
-			if ( self::is_multisite() ) {
-				\restore_current_blog();
+					$result = \delete_option( $prefixed_name );
+
+					\restore_current_blog();
+				}
+			} else {
+				$result = \delete_option( $prefixed_name );
 			}
 
 			return $result;
@@ -315,13 +325,10 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			$prefixed_name = self::prefix_name( $option_name );
 
 			if ( self::is_multisite() ) {
-				\switch_to_blog( \get_main_network_id() );
-			}
-
-			$result = \update_option( $prefixed_name, $value, $autoload );
-
-			if ( self::is_multisite() ) {
-				\restore_current_blog();
+				// Network options don't support autoload parameter.
+				$result = \update_network_option( null, $prefixed_name, $value );
+			} else {
+				$result = \update_option( $prefixed_name, $value, $autoload );
 			}
 
 			return $result;
@@ -337,6 +344,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @return mixed
 		 *
 		 * @since  4.1.3
+		 * @since 5.6.0 - Updated to get options from the correct multisite db table for settings, sitemeta. And added a fallback to prevent possible errors during the migration phase from 5.5.4 to 5.6.0.
 		 */
 		public static function get_global_option( $option_name = '', $default = null ) {
 			// bail early if no option name was requested.
@@ -344,16 +352,20 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 				return;
 			}
 
-			if ( self::is_multisite() ) {
-				switch_to_blog( get_main_network_id() );
-			}
-
 			$prefixed_name = self::prefix_name( $option_name );
 
-			$result = \get_option( $prefixed_name, $default );
-
 			if ( self::is_multisite() ) {
-				restore_current_blog();
+				// Try new location first (wp_sitemeta).
+				$result = \get_network_option( null, $prefixed_name, null );
+
+				// Backward compatibility for migration from 5.5.4 to 5.6.0: fallback to old location (wp_options of main site).
+				if ( null === $result ) {
+					\switch_to_blog( \get_main_network_id() );
+					$result = \get_option( $prefixed_name, $default );
+					\restore_current_blog();
+				}
+			} else {
+				$result = \get_option( $prefixed_name, $default );
 			}
 
 			return maybe_unserialize( $result );
@@ -1086,6 +1098,23 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 */
 		public static function generate_data() {
 			self::$data = self::get_registered_post_types();
+		}
+
+		/**
+		 * Attempt to get the server side HTTP referrer.
+		 *
+		 * @return string The HTTP referrer or 'Not found' if not available.
+		 *
+		 * @since 5.6.0
+		 */
+		public static function try_to_get_http_referrer(): string {
+			$result = \esc_html__( 'Not found', 'wp-security-audit-log' );
+
+			if ( isset( $_SERVER['HTTP_REFERER'] ) && ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+				$result = \esc_url_raw( \wp_unslash( $_SERVER['HTTP_REFERER'] ) );
+			}
+
+			return $result;
 		}
 	}
 }

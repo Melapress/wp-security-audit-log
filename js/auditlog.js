@@ -34,66 +34,19 @@ window['WsalAuditLogRefreshed'] = function () {
 	// 	viewer.submit();
 	// });
 
-	var modification_alerts = ['1002', '1003', '6007', '6023'];
-
 	jQuery('.log-disable').each(function () {
-		if (-1 == modification_alerts.indexOf(this.innerText)) {
-			// Tooltip Confirm disable alert.
-			if (jQuery(this).attr('data-disabled')) {
-				jQuery(this).darkTooltip({
-					animation: 'fadeIn',
-					size: 'small',
-					gravity: 'west',
-				});
-			} else
-			jQuery(this).darkTooltip({
-				animation: 'fadeIn',
-				size: 'small',
-				gravity: 'west',
-				confirm: true,
-				yes: 'Disable',
-				no: '',
-				onYes: function (elem, tooltip) {
-					WsalDisableByCode(elem.attr('data-alert-id'), elem.data('disable-alert-nonce'));
-					elem.attr('data-disabled', 'disabled');
-
-					jQuery('#darktooltip-'+elem.attr('id')+' .confirm').remove();
-					var { __ } = wp.i18n;
-					jQuery('#darktooltip-'+elem.attr('id')+' strong').text(__( 'This event is disabled.', 'wp-security-audit-log' ),);
-
-					// delete jQuery(elem)['tooltip'];
-
-					//console.log(jQuery(elem).darkTooltip());
-
-					//elem.removeAttribute('data-disabled', 'disabled');
-
-					// delete elem['darkTooltip'];
-
-					// jQuery(elem).darkTooltip({
-					// 	animation: 'fadeIn',
-					// 	size: 'small',
-					// 	gravity: 'west',
-					// 	confirm: false,
-					// });
-				}
-			});
-		} else {
-			// Tooltip Confirm disable alert.
-			jQuery(this).darkTooltip({
-				animation: 'fadeIn',
-				size: 'small',
-				gravity: 'west',
-				confirm: true,
-				yes: 'Disable',
-				no: '<span>Modify</span>',
-				onYes: function (elem) {
-					WsalDisableByCode(elem.attr('data-alert-id'), elem.data('disable-alert-nonce'));
-				},
-				onNo: function (elem) {
-					window.location.href = elem.attr('data-link');
-				}
-			});
-		}
+		// Tooltip Confirm disable alert.
+		jQuery(this).darkTooltip({
+			animation: 'fadeIn',
+			size: 'small',
+			gravity: 'west',
+			confirm: true,
+			yes: 'Disable',
+			no: '',
+			onYes: function (elem) {
+				WsalDisableByCode(elem.attr('data-alert-id'), elem.data('disable-alert-nonce'));
+			},
+		});
 	});
 
 	// tooltip severity type
@@ -222,22 +175,61 @@ function WsalSsasChange(value) {
 }
 
 function WsalDisableCustom(link, meta_key) {
-	var linkElm = jQuery(link);
+	const linkElm = jQuery(link);
+
 	linkElm.hide();
+
 	jQuery.ajax({
 		type: 'POST',
 		url: ajaxurl,
-		async: false,
+		dataType: 'json',
 		data: {
 			action: 'AjaxDisableCustomField',
 			notice: meta_key,
 			disable_nonce: linkElm.data('disable-custom-nonce'),
-			object_type: linkElm.data('object-type')
+			object_type: linkElm.data('object-type'),
 		},
-		success: function (data) {
-			var notice = jQuery('<div class="updated" data-notice-name="notifications-extension"></div>').html(data);
-			jQuery("h2:first").after(notice);
-		}
+
+    success: function (response) {
+        const data = response?.data;
+        if (!data) {
+            linkElm.show();
+            return;
+        }
+
+        // Create the notice structure
+        const notice = jQuery('<div class="updated" data-notice-name="notifications-extension"></div>');
+        
+        // Build message 1
+        const message1 = jQuery('<p></p>');
+        message1.append(document.createTextNode(data.p1_parts?.[0] || ''));
+        message1.append(jQuery('<strong></strong>').text(data.notice || ''));
+        message1.append(document.createTextNode(data.p1_parts?.[1] || ''));
+        
+        // Build message 2
+        const message2 = jQuery('<p></p>');
+        message2.append(document.createTextNode(data.p2_parts?.[0] || ''));
+        const settingsLink = jQuery('<a></a>')
+            .attr('href', data.settings_url || '#')
+            .text(data.tab_label || '');
+        message2.append(settingsLink);
+        message2.append(document.createTextNode(data.p2_parts?.[1] || ''));
+        
+        // Append both messages to notice
+        notice.append(message1);
+        notice.append(message2);
+
+        jQuery('h2:first').after(notice);
+    },
+
+		error: function (xhr) {
+			linkElm.show();
+
+      const message = xhr?.responseJSON?.data?.message || 'Failed to exclude custom field. Please try again.';
+      const errorNotice = jQuery('<div class="notice notice-error"><p></p></div>');
+      errorNotice.find('p').text(message);
+			jQuery('h2:first').after(errorNotice);
+		},
 	});
 }
 

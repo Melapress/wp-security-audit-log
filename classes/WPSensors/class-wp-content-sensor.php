@@ -1182,8 +1182,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 *
 		 * @global array $_POST
 		 *
-		 * @param WP_Post $old_post - Old post.
-		 * @param WP_Post $new_post - New post.
+		 * @param \WP_Post $old_post - Old post.
+		 * @param \WP_Post $new_post - New post.
 		 *
 		 * @since 4.5.0
 		 */

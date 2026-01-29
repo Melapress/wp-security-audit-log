@@ -188,13 +188,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 */
 		public static function on_deactivated_plugin( $plugin_name ) {
 			if ( ! in_array( $plugin_name, self::$reported_plugins, true ) ) {
-				$plugin_data = \get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_name, true, false );
+				$plugin_data = \get_plugin_data( \WP_PLUGIN_DIR . '/' . $plugin_name, true, false );
 				$plugin_slug = dirname( $plugin_name );
 
 				Alert_Manager::trigger_event(
 					5002,
 					array(
-						'PluginFile' => WP_PLUGIN_DIR . '/' . $plugin_name,
+						'PluginFile' => \WP_PLUGIN_DIR . '/' . $plugin_name,
 						'PluginData' => (object) array(
 							'Name'          => $plugin_data['Name'],
 							'PluginURI'     => $plugin_data['PluginURI'],
@@ -424,8 +424,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				'plugin_requires_wp'  => $new_plugin_data['RequiresWP'] ?? '',
 				'plugin_requires_php' => $new_plugin_data['RequiresPHP'] ?? '',
 				// Prevent warning Undefined array key "Network" in an edge case when an invalid plugin.zip is uploaded to the site.
-				'plugin_network'      => ( $plugin_data['Network'] ?? false ) ? 'True' : 'False',
-				'plugin_path'         => WP_PLUGIN_DIR . \DIRECTORY_SEPARATOR . $plugin,
+				'plugin_network'      => ( $new_plugin_data['Network'] ?? false ) ? \esc_html__( 'True', 'wp-security-audit-log' ) : \esc_html__( 'False', 'wp-security-audit-log' ),
+				'plugin_path'         => \WP_PLUGIN_DIR . \DIRECTORY_SEPARATOR . $plugin,
 			);
 
 			if ( isset( $new_plugin_data['UpdateURI'] ) ) {
@@ -507,8 +507,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 
 			// No plugin info in instance, so get it ourself.
 			$plugin_data = array();
-			if ( file_exists( WP_PLUGIN_DIR . '/' . $arr_data['plugin'] ) ) {
-				$plugin_data = \get_plugin_data( WP_PLUGIN_DIR . '/' . $arr_data['plugin'], true, false );
+			if ( file_exists( \WP_PLUGIN_DIR . '/' . $arr_data['plugin'] ) ) {
+				$plugin_data = \get_plugin_data( \WP_PLUGIN_DIR . '/' . $arr_data['plugin'], true, false );
 			}
 
 			$plugin_slug = dirname( $arr_data['plugin'] );
@@ -521,7 +521,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				'plugin_author'      => $plugin_data['Author'] ?? '',
 				'plugin_version'     => $plugin_data['Version'] ?? '',
 				'plugin_url'         => $plugin_data['PluginURI'] ?? '',
-				'plugin_network'     => ( $plugin_data['Network'] ) ? 'True' : 'False',
+				'plugin_network'     => ( $plugin_data['Network'] ?? false ) ? \esc_html__( 'True', 'wp-security-audit-log' ) : \esc_html__( 'False', 'wp-security-audit-log' ),
 				'plugin_path'        => \WP_PLUGIN_DIR . \DIRECTORY_SEPARATOR . $arr_data['plugin'],
 			);
 
@@ -586,8 +586,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 
 				// No plugin info in instance, so get it ourself.
 				$plugin_data = array();
-				if ( file_exists( WP_PLUGIN_DIR . '/' . $arr_data['plugin'] ) ) {
-					$plugin_data = \get_plugin_data( WP_PLUGIN_DIR . '/' . $arr_data['plugin'], true, false );
+				if ( file_exists( \WP_PLUGIN_DIR . '/' . $arr_data['plugin'] ) ) {
+					$plugin_data = \get_plugin_data( \WP_PLUGIN_DIR . '/' . $arr_data['plugin'], true, false );
 				}
 
 				$plugin_slug = dirname( $arr_data['plugin'] );
@@ -600,7 +600,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					'plugin_author'      => $plugin_data['Author'] ?? '',
 					'plugin_version'     => $plugin_data['Version'] ?? '',
 					'plugin_url'         => $plugin_data['PluginURI'] ?? '',
-					'plugin_network'     => ( $plugin_data['Network'] ) ? 'True' : 'False',
+					'plugin_network'     => ( $plugin_data['Network'] ?? false ) ? \esc_html__( 'True', 'wp-security-audit-log' ) : \esc_html__( 'False', 'wp-security-audit-log' ),
 					'plugin_path'        => \WP_PLUGIN_DIR . \DIRECTORY_SEPARATOR . $arr_data['plugin'],
 				);
 
@@ -667,7 +667,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				'plugin_author'      => $plugin_data['Author'],
 				'plugin_version'     => $plugin_data['Version'],
 				'plugin_url'         => $plugin_data['PluginURI'],
-				'plugin_network'     => ( $plugin_data['Network'] ) ? 'True' : 'False',
+				'plugin_network'     => ( $plugin_data['Network'] ?? false ) ? \esc_html__( 'True', 'wp-security-audit-log' ) : \esc_html__( 'False', 'wp-security-audit-log' ),
 				'plugin_path'        => \WP_PLUGIN_DIR . \DIRECTORY_SEPARATOR . $plugin_slug,
 			);
 
@@ -1015,7 +1015,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					} else {
 						$plugin_name = isset( $get_array['plugin'] ) ? $get_array['plugin'] : false;
 						if ( ! \is_wp_error( \validate_plugin( $plugin_name ) ) ) {
-							$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name ) : false;
+							$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( \WP_PLUGIN_DIR ) . $plugin_name ) : false;
 							$plugin_slug = dirname( $plugin_name );
 
 							Alert_Manager::trigger_event(
@@ -1067,7 +1067,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					} else {
 						$plugin_name = isset( $get_array['plugin'] ) ? $get_array['plugin'] : false;
 						if ( ! \is_wp_error( \validate_plugin( $plugin_name ) ) ) {
-							$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name ) : false;
+							$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( \WP_PLUGIN_DIR ) . $plugin_name ) : false;
 
 							$plugin_slug = dirname( $plugin_name );
 
@@ -1387,9 +1387,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					$plugin_current_version = $event_plugin_data['Version'];
 					$update_admin_screen    = \esc_url( \network_admin_url( 'update-core.php' ) );
 
+					$server_address = isset( $_SERVER['SERVER_ADDR'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['SERVER_ADDR'] ) ) : '127.0.0.1';
+
 					Alert_Manager::trigger_event(
 						5032,
 						array(
+							'CurrentUserID'        => 0,
+							'ClientIP'             => $server_address,
 							'PluginName'           => $plugin_name,
 							'CurrentPluginVersion' => $plugin_current_version,
 							'NewPluginVersion'     => $new_available_version,
@@ -1445,9 +1449,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					$theme_current_version = $theme_event_data['Version'];
 					$update_admin_screen   = \esc_url( \network_admin_url( 'update-core.php' ) );
 
+					$server_address = isset( $_SERVER['SERVER_ADDR'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['SERVER_ADDR'] ) ) : '127.0.0.1';
+
 					Alert_Manager::trigger_event(
 						5033,
 						array(
+							'CurrentUserID'       => 0,
+							'ClientIP'            => $server_address,
 							'ThemeName'           => $theme_name,
 							'CurrentThemeVersion' => $theme_current_version,
 							'NewThemeVersion'     => $new_available_version,

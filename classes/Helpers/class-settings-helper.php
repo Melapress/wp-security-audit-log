@@ -598,6 +598,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @return mixed
 		 *
 		 * @since 4.4.3
+		 * @since 5.6.0 - Updated to get options from the correct multisite db table for settings: sitemeta. And added a fallback to prevent possible errors during the migration phase from 5.5.4 to 5.6.0.
 		 */
 		private static function get_option_value_internal( $option_name = '', $default = null ) {
 			// bail early if no option name was requested.
@@ -606,17 +607,22 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			}
 
 			if ( WP_Helper::is_multisite() ) {
-				if ( \function_exists( 'switch_to_blog' ) ) {
+				// Try to get the network option in the new table location: sitemeta (WSAL 5.6.0+).
+				$result = \get_network_option( null, $option_name, null );
+
+				/**
+				 * Fallback compatibility for migration from 5.5.4 to 5.6.0: if not found in new location,
+				 * try the old location with the wrong get_main_network_id(), present in older WSAL versions.
+				 */
+				if ( null === $result ) {
 					\switch_to_blog( \get_main_network_id() );
-				}
-			}
 
-			$result = \get_option( $option_name, $default );
+					$result = \get_option( $option_name, $default );
 
-			if ( WP_Helper::is_multisite() ) {
-				if ( \function_exists( 'restore_current_blog' ) ) {
 					\restore_current_blog();
 				}
+			} else {
+				$result = \get_option( $option_name, $default );
 			}
 
 			return \maybe_unserialize( $result );
@@ -633,6 +639,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @return bool Whether the option w\as updated.
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.0 - Updated to save options to the correct multisite db table for settings, sitemeta.
 		 */
 		private static function set_option_value_internal( $option_name = '', $value = null, $autoload = false ) {
 			// bail early if no option name or value w\as passed.
@@ -641,22 +648,15 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			}
 
 			if ( WP_Helper::is_multisite() ) {
-				if ( \function_exists( 'switch_to_blog' ) ) {
-					\switch_to_blog( \get_main_network_id() );
-				}
-			}
+				$result = \update_network_option( null, $option_name, $value );
 
-			if ( false === $autoload ) {
-				\delete_option( $option_name );
-				$result = \add_option( $option_name, $value, '', $autoload );
+			} elseif ( false === $autoload ) {
+					\delete_option( $option_name );
+
+					$result = \add_option( $option_name, $value, '', $autoload );
+
 			} else {
 				$result = \update_option( $option_name, $value, $autoload );
-			}
-
-			if ( WP_Helper::is_multisite() ) {
-				if ( \function_exists( 'restore_current_blog' ) ) {
-					\restore_current_blog();
-				}
 			}
 
 			return $result;
@@ -770,6 +770,11 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			}
 
 			$ip = parse_url( 'http://' . $ip, PHP_URL_HOST );
+
+			// Prevent fatal error with str replace if $ip is false or null.
+			if ( false === $ip || null === $ip ) {
+				return 'Unknown';
+			}
 
 			$ip = str_replace( array( '[', ']' ), '', $ip );
 
@@ -995,9 +1000,21 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @return int[] List of alerts disabled by default.
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.0 - Added filter to allow extensions to add their own default disabled alerts.
 		 */
 		public static function get_default_disabled_alerts() {
-			return array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6066, 6067, 6068, 6069, 6070, 6071, 6072 );
+			$alerts = array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6066, 6067, 6068, 6069, 6070, 6071, 6072 );
+
+			/**
+			 * Filters the list of alerts disabled by default.
+			 *
+			 * Allows extensions to add their own default disabled alerts.
+			 *
+			 * @param int[] $alerts - List of alert IDs disabled by default.
+			 *
+			 * @since 5.6.0
+			 */
+			return \apply_filters( 'wsal_default_disabled_alerts', $alerts );
 		}
 
 		/**
@@ -1853,11 +1870,23 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			$was_enabled = self::get_boolean_option_value( 'pruning-date-e', false );
 			$old_period  = self::get_option_value( 'pruning-date', '3 months' );
 
+			/**
+			 * If enable is true, and the $new_date is identical to the $old_period, and $was_enabled is false:
+			 * then it's the first time we're loading this after plugin activation and reset settings.
+			 *
+			 * Save this in a variable to skip event 6052.
+			 */
+			$skip_first_time_event_trigger = $enable && ( $new_date === $old_period ) && ! $was_enabled;
+
 			if ( ! $was_enabled && $enable ) {
 				// The retention period is being enabled.
 				self::set_option_value( 'pruning-date', $new_date );
 				self::set_option_value( 'pruning-unit', $new_unit );
 				self::set_boolean_option_value( 'pruning-date-e', $enable );
+
+				if ( $skip_first_time_event_trigger ) {
+					return;
+				}
 
 				Alert_Manager::trigger_event(
 					6052,

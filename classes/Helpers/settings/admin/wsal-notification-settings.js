@@ -741,17 +741,16 @@ $doc.ready(function () {
 
     /**
      * Sends test email
-     * 
      */
     $doc.on('click', '#test_email_notification_settings_ajax', function (e) {
-        //const email_body = (jQuery('#email_notifications_body').length) ? jQuery('#email_notifications_body').val() : null;
 
-        var inputid = 'email_notifications_body';
+        const inputid = 'email_notifications_body';
 
-        var email_body;
-        var editor = tinyMCE.get(inputid);
+        let email_body;
+        const editor = tinyMCE.get(inputid);
 
-        var textArea = jQuery('textarea#' + inputid);
+        const textArea = jQuery('textarea#' + inputid);
+
         if (textArea.length > 0 && textArea.is(':visible')) {
             email_body = textArea.val();
         } else {
@@ -759,7 +758,9 @@ $doc.ready(function () {
         }
 
         const email_subject = (jQuery('#email_notifications_subject').length) ? jQuery('#email_notifications_subject').val() : null;
+
         const email = (jQuery('#notification_default_email_address').length) ? jQuery('#notification_default_email_address').val() : null;
+
         const nonceValue = jQuery('#twilio_notification_nonce').val();
 
         if (!email_body || !email_subject || !email) {

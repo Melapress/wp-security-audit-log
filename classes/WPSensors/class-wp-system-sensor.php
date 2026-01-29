@@ -1443,9 +1443,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 
 				$update_admin_screen = \esc_url( \network_admin_url( 'update-core.php' ) );
 
+				$server_address = isset( $_SERVER['SERVER_ADDR'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['SERVER_ADDR'] ) ) : '127.0.0.1';
+
 				Alert_Manager::trigger_event(
 					6079,
 					array(
+						'CurrentUserID'    => 0,
+						'ClientIP'         => $server_address,
 						'CurrentWPVersion' => $current_version,
 						'NewWPVersion'     => $new_available_version,
 						'UpdateAdminUrl'   => $update_admin_screen,

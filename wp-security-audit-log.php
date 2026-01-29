@@ -2,12 +2,12 @@
 /**
  * WP Activity Log.
  *
- * @copyright Copyright (C) 2013-2025, Melapress - support@melapress.com
+ * @copyright Copyright (C) 2013-2026, Melapress - support@melapress.com
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     5.5.4
+ * Version:     5.6.0
  * Plugin URI:  https://melapress.com/wordpress-activity-log/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      Melapress
@@ -52,7 +52,7 @@ if ( file_exists( plugin_dir_path( __FILE__ ) . 'third-party/vendor/autoload.php
 }
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '5.5.4' );
+	define( 'WSAL_VERSION', '5.6.0' );
 	define( 'WSAL_PREFIX', 'wsal_' );
 	define( 'WSAL_PREFIX_PAGE', 'wsal-' );
 }

@@ -214,7 +214,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				'Username'         => $user_login,
 				'CurrentUserID'    => $user_id,
 				'CurrentUserRoles' => $user_roles,
+				'LoginPageURL'     => WP_Helper::try_to_get_http_referrer(),
 			);
+
 			if ( class_exists( '\WSAL\Helpers\User_Sessions_Helper' ) ) {
 				$alert_data['SessionID'] = User_Sessions_Helper::hash_token( $token );
 			}
@@ -246,12 +248,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					return;
 				}
 
+				$alert_data = array(
+					'CurrentUserID'    => self::$current_user->ID,
+					'CurrentUserRoles' => User_Helper::get_user_roles( self::$current_user ),
+					'LoginPageURL'     => WP_Helper::try_to_get_http_referrer(),
+				);
+
 				Alert_Manager::trigger_event(
 					1001,
-					array(
-						'CurrentUserID'    => self::$current_user->ID,
-						'CurrentUserRoles' => User_Helper::get_user_roles( self::$current_user ),
-					),
+					$alert_data,
 					true
 				);
 			}
@@ -399,10 +404,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				$error_message = $error->get_error_message();
 			}
 
-			// if ( self::is_past_login_failure_limit( $ip, $site_id, $user ) ) {
-			// return;
-			// }
-
 			if ( 1002 === $new_alert_code ) {
 				if ( ! Alert_Manager::check_enable_user_roles( $username, $user_roles ) ) {
 					return;
@@ -413,129 +414,40 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					return;
 				}
 
-				/** Check known users */
-				/*
-				$occ = Occurrences_Entity::build_multi_query(
-					'   WHERE client_ip = %s '
-					. ' AND username = %s '
-					. ' AND alert_id = %d '
-					. ' AND site_id = %d '
-					. ' AND ( created_on BETWEEN %d AND %d );',
+				// Create a new record exists user.
+				Alert_Manager::trigger_event_if(
+					$new_alert_code,
 					array(
-						$ip,
-						$username,
-						1002,
-						$site_id,
-						mktime( 0, 0, 0, $m, $d, $y ),
-						mktime( 0, 0, 0, $m, $d + 1, $y ) - 1,
-					)
-				);
-				$occ = count( $occ ) ? $occ[0] : null;
-
-				if ( ! empty( $occ ) ) {
-					// Update existing record exists user.
-					self::increment_login_failure( $ip, $site_id, $user );
-
-					$no_increment            = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS_NO_INCREMENT );
-					$attempts                = Occurrences_Entity::get_meta_value( $occ, 'Attempts', 0 );
-					$new                     = ( $no_increment && $no_increment === $user->ID ) ? $attempts : $attempts + 1;
-					$login_failure_log_limit = self::get_login_failure_log_limit();
-					if ( - 1 !== $login_failure_log_limit && $new > $login_failure_log_limit ) {
-						$new = $login_failure_log_limit . '+';
-					}
-
-					Metadata_Entity::update_by_name_and_occurrence_id( 'Attempts', $new, $occ['id'] );
-
-					unset( $occ['created_on'] );
-					Occurrences_Entity::save( $occ );
-				} else { */
-				{
-					// Create a new record exists user.
-					Alert_Manager::trigger_event_if(
-						$new_alert_code,
-						array(
-							'Attempts'         => 1,
-							'Username'         => $username,
-							'CurrentUserID'    => $user->ID,
-							'LogFileText'      => '',
-							'CurrentUserRoles' => $user_roles,
-							'error_message'    => ( ! empty( $error_message ) ) ? $error_message : null,
-						),
-						/**
-						* Skip if 1004 (session block) is already in place.
-						*
-						* @return bool
-						*/
-						function () {
-							return ! ( Alert_Manager::will_or_has_triggered( 1004 ) || Alert_Manager::has_triggered( 1002 ) );
-						}
-					);
-				}
-			} else {
-				/*
-				$occ_unknown = Occurrences_Entity::build_multi_query(
-					' WHERE client_ip = %s '
-					. ' AND alert_id = %d '
-					. ' AND site_id = %d '
-					. ' AND ( created_on BETWEEN %d AND %d );',
-					array(
-						$ip,
-						1003,
-						$site_id,
-						mktime( 0, 0, 0, $m, $d, $y ),
-						mktime( 0, 0, 0, $m, $d + 1, $y ) - 1,
-					)
-				);
-
-				$occ_unknown = count( $occ_unknown ) ? $occ_unknown[0] : null;
-				if ( ! empty( $occ_unknown ) ) {
-					// Update existing record not exists user.
-					self::increment_login_failure( $ip, $site_id, false );
-
-					// Increase the number of attempts.
-					$new = Occurrences_Entity::get_meta_value( $occ_unknown, 'Attempts', 0 ) + 1;
-
-					// If login attempts pass allowed number of attempts then stop increasing the attempts.
-					$failure_limit = self::get_visitor_login_failure_log_limit();
-					if ( -1 !== $failure_limit && $new > $failure_limit ) {
-						$new = $failure_limit . '+';
-					}
-
-					// Update the number of login attempts.
-					Metadata_Entity::update_by_name_and_occurrence_id( 'Attempts', $new, $occ_unknown['id'] );
-
-					// Get users from alert.
-					$users = \maybe_unserialize( Metadata_Entity::load_by_name_and_occurrence_id( 'Users', $occ_unknown['id'] )['value'] );
-
-					// Update it if username is not already present in the array.
-					if ( ! empty( $users ) && is_array( $users ) && ! in_array( $username, $users, true ) ) {
-						$users[] = $username;
-						Metadata_Entity::update_by_name_and_occurrence_id( 'Users', $users, $occ_unknown['id'] );
-					} else {
-						// In this case the value doesn't exist so set the value to array.
-						$users = array( $username );
-					}
-
-					unset( $occ_unknown['created_on'] );
-					Occurrences_Entity::save( $occ_unknown );
-				} else {
+						'Attempts'         => 1,
+						'Username'         => $username,
+						'CurrentUserID'    => $user->ID,
+						'LogFileText'      => '',
+						'CurrentUserRoles' => $user_roles,
+						'error_message'    => ( ! empty( $error_message ) ) ? $error_message : null,
+						'LoginPageURL'     => WP_Helper::try_to_get_http_referrer(),
+					),
+					/**
+					* Skip if 1004 (session block) is already in place.
+					*
+					* @return bool
 					*/
-				{
-					// Make an array of usernames.
-					// $users = array( $username );
-
-					// Log an alert for a login attempt with unknown username.
-					Alert_Manager::trigger_event(
-						$new_alert_code,
-						array(
-							'Attempts'      => 1,
-							'Users'         => $username,
-							'LogFileText'   => '',
-							'ClientIP'      => $ip,
-							'error_message' => ( ! empty( $error_message ) ) ? $error_message : null,
-						)
-					);
-				}
+					function () {
+						return ! ( Alert_Manager::will_or_has_triggered( 1004 ) || Alert_Manager::has_triggered( 1002 ) );
+					}
+				);
+			} else {
+				// Log an alert for a login attempt with unknown username.
+				Alert_Manager::trigger_event(
+					$new_alert_code,
+					array(
+						'Attempts'      => 1,
+						'Users'         => $username,
+						'LogFileText'   => '',
+						'ClientIP'      => $ip,
+						'error_message' => ( ! empty( $error_message ) ) ? $error_message : null,
+						'LoginPageURL'  => WP_Helper::try_to_get_http_referrer(),
+					)
+				);
 			}
 		}
 

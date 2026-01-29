@@ -205,8 +205,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			endif;
 		}
 
-		// phpcs:disable
-		// phpcs:enable
 
 		// Check anonymous mode.
 		if ( 'anonymous' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) ) { // If user manually opt-out then don't show the notice.
@@ -236,8 +234,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Display add-on available notice.
 		$screen = get_current_screen();
 
-		// phpcs:disable
-		// phpcs:enable
 	}
 
 	/**
@@ -512,8 +508,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		$wsal_db = Connection::get_connection();
 
-		// phpcs:disable
-		// phpcs:enable
 
 		$alert_meta = Occurrences_Entity::get_meta_array( (int) $get_array['occurrence'], array(), $wsal_db );
 
@@ -565,8 +559,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		die( json_encode( array_slice( $grp1 + $grp2, 0, 7 ) ) ); // phpcs:ignore
 	}
 
-	// phpcs:disable
-	// phpcs:enable
 
 	/**
 	 * Ajax callback to download failed login log.
@@ -934,8 +926,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		wp_send_json_success();
 	}
 
-	// phpcs:disable
-	// phpcs:enable
 
 	/**
 	 * If the plugin-install script from core is not enqueued, add it

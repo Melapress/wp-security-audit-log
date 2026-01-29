@@ -197,8 +197,6 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function init() {
-			// phpcs:disable
-			// phpcs:enable
 			\add_action( 'shutdown', array( __CLASS__, 'commit_pipeline' ), 8 );
 		}
 
@@ -917,18 +915,14 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			 */
 			$event_data = \apply_filters( 'wsal_event_data_before_log', $event_data, $event_id );
 
-			// phpcs:ignore
 
 			foreach ( self::get_loggers() as $logger ) {
-				// phpcs:disable
-				// phpcs:enable
 				if ( $logger instanceof \WSAL\Loggers\WSAL_Ext_MirrorLogger ) {
 					$logger->log( $event_id, $event_data );
 				} else {
 					$logger::log( $event_id, $event_data );
 				}
 			}
-			// phpcs:disable
 		}
 
 		/**
@@ -1355,6 +1349,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					'failed'       => esc_html__( 'Failed', 'wp-security-audit-log' ),
 					'denied'       => esc_html__( 'Denied', 'wp-security-audit-log' ),
 					'available'    => esc_html__( 'Available', 'wp-security-audit-log' ),
+					'completed'    => esc_html__( 'Completed', 'wp-security-audit-log' ),
 				);
 				// sort the types alphabetically.
 				asort( self::$event_types );
