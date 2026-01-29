@@ -46,7 +46,7 @@ if ( ! class_exists( '\WSAL\MainWP\PMP_Addon_Member_Edit_Panel' ) && class_exist
 			$this->slug = 'pmp-wp-activity-log';
 
 			// Displayed title for this panel.
-			$this->title = __( 'Member Activity', 'wp-security-audit-log' );
+			$this->title = \__( 'Member Activity', 'wp-security-audit-log' );
 		}
 
 		/**
@@ -54,19 +54,20 @@ if ( ! class_exists( '\WSAL\MainWP\PMP_Addon_Member_Edit_Panel' ) && class_exist
 		 *
 		 * Some PMP events can be triggered only by Admins and will not be returned in this panel. We get only the events that this specific user has triggered.
 		 *
+		 * @param int $user_id The user ID to fetch events for.
+		 *
 		 * @return array List of events for this user.
 		 *
 		 * @since 5.5.2
 		 */
-		private static function pmp_panel_events() {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended 
-			$user_id = isset( $_REQUEST['user_id'] ) ? (int) $_REQUEST['user_id'] : 0; // can't verify nonce in this context.
-
-			if ( $user_id <= 0 ) {
-				return array();
-			}
+		private static function pmp_panel_events( int $user_id ) {
 
 			$events = Paid_Memberships_Pro_Helper::get_plugin_events();
+
+			// Short-circuit if no events are configured to avoid invalid SQL.
+			if ( empty( $events ) ) {
+				return array();
+			}
 
 			// Placeholders to spread events in the SQL query.
 			$placeholders = implode( ',', array_fill( 0, count( $events ), '%d' ) );
@@ -84,31 +85,71 @@ if ( ! class_exists( '\WSAL\MainWP\PMP_Addon_Member_Edit_Panel' ) && class_exist
 		}
 
 		/**
+		 * Gets the audit log URL filtered by user.
+		 *
+		 * @param int $user_id - The user ID to use in the filter for the activity log.
+		 *
+		 * @return string - The audit log URL with user filter applied.
+		 *
+		 * @since 5.6.0
+		 */
+		private static function get_user_activity_log_url( int $user_id ): string {
+			$username = '';
+
+			if ( $user_id > 0 ) {
+				$user_data = \get_userdata( $user_id );
+				if ( $user_data ) {
+					$username = $user_data->user_login;
+				}
+			}
+
+			$audit_log_url = \admin_url( '?page=wsal-auditlog' );
+
+			if ( ! empty( $username ) ) {
+				$audit_log_url = \add_query_arg( array( 'filters[0]' => 'username:' . $username ), $audit_log_url );
+			}
+
+			return $audit_log_url;
+		}
+
+		/**
 		 * Display the panel contents.
 		 *
 		 * @since 5.5.2
 		 */
 		protected function display_panel_contents() {
-			$events = self::pmp_panel_events();
+
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only panel view, no nonce provided by PMPro. Capability check below.
+			$user_id = isset( $_REQUEST['user_id'] ) ? (int) $_REQUEST['user_id'] : 0;
+
+			if ( ! \current_user_can( 'edit_users' ) && \get_current_user_id() !== $user_id ) {
+				return array();
+			}
+
+			if ( $user_id <= 0 ) {
+				return array();
+			}
+
+			$events = self::pmp_panel_events( $user_id );
 
 			?>
-			<p><?php esc_html_e( 'Here are the most recent user activity records for this member.', 'wp-security-audit-log' ); ?></p>
+			<p><?php \esc_html_e( 'Here are the most recent user activity records for this member.', 'wp-security-audit-log' ); ?></p>
 			<table class="widefat striped fixed">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Alert ID', 'wp-security-audit-log' ); ?></th>
-						<th><?php esc_html_e( 'Severity', 'wp-security-audit-log' ); ?></th>
-						<th><?php esc_html_e( 'Date', 'wp-security-audit-log' ); ?></th>
-						<th><?php esc_html_e( 'Object', 'wp-security-audit-log' ); ?></th>
-						<th><?php esc_html_e( 'Event Type', 'wp-security-audit-log' ); ?></th>
-						<th><?php esc_html_e( 'Message', 'wp-security-audit-log' ); ?></th>
+						<th><?php \esc_html_e( 'Alert ID', 'wp-security-audit-log' ); ?></th>
+						<th><?php \esc_html_e( 'Severity', 'wp-security-audit-log' ); ?></th>
+						<th><?php \esc_html_e( 'Date', 'wp-security-audit-log' ); ?></th>
+						<th><?php \esc_html_e( 'Object', 'wp-security-audit-log' ); ?></th>
+						<th><?php \esc_html_e( 'Event Type', 'wp-security-audit-log' ); ?></th>
+						<th><?php \esc_html_e( 'Message', 'wp-security-audit-log' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 			<?php
 
 			if ( is_array( $events ) && count( $events ) > 0 ) {
-				foreach ( self::pmp_panel_events() as $event ) {
+				foreach ( $events as $event ) {
 
 					// The specific ID of this occurrence record in the DB.
 					$occurence_id = (int) $event['id'];
@@ -139,14 +180,15 @@ if ( ! class_exists( '\WSAL\MainWP\PMP_Addon_Member_Edit_Panel' ) && class_exist
 					<?php
 				}
 			} else {
-				echo '<p>' . esc_html__( 'No events found for this user.', 'wp-security-audit-log' ) . '</p>';
+				echo '<p>' . \esc_html__( 'No events found for this user.', 'wp-security-audit-log' ) . '</p>';
 			}
+
 			?>
 				</tbody>
 			</table>
 			<p>
-				<a class="button button-primary" href="<?php echo esc_url( admin_url( '?page=wsal-auditlog' ) ); ?>">
-					<?php esc_html_e( 'View WP Activity Logs', 'wp-security-audit-log' ); ?>
+				<a class="button button-primary" href="<?php echo \esc_url( self::get_user_activity_log_url( $user_id ) ); ?>">
+					<?php \esc_html_e( 'View WP Activity Logs', 'wp-security-audit-log' ); ?>
 				</a>
 			</p>
 

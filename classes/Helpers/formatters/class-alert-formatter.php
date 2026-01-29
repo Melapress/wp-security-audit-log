@@ -62,8 +62,11 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 					// NULL value check is here because events related to user meta fields didn't have the MetaLink meta prior to version 4.3.2.
 
 					if ( $configuration['is_js_in_links_allowed'] && 'NULL' !== $value ) {
-						$label  = __( 'Exclude custom field from the monitoring', 'wp-security-audit-log' );
-						$result = "<a href=\"#\" data-object-type='{$metadata['Object']}' data-disable-custom-nonce='" . \wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> {$label}</a>";
+						$label = __( 'Exclude custom field from the monitoring', 'wp-security-audit-log' );
+
+						$escaped_value = \esc_js( $value );
+
+						$result = "<a href=\"#\" data-object-type='" . \esc_attr( $metadata['Object'] ) . "' data-disable-custom-nonce='" . \esc_attr( \wp_create_nonce( 'disable-custom-nonce' . $value ) ) . "' onclick=\"return WsalDisableCustom(this, '" . $escaped_value . "');\"> " . \esc_html( $label ) . '</a>';
 
 						return self::wrap_in_hightlight_markup( $result, $configuration, true );
 					}
@@ -227,6 +230,39 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 
 					return self::wrap_in_hightlight_markup( $return, $configuration );
 
+				/**
+				 * Allow users to expand truncated previous Login Page URL. These URLs can be long, so they're truncated by default.
+				 *
+				 * @since 5.6.0
+				 */
+				case '%LoginPageURL%' === $expression:
+					// If value is NULL or empty, return an empty string. This avoids displaying 'NULL' in the alert for old plugin versions before 5.6.0.
+					if ( 'NULL' === $value || empty( $value ) ) {
+						return '';
+					}
+
+					$max_length = $configuration['max_meta_value_length'];
+
+					if ( mb_strlen( $value ) > $max_length ) {
+						$truncated = mb_substr( $value, 0, $max_length );
+						$result    = '<span class="wsal-truncated-url"><strong>' . \esc_html( $truncated ) . '...</strong></span>';
+
+						return $result;
+					}
+
+					// If JS in links is not allowed, we just show the full URL.
+					if ( mb_strlen( $value ) > $max_length ) {
+						$value = \esc_html( $value );
+					}
+
+					return self::wrap_in_hightlight_markup( $value, $configuration );
+
+				case '%EditorLinkOrder%' === $expression:
+					if ( ! isset( $metadata['EditorLinkOrder'] ) ) {
+						return '';
+					}
+					return $metadata['EditorLinkOrder'];
+
 				default:
 					/**
 					 * Allows meta formatting via filter if no match was found.
@@ -284,7 +320,7 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 				case '%old_path%':
 				case '%FilePath%':
 					if ( mb_strlen( $value ) > $length ) {
-						$value = mb_substr( $value, 0, $length ); // phpcs:ignore
+						$value = mb_substr( $value, 0, $length );
 					}
 					break;
 				case '%MetaValue%':

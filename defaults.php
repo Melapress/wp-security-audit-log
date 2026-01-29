@@ -173,8 +173,10 @@ function set_wsal_alerts() {
 					1000,
 					WSAL_LOW,
 					esc_html__( 'User logged in', 'wp-security-audit-log' ),
-					esc_html__( 'User logged in.', 'wp-security-audit-log' ),
-					array(),
+					esc_html__( 'User logged in', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Login URL', 'wp-security-audit-log' ) => '%LoginPageURL%',
+					),
 					array(),
 					'user',
 					'login',
@@ -194,11 +196,14 @@ function set_wsal_alerts() {
 					WSAL_MEDIUM,
 					esc_html__( 'Failed login attempt', 'wp-security-audit-log' ),
 					esc_html__( 'Failed login attempt - wrong password.', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Login URL', 'wp-security-audit-log' ) => '%LoginPageURL%',
+					),
 					array(
 						esc_html__( 'Security tip: limit users failed login attempts.', 'wp-security-audit-log' )  => array(
-							'url'   => 'https://melapress.com/wordpress-limit-login-attempts/?#utm_source=plugin&utm_medium=wsal&utm_campaign=event_1002',
-							'label' => esc_html__( 'limit users failed login attempts', 'wp-security-audit-log' ),
+							'url'                  => 'https://melapress.com/wordpress-limit-login-attempts/?#utm_source=plugin&utm_medium=wsal&utm_campaign=event_1002',
+							'label'                => esc_html__( 'limit users failed login attempts', 'wp-security-audit-log' ),
+							'exclude_from_reports' => true,
 						),
 					),
 					'user',
@@ -209,9 +214,10 @@ function set_wsal_alerts() {
 					WSAL_LOW,
 					esc_html__( 'Failed login attempt with a non-existing user', 'wp-security-audit-log' ),
 					esc_html__( 'Failed login attempt with the username %Users% - user does not exist.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Login URL', 'wp-security-audit-log' ) => '%LoginPageURL%',
+					),
 					array(),
-					array(),
-					// Constants::wsaldefaults_build_links( array( 'LogFileText' ) ),
 					'system',
 					'failed-login',
 				),
@@ -222,6 +228,7 @@ function set_wsal_alerts() {
 					esc_html__( 'Login blocked because other session(s) already exist for this user.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'IP address', 'wp-security-audit-log' ) => '%ClientIP%',
+						esc_html__( 'Login URL', 'wp-security-audit-log' ) => '%LoginPageURL%',
 					),
 					array(),
 					'user',
@@ -234,6 +241,7 @@ function set_wsal_alerts() {
 					esc_html__( 'User logged in however there are other session(s) already for this user.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'IP address(es)', 'wp-security-audit-log' ) => '%IPAddress%',
+						esc_html__( 'Login URL', 'wp-security-audit-log' ) => '%LoginPageURL%',
 					),
 					array(),
 					'user',
@@ -2302,7 +2310,7 @@ function set_wsal_alerts() {
 							'label' => 'View all updates',
 						),
 					),
-					'plugin',
+					'system',
 					'available',
 				),
 				array(
@@ -2407,7 +2415,7 @@ function set_wsal_alerts() {
 							'label' => 'View all updates',
 						),
 					),
-					'theme',
+					'system',
 					'available',
 				),
 				array(

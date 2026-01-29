@@ -4,10 +4,10 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit4054
+class ComposerStaticInit10068
 {
     public static $prefixLengthsPsr4 = array (
-        'W' => 
+        'W' =>
         array (
             'WSAL\\Extensions\\' => 16,
             'WSAL\\' => 5,
@@ -15,11 +15,11 @@ class ComposerStaticInit4054
     );
 
     public static $prefixDirsPsr4 = array (
-        'WSAL\\Extensions\\' => 
+        'WSAL\\Extensions\\' =>
         array (
             0 => __DIR__ . '/../..' . '/extensions',
         ),
-        'WSAL\\' => 
+        'WSAL\\' =>
         array (
             0 => __DIR__ . '/../..' . '/classes',
         ),
@@ -100,6 +100,7 @@ class ComposerStaticInit4054
         'WSAL\\WP_Sensors\\Alerts\\ACF_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-acf-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\BBPress_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-bbpress-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Gravity_Forms_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-gravity-forms-custom-alerts.php',
+        'WSAL\\WP_Sensors\\Alerts\\LearnDash_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-learndash-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\MainWP_Server_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-mainwp-server-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Memberpress_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-memberpress-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Multisite_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-multisite-custom-alerts.php',
@@ -119,6 +120,7 @@ class ComposerStaticInit4054
         'WSAL\\WP_Sensors\\Helpers\\ACF_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-acf-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\BBPress_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-bbpress-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\GravityForms_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-gravityforms-helper.php',
+        'WSAL\\WP_Sensors\\Helpers\\LearnDash_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-learndash-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\MainWP_Server_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-mainwp-server-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\MemberPress_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-memberpress-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\Paid_Memberships_Pro_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-paid-memberships-pro-helper.php',
@@ -131,6 +133,7 @@ class ComposerStaticInit4054
         'WSAL\\WP_Sensors\\Helpers\\WP_Plugins_Themes_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\Woocommerce_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-woocommerce-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\Yoast_SEO_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-yoast-seo-helper.php',
+        'WSAL\\WP_Sensors\\LearnDash_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-learndash-sensor.php',
         'WSAL\\WP_Sensors\\MainWP_Server_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-mainwp-server-sensor.php',
         'WSAL\\WP_Sensors\\Main_WP_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-main-wp-sensor.php',
         'WSAL\\WP_Sensors\\MemberPress_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-memberpress-sensor.php',
@@ -176,9 +179,9 @@ class ComposerStaticInit4054
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit4054::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit4054::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit4054::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit10068::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit10068::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit10068::$classMap;
 
         }, null, ClassLoader::class);
     }

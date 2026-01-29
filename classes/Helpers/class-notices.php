@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage helpers
- * @copyright  2025 Melapress
+ * @copyright  2026 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  * @since 4.6.0
@@ -16,6 +16,7 @@ namespace WSAL\Helpers;
 
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Utils\Abstract_Migration;
+use WSAL\WP_Sensors\Helpers\LearnDash_Helper;
 
 if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 
@@ -30,6 +31,13 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 		 * That is a global constant used for showing the ebook notice.
 		 */
 		public const EBOOK_NOTICE = 'ebook-notice-show';
+
+		/**
+		 * Constant used for showing the LearnDash update notice.
+		 *
+		 * @since 5.6.0
+		 */
+		public const LEARNDASH_UPDATE_NOTICE = 'learndash-update-notice-dismissed';
 
 		/**
 		 * Holds the number of notices we have to show in the admin menu bubble.
@@ -74,9 +82,16 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				// self::display_yearly_security_survey();
 				// }
 
-				$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
-				if ( ! $melapress_survey_2025 && ! self::is_black_friday_campaign_active() ) {
-					self::display_yearly_wsal_melapress_survey();
+				$learndash_update_notice = Settings_Helper::get_boolean_option_value( self::LEARNDASH_UPDATE_NOTICE, false );
+
+				if ( ! $learndash_update_notice && LearnDash_Helper::is_learndash_active() ) {
+					self::display_learndash_update_notice();
+				} else {
+					$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
+
+					if ( ! $melapress_survey_2025 && ! self::is_black_friday_campaign_active() ) {
+						self::display_yearly_wsal_melapress_survey();
+					}
 				}
 
 				// @free:start
@@ -119,11 +134,21 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 			// ++self::$number_of_notices;
 			// }
 
-			$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
-			if ( ! $melapress_survey_2025 && ! self::is_black_friday_campaign_active() ) {
-				\add_action( 'wp_ajax_dismiss_melapress_survey', array( __CLASS__, 'dismiss_melapress_survey' ) );
+			$learndash_update_notice = Settings_Helper::get_boolean_option_value( self::LEARNDASH_UPDATE_NOTICE, false );
+
+			if ( ! $learndash_update_notice && LearnDash_Helper::is_learndash_active() ) {
+				\add_action( 'wp_ajax_dismiss_learndash_update_notice', array( __CLASS__, 'dismiss_learndash_update_notice' ) );
 
 				++self::$number_of_notices;
+			} else {
+
+				$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
+
+				if ( ! $melapress_survey_2025 && ! self::is_black_friday_campaign_active() ) {
+					\add_action( 'wp_ajax_dismiss_melapress_survey', array( __CLASS__, 'dismiss_melapress_survey' ) );
+
+					++self::$number_of_notices;
+				}
 			}
 
 			// @free:start
@@ -255,6 +280,29 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 		}
 
 		/**
+		 * Ajax request handler to dismiss the LearnDash update notice.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.0
+		 */
+		public static function dismiss_learndash_update_notice() {
+			if ( ! Settings_Helper::current_user_can( 'edit' ) || ! \current_user_can( 'manage_options' ) ) {
+				\wp_send_json_error();
+			}
+
+			\check_ajax_referer( 'dismiss_learndash_update_notice', 'nonce' );
+
+			$update_setting = Settings_Helper::set_option_value( self::LEARNDASH_UPDATE_NOTICE, true );
+
+			if ( ! $update_setting ) {
+				\wp_send_json_error( \esc_html__( 'Failed to dismiss the notice. Please try again.', 'wp-security-audit-log' ) );
+			}
+
+			\wp_send_json_success();
+		}
+
+		/**
 		 * Display the 2025 MelaPress survey admin notice
 		 *
 		 * @since 5.5.1
@@ -309,6 +357,32 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 					<a href="<?php echo \esc_url( $melapress_survey_url ); ?>" target="_blank" rel="noopener" style="background-color: #009344;"  class="button button-primary"><?php \esc_html_e( 'Take the survey', 'wp-security-audit-log' ); ?></a>
 					<button type="button" class="notice-dismiss wsal-plugin-notice-close"><span class="screen-reader-text"><?php \esc_html_e( 'Dismiss this notice.', 'wp-security-audit-log' ); ?></span></button>
 				</div>
+			<?php
+		}
+
+		/**
+		 * Display the LearnDash update notice.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.0
+		 */
+		public static function display_learndash_update_notice() {
+			if ( ! \current_user_can( 'manage_options' ) ) {
+				return;
+			}
+
+			$review_url = WP_Helper::get_admin_url( 'admin.php?page=wsal-togglealerts#cat-LearnDash-LMS' );
+
+			?>
+			<div style="position: relative; padding-top: 8px; padding-bottom: 8px; border-left-color: #009344;" class="wsal-notice notice notice-info" id="wsal-learndash-update-notice" data-dismiss-action="dismiss_learndash_update_notice" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_learndash_update_notice' ) ); ?>">
+				<p style="font-weight:700; margin-top: 0;"><?php \esc_html_e( 'Great news! We\'ve added support for LearnDash LMS.', 'wp-security-audit-log' ); ?></p>
+				<p><?php \esc_html_e( 'You can now track course creation, lesson modifications, student enrollments, quiz completions, and more.', 'wp-security-audit-log' ); ?></p>
+				<p><?php \esc_html_e( 'To help keep your activity log focused and efficient, we\'ve carefully selected which events are enabled by default. You can review and customize which LearnDash events you want to track at any time.', 'wp-security-audit-log' ); ?></p>
+				<a href="<?php echo \esc_url( $review_url ); ?>" style="background-color: #009344;" class="button button-primary"><?php \esc_html_e( 'Review Settings', 'wp-security-audit-log' ); ?></a>
+				<button type="button" class="button wsal-plugin-notice-close" style="margin-left: 8px;"><?php \esc_html_e( 'Not Now', 'wp-security-audit-log' ); ?></button>
+				<button type="button" class="notice-dismiss wsal-plugin-notice-close"><span class="screen-reader-text"><?php \esc_html_e( 'Dismiss this notice.', 'wp-security-audit-log' ); ?></span></button>
+			</div>
 			<?php
 		}
 

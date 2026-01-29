@@ -1128,9 +1128,6 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			<?php
 		}
 
-		// phpcs:disable
-		// phpcs:enable
-		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		/**
 		 * Textarea

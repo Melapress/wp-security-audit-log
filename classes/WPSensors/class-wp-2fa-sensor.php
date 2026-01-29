@@ -133,6 +133,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 
 					foreach ( $providers as $class => $provider ) {
 						$policy_name = '';
+
 						if ( is_string( $class ) && \class_exists( (string) $class ) ) {
 							try {
 								if ( constant( $class . '::POLICY_SETTINGS_NAME' ) ) {
@@ -160,13 +161,18 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 							$policy_name = ( isset( $methods[ $provider ] ) ) ? $methods[ $provider ] : '';
 						}
 
-						if ( ! empty( $policy_name ) && ( ! isset( $old_value[ $policy_name ] ) || $old_value[ $policy_name ] !== $new_value[ $policy_name ] ) ) {
-							$alert_code = 7804;
-							$variables  = array(
-								'method'    => $names[ $provider ],
-								'EventType' => ! empty( $new_value[ $policy_name ] ) ? 'enabled' : 'disabled',
-							);
-							Alert_Manager::trigger_event( $alert_code, $variables );
+						if ( ! empty( $policy_name ) ) {
+							$old_val = $old_value[ $policy_name ] ?? null;
+							$new_val = $new_value[ $policy_name ] ?? null;
+
+							if ( $old_val !== $new_val ) {
+								$variables = array(
+									'method'    => $names[ $provider ],
+									'EventType' => ! empty( $new_val ) ? 'enabled' : 'disabled',
+								);
+
+								Alert_Manager::trigger_event( 7804, $variables );
+							}
 						}
 					}
 				}

@@ -7,7 +7,7 @@
  *
  * @since      4.6.0
  *
- * @copyright  2025 Melapress
+ * @copyright  2026 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
@@ -166,7 +166,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			$this->table_name = Occurrences_Entity::get_table_name( self::$wsal_db );
 			$this->table      = Occurrences_Entity::class;
 
-			/* @free:start */
+			// @free:start
 			add_action(
 				'wsal_search_filters_list',
 				function ( $which ) {
@@ -208,7 +208,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				},
 				999
 			);
-			/* @free:end */
+			// @free:end
 		}
 
 		/**
@@ -254,11 +254,9 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		<label class="screen-reader-text" for="<?php echo \esc_attr( $input_id ); ?>"><?php echo \esc_attr( $text ); ?>:</label>
 			<?php
 			$try_free_search = false;
-			// phpcs:ignore
-			/* @free:start */
+			// @free:start
 			$try_free_search = Settings_Helper::get_boolean_option_value( 'free-search-try' );
-			// phpcs:ignore
-			/* @free:end */
+			// @free:end
 
 			if ( $try_free_search ) {
 				?>
@@ -639,13 +637,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					if ( false === $desc ) {
 						$desc = __( 'Alert description not found.', 'wp-security-audit-log' );
 					}
-					$extra_msg           = '';
-					$data_link           = '';
-					$modification_alerts = array( 1002, 1003 );
-					if ( in_array( (int) $item['alert_id'], $modification_alerts, true ) ) {
-						$extra_msg = '. Modify this alert.';
-						$data_link = add_query_arg( 'page', 'wsal-togglealerts#tab-users-profiles---activity', \network_admin_url( 'admin.php' ) );
-					}
 
 					$disabled_events = array_flip( Settings_Helper::get_disabled_alerts() );
 
@@ -654,12 +645,12 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					$id = ' id="alert_' . $item['alert_id'] . '"';
 
 					if ( isset( $disabled_event ) && ! empty( $disabled_event ) ) {
-						return '<span' . $id . ' class="log-disable" data-disabled="disabled" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="<strong>' . __( 'This event is disabled.', 'wp-security-audit-log' ) . '</strong><br>' . $item['alert_id'] . ' - ' . esc_html( $desc ) . $extra_msg . '" data-alert-id="' . $item['alert_id'] . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
+						return '<span' . $id . ' class="log-disable" data-disabled="disabled" data-disable-alert-nonce="' . \wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="<strong>' . __( 'This event is disabled.', 'wp-security-audit-log' ) . '</strong><br>' . $item['alert_id'] . ' - ' . esc_html( $desc ) . '" data-alert-id="' . $item['alert_id'] . '">'
 						. str_pad( (string) $item['alert_id'], 4, '0', STR_PAD_LEFT ) . ' </span>';
 					}
 
-					return '<span' . $id . ' class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="<strong>' . __( 'Disable this type of event.', 'wp-security-audit-log' ) . '</strong><br>' . $item['alert_id'] . ' - ' . esc_html( $desc ) . $extra_msg . '" data-alert-id="' . $item['alert_id'] . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
-						. str_pad( (string) $item['alert_id'], 4, '0', STR_PAD_LEFT ) . ' </span>';
+					return '<span' . $id . ' class="log-disable" data-disable-alert-nonce="' . \wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="' . $item['alert_id'] . ' - ' . esc_html( $desc ) . '" data-alert-id="' . $item['alert_id'] . '">'
+				. str_pad( (string) $item['alert_id'], 4, '0', STR_PAD_LEFT ) . ' </span>';
 				case 'code':
 					$code = 0;
 					if ( isset( $item['severity'] ) ) {
@@ -805,8 +796,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					$btns = '<a class="more-info button button-secondary data-event-inspector-link" data-darktooltip="' . $tooltip . '" data-inspector-active-text="' . __( 'Close inspector.', 'wp-security-audit-log' ) . '" title="' . __( 'Event data inspector', 'wp-security-audit-log' ) . '"' . ' href="' . $url . '">' . __( 'More details...', 'wp-security-audit-log' ) . '</a>';
 
-					// phpcs:disable
-					// phpcs:enable
 
 					return $btns;
 
@@ -873,8 +862,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				 * Action and action2 are set based on the triggers above or below the table
 				 */
 				$actions = array();
-				// phpcs:disable
-				// phpcs:enable
 
 				$actions['disable_alerts'] = __( 'Disable this type of event IDs', 'wp-security-audit-log' );
 				$actions['disable_users']  = __( 'Do not keep a log of this user(s)\' actions', 'wp-security-audit-log' );
@@ -933,8 +920,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				}
 			}
 
-			// phpcs:disable
-			// phpcs:enable
 
 			if ( ( ( isset( $_REQUEST['action'] ) && 'disable_alerts' === $_REQUEST['action'] ) || ( isset( $_REQUEST['action2'] ) && 'disable_alerts' === $_REQUEST['action2'] ) ) && Settings_Helper::current_user_can( 'edit' ) ) {
 				if ( ! isset( $_REQUEST['_wpnonce'] ) ) {
@@ -1212,7 +1197,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				\do_action( 'wsal_list_view_top_navigation' );
 			}
 
-			// phpcs:disable
 		}
 
 		/**
@@ -1229,16 +1213,13 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			$search_string = ( isset( $_REQUEST['s'] ) ? \esc_sql( \sanitize_text_field( \wp_unslash( $_REQUEST['s'] ) ) ) : '' );
 
 			if ( '' !== $search_string ) {
-				// phpcs:ignore
-				/* @free:start */
+				// @free:start
 				Settings_Helper::delete_option_value( 'free-search-try' );
 				$column_names = $this->table::get_fields();
 				unset( $column_names['user_roles'] );
 				unset( $column_names['severity'] );
 				unset( $column_names['object'] );
-				// phpcs:ignore
-				/* @free:end */
-				// phpcs:ignore
+				// @free:end
 				unset( $column_names['created_on'] );
 				unset( $column_names['site_id'] );
 				foreach ( array_keys( $column_names ) as $value ) {
@@ -1247,8 +1228,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 				$query['OR'] = $search;
 
-				// phpcs:ignore
-				/* @free:start */
+				// @free:start
 				$query['OR'][] = array(
 					$this->table::get_table_name( self::$wsal_db ) . '.id IN (
 					SELECT DISTINCT occurrence_id
@@ -1256,8 +1236,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						WHERE TRIM(BOTH "\"" FROM value) LIKE %s
 					)' => '%' . $search_string . '%',
 				);
-				// phpcs:ignore
-				/* @free:end */
+				// @free:end
 			}
 
 			return $query;

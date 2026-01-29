@@ -289,8 +289,6 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				// AJAX test email part.
 				\add_action( 'wp_ajax_wsal_send_notifications_test_email', array( Notification_Helper::class, 'send_test_email' ) );
 
-				// phpcs:disable
-				// phpcs:enable
 			}
 
 			$current_settings = Settings_Helper::get_option_value( self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
@@ -300,8 +298,6 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				self::build_in_check_and_save( array( 'notification_weekly_summary_notification' => true ), true );
 			}
 
-			// phpcs:disable
-			// phpcs:enable
 		}
 
 		/**
@@ -1164,6 +1160,8 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		 * @return void
 		 *
 		 * @since 5.1.1
+		 *
+		 * @since 5.6.0 - Added suppression of event triggers during first-time initialization.
 		 */
 		private static function build_in_check_and_save( array $post_array, bool $first_time = false ) {
 			if ( ! \current_user_can( 'manage_options' ) ) {
@@ -1173,9 +1171,19 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				}
 			}
 
+			/**
+			 * Suppress events on first time activation and upon settings reset via the plugin's options.
+			 */
+			$suppress_events_on_first_time_activation = false;
+
+			if ( $first_time ) {
+				$suppress_events_on_first_time_activation = true;
+			}
+
 			$report_options = array();
 
 			$no_defaults = false;
+
 			if ( ! self::is_default_mail_set() && ! self::is_default_twilio_set() && ! self::is_default_slack_set() ) {
 				$no_defaults = true;
 			}
@@ -1185,7 +1193,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			$report_options['daily_summary_notification'] = ( ( isset( $post_array['notification_daily_summary_notification'] ) ) ? filter_var( $post_array['notification_daily_summary_notification'], FILTER_VALIDATE_BOOLEAN ) : false );
 
 			$current_daily_summary_notification = isset( $current_settings['daily_summary_notification'] ) ? $current_settings['daily_summary_notification'] : '';
-			if ( $current_daily_summary_notification !== $report_options['daily_summary_notification'] ) {
+			if ( ! $suppress_events_on_first_time_activation && $current_daily_summary_notification !== $report_options['daily_summary_notification'] ) {
 				Alert_Manager::trigger_event(
 					6310,
 					array(
@@ -1197,7 +1205,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			$report_options['daily_email_address'] = ( ( isset( $post_array['notification_daily_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_daily_email_address'] ) ) : Email_Helper::get_default_email_to() );
 
 			$current_daily_mail_address = isset( $current_settings['daily_email_address'] ) ? $current_settings['daily_email_address'] : '';
-			if ( $report_options['daily_email_address'] !== $current_daily_mail_address ) {
+			if ( ! $suppress_events_on_first_time_activation && $report_options['daily_email_address'] !== $current_daily_mail_address ) {
 				Alert_Manager::trigger_event(
 					6311,
 					array(
@@ -1215,7 +1223,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			$report_options['weekly_summary_notification'] = ( ( isset( $post_array['notification_weekly_summary_notification'] ) ) ? filter_var( $post_array['notification_weekly_summary_notification'], FILTER_VALIDATE_BOOLEAN ) : false );
 
 			$current_weekly_summary_notification = isset( $current_settings['weekly_summary_notification'] ) ? $current_settings['weekly_summary_notification'] : '';
-			if ( $current_weekly_summary_notification !== $report_options['weekly_summary_notification'] ) {
+			if ( ! $suppress_events_on_first_time_activation && $current_weekly_summary_notification !== $report_options['weekly_summary_notification'] ) {
 				Alert_Manager::trigger_event(
 					6319,
 					array(
@@ -1227,7 +1235,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			$report_options['weekly_email_address'] = ( ( isset( $post_array['notification_weekly_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_weekly_email_address'] ) ) : Email_Helper::get_default_email_to() );
 
 			$current_weekly_mail_address = isset( $current_settings['weekly_email_address'] ) ? $current_settings['weekly_email_address'] : '';
-			if ( $report_options['weekly_email_address'] !== $current_weekly_mail_address ) {
+			if ( ! $suppress_events_on_first_time_activation && $report_options['weekly_email_address'] !== $current_weekly_mail_address ) {
 				Alert_Manager::trigger_event(
 					6328,
 					array(

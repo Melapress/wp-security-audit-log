@@ -19,6 +19,7 @@ use WSAL\Helpers\User_Helper;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Extensions\Views\Reports;
+use WSAL\Controllers\Alert_Manager;
 use WSAL\Entities\Occurrences_Entity;
 use WSAL\ListAdminEvents\List_Events;
 
@@ -97,6 +98,13 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 			$enclosure            = '"';
 			$csv_export_separator = ',';
 
+			// Load all alerts once for filtering excluded links.
+			$all_alerts = array();
+
+			if ( \class_exists( '\WSAL\Extensions\Views\Reports' ) ) {
+				$all_alerts = Alert_Manager::get_alerts();
+			}
+
 			if ( ! empty( $data ) ) {
 
 				foreach ( $data as $row ) {
@@ -154,10 +162,17 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 					$current_row = array();
 					foreach ( array_keys( self::prepare_header() ) as $column_name ) {
 						if ( 'mesg' == $column_name ) {
+							// Get raw message and filter out excluded links.
+							$raw_message = List_events::format_column_value( $row, $column_name );
+
+							if ( isset( $row['alert_id'] ) && ! empty( $all_alerts ) && \class_exists( '\WSAL\Extensions\Views\Reports' ) ) {
+								$raw_message = Reports::maybe_exclude_alert_message_from_report( $raw_message, (int) $row['alert_id'], $all_alerts );
+							}
+
 							$html = htmlspecialchars_decode(
 								\trim(
 									\strip_tags(
-										str_replace( array( '<br />', '<br>', '<br/>', '</br>' ), "\n", List_events::format_column_value( $row, $column_name ) ),
+										str_replace( array( '<br />', '<br>', '<br/>', '</br>' ), "\n", $raw_message ),
 										array( 'a' )
 									)
 								)
