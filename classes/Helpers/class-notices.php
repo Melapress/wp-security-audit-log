@@ -16,7 +16,6 @@ namespace WSAL\Helpers;
 
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Utils\Abstract_Migration;
-use WSAL\WP_Sensors\Helpers\LearnDash_Helper;
 
 if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 
@@ -47,6 +46,20 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 		 * @since 5.2.2
 		 */
 		private static $number_of_notices = 0;
+
+		/**
+		 * Checks if LearnDash plugin is active.
+		 *
+		 * ! We use this local function instead of LearnDash_Helper::is_learndash_active() to avoid a
+		 * ! hard dependency on the LearnDash_Helper class, which can cause a fatal error in some edge cases.
+		 *
+		 * @return bool
+		 *
+		 * @since 5.6.1
+		 */
+		private static function is_learndash_active(): bool {
+			return \function_exists( 'learndash_get_post_type_slug' );
+		}
 
 		/**
 		 * Sets the class hooks.
@@ -84,14 +97,10 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 
 				$learndash_update_notice = Settings_Helper::get_boolean_option_value( self::LEARNDASH_UPDATE_NOTICE, false );
 
-				if ( ! $learndash_update_notice && LearnDash_Helper::is_learndash_active() ) {
+				if ( ! $learndash_update_notice && self::is_learndash_active() ) {
 					self::display_learndash_update_notice();
-				} else {
-					$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
-
-					if ( ! $melapress_survey_2025 && ! self::is_black_friday_campaign_active() ) {
-						self::display_yearly_wsal_melapress_survey();
-					}
+				} elseif ( self::should_show_melapress_survey() ) {
+					self::display_melapress_product_survey();
 				}
 
 				// @free:start
@@ -136,19 +145,16 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 
 			$learndash_update_notice = Settings_Helper::get_boolean_option_value( self::LEARNDASH_UPDATE_NOTICE, false );
 
-			if ( ! $learndash_update_notice && LearnDash_Helper::is_learndash_active() ) {
+			if ( ! $learndash_update_notice && self::is_learndash_active() ) {
 				\add_action( 'wp_ajax_dismiss_learndash_update_notice', array( __CLASS__, 'dismiss_learndash_update_notice' ) );
 
 				++self::$number_of_notices;
-			} else {
+			} elseif ( self::should_show_melapress_survey() ) {
 
-				$melapress_survey_2025 = Settings_Helper::get_boolean_option_value( 'melapress-survey-2025', false );
+				\add_action( 'wp_ajax_dismiss_melapress_survey', array( __CLASS__, 'dismiss_melapress_survey' ) );
+				\add_action( 'wp_ajax_take_melapress_survey', array( __CLASS__, 'take_melapress_survey' ) );
 
-				if ( ! $melapress_survey_2025 && ! self::is_black_friday_campaign_active() ) {
-					\add_action( 'wp_ajax_dismiss_melapress_survey', array( __CLASS__, 'dismiss_melapress_survey' ) );
-
-					++self::$number_of_notices;
-				}
+				++self::$number_of_notices;
 			}
 
 			// @free:start
@@ -253,27 +259,48 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 		}
 
 		/**
-		 * Ajax request handler to dismiss the melapress survey notice. Please note that this is different from the yearly survey, which is for all the version of the plugin.
+		 * Ajax request handler to dismiss the melapress survey notice (X button).
 		 *
 		 * @return void
 		 *
 		 * @since 5.5.3
+		 * @since 5.6.1 - Changed to temporary dismissal that resets on plugin upgrade.
 		 */
 		public static function dismiss_melapress_survey() {
 			if ( ! Settings_Helper::current_user_can( 'edit' ) || ! \current_user_can( 'manage_options' ) ) {
 				\wp_send_json_error();
 			}
 
-			$nonce_check = \check_ajax_referer( 'dismiss_melapress_survey', 'nonce' );
+			\check_ajax_referer( 'dismiss_melapress_survey', 'nonce' );
 
-			if ( ! $nonce_check ) {
-				\wp_send_json_error( \esc_html_e( 'nonce is not provided or incorrect', 'wp-security-audit-log' ) );
+			$update_setting = Settings_Helper::set_boolean_option_value( 'melapress-survey-dismissed', true );
+
+			if ( ! $update_setting ) {
+				\wp_send_json_error( \esc_html__( 'Failed to dismiss the survey. Please try again.', 'wp-security-audit-log' ) );
 			}
 
-			$update_yr_setting = Settings_Helper::set_option_value( 'melapress-survey-2025', true );
+			\wp_send_json_success();
+		}
 
-			if ( ! $update_yr_setting ) {
-				\wp_send_json_error( \esc_html__( 'Failed to dismiss the survey. Please try again.', 'wp-security-audit-log' ) );
+		/**
+		 * Ajax request handler when the user clicks "Take the survey".
+		 * Sets a permanent flag that persists across upgrades.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.1
+		 */
+		public static function take_melapress_survey() {
+			if ( ! Settings_Helper::current_user_can( 'edit' ) || ! \current_user_can( 'manage_options' ) ) {
+				\wp_send_json_error();
+			}
+
+			\check_ajax_referer( 'take_melapress_survey', 'nonce' );
+
+			$update_setting = Settings_Helper::set_boolean_option_value( 'melapress-survey-taken', true );
+
+			if ( ! $update_setting ) {
+				\wp_send_json_error( \esc_html__( 'Failed to save the survey preference. Please try again.', 'wp-security-audit-log' ) );
 			}
 
 			\wp_send_json_success();
@@ -338,11 +365,11 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 		}
 
 		/**
-		 * Display the 2025 WSAL survey admin notice
+		 * Display the Melapress product survey admin notice.
 		 *
 		 * @since 5.5.3
 		 */
-		public static function display_yearly_wsal_melapress_survey() {
+		public static function display_melapress_product_survey() {
 			// Show only to admins.
 			if ( ! \current_user_can( 'manage_options' ) ) {
 					return;
@@ -352,9 +379,9 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 
 
 			?>
-				<div style="position: relative; padding-top: 8px; padding-bottom: 8px; border-left-color: #009344;" class="wsal-notice notice notice-info" id="wsal-melapress-survey-notice" data-dismiss-action="dismiss_melapress_survey" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_melapress_survey' ) ); ?>">
+				<div style="position: relative; padding-top: 8px; padding-bottom: 8px; border-left-color: #009344;" class="wsal-notice notice notice-info" id="wsal-melapress-survey-notice" data-dismiss-action="dismiss_melapress_survey" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_melapress_survey' ) ); ?>" data-take-action="take_melapress_survey" data-take-nonce="<?php echo \esc_attr( \wp_create_nonce( 'take_melapress_survey' ) ); ?>">
 					<p style="font-weight:700; margin-top: 0;"><?php \esc_html_e( 'Got 2 minutes? Help us shape the future of WP Activity Log', 'wp-security-audit-log' ); ?></p>
-					<a href="<?php echo \esc_url( $melapress_survey_url ); ?>" target="_blank" rel="noopener" style="background-color: #009344;"  class="button button-primary"><?php \esc_html_e( 'Take the survey', 'wp-security-audit-log' ); ?></a>
+					<a href="<?php echo \esc_url( $melapress_survey_url ); ?>" target="_blank" rel="noopener" style="background-color: #009344;" class="button button-primary wsal-survey-take-btn"><?php \esc_html_e( 'Take the survey', 'wp-security-audit-log' ); ?></a>
 					<button type="button" class="notice-dismiss wsal-plugin-notice-close"><span class="screen-reader-text"><?php \esc_html_e( 'Dismiss this notice.', 'wp-security-audit-log' ); ?></span></button>
 				</div>
 			<?php
@@ -411,6 +438,39 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 
 			// Campaign runs from November 21 to December 1.
 			return $current_date >= '2025-11-21' && $current_date <= '2025-12-01';
+		}
+
+		/**
+		 * Check if the Melapress survey banner should be displayed.
+		 *
+		 * @return bool
+		 *
+		 * @since 5.6.1
+		 */
+		public static function should_show_melapress_survey(): bool {
+			// Permanent dismissal: user already took the survey.
+			if ( Settings_Helper::get_boolean_option_value( 'melapress-survey-taken', false ) ) {
+				return false;
+			}
+
+			// Temporary dismissal: user clicked X (resets on next upgrade).
+			if ( Settings_Helper::get_boolean_option_value( 'melapress-survey-dismissed', false ) ) {
+				return false;
+			}
+
+			// Don't show during Black Friday.
+			if ( self::is_black_friday_campaign_active() ) {
+				return false;
+			}
+
+			// On new installs, wait 15 days before showing.
+			$installed_at = Settings_Helper::get_option_value( 'plugin-installed-at', false );
+
+			if ( false !== $installed_at && ( time() - (int) $installed_at ) < 15 * DAY_IN_SECONDS ) {
+				return false;
+			}
+
+			return true;
 		}
 
 		/**

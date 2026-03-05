@@ -811,9 +811,11 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 						}
 					}
 					if ( 0 === $event_data['CurrentUserID'] ) {
-						if ( 'system' === \strtolower( $alert_obj['object'] ) ) {
+						$alert_object = \strtolower( (string) ( $alert_obj['object'] ?? '' ) );
+
+						if ( 'system' === $alert_object ) {
 							$event_data['Username'] = 'System';
-						} elseif ( str_starts_with( \strtolower( $alert_obj['object'] ), 'woocommerce' ) && 9130 !== (int) $event_id ) {
+						} elseif ( str_starts_with( $alert_object, 'woocommerce' ) && 9130 !== (int) $event_id ) {
 							$event_data['Username'] = 'WooCommerce System';
 						} else {
 							$event_data['Username'] = 'Unknown User';
@@ -823,9 +825,11 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			}
 			if ( isset( $event_data['CurrentUserID'] ) && ! isset( $event_data['Username'] ) ) {
 				if ( 0 === $event_data['CurrentUserID'] ) {
-					if ( 'system' === \strtolower( $alert_obj['object'] ) ) {
+					$alert_object = \strtolower( (string) ( $alert_obj['object'] ?? '' ) );
+
+					if ( 'system' === $alert_object ) {
 						$event_data['Username'] = 'System';
-					} elseif ( str_starts_with( \strtolower( $alert_obj['object'] ), 'woocommerce' ) ) {
+					} elseif ( str_starts_with( $alert_object, 'woocommerce' ) ) {
 						$event_data['Username'] = 'WooCommerce System';
 					} else {
 						$event_data['Username'] = 'Unknown User';

@@ -10,7 +10,7 @@
  * @copyright  2026 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
- * @see       https://wordpress.org/plugins/wp-2fa/
+ * @see       https://wordpress.org/plugins/wp-security-audit-log/
  */
 
 declare(strict_types=1);

@@ -6,7 +6,7 @@
  * @subpackage utils
  * @copyright  2026 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
- * @link       https://wordpress.org/plugins/wp-2fa/
+ * @link       https://wordpress.org/plugins/wp-security-audit-log/
  */
 
 namespace WSAL\Utils;
@@ -129,6 +129,9 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 				if ( '0000' === $stored_version_as_number && ! WP_Helper::is_plugin_installed() ) {
 					// That is first install of the plugin, store the version and leave.
 					self::store_updated_version();
+
+					// Store installation timestamp for time-delayed notices (e.g. survey banner).
+					Settings_Helper::set_option_value( 'plugin-installed-at', time() );
 
 					$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
 
@@ -270,6 +273,11 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 
 				if ( '0.0.0' !== (string) static::$stored_version ) {
 					WP_Helper::set_global_option( self::UPGRADE_NOTICE, true );
+
+					/**
+					 * Reset survey dismiss so the banner reappears after each upgrade.
+					 */
+					Settings_Helper::delete_option_value( 'melapress-survey-dismissed' );
 				}
 			}
 		}

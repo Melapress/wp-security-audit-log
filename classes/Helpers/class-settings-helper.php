@@ -350,18 +350,34 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @return array|null - Options.
 		 *
 		 * @since 4.4.3
+		 * @since 5.6.1 - Updated to get options from the correct multisite db table for settings: sitemeta.
 		 */
 		public static function get_options_by_prefix( $opt_prefix, $as_array = false ) {
 			global $wpdb;
 
 			$opt_prefix = self::convert_name_prefix_if_needed( $opt_prefix );
 
-			$prepared_query = $wpdb->prepare( // phpcs:ignore
-				"SELECT * FROM {$wpdb->base_prefix}options WHERE option_name LIKE %s;",
-				$opt_prefix . '%%'
-			);
+			if ( WP_Helper::is_multisite() ) {
+				$prepared_query = $wpdb->prepare(
+					"SELECT meta_id AS option_id, meta_key AS option_name, meta_value AS option_value FROM {$wpdb->sitemeta} WHERE site_id = %d AND meta_key LIKE %s;",
+					\get_current_network_id(),
+					$opt_prefix . '%%'
+				);
+			} else {
+				$prepared_query = $wpdb->prepare(
+					"SELECT * FROM {$wpdb->base_prefix}options WHERE option_name LIKE %s;",
+					$opt_prefix . '%%'
+				);
+			}
 
-			return $wpdb->get_results($prepared_query, ($as_array) ? ARRAY_A : OBJECT); // phpcs:ignore
+			/**
+			 * WordPress.DB.PreparedSQL.NotPrepared: this is a false positive. The query IS prepared, but PHPCS can't trace that $prepared_query came from $wpdb->prepare().
+			 *
+			 * WordPress.DB.DirectDatabaseQuery.DirectQuery: this is a warning against direct DB queries vs using WordPress functions. There's no WP function to get multiple options by prefix, so we have to use a direct query.
+			 *
+			 * WordPress.DB.DirectDatabaseQuery.NoCaching: would add complexity around cache invalidation (when connections are added/updated/deleted).
+			 */
+			return $wpdb->get_results( $prepared_query, ( $as_array ) ? ARRAY_A : OBJECT ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- Custom query for WSAL options retrieval.
 		}
 
 		/**
@@ -615,11 +631,22 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 				 * try the old location with the wrong get_main_network_id(), present in older WSAL versions.
 				 */
 				if ( null === $result ) {
-					\switch_to_blog( \get_main_network_id() );
+					// Need to be wrapped in function_exists otherwise this will crash on MainWP installations.
+					if ( \function_exists( 'switch_to_blog' ) && \function_exists( 'restore_current_blog' ) ) {
+						\switch_to_blog( \get_main_network_id() );
+					}
 
+					/**
+					 * Here get_option() runs outside the function_exists check intentionally: when switch_to_blog is
+					 * unavailable (e.g. MainWP forces is_multisite() via filter on a single site), we still attempt
+					 * a best-effort read from the current blog context rather than skipping the backward-compat fallback.
+					 */
 					$result = \get_option( $option_name, $default );
 
-					\restore_current_blog();
+					// Need to be wrapped in function_exists otherwise this will crash on MainWP installations.
+					if ( \function_exists( 'switch_to_blog' ) && \function_exists( 'restore_current_blog' ) ) {
+						\restore_current_blog();
+					}
 				}
 			} else {
 				$result = \get_option( $option_name, $default );

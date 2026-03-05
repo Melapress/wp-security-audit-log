@@ -171,6 +171,10 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 
 			MainWP_Addon::init();
+
+			// Register hooks for plugin active cache invalidation (for multisite performance).
+			WP_Helper::register_is_plugin_active_cache_hooks();
+
 			// Hide all unrelated to the plugin notices on the plugin admin pages.
 			\add_action( 'admin_print_scripts', array( WP_Helper::class, 'hide_unrelated_notices' ) );
 

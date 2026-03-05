@@ -669,6 +669,25 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 
 	/**
+	 * Register shared scripts early so that extensions enqueuing on
+	 * admin_enqueue_scripts (priority 10) can safely declare them
+	 * as dependencies.
+	 *
+	 * @return void
+	 *
+	 * @since 5.6.1
+	 */
+	public static function register_scripts() {
+		wp_register_script(
+			'darktooltip',
+			WSAL_BASE_URL . 'js/jquery.darktooltip.js',
+			array( 'jquery' ),
+			WSAL_VERSION,
+			true
+		);
+	}
+
+	/**
 	 * Method: Render header of the view.
 	 */
 	public static function header() {
@@ -709,14 +728,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	public static function footer() {
 		wp_enqueue_script( 'jquery' );
 
-		// Darktooltip js.
-		wp_enqueue_script(
-			'darktooltip', // Identifier.
-			WSAL_BASE_URL . 'js/jquery.darktooltip.js', // Script location.
-			array( 'jquery' ), // Depends on jQuery.
-			WSAL_VERSION, // Script version.
-			true
-		);
+		wp_enqueue_script( 'darktooltip' );
 
 		// Remodal script.
 		wp_enqueue_script(

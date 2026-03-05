@@ -109,6 +109,7 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 
 				foreach ( $data as $row ) {
 					$current_row = array();
+
 					foreach ( array_keys( self::prepare_header() ) as $column_name ) {
 						if ( 'message' == $column_name ) {
 							$html = htmlspecialchars_decode(
@@ -154,12 +155,19 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 							);
 						}
 					}
+
+					// Ensure all values are strings and strip &nbsp; HTML entities before writing.
+					$current_row = array_map( 'strval', $current_row );
+
+					$current_row = str_replace( '&nbsp;', ' ', $current_row );
+
 					fputcsv( $output, $current_row, $csv_export_separator, $enclosure, '\\' );
 				}
 			} else {
 
 				foreach ( self::$events as $row ) {
 					$current_row = array();
+
 					foreach ( array_keys( self::prepare_header() ) as $column_name ) {
 						if ( 'mesg' == $column_name ) {
 							// Get raw message and filter out excluded links.
@@ -206,6 +214,12 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 							);
 						}
 					}
+
+					// Ensure all values are strings and strip &nbsp; HTML entities before writing.
+					$current_row = array_map( 'strval', $current_row );
+
+					$current_row = str_replace( '&nbsp;', ' ', $current_row );
+
 					fputcsv( $output, $current_row, $csv_export_separator, $enclosure, '\\' );
 				}
 			}

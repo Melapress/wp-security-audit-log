@@ -221,8 +221,15 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 		public static function get_report( $test = false, $weekly = false ): array {
 			$date_format = Settings_Helper::get_date_format(); // Get date format.
 			$date_obj    = new \DateTime();
-			$date_obj->setTime( 0, 0 ); // Set time of the object to 00:00:00.
-			$date_string = $date_obj->format( 'U' ); // Get the date in UNIX timestamp.
+
+			// Convert to WP timezone before getting midnight.
+			$date_obj->setTimezone( \wp_timezone() );
+
+			// Set time of the object to 00:00:00.
+			$date_obj->setTime( 0, 0 );
+
+			// Get the date in UNIX timestamp.
+			$date_string = $date_obj->format( 'U' );
 
 			$current_settings = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
 
@@ -288,16 +295,16 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 				return array();
 			}
 
-			$home_url = home_url();
+			$home_url = \home_url();
 			$safe_url = str_replace( array( 'http://', 'https://' ), '', $home_url );
 
 			// the date displayed in daily reports.
-			$display_date    = gmdate( $date_format, $start );
-			$report_date     = gmdate( 'Y-m-d', $start );
+			$display_date    = \wp_date( $date_format, $start );
+			$report_date     = \wp_date( 'Y-m-d', $start );
 			$report_end_date = false;
 			if ( $weekly ) {
-				$report_end_date  = gmdate( 'Y-m-d', $end );
-				$display_end_date = gmdate( $date_format, $end );
+				$report_end_date  = \wp_date( 'Y-m-d', $end );
+				$display_end_date = \wp_date( $date_format, $end );
 			}
 
 			// Report object.

@@ -10,7 +10,7 @@
  * @copyright  2026 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
- * @see       https://wordpress.org/plugins/wp-2fa/
+ * @see       https://wordpress.org/plugins/wp-security-audit-log/
  */
 
 declare(strict_types=1);
@@ -104,6 +104,16 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @var array
 		 */
 		private static $blogs_info = array();
+
+		/**
+		 * In-memory cache for plugin active status across the network.
+		 * Used to avoid repeated transient lookups within the same request.
+		 *
+		 * @var array
+		 *
+		 * @since 5.6.1
+		 */
+		private static $plugin_active_cache = array();
 
 		/**
 		 * Checks if specific role exists.
@@ -276,11 +286,22 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 				 * try the old location with the wrong get_main_network_id(), present in older WSAL versions.
 				 */
 				if ( false === $result ) {
-					\switch_to_blog( \get_main_network_id() );
+					// Need to be wrapped in function_exists otherwise this will crash on MainWP installations.
+					if ( \function_exists( 'switch_to_blog' ) && \function_exists( 'restore_current_blog' ) ) {
+						\switch_to_blog( \get_main_network_id() );
+					}
 
+					/**
+					 * Here delete_option() runs outside the function_exists check intentionally: when switch_to_blog is
+					 * unavailable (e.g. MainWP forces is_multisite() via filter on a single site), we still attempt
+					 * a best-effort delete from the current blog context rather than skipping the backward-compat fallback.
+					 */
 					$result = \delete_option( $prefixed_name );
 
-					\restore_current_blog();
+					// Need to be wrapped in function_exists otherwise this will crash on MainWP installations.
+					if ( \function_exists( 'switch_to_blog' ) && \function_exists( 'restore_current_blog' ) ) {
+						\restore_current_blog();
+					}
 				}
 			} else {
 				$result = \delete_option( $prefixed_name );
@@ -360,9 +381,20 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 
 				// Backward compatibility for migration from 5.5.4 to 5.6.0: fallback to old location (wp_options of main site).
 				if ( null === $result ) {
-					\switch_to_blog( \get_main_network_id() );
+					if ( \function_exists( 'switch_to_blog' ) && \function_exists( 'restore_current_blog' ) ) {
+						\switch_to_blog( \get_main_network_id() );
+					}
+
+					/**
+					 * get_option() runs outside the function_exists check intentionally: when switch_to_blog is
+					 * unavailable (e.g. MainWP forces is_multisite() via filter on a single site), we still attempt
+					 * a best-effort read from the current blog context rather than skipping the backward-compat fallback.
+					 */
 					$result = \get_option( $prefixed_name, $default );
-					\restore_current_blog();
+
+					if ( \function_exists( 'switch_to_blog' ) && \function_exists( 'restore_current_blog' ) ) {
+						\restore_current_blog();
+					}
 				}
 			} else {
 				$result = \get_option( $prefixed_name, $default );
@@ -794,6 +826,10 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		/**
 		 * Determines whether a plugin is active.
 		 *
+		 * Uses a two-layer caching strategy for multisite networks:
+		 * 1. In-memory cache for the current request
+		 * 2. Site transient for persistence across requests
+		 *
 		 * @uses is_plugin_active() Uses this WP core function after making sure that this function is available.
 		 *
 		 * @param string $plugin Path to the main plugin file from plugins directory.
@@ -801,33 +837,94 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @return bool True, if in the active plugins list. False, not in the list.
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.1 Added caching for multisite network-wide checks.
 		 */
 		public static function is_plugin_active( $plugin ) {
 			if ( ! function_exists( 'is_plugin_active' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
+			// Fast path: check current site first (covers most cases including network-activated plugins).
 			$is_active = \is_plugin_active( $plugin );
 
-			if ( ! $is_active && self::is_multisite() ) {
-				// Check if the plugin is active on any of the multisite blogs.
-				$sites = self::get_multi_sites();
-				foreach ( $sites as $site ) {
-					\switch_to_blog( $site->blog_id );
-
-					if ( in_array( $plugin, (array) \get_option( 'active_plugins', array() ) ) ) {
-						$is_active = true;
-
-						\restore_current_blog();
-
-						return $is_active;
-					}
-
-					\restore_current_blog();
-				}
+			if ( $is_active ) {
+				return true;
 			}
 
+			// Single site doesn't need network-wide check.
+			if ( ! self::is_multisite() ) {
+				return false;
+			}
+
+			// Check in-memory cache first (avoids repeated transient lookups in same request).
+			if ( isset( self::$plugin_active_cache[ $plugin ] ) ) {
+				return self::$plugin_active_cache[ $plugin ];
+			}
+
+			// Check persistent cache (site transient).
+			$cache_key = 'wsal_active_plugins_' . md5( $plugin );
+			$cached    = \get_site_transient( $cache_key );
+
+			if ( false !== $cached ) {
+				self::$plugin_active_cache[ $plugin ] = (bool) $cached;
+				return self::$plugin_active_cache[ $plugin ];
+			}
+
+			// Expensive check: iterate through all sites to find if plugin is active anywhere.
+			$sites = self::get_multi_sites();
+
+			foreach ( $sites as $site ) {
+				\switch_to_blog( $site->blog_id );
+
+				if ( in_array( $plugin, (array) \get_option( 'active_plugins', array() ), true ) ) {
+					$is_active = true;
+					\restore_current_blog();
+					break;
+				}
+
+				\restore_current_blog();
+			}
+
+			// Cache the result with 1 hour TTL as safety fallback.
+			\set_site_transient( $cache_key, $is_active ? 1 : 0, HOUR_IN_SECONDS );
+			self::$plugin_active_cache[ $plugin ] = $is_active;
+
 			return $is_active;
+		}
+
+		/**
+		 * Invalidates the network-wide plugin active cache for a specific plugin.
+		 *
+		 * This method is called when a plugin is activated or deactivated to ensure
+		 * the cache reflects the current state.
+		 *
+		 * @param string $plugin - Plugin basename (e.g., 'woocommerce/woocommerce.php').
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.1
+		 */
+		public static function invalidate_plugin_active_cache( $plugin ) {
+			$cache_key = 'wsal_active_plugins_' . md5( $plugin );
+			\delete_site_transient( $cache_key );
+			unset( self::$plugin_active_cache[ $plugin ] );
+		}
+
+		/**
+		 * Registers hooks for cache invalidation when plugins are activated or deactivated.
+		 *
+		 * Should be called early in the plugin lifecycle.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.1
+		 */
+		public static function register_is_plugin_active_cache_hooks() {
+			if ( self::is_multisite() ) {
+				\add_action( 'activated_plugin', array( __CLASS__, 'invalidate_plugin_active_cache' ), 10, 1 );
+				\add_action( 'deactivated_plugin', array( __CLASS__, 'invalidate_plugin_active_cache' ), 10, 1 );
+				\add_action( 'deleted_plugin', array( __CLASS__, 'invalidate_plugin_active_cache' ), 10, 1 );
+			}
 		}
 
 		/**
