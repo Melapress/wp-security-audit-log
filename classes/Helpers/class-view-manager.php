@@ -110,6 +110,9 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 			// Add plugin shortcut links.
 			add_filter( 'plugin_action_links_' . WSAL_BASE_NAME, array( __CLASS__, 'add_plugin_shortcuts' ) );
 
+			// Register shared scripts early so extension callbacks at priority 10 can use them as dependencies.
+			add_action( 'admin_enqueue_scripts', array( 'WSAL_Views_AuditLog', 'register_scripts' ), 9 );
+
 			// Render header.
 			add_action( 'admin_enqueue_scripts', array( __CLASS__, 'render_view_header' ) );
 

@@ -128,7 +128,7 @@ function wsaldefaults_build_links( $link_aliases = array() ) {
 
 				case 'RevisionLink':
 					// if ( defined( 'WP_POST_REVISIONS' ) && ! WP_POST_REVISIONS ) {
-					// 	$result[ esc_html__( 'revisions are not enabled', 'wp-security-audit-log' ) ] = '';
+					// $result[ esc_html__( 'revisions are not enabled', 'wp-security-audit-log' ) ] = '';
 					// } else {
 						$result[ esc_html__( 'View the content changes', 'wp-security-audit-log' ) ] = '%RevisionLink%';
 					// }
@@ -194,15 +194,15 @@ function set_wsal_alerts() {
 				array(
 					1002,
 					WSAL_MEDIUM,
-					esc_html__( 'Failed login attempt', 'wp-security-audit-log' ),
-					esc_html__( 'Failed login attempt - wrong password.', 'wp-security-audit-log' ),
+					\esc_html__( 'Failed login attempt', 'wp-security-audit-log' ),
+					\esc_html__( 'Failed login attempt - wrong password.', 'wp-security-audit-log' ),
 					array(
-						esc_html__( 'Login URL', 'wp-security-audit-log' ) => '%LoginPageURL%',
+						\esc_html__( 'Login URL', 'wp-security-audit-log' ) => '%LoginPageURL%',
 					),
 					array(
-						esc_html__( 'Security tip: limit users failed login attempts.', 'wp-security-audit-log' )  => array(
-							'url'                  => 'https://melapress.com/wordpress-limit-login-attempts/?#utm_source=plugin&utm_medium=wsal&utm_campaign=event_1002',
-							'label'                => esc_html__( 'limit users failed login attempts', 'wp-security-audit-log' ),
+						\esc_html__( 'Security tip: limit users failed login attempts with Melapress Login Security.', 'wp-security-audit-log' )  => array(
+							'url'                  => 'https://wordpress.org/plugins/melapress-login-security/',
+							'label'                => \esc_html__( 'limit users failed login attempts with Melapress Login Security', 'wp-security-audit-log' ),
 							'exclude_from_reports' => true,
 						),
 					),

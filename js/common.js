@@ -50,6 +50,36 @@ jQuery( document ).ready( function() {
 		  })
 	});
 
+  /**
+   * "Take the survey" button. Fires a separate AJAX action for permanent dismissal.
+   * 
+   * @since 5.6.1
+   */
+	jQuery( document ).on( 'click', '.wsal-notice .wsal-survey-take-btn', function() {
+		const noticeElm = jQuery( this ).closest( '.wsal-notice' );
+		const takeAction = noticeElm.attr( 'data-take-action' );
+		const takeNonce = noticeElm.attr( 'data-take-nonce' );
+		if ( ! takeAction ) {
+			return;
+		}
+
+		jQuery.ajax( {
+			type: 'POST',
+			url: wsalCommonData.ajaxURL,
+			async: true,
+			data: {
+				action: takeAction,
+				nonce: takeNonce
+			}
+		} );
+
+		noticeElm.fadeTo( 100, 0, function() {
+			noticeElm.slideUp( 100, function() {
+				noticeElm.remove();
+			} );
+		} );
+	} );
+
 	/**
 	 * Check & Load New Alerts on WP-Admin bar.
 	 *

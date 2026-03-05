@@ -6,7 +6,7 @@
  * @subpackage utils
  * @copyright  2026 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
- * @link       https://wordpress.org/plugins/wp-2fa/
+ * @link       https://wordpress.org/plugins/wp-security-audit-log/
  */
 
 namespace WSAL\Utils;
@@ -360,7 +360,12 @@ if ( ! class_exists( '\WSAL\Utils\Migrate_53' ) ) {
 
 				$report_options = array();
 
-				$not_info = maybe_unserialize( $notification->option_value );
+				$not_info = \maybe_unserialize( $notification->option_value );
+
+				// Skip if the unserialized value is not a valid notification object.
+				if ( ! is_object( $not_info ) || ! isset( $not_info->triggers ) || ! is_array( $not_info->triggers ) || empty( $not_info->triggers ) ) {
+					continue;
+				}
 
 				$conditions = $not_info->triggers;
 				$num        = count( $conditions );
