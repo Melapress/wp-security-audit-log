@@ -6,7 +6,7 @@
  * @subpackage slack
  * @since 5.3.4
  * @copyright  2026 Melapress
- * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  */
 
@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace WSAL\Controllers\Slack;
 
 use WSAL\Views\Notifications;
+use WSAL\Helpers\Credential_Settings_Helper;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
@@ -85,16 +86,19 @@ if ( ! class_exists( '\WSAL\Controllers\Slack\Slack' ) ) {
 		}
 
 		/**
-		 * Stores the Slack Credentials key via AJAX request
+		 * Stores the Slack Credentials key via AJAX request.
+		 *
+		 * Encrypts the token before persisting it.
 		 *
 		 * @return void
 		 *
 		 * @since 5.3.4
+		 * @since 5.6.2 - Encrypt credential before saving.
 		 */
 		public static function store_slack_api_key_ajax() {
 			if ( \wp_doing_ajax() ) {
-				if ( isset( $_REQUEST['_wpnonce'] ) ) {
-					$nonce_check = \wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_REQUEST['_wpnonce'] ) ), self::NONCE_NAME );
+				if ( isset( $_POST['_wpnonce'] ) ) {
+					$nonce_check = \wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), self::NONCE_NAME );
 					if ( ! $nonce_check ) {
 						\wp_send_json_error( new \WP_Error( 500, \esc_html__( 'Nonce checking failed', 'wp-security-audit-log' ) ), 400 );
 					}
@@ -107,23 +111,32 @@ if ( ! class_exists( '\WSAL\Controllers\Slack\Slack' ) ) {
 
 			if ( \current_user_can( 'manage_options' ) ) {
 
-				if ( isset( $_REQUEST['slack_auth'] ) && ! empty( $_REQUEST['slack_auth'] ) ) {
-					$slack_valid =
-					Slack_API::verify_slack_token(
-						(string) \sanitize_text_field( \wp_unslash( $_REQUEST['slack_auth'] ) ),
-					);
-					if ( $slack_valid ) {
-						$options = Notifications::get_global_notifications_setting();
+				$slack_token = \sanitize_text_field( \wp_unslash( $_POST['slack_auth'] ?? '' ) );
+				$options     = Notifications::get_global_notifications_setting();
 
-						$options['slack_notification_auth_token'] = \sanitize_text_field( \wp_unslash( $_REQUEST['slack_auth'] ) );
-
-						Notifications::set_global_notifications_setting( $options );
-
-						\wp_send_json_success();
-					}
-
-					\wp_send_json_error( __( 'SLACK: No token provided or the provided one is invalid. Please check and provide the details again.', 'wp-security-audit-log' ) . Slack_API::get_slack_error() );
+				/**
+				 * If the submitted token matches the masked stored value, the user did not change it.
+				 * Keep the existing DB value and return success.
+				 */
+				if ( Credential_Settings_Helper::is_submitted_credential_unchanged( $slack_token, $options['slack_notification_auth_token'] ?? '' ) ) {
+					\wp_send_json_success();
 				}
+
+				$result = Credential_Settings_Helper::validate_and_save_slack(
+					$slack_token,
+					$options
+				);
+
+				if ( false !== $result ) {
+					Notifications::set_global_notifications_setting( $result );
+					\wp_send_json_success();
+				}
+
+				$slack_cred_error_message = \__( 'Invalid Slack credentials: No token provided or the provided one is invalid. Please check and provide the details again.', 'wp-security-audit-log' );
+
+				$concat_slack_error = \esc_html( $slack_cred_error_message . Slack_API::get_slack_error() );
+
+				\wp_send_json_error( $concat_slack_error );
 			}
 			\wp_send_json_error( new \WP_Error( 500, \esc_html__( 'Not allowed', 'wp-security-audit-log' ) ), 400 );
 		}
@@ -187,13 +200,22 @@ if ( ! class_exists( '\WSAL\Controllers\Slack\Slack' ) ) {
 		/**
 		 * Returns the currently stored Slack AUTH key or false if there is none.
 		 *
+		 * PHP constant \WSAL_SLACK_AUTH_TOKEN takes priority over the DB value.
+		 *
 		 * @return bool|string
 		 *
 		 * @since 5.3.4
+		 * @since 5.6.2 - Added constant override and encrypted storage support.
 		 */
 		public static function get_slack_auth_key() {
 			if ( null === self::$auth_key ) {
 				self::$auth_key = false;
+
+				if ( defined( '\WSAL_SLACK_AUTH_TOKEN' ) && '' !== \WSAL_SLACK_AUTH_TOKEN ) {
+					self::$auth_key = \WSAL_SLACK_AUTH_TOKEN;
+
+					return self::$auth_key;
+				}
 
 				if ( isset( self::get_settings()['slack_notification_auth_token'] ) ) {
 					self::$auth_key = self::get_settings()['slack_notification_auth_token'];

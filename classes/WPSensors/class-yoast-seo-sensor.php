@@ -4,8 +4,10 @@
  *
  * Yoast SEO sensor file.
  *
- * @package Wsal
  * @since 3.2.0
+ *
+ * @package wsal
+ * @subpackage sensors
  */
 
 declare(strict_types=1);
@@ -1739,10 +1741,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 			if ( $new_value['og_default_image'] !== $old_value['og_default_image'] ) {
 				$alert_code = 8845;
 				$alert_args = array(
-					'image_name' => ( empty( $new_value['og_default_image_id'] ) ) ? esc_html__( 'None supplied', 'wsal-yoast' ) : wp_basename( $new_value['og_default_image'] ),
-					'image_path' => ( empty( $new_value['og_default_image'] ) ) ? esc_html__( 'None supplied', 'wsal-yoast' ) : dirname( $new_value['og_default_image'] ),
-					'old_image'  => ( empty( $old_value['og_default_image'] ) ) ? esc_html__( 'None supplied', 'wsal-yoast' ) : wp_basename( $old_value['og_default_image'] ),
-					'old_path'   => ( empty( $old_value['og_default_image'] ) ) ? esc_html__( 'None supplied', 'wsal-yoast' ) : dirname( $old_value['og_default_image'] ),
+					'image_name' => ( empty( $new_value['og_default_image_id'] ) ) ? esc_html__( 'None supplied', 'wp-security-audit-log' ) : wp_basename( $new_value['og_default_image'] ),
+					'image_path' => ( empty( $new_value['og_default_image'] ) ) ? esc_html__( 'None supplied', 'wp-security-audit-log' ) : dirname( $new_value['og_default_image'] ),
+					'old_image'  => ( empty( $old_value['og_default_image'] ) ) ? esc_html__( 'None supplied', 'wp-security-audit-log' ) : wp_basename( $old_value['og_default_image'] ),
+					'old_path'   => ( empty( $old_value['og_default_image'] ) ) ? esc_html__( 'None supplied', 'wp-security-audit-log' ) : dirname( $old_value['og_default_image'] ),
 				);
 				Alert_Manager::trigger_event( $alert_code, $alert_args );
 			}
@@ -1768,8 +1770,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 			if ( $new_value['pinterestverify'] !== $old_value['pinterestverify'] ) {
 				$alert_code = 8848;
 				$alert_args = array(
-					'new_value' => ( empty( $new_value['pinterestverify'] ) ) ? esc_html__( 'None supplied', 'wsal-yoast' ) : $new_value['pinterestverify'],
-					'old_value' => ( empty( $old_value['pinterestverify'] ) ) ? esc_html__( 'None supplied', 'wsal-yoast' ) : $old_value['pinterestverify'],
+					'new_value' => ( empty( $new_value['pinterestverify'] ) ) ? esc_html__( 'None supplied', 'wp-security-audit-log' ) : $new_value['pinterestverify'],
+					'old_value' => ( empty( $old_value['pinterestverify'] ) ) ? esc_html__( 'None supplied', 'wp-security-audit-log' ) : $old_value['pinterestverify'],
 				);
 				Alert_Manager::trigger_event( $alert_code, $alert_args );
 			}

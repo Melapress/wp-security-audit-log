@@ -5,7 +5,7 @@
  * @package    wsal
  * @subpackage utils
  * @copyright  2026 Melapress
- * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  */
 
@@ -724,13 +724,6 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			WP_Helper::delete_global_option( 'disable-refresh' );
 			Plugin_Extensions::deactivate_plugins();
 			WP_Helper::set_global_option( 'extensions-merged-notice', true );
-			// phpcs:disable
-			/* @free:start */
-			// phpcs:enable
-			WP_Helper::set_global_option( 'free-search-try', true );
-			// phpcs:disable
-			/* @free:end */
-			// phpcs:enable
 		}
 
 		/**

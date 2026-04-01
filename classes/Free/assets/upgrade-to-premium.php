@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Vars to calculate display of Black Friday campaign
  */
-$now = strtotime( 'now' );
+$now                = strtotime( 'now' );
 $black_friday_start = strtotime( '2025-11-21' );
 $black_friday_end   = strtotime( '2025-12-01 23:59:59' );
 ?>
@@ -170,7 +170,7 @@ $black_friday_end   = strtotime( '2025-12-01 23:59:59' );
 			</ul>'
 			?>
 		</p>
-		<p class="wsal-persistent-cta-link"><a href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-upgrade-banner" target="_blank" class="cta-link"><?php echo \esc_html__( 'Get WP Activity Log Premium', 'wp - security - audit - log' ); ?></a></p>
+		<p class="wsal-persistent-cta-link"><a href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-upgrade-banner" target="_blank" class="cta-link"><?php echo \esc_html__( 'Get WP Activity Log Premium', 'wp-security-audit-log' ); ?></a></p>
 		</div>
 	</div>
 	<!-- Copy END -->

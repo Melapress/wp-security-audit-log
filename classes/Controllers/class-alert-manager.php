@@ -42,18 +42,26 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 * Holds list of the ignored \WP_Post types.
 		 */
 		public const IGNORED_POST_TYPES = array(
-			'attachment',          // Attachment CPT.
-			'revision',            // Revision CPT.
-			'nav_menu_item',       // Nav menu item CPT.
-			'customize_changeset', // Customize changeset CPT.
-			'custom_css',          // Custom CSS CPT.
-			'wp_template',         // Gutenberg templates.
+			// Attachment CPT.
+			'attachment',
+			// Revision CPT.
+			'revision',
+			// Nav menu item CPT.
+			'nav_menu_item',
+			// Customize changeset CPT.
+			'customize_changeset',
+			// Custom CSS CPT.
+			'custom_css',
+			// Gutenberg templates.
+			'wp_template',
+			// WP Core collaborative editing sync storage. Stops 2055 event spam triggered by new WP collaborative feature.
+			'wp_sync_storage',
 		);
 
 		/**
 		 * Array of loggers (WSAL_AbstractLogger).
 		 *
-		 * @var WSAL_AbstractLogger[]
+		 * @var \WSAL_AbstractLogger[]
 		 *
 		 * @since 4.5.0
 		 */
@@ -1263,7 +1271,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				array(
 					'Message' => $message,
 					'Context' => $args,
-					'Trace'   => debug_backtrace(),
+					'Trace'   => debug_backtrace(), //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
 				)
 			);
 		}

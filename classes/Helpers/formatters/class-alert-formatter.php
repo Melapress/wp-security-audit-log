@@ -56,7 +56,7 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 
 			switch ( true ) {
 				case '%Message%' === $expression:
-					return esc_html( $value );
+					return \esc_html( $value );
 
 				case '%MetaLink%' === $expression:
 					// NULL value check is here because events related to user meta fields didn't have the MetaLink meta prior to version 4.3.2.
@@ -76,13 +76,13 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 				case in_array( $expression, array( '%path%', '%old_path%', '%FilePath%' ), true ):
 					// Concatenate directory and file paths.
 					if ( $configuration['is_js_in_links_allowed'] ) {
-                        $result = '<strong><span>' . $value . '</span>'; // phpcs:ignore
-                        $result .= "<a href=\"#\" data-shortened-text='{$value}'>" . $configuration['ellipses_sequence'] . "</a></strong>"; // phpcs:ignore
+						$result  = '<strong><span>' . \esc_html( $value ) . '</span>';
+						$result .= "<a href=\"#\" data-shortened-text='" . \esc_attr( $value ) . "'>" . $configuration['ellipses_sequence'] . '</a></strong>';
 
 						return $result;
 					}
 
-					return $value;
+					return \esc_html( $value );
 
 				case in_array( $expression, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ), true ):
 					// Trim the meta value to the maximum length and append configured ellipses sequence.

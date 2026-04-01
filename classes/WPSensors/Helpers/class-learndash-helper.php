@@ -1291,5 +1291,35 @@ if ( ! \class_exists( '\WSAL\WP_Sensors\Helpers\LearnDash_Helper' ) ) {
 
 			return $events_data;
 		}
+
+		/**
+		 * Builds the event variables array for LearnDash view/open events.
+		 *
+		 * @param \WP_Post $post - Post object.
+		 *
+		 * @return array
+		 *
+		 * @since 5.6.2
+		 */
+		public static function build_ld_view_event_variables( $post ): array {
+			$author_name = self::get_author_display_name( $post );
+
+			$variables = array(
+				'PostTitle'  => \esc_html( $post->post_title ),
+				'PostID'     => $post->ID,
+				'PostStatus' => $post->post_status,
+				'Category'   => self::get_post_categories( $post->ID ),
+			);
+
+			if ( 'sfwd-courses' === $post->post_type ) {
+				$variables['CourseAuthor']   = $author_name;
+				$variables['CourseCategory'] = self::get_ld_post_categories( $post->ID, $post->post_type );
+			} elseif ( 'sfwd-lessons' === $post->post_type ) {
+				$variables['LessonAuthor']   = $author_name;
+				$variables['LessonCategory'] = self::get_ld_post_categories( $post->ID, $post->post_type );
+			}
+
+			return $variables;
+		}
 	}
 }

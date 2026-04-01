@@ -51,10 +51,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 				if ( WP_Helper::is_multisite() ) {
 					\add_action( 'update_site_option', array( __CLASS__, 'settings_trigger' ), 10, 3 );
 				}
-				// \add_action( 'update_user_meta', array( __CLASS__, 'user_trigger' ), 10, 4 );
-				// \add_action( 'delete_user_meta', array( __CLASS__, 'user_deletions_trigger' ), 10, 4 );
-
-				// \add_action( 'wp_2fa_user_is_unlocked', array( __CLASS__, 'user_unlock_trigger' ) );
 			}
 		}
 
@@ -287,8 +283,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 			);
 
 			if ( WP_2FA_Helper::is_wp2fa_active() ) {
-				\add_action( 'update_user_metadata', array( __CLASS__, 'store_user_meta' ), 1, 4 );
-				\add_action( 'add_user_metadata', array( __CLASS__, 'store_user_meta' ), 1, 4 );
+				\add_filter( 'update_user_metadata', array( __CLASS__, 'store_user_meta' ), 1, 4 );
+				\add_filter( 'add_user_metadata', array( __CLASS__, 'store_user_meta' ), 1, 4 );
 				\add_action( 'updated_user_meta', array( __CLASS__, 'user_trigger' ), 10, 4 );
 				\add_action( 'added_user_meta', array( __CLASS__, 'user_trigger' ), 10, 4 );
 				\add_action( 'delete_user_meta', array( __CLASS__, 'user_deletions_trigger' ), 10, 4 );
@@ -298,36 +294,23 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 		/**
 		 * Keeps old metadata of the user for comparison.
 		 *
-		 * @param int    $meta_id ID of the metadata entry to update.
-		 * @param int    $user_id ID of the user metadata is for.
-		 * @param string $meta_key Metadata key.
-		 * @param mixed  $_meta_value Metadata value. Serialized if non-scalar.
+		 * @param null|bool $check       Whether to allow adding/updating metadata for the given type.
+		 * @param int       $user_id     ID of the user metadata is for.
+		 * @param string    $meta_key    Metadata key.
+		 * @param mixed     $_meta_value Metadata value. Serialized if non-scalar.
+		 *
+		 * @return null|bool
 		 *
 		 * @since 5.4.2
+		 * @since 5.6.1 - Fixed wrong hook type, use filter instead of action.
 		 */
-		public static function store_user_meta( $meta_id, $user_id, $meta_key, $_meta_value ) {
+		public static function store_user_meta( $check, $user_id, $meta_key, $_meta_value ) {
 
 			if ( 'wp_2fa_enabled_methods' === $meta_key ) {
 				self::$old_user_meta['wp_2fa_enabled_methods'] = \get_user_meta( $user_id, 'wp_2fa_enabled_methods', true );
 			}
+
+			return $check;
 		}
-
-		// /**
-		// * Fires when user is unlocked.
-		// *
-		// * @param \WP_User $user - The user object of the user being unlocked.
-		// *
-		// * @return void
-		// *
-		// * @since 5.4.2
-		// */
-		// public static function user_unlock_trigger( $user ) {
-
-		// $alert_code = 7812;
-		// $variables  = array(
-		// 'EditUserLink' => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
-		// );
-		// Alert_Manager::trigger_event( $alert_code, $variables );
-		// }
 	}
 }

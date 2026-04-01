@@ -5,7 +5,7 @@
  * @package    wsal
  * @subpackage mainwp
  * @copyright  2026 Melapress
- * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  *
  * @since 5.0.0
@@ -252,7 +252,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 				$site_data[ $site_id ] = self::fetch_site_events( $site_id );
 
 				if ( ! isset( $site_data[ $site_id ] ) || isset( $site_data[ $site_id ]['error'] ) ) {
-					\error_log( 'WSAL - MainWP response: ' . $site_data[ $site_id ]['error'] );
+					\error_log( 'WSAL - MainWP response: ' . $site_data[ $site_id ]['error'] ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					Logger::log( $site_data[ $site_id ]['error'] );
 					return new \WP_Error( 'MainWP_error', $site_data[ $site_id ]['error'] );
 				}
@@ -503,6 +503,10 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 			}
 
 			foreach ( $events as $event ) {
+				if ( ! isset( $event['created_on'], $event['alert_id'], $event['meta_data'] ) ) {
+					continue;
+				}
+
 				\add_filter(
 					'wsal_database_site_id_value',
 					( function () use ( $site_id ) {
@@ -520,9 +524,6 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 					10,
 					2
 				);
-				// if ( null === $event['meta_data']['CurrentUserID'] ) {
-				// $event['meta_data']['CurrentUserID'] = 0;
-				// }
 
 				if ( isset( $event['meta_data']['UserData'] ) && isset( $event['meta_data']['UserData']['ID'] ) ) {
 					$saved_result = MainWP_Server_Users::save_user( $event['meta_data']['UserData'], (int) $site_id + self::SET_SITE_ID_NUMBER );

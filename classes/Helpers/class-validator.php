@@ -98,7 +98,7 @@ if ( ! class_exists( '\WSAL\Helpers\Validator' ) ) {
 		 * @since 4.4.2.1
 		 */
 		private static function is_string_contains_only( string $string ): bool {
-			if ( preg_match( '/[a-z\d_-]*/i', $string ) ) {
+			if ( preg_match( '/^[a-z\d_-]+$/i', $string ) ) {
 				return true;
 			}
 			return false;

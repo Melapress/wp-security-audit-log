@@ -6,6 +6,11 @@
  * @package wsal
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 ?>
 <style>
 /* Styles - START */

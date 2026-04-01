@@ -5,7 +5,7 @@
  * @package    wsal
  * @subpackage mainwp
  * @copyright  2026 Melapress
- * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  *
  * @since 5.0.0
@@ -304,7 +304,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 					 *
 					 * This action hook is triggered before displaying the audit log view.
 					 *
-					 * @param WSAL_AuditLogListView $this->_view - Audit log view object.
+					 * @param \WSAL\ListAdminEvents\List_Events $this->_view - Audit log view object.
 					 */
 					do_action( 'wsal_auditlog_before_view', $events_list );
 
@@ -328,7 +328,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 							 *
 							 * This action hook is triggered after displaying the audit log view.
 							 *
-							 * @param WSAL_AuditLogListView $this->_view - Audit log view object.
+							 * @param \WSAL\ListAdminEvents\List_Events $this->_view - Audit log view object.
 							 */
 							do_action( 'wsal_auditlog_after_view', $events_list );
 						?>

@@ -126,8 +126,8 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Rank_Math_Sensor' ) ) {
 			if ( Rank_Math_Helper::is_rank_math_active() ) {
 				\add_action( 'rank_math/module_changed', array( __CLASS__, 'module_change' ), 10, 2 );
 
-				\add_action( 'update_post_metadata', array( __CLASS__, 'store_old_values' ), 10, 5 );
-				\add_action( 'delete_post_metadata', array( __CLASS__, 'store_old_values_delete' ), 10, 5 );
+				\add_filter( 'update_post_metadata', array( __CLASS__, 'store_old_values' ), 10, 5 );
+				\add_filter( 'delete_post_metadata', array( __CLASS__, 'store_old_values_delete' ), 10, 5 );
 
 				\add_action( 'updated_post_meta', array( __CLASS__, 'post_meta_updated' ), 10, 4 );
 				\add_action( 'added_post_meta', array( __CLASS__, 'post_meta_added' ), 10, 4 );
@@ -208,9 +208,9 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Rank_Math_Sensor' ) ) {
 		}
 
 		/**
-		 * Stores the old value of the metadata before updating it.
+		 * Stores the old value of the metadata before deleting it.
 		 *
-		 * @param null|bool $check      Whether to allow updating metadata for the given type.
+		 * @param null|bool $check      Whether to allow deleting metadata for the given type.
 		 * @param int       $object_id  ID of the object metadata is for.
 		 * @param string    $meta_key   Metadata key.
 		 * @param mixed     $meta_value Metadata value. Must be serializable if non-scalar.
@@ -218,16 +218,19 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Rank_Math_Sensor' ) ) {
 		 *                              for all objects, ignoring the specified $object_id.
 		 *                              Default false.
 		 *
-		 * @return void
+		 * @return null|bool
 		 *
 		 * @since 5.4.0
+		 * @since 5.6.1 - Fixed void return type: now returns $check to preserve the filter chain.
 		 */
-		public static function store_old_values_delete( $check, $object_id, $meta_key, $meta_value, $delete_all ): void {
+		public static function store_old_values_delete( $check, $object_id, $meta_key, $meta_value, $delete_all ) {
 			if ( ! ( isset( self::SUPPORTED_META_KEYS[ $meta_key ] ) ) ) {
-				return;
-			} else {
-				self::store_old_values( $check, $object_id, $meta_key, $meta_value, $meta_value );
+				return $check;
 			}
+
+			self::store_old_values( $check, $object_id, $meta_key, $meta_value, $meta_value );
+
+			return $check;
 		}
 
 		/**
@@ -241,24 +244,27 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Rank_Math_Sensor' ) ) {
 		 *                              If specified, only update existing metadata entries with
 		 *                              this value. Otherwise, update all entries.
 		 *
-		 * @return void
+		 * @return null|bool
 		 *
 		 * @since 5.4.0
+		 * @since 5.6.1 - Fixed void return type: now returns $check to preserve the filter chain.
 		 */
-		public static function store_old_values( $check, $object_id, $meta_key, $meta_value, $prev_value ): void {
+		public static function store_old_values( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
 			if ( ! ( isset( self::SUPPORTED_META_KEYS[ $meta_key ] ) ) ) {
-				return;
-			} else {
-				if ( empty( $prev_value ) ) {
-					// Unfortunately RnakMath doesn't provide the old value in the update_post_metadata hook.
-					$prev_value = \get_metadata_raw( 'post', $object_id, $meta_key );
-					if ( \is_countable( $prev_value ) && count( $prev_value ) === 1 ) {
-						$prev_value = $prev_value[0];
-					}
-				}
-
-				self::$old_vals[ $meta_key ] = $prev_value;
+				return $check;
 			}
+
+			if ( empty( $prev_value ) ) {
+				$prev_value = \get_metadata_raw( 'post', $object_id, $meta_key, false );
+
+				if ( \is_array( $prev_value ) && count( $prev_value ) === 1 ) {
+					$prev_value = $prev_value[0];
+				}
+			}
+
+			self::$old_vals[ $meta_key ] = $prev_value;
+
+			return $check;
 		}
 
 		/**

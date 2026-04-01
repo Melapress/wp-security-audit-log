@@ -377,7 +377,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				Alert_Manager::trigger_event(
 					5031,
 					array(
-						'Theme' => (object) array(
+						'Theme'       => (object) array(
 							'Name'                   => $theme_name,
 							'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 							'Description'            => $theme->Description, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -385,6 +385,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 							'Version'                => $theme_version,
 							'get_template_directory' => $theme->get_template_directory(),
 						),
+						'ThemeStatus' => WP_Plugins_Themes_Helper::get_theme_status_label( $one_updated_theme ),
 					)
 				);
 			}
@@ -539,8 +540,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					Alert_Manager::trigger_event(
 						5004,
 						array(
-							'PluginFile' => $arr_data['plugin'],
-							'PluginData' => (object) array(
+							'PluginFile'   => $arr_data['plugin'],
+							'PluginData'   => (object) array(
 								'Name'            => $context['plugin_name'],
 								'PluginURI'       => $context['plugin_url'],
 								'PluginRepoUrl'   => self::get_plugin_wp_repo_url( $plugin_slug ),
@@ -551,7 +552,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 								'Title'           => $context['plugin_title'],
 								'plugin_dir_path' => $context['plugin_path'],
 							),
-							'OldVersion' => $old_version,
+							'OldVersion'   => $old_version,
+							'PluginStatus' => WP_Plugins_Themes_Helper::get_plugin_status_label( $arr_data['plugin'] ),
 						)
 					);
 				}
@@ -618,8 +620,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 						Alert_Manager::trigger_event(
 							5004,
 							array(
-								'PluginFile' => $arr_data['plugin'],
-								'PluginData' => (object) array(
+								'PluginFile'   => $arr_data['plugin'],
+								'PluginData'   => (object) array(
 									'Name'            => $context['plugin_name'],
 									'PluginURI'       => $context['plugin_url'],
 									'PluginRepoUrl'   => self::get_plugin_wp_repo_url( $plugin_slug ),
@@ -630,7 +632,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 									'Title'           => $context['plugin_title'],
 									'plugin_dir_path' => $context['plugin_path'],
 								),
-								'OldVersion' => $old_version,
+								'OldVersion'   => $old_version,
+								'PluginStatus' => WP_Plugins_Themes_Helper::get_plugin_status_label( $arr_data['plugin'] ),
 							)
 						);
 					}
@@ -680,8 +683,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					Alert_Manager::trigger_event(
 						5004,
 						array(
-							'PluginFile' => $plugin_slug,
-							'PluginData' => (object) array(
+							'PluginFile'   => $plugin_slug,
+							'PluginData'   => (object) array(
 								'Name'            => $context['plugin_name'],
 								'PluginURI'       => $context['plugin_url'],
 								'PluginRepoUrl'   => self::get_plugin_wp_repo_url( $plugin_slug ),
@@ -692,7 +695,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 								'Title'           => $context['plugin_title'],
 								'plugin_dir_path' => $context['plugin_path'],
 							),
-							'OldVersion' => $old_version,
+							'OldVersion'   => $old_version,
+							'PluginStatus' => WP_Plugins_Themes_Helper::get_plugin_status_label( $plugin_slug ),
 						)
 					);
 				}
@@ -964,12 +968,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		}
 
 		/**
-		 * Plugin creates/modifies posts.
+		 * Detects posts created by plugin actions.
 		 *
-		 * @param int    $post_id - Post ID.
-		 * @param object $post - Post object.
+		 * @param int      $post_id - The post ID.
+		 * @param \WP_Post $post - The post object.
+		 *
+		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.2 Refactored to better detect posts created by plugin actions.
 		 */
 		public static function plugin_created_post( $post_id, $post ) {
 			if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
@@ -977,117 +984,85 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 			}
 
 			// Ignore if the request is coming from post editor.
-			if ( isset( $_REQUEST['_wp_http_referer'] ) ) {
-				$referrer   = esc_url_raw( wp_unslash( $_REQUEST['_wp_http_referer'] ) );
-				$parsed_url = wp_parse_url( $referrer );
+			if ( isset( $_POST['_wp_http_referer'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$referrer   = \esc_url_raw( \wp_unslash( $_POST['_wp_http_referer'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$parsed_url = \wp_parse_url( $referrer );
 
 				if ( isset( $parsed_url['path'] ) && 'post' === basename( $parsed_url['path'], '.php' ) ) {
 					return;
 				}
 			}
 
-			// Filter $_REQUEST array for security.
-			$get_array  = filter_input_array( INPUT_GET );
-			$post_array = filter_input_array( INPUT_POST );
+			$get_action  = isset( $_GET['action'] ) ? \sanitize_text_field( \wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$post_action = isset( $_POST['action'] ) ? \sanitize_text_field( \wp_unslash( $_POST['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$plugin_name = isset( $_GET['plugin'] ) ? \sanitize_text_field( \wp_unslash( $_GET['plugin'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			$wp_actions = array( 'editpost', 'heartbeat', 'inline-save', 'trash', 'untrash', 'vc_save' );
-			if ( isset( $get_array['action'] ) && ! in_array( $get_array['action'], $wp_actions, true ) ) {
+
+			// Handle GET-based plugin actions (e.g. plugin activation via admin URL).
+			if ( $get_action && ! in_array( $get_action, $wp_actions, true ) ) {
+				if (
+				! in_array( $post->post_type, Alert_Manager::get_ignored_post_types(), true )
+				&& ! empty( $post->post_title )
+				&& $plugin_name
+				&& ! \is_wp_error( \validate_plugin( $plugin_name ) )
+				) {
+					$plugin_data = \get_plugin_data( \trailingslashit( \WP_PLUGIN_DIR ) . $plugin_name );
+					$plugin_slug = dirname( $plugin_name );
+					$editor_link = self::get_editor_link( $post );
+
+					Alert_Manager::trigger_event(
+						5019,
+						array(
+							'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
+							'PostID'             => $post->ID,
+							'PostType'           => $post->post_type,
+							'PostTitle'          => $post->post_title,
+							'PostStatus'         => $post->post_status,
+							'Username'           => 'Plugins',
+							$editor_link['name'] => $editor_link['value'],
+							'PluginData'         => (object) array(
+								'PluginRepoUrl' => self::get_plugin_wp_repo_url( $plugin_slug ),
+							),
+						)
+					);
+				}
+			}
+
+			// Handle POST-based plugin actions that include a plugin identifier in the URL.
+			if ( $post_action && ! in_array( $post_action, $wp_actions, true ) ) {
 				if (
 				! in_array( $post->post_type, Alert_Manager::get_ignored_post_types(), true )
 				&& ! empty( $post->post_title )
 				) {
-					// Get post editor link.
-					$editor_link = self::get_editor_link( $post );
+					// Ignore WooCommerce Bulk Stock Management page.
+					$post_page         = isset( $_POST['page'] ) ? \sanitize_text_field( \wp_unslash( $_POST['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+					$is_woo_bulk_stock = 'woocommerce-bulk-stock-management' === $post_page;
 
-					// If the plugin modify the post.
-					if ( false !== strpos( $get_array['action'], 'edit' ) ) {
+					// Ignore MainWP plugin requests.
+					$mainwp_actions    = array( 'restore', 'unpublish', 'publish' );
+					$is_mainwp_request = isset( $_POST['mainwpsignature'] ) && in_array( $post_action, $mainwp_actions, true ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+					if ( ! $is_woo_bulk_stock && ! $is_mainwp_request && $plugin_name && ! \is_wp_error( \validate_plugin( $plugin_name ) ) ) {
+						$plugin_data = \get_plugin_data( \trailingslashit( \WP_PLUGIN_DIR ) . $plugin_name );
+						$plugin_slug = dirname( $plugin_name );
+						$editor_link = self::get_editor_link( $post );
+
 						Alert_Manager::trigger_event(
-							2106,
+							5019,
 							array(
+								'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
 								'PostID'             => $post->ID,
 								'PostType'           => $post->post_type,
 								'PostTitle'          => $post->post_title,
 								'PostStatus'         => $post->post_status,
-								'PostUrl'            => get_permalink( $post->ID ),
+								'Username'           => 'Plugins',
 								$editor_link['name'] => $editor_link['value'],
+								'PluginData'         => (object) array(
+									'PluginRepoUrl' => self::get_plugin_wp_repo_url( $plugin_slug ),
+								),
 							)
 						);
-					} else {
-						$plugin_name = isset( $get_array['plugin'] ) ? $get_array['plugin'] : false;
-						if ( ! \is_wp_error( \validate_plugin( $plugin_name ) ) ) {
-							$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( \WP_PLUGIN_DIR ) . $plugin_name ) : false;
-							$plugin_slug = dirname( $plugin_name );
-
-							Alert_Manager::trigger_event(
-								5019,
-								array(
-									'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
-									'PostID'             => $post->ID,
-									'PostType'           => $post->post_type,
-									'PostTitle'          => $post->post_title,
-									'PostStatus'         => $post->post_status,
-									'Username'           => 'Plugins',
-									$editor_link['name'] => $editor_link['value'],
-									'PluginData'         => (object) array(
-										'PluginRepoUrl' => self::get_plugin_wp_repo_url( $plugin_slug ),
-									),
-								)
-							);
-						}
-					}
-				}
-			}
-
-			if ( isset( $post_array['action'] ) && ! in_array( $post_array['action'], $wp_actions, true ) ) {
-				if (
-				! in_array( $post->post_type, Alert_Manager::get_ignored_post_types(), true )
-				&& ! empty( $post->post_title )
-				) {
-					// If the plugin modify the post.
-					if ( false !== strpos( $post_array['action'], 'edit' ) ) {
-						$editor_link = self::get_editor_link( $post );
-						Alert_Manager::trigger_event(
-							2106,
-							array(
-								'PostID'             => $post->ID,
-								'PostType'           => $post->post_type,
-								'PostTitle'          => $post->post_title,
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
-					} elseif (
-					( isset( $post_array['page'] ) && 'woocommerce-bulk-stock-management' === $post_array['page'] ) // If page index is set in post array then ignore.
-					|| (
-					isset( $post_array['mainwpsignature'] )
-					&& ( 'restore' === $post_array['action'] || 'unpublish' === $post_array['action'] || 'publish' === $post_array['action'] )
-					) // OR If the request is coming from MainWP then ignore.
-					) {
-						// Ignore WooCommerce Bulk Stock Management page.
-						// OR MainWP plugin requests.
-					} else {
-						$plugin_name = isset( $get_array['plugin'] ) ? $get_array['plugin'] : false;
-						if ( ! \is_wp_error( \validate_plugin( $plugin_name ) ) ) {
-							$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( \WP_PLUGIN_DIR ) . $plugin_name ) : false;
-
-							$plugin_slug = dirname( $plugin_name );
-
-							$editor_link = self::get_editor_link( $post );
-							Alert_Manager::trigger_event(
-								5019,
-								array(
-									'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
-									'PostID'             => $post->ID,
-									'PostType'           => $post->post_type,
-									'PostTitle'          => $post->post_title,
-									'PostStatus'         => $post->post_status,
-									'Username'           => 'Plugins',
-									$editor_link['name'] => $editor_link['value'],
-									'PluginData'         => (object) array(
-										'PluginRepoUrl' => self::get_plugin_wp_repo_url( $plugin_slug ),
-									),
-								)
-							);
-						}
 					}
 				}
 			}

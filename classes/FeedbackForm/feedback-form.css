@@ -1,0 +1,81 @@
+#wp-security-audit-log-popover {
+	border: 1px solid #ccc;
+	padding: 2rem;
+	border-radius: 8px;
+}
+
+#wp-security-audit-log-popover::backdrop {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+#wp-security-audit-log-popover .wsal-close-button {
+	position: absolute;
+	top: 0.75rem;
+	right: 0.75rem;
+	background: none;
+	border: none;
+	font-size: 1.5rem;
+	line-height: 1;
+	cursor: pointer;
+	color: #666;
+	padding: 0.25rem 0.5rem;
+}
+
+#wp-security-audit-log-popover .wsal-close-button:hover {
+	color: #000;
+}
+
+#wp-security-audit-log-popover form {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+#wp-security-audit-log-popover .wsal-reason-wrapper {
+	display: flex;
+	gap: 1rem;
+	flex-direction: column;
+}
+
+#wp-security-audit-log-popover .wsal-feedback-wrapper {
+	display: none;
+}
+
+#wp-security-audit-log-popover .wsal-feedback-wrapper textarea,
+#wp-security-audit-log-popover .wsal-feedback-wrapper input {
+	width: 100%;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 0.5rem;
+}
+
+#wp-security-audit-log-popover .wsal-actions {
+	display: flex;
+	gap: 1rem;
+}
+
+#wp-security-audit-log-popover button {
+	padding: 0.5rem 1rem;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+	background-color: #5437D1;
+	cursor: pointer;
+	color: #fff;
+	margin: 0;
+}
+
+#wp-security-audit-log-popover button.wsal-dismiss {
+	background-color: #fff;
+	cursor: pointer;
+	color: #000;
+}
+
+#wp-security-audit-log-popover .wsal-logo-wrapper {
+	text-align: center;
+	margin-bottom: 1.5rem;
+}
+
+#wp-security-audit-log-popover .wsal-logo-wrapper img {
+	width: 150px;
+	margin-bottom: 1rem;
+}

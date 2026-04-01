@@ -5,7 +5,7 @@
  * @package    wsal
  * @subpackage helpers
  * @copyright  2026 Melapress
- * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  * @since 4.6.0
  */
@@ -16,6 +16,11 @@ namespace WSAL\Helpers;
 
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Utils\Abstract_Migration;
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 

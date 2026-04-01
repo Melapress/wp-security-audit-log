@@ -4,7 +4,7 @@
  *
  * Class file for alert manager.
  *
- * @since   1.0.0
+ * @since 4.6.0
  *
  * @package wsal
  * @subpackage wsal-yoast-forms
@@ -370,7 +370,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 					8833,
 					WSAL_MEDIUM,
 					esc_html__( 'User Enabled/Disabled Author or Data archives in Yoast SEO plugin settings', 'wp-security-audit-log' ),
-					esc_html__( 'Changed the status of the %archive_type% archives in the plugin settings.' ),
+					esc_html__( 'Changed the status of the %archive_type% archives in the plugin settings.', 'wp-security-audit-log' ),
 					array(),
 					array(),
 					'yoast-seo-search-appearance',

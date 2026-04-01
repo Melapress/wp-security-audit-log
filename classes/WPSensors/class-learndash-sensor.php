@@ -21,7 +21,7 @@ use WSAL\WP_Sensors\Helpers\LearnDash_Helper;
 use WSAL\WP_Sensors\Alerts\LearnDash_Custom_Alerts;
 
 // Exit if accessed directly.
-if ( ! \defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
@@ -187,6 +187,10 @@ if ( ! \class_exists( '\WSAL\WP_Sensors\LearnDash_Sensor' ) ) {
 
 				\add_action( 'create_term', array( __CLASS__, 'ld_taxonomy_creation_triggers' ), 10, 4 );
 				\add_action( 'delete_term', array( __CLASS__, 'ld_taxonomy_deletion_triggers' ), 10, 5 );
+
+				\add_action( 'wp_head', array( __CLASS__, 'ld_post_viewed' ), 10 );
+				\add_action( 'admin_action_edit', array( __CLASS__, 'ld_post_opened_in_gutenberg_editor' ), 10 );
+				\add_filter( 'post_edit_form_tag', array( __CLASS__, 'ld_post_opened_in_classic_editor' ), 10, 1 );
 
 			}
 		}
@@ -789,6 +793,157 @@ if ( ! \class_exists( '\WSAL\WP_Sensors\LearnDash_Sensor' ) ) {
 			}
 		}
 
+
+		/**
+		 * Detect when a logged-in user views a LearnDash course or lesson on the front-end.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.2
+		 */
+		public static function ld_post_viewed() {
+			if ( ! \is_singular( array( 'sfwd-courses', 'sfwd-lessons' ) ) ) {
+				return;
+			}
+
+			if ( ! \is_user_logged_in() || \is_admin() ) {
+				return;
+			}
+
+			$post = \get_queried_object();
+
+			if ( empty( $post ) || ! $post instanceof \WP_Post ) {
+				return;
+			}
+
+			$current_path = isset( $_SERVER['REQUEST_URI'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['REQUEST_URI'] ) ) : false;
+
+			if (
+				! empty( $_SERVER['HTTP_REFERER'] )
+				&& ! empty( $current_path )
+				&& false !== \strpos( \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_REFERER'] ) ), $current_path )
+			) {
+				// Ignore same-page refresh to avoid double entries.
+				return;
+			}
+
+			if ( empty( $post->post_title ) ) {
+				return;
+			}
+
+			if ( 'sfwd-courses' === $post->post_type ) {
+				$event_id = 11020;
+			} elseif ( 'sfwd-lessons' === $post->post_type ) {
+				$event_id = 11215;
+			} else {
+				return;
+			}
+
+			$event_variables = LearnDash_Helper::build_ld_view_event_variables( $post );
+
+			$event_variables['PostUrl']        = \esc_url( \get_permalink( $post->ID ) );
+			$event_variables['EditorLinkPost'] = \esc_url( \get_edit_post_link( $post->ID ) );
+
+			Alert_Manager::trigger_event( $event_id, $event_variables );
+		}
+
+		/**
+		 * Detect when a LearnDash course or lesson is opened in the Gutenberg editor.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.2
+		 */
+		public static function ld_post_opened_in_gutenberg_editor() {
+			$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( 0 === $post_id ) {
+				return;
+			}
+
+			$post = \get_post( $post_id );
+
+			if ( empty( $post ) || ! $post instanceof \WP_Post ) {
+				return;
+			}
+
+			if ( ! \in_array( $post->post_type, array( 'sfwd-courses', 'sfwd-lessons' ), true ) ) {
+				return;
+			}
+
+			self::ld_post_opened_in_editor( $post );
+		}
+
+		/**
+		 * Detect when a LearnDash course or lesson is opened in the Classic editor.
+		 *
+		 * @param \WP_Post $post - Post object.
+		 *
+		 * @return \WP_Post
+		 *
+		 * @since 5.6.2
+		 */
+		public static function ld_post_opened_in_classic_editor( $post ) {
+			if ( empty( $post ) || ! $post instanceof \WP_Post ) {
+				return $post;
+			}
+
+			if ( ! \in_array( $post->post_type, array( 'sfwd-courses', 'sfwd-lessons' ), true ) ) {
+				return $post;
+			}
+
+			self::ld_post_opened_in_editor( $post );
+
+			return $post;
+		}
+
+		/**
+		 * Shared logic for triggering the "opened in editor" event for LearnDash courses and lessons.
+		 *
+		 * @param \WP_Post $post - Post object.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.2
+		 */
+		private static function ld_post_opened_in_editor( $post ) {
+			$current_path = isset( $_SERVER['SCRIPT_NAME'] ) ? \esc_url_raw( \wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) . '?post=' . $post->ID : false;
+			$referrer     = isset( $_SERVER['HTTP_REFERER'] ) ? \esc_url_raw( \wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : false;
+
+			// If the referrer is post-new then we can ignore this one.
+			if ( ! empty( $referrer ) ) {
+				$parsed_url = \wp_parse_url( $referrer );
+
+				if ( isset( $parsed_url['path'] ) && 'post-new' === basename( $parsed_url['path'], '.php' ) ) {
+					return;
+				}
+			}
+
+			if ( ! empty( $referrer ) && false !== strpos( $referrer, $current_path ) ) {
+				// Ignore same-page to avoid double entries.
+				return;
+			}
+
+			if ( empty( $post->post_title ) ) {
+				return;
+			}
+
+			if ( 'sfwd-courses' === $post->post_type ) {
+				$event_id = 11021;
+			} elseif ( 'sfwd-lessons' === $post->post_type ) {
+				$event_id = 11216;
+			} else {
+				return;
+			}
+
+			if ( ! Alert_Manager::was_triggered( $event_id ) ) {
+				$event_variables = LearnDash_Helper::build_ld_view_event_variables( $post );
+
+				$event_variables['EditorLinkPost'] = \esc_url( \get_edit_post_link( $post->ID ) );
+
+				Alert_Manager::trigger_event( $event_id, $event_variables );
+			}
+		}
 
 		/**
 		 * Applies default disabled alerts when LearnDash is first detected by an existing WSAL install.

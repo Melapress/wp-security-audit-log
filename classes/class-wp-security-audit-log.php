@@ -27,6 +27,7 @@ use WSAL\Helpers\Settings_Helper;
 use WSAL\Actions\Plugin_Installer;
 use WSAL\Helpers\Uninstall_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\FeedbackForm\Feedback_Form;
 use WSAL\ListAdminEvents\List_Events;
 use WSAL\CopyEventData\Copy_Event_Data;
 use WSAL\Controllers\Plugin_Extensions;
@@ -408,7 +409,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			\add_filter( 'login_message', array( __CLASS__, 'render_login_page_message' ), 10, 1 );
 
 			\add_filter( 'mainwp_child_extra_execution', array( '\WSAL\MainWP\MainWP_API', 'retrieve_info_call_back' ), 10, 2 );
-			// add_filter( 'mainwp_child_extra_execution', array( new WSAL_MainWpApi( $this ), 'handle_callback' ), 10, 2 );
 
 			\add_action( 'wsal_freemius_loaded', array( __CLASS__, 'adjust_freemius_strings' ) );
 
@@ -419,6 +419,8 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			// Extensions which are only admin based.
 			if ( \is_admin() ) {
 				Plugin_Installer::init();
+
+				Feedback_Form::init();
 			}
 
 			Plugin_Extensions::init();
@@ -520,6 +522,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 						}
 					);
 					wsal_freemius()->add_filter( 'default_to_anonymous_feedback', '__return_true' );
+					wsal_freemius()->add_filter( 'show_deactivation_feedback_form', '__return_false' );
 
 					wsal_freemius()->add_filter(
 						'pricing_url',
@@ -765,12 +768,19 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		/**
 		 * Plugin Deactivation Actions.
 		 *
-		 * This function runs on plugin deactivation to send
-		 * deactivation email.
+		 * This function runs on plugin deactivation.
+		 *
+		 * @param bool $network_wide - Whether the plugin is being deactivated for the entire network.
+		 *
+		 * @return void
 		 *
 		 * @since 3.3.1
+		 * @since 5.6.2 Unschedule all cron jobs on deactivation, including per-site on multisite.
 		 */
-		public static function deactivate_actions() {
+		public static function deactivate_actions( $network_wide = false ) {
+
+			Cron_Jobs::unschedule_all_cron_jobs( $network_wide );
+
 			/**
 			 * Allow short-circuiting of the deactivation email sending by using
 			 * this filter to return true here instead of default false.
@@ -950,15 +960,17 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			$live_events_enabled = false;
 			// Set data array for common script.
 			$script_data = array(
-				'ajaxURL'           => \admin_url( 'admin-ajax.php' ),
-				'liveEvents'        => $live_events_enabled,
-				'installing'        => esc_html__( 'Installing, please wait', 'wp-security-audit-log' ),
-				'already_installed' => esc_html__( 'Already installed', 'wp-security-audit-log' ),
-				'installed'         => esc_html__( 'Extension installed', 'wp-security-audit-log' ),
-				'activated'         => esc_html__( 'Extension activated', 'wp-security-audit-log' ),
-				'failed'            => esc_html__( 'Install failed', 'wp-security-audit-log' ),
-				'reloading_page'    => esc_html__( 'Reloading page', 'wp-security-audit-log' ),
+				'ajaxURL'            => \admin_url( 'admin-ajax.php' ),
+				'liveEvents'         => $live_events_enabled,
+				'installing'         => esc_html__( 'Installing, please wait', 'wp-security-audit-log' ),
+				'already_installed'  => esc_html__( 'Already installed', 'wp-security-audit-log' ),
+				'installed'          => esc_html__( 'Extension installed', 'wp-security-audit-log' ),
+				'activated'          => esc_html__( 'Extension activated', 'wp-security-audit-log' ),
+				'failed'             => esc_html__( 'Install failed', 'wp-security-audit-log' ),
+				'reloading_page'     => esc_html__( 'Reloading page', 'wp-security-audit-log' ),
+				'dismissNoticeNonce' => \wp_create_nonce( 'wsal-dismiss-notice' ),
 			);
+
 
 			\wp_localize_script( 'wsal-common', 'wsalCommonData', $script_data );
 

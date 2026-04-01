@@ -1,6 +1,8 @@
 var $doc = jQuery(document),
     $window = jQuery(window);
 
+const { __ } = wp.i18n;
+
 /**
  * Validate a comma-separated list of email addresses with no spaces.
  *
@@ -28,8 +30,6 @@ function wsalIsValidEmailList(emailVal) {
  * @since 5.5.0
  */
 function wsalNotificationEmailValidation(emailInputFieldSelector, checkboxTriggerSelector) {
-  const { __ } = wp.i18n;
-
 	const $emailField = jQuery(emailInputFieldSelector);
 	const $checkboxTrigger = jQuery(checkboxTriggerSelector);
 	const $checkboxToggle = jQuery(checkboxTriggerSelector).find('.switchery');
@@ -37,7 +37,7 @@ function wsalNotificationEmailValidation(emailInputFieldSelector, checkboxTrigge
 	const emailErrorNoticeId = emailInputFieldSelector.replace('#', 'wsal-') + '-alert';
 
   const emailErrorNotice =
-    '<div id="' + emailErrorNoticeId + '"><span style="color:red;" class="extra-text">' +
+    '<div id="' + emailErrorNoticeId + '"><span style="color:red;" class="wsal-extra-text">' +
     __( 'Please enter one or more valid email addresses separated by commas, with no spaces.', 'wp-security-audit-log' ) +
     '</span></div>';
 
@@ -315,7 +315,6 @@ $doc.ready(function () {
 
                 if ( check_mail ) {
                     if ( email === null || (typeof email === "string" && email.length === 0) ) {
-                        var { __ } = wp.i18n;
                         $saveAlert.addClass('is-failed').delay(900);
                         $saveAlert.append('<div class="wsal-error-message">' + __( 'Email can not be empty!', 'wp-security-audit-log' ) + '<p><button id="wsal_remove_error" type="button">Close</button></p></div>');
 
@@ -356,7 +355,6 @@ $doc.ready(function () {
 
                 //alert(JSON.stringify(result, null, 2));
             } else {
-                var { __ } = wp.i18n;
                 $saveAlert.addClass('is-failed').delay(900);
                 $saveAlert.append('<div class="wsal-error-message">' + __( 'There are builder errors that needs to be fixed!', 'wp-security-audit-log' ) + '<p><button id="wsal_remove_error" type="button">Close</button></p></div>');
 
@@ -402,7 +400,6 @@ $doc.ready(function () {
 
             error: function (xhr, status, error) {
                 if ('undefined' != typeof xhr.status && xhr.status != 200) {
-                    const { __ } = wp.i18n;
                     let errorMessage = __( 'An error occurred while saving notification settings. Please try again.', 'wp-security-audit-log' );
 
                     // Handle different error message formats
@@ -664,7 +661,7 @@ $doc.ready(function () {
         const nonceValue = jQuery('#twilio_notification_nonce').val();
 
         if (!sid || !auth || !id) {
-            alert('Please fill in all required fields.');
+            alert( __( 'Please fill in all required fields.', 'wp-security-audit-log' ) );
         } else {
 
             $wsalBody.addClass('has-overlay');
@@ -673,6 +670,7 @@ $doc.ready(function () {
 
             jQuery.ajax({
                 url: ajaxurl,
+                type: 'POST',
                 data: {
                     action: 'wsal_store_twilio_api_key',
                     twilio_sid: sid,
@@ -707,7 +705,7 @@ $doc.ready(function () {
         const nonceValue = jQuery('#slack_notification_nonce').val();
 
         if (!auth) {
-            alert('Please fill in all required fields.');
+            alert( __( 'Please fill in all required fields.', 'wp-security-audit-log' ) );
         } else {
 
             $wsalBody.addClass('has-overlay');
@@ -716,6 +714,7 @@ $doc.ready(function () {
 
             jQuery.ajax({
                 url: ajaxurl,
+                type: 'POST',
                 data: {
                     action: 'wsal_store_slack_api_key',
                     slack_auth: auth,
@@ -765,13 +764,13 @@ $doc.ready(function () {
 
         if (!email_body || !email_subject || !email) {
             if (!email_body) {
-                alert('Please provide email body (text).');
+                alert( __( 'Please provide email body (text).', 'wp-security-audit-log' ) );
             }
             if (!email_subject) {
-                alert('Please provide email subject.');
+                alert( __( 'Please provide email subject.', 'wp-security-audit-log' ) );
             }
             if (!email) {
-                alert('Please specify a default email address in the settings to send a test email.');
+                alert( __( 'Please specify a default email address in the settings to send a test email.', 'wp-security-audit-log' ) );
             }
         } else {
 
@@ -817,13 +816,13 @@ $doc.ready(function () {
 
         if (!sid || !auth || !id) {
             if (!sid) {
-                alert('Please provide Twilio SID.');
+                alert( __( 'Please provide Twilio SID.', 'wp-security-audit-log' ) );
             }
             if (!auth) {
-                alert('Please provide Twilio AUTH.');
+                alert( __( 'Please provide Twilio AUTH.', 'wp-security-audit-log' ) );
             }
             if (!id) {
-                alert('Please provide Twilio number.');
+                alert( __( 'Please provide Twilio number.', 'wp-security-audit-log' ) );
             }
         } else {
 
@@ -843,10 +842,10 @@ $doc.ready(function () {
 
             if (!email_body || !number) {
                 if (!email_body) {
-                    alert('Please provide SMS text.');
+                    alert( __( 'Please provide SMS text.', 'wp-security-audit-log' ) );
                 }
                 if (!number) {
-                    alert('Please provide SMS number to send test message to - use the default settings for this.');
+                    alert( __( 'Please provide an SMS number to send a test message. You can add this in the default settings at the top of this page.', 'wp-security-audit-log' ) );
                 }
             } else {
 
@@ -893,9 +892,9 @@ $doc.ready(function () {
         if (!auth) {
             
             if (!auth) {
-                alert('Please provide Twilio AUTH.');
+                alert( __( 'Please provide a Slack bot token.', 'wp-security-audit-log' ) );
             }
-            
+
         } else {
 
             var inputid = 'slack_notifications_body';
@@ -913,10 +912,10 @@ $doc.ready(function () {
             
             if (!email_body || !number) {
                 if (!email_body) {
-                    alert('Please provide Slack text.');
+                    alert( __( 'Please provide Slack text.', 'wp-security-audit-log' ) );
                 }
                 if (!number) {
-                    alert('Please provide Slack channel to send test message to - use the default settings for this.');
+                    alert( __( 'Invalid Slack bot token or channel. Please provide both a Slack channel and a valid bot token to send a test message.', 'wp-security-audit-log' ) );
                 }
             } else {
 
@@ -944,6 +943,11 @@ $doc.ready(function () {
                             setTimeout(function () { $wsalBody.removeClass('has-overlay'); }, 1200);
                             alert(data.data);
                         }
+                    },
+                    error: function () {
+                      $saveAlert.addClass('is-failed').delay(900).fadeOut(700);
+                      setTimeout(function () { $wsalBody.removeClass('has-overlay'); }, 1200);
+                      alert( __( 'An error occurred while sending the test Slack message. Please try again.', 'wp-security-audit-log' ) );
                     },
                 });
             }

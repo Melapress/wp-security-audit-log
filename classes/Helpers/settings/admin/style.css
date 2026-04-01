@@ -7,7 +7,7 @@
   border: 0 solid #ccc;
   border-left-width: 5px;
   border-bottom: 1px solid #eee;
-  margin: 0 !important;
+  margin: 0;
   padding: 10px;
   line-height: 1.9;
   color: #444;
@@ -17,7 +17,7 @@
   background-color: #FFF8DC;
   border: 0 solid #ffeb8e;
   border-left-width: 5px;
-  margin: 0 !important;
+  margin: 0;
   padding: 10px;
   line-height: 1.9;
   color: #444;
@@ -37,8 +37,18 @@
   border-color: #67d218;
 }
 
+.wsal-message-hint.wsal-message-warning {
+  background-color: #FFF3CD;
+  border-color: #FFAB00;
+}
+
+.wsal-constant-notice {
+	margin-left: 270px;
+	margin-top: 12px;
+}
+
 .wsal-builder-content-area .wsal-message-hint {
-  margin-top: 15px !important;
+  margin-top: 15px;
 }
 
 #wsal-import-data-notes {
@@ -565,7 +575,7 @@ body.has-overlay #wsal-page-overlay {
   .option-item input[type=tel] {
     width: 100%;
   }
-  .option-item .extra-text {
+  .option-item .wsal-extra-text {
     padding: 8px 0 0;
   }
 }
@@ -1142,15 +1152,15 @@ body.has-overlay #wsal-page-overlay {
   width: auto !important;
 }
 
-.extra-text {
+.wsal-extra-text {
   display: block;
   clear: both;
   padding: 8px 0 0 270px;
   font-size: 12px;
-  color: #888;
+  color: #525252;
 }
 
-.wp-editor-wrap + .extra-text {
+.wp-editor-wrap + .wsal-extra-text {
   padding-right: 0;
   padding-left: 0;
 }
@@ -1418,7 +1428,7 @@ body.has-overlay #wsal-page-overlay {
   float: left;
 }
 
-.image-preview-wrapper .extra-text {
+.image-preview-wrapper .wsal-extra-text {
   padding-left: 3px;
 }
 

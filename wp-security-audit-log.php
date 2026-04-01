@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     5.6.1
+ * Version:     5.6.2
  * Plugin URI:  https://melapress.com/wordpress-activity-log/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      Melapress
@@ -52,7 +52,7 @@ if ( file_exists( plugin_dir_path( __FILE__ ) . 'third-party/vendor/autoload.php
 }
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '5.6.1' );
+	define( 'WSAL_VERSION', '5.6.2' );
 	define( 'WSAL_PREFIX', 'wsal_' );
 	define( 'WSAL_PREFIX_PAGE', 'wsal-' );
 }
@@ -137,9 +137,7 @@ if ( ! defined( 'WSAL_MIRROR_PREFIX' ) ) {
 	define( 'WSAL_MIRROR_PREFIX', 'mirror-' );
 }
 
-// phpcs:disable
-/* @free:start */
-// phpcs:enable
+// @free:start
 if ( ! function_exists( 'wsal_disable_freemius_on_free' ) ) {
 	/**
 	 * Disables the freemius
@@ -156,14 +154,10 @@ if ( ! function_exists( 'wsal_disable_freemius_on_free' ) ) {
 }
 \add_filter( 'wsal_freemius_sdk_object', 'wsal_disable_freemius_on_free' );
 \add_filter( 'wsal_disable_freemius_sdk', '__return_true' );
-// phpcs:disable
-/* @free:end */
-// phpcs:enable
+// @free:end
 
 if ( ! function_exists( 'wsal_freemius' ) ) {
 
-	// phpcs:disable
-	// phpcs:enable
 
 	// Load action scheduler for event mirroring.
 	$action_scheduler_file_path = WSAL_BASE_DIR . implode(
@@ -200,9 +194,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 } else {
 	wsal_freemius()->set_basename( true, __FILE__ );
 }
-// phpcs:disable
-/* @free:start */
-// phpcs:enable
+// @free:start
 if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
 	/**
 	 * Takes care of deactivation of the premium plugin when the free plugin is activated. The opposite direction is handled
@@ -223,8 +215,7 @@ if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
 
 	\register_activation_hook( __FILE__, 'wsal_free_on_plugin_activation' );
 }
-// phpcs:disable
-/* @free:end */
+// @free:end
 
 \add_filter(
 	'fs_templates/connect.php_wp-security-audit-log',
@@ -256,7 +247,6 @@ if ( ! function_exists( 'freemius_template_modification' ) ) {
 	}
 }
 
-// phpcs:enable
 
 if ( ! function_exists( 'str_ends_with' ) ) {
 	/**

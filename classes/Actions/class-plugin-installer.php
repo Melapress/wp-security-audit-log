@@ -17,6 +17,11 @@ namespace WSAL\Actions;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Plugins_Helper;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 
 	/**
@@ -46,6 +51,15 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 		 */
 		public static function run_addon_install() {
 			\check_ajax_referer( 'wsal-install-addon' );
+
+			// Verify user has permission to install and activate plugins.
+			if ( ! \current_user_can( 'install_plugins' ) || ! \current_user_can( 'activate_plugins' ) ) {
+				\wp_send_json_error(
+					array(
+						'message' => esc_html__( 'You do not have permission to install plugins.', 'wp-security-audit-log' ),
+					)
+				);
+			}
 
 			$predefined_plugins = Plugins_Helper::get_installable_plugins();
 

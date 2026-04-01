@@ -76,9 +76,13 @@ abstract class WSAL_AbstractView {
 	/**
 	 * Dismiss an admin notice through ajax.
 	 *
-	 * @internal
+	 * @return void
+	 *
+	 * @since 4.4.1
 	 */
 	public function ajax_dismiss_notice() {
+		\check_ajax_referer( 'wsal-dismiss-notice', 'nonce' );
+
 		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
@@ -284,7 +288,6 @@ abstract class WSAL_AbstractView {
 	/**
 	 * Modifies the admin footer.
 	 *
-	 *
 	 * @since 5.1.1
 	 */
 	public static function in_admin_footer() {
@@ -292,15 +295,10 @@ abstract class WSAL_AbstractView {
 		global $current_screen;
 
 		if ( isset( $current_screen ) && ( in_array( $current_screen->base, WpSecurityAuditLog::get_plugin_screens_array(), true ) ) ) {
-			
 			if ( 'free' === WpSecurityAuditLog::get_plugin_version() ) {
-				
 				include_once WSAL_BASE_DIR . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'Free' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'upgrade-to-premium.php';
-
 			}
-
 		}
-
 	}
 
 	/**
@@ -317,12 +315,6 @@ abstract class WSAL_AbstractView {
 
 		if ( isset( $current_screen ) && ( in_array( $current_screen->base, WpSecurityAuditLog::get_plugin_screens_array(), true ) ) ) {
 			$our_footer = '';
-			// if ( 'free' === WpSecurityAuditLog::get_plugin_version() ) {
-			// 	\ob_start();
-			// 	include_once WSAL_BASE_DIR . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'Free' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'upgrade-to-premium.php';
-
-			// 	$our_footer = \ob_get_clean();
-			// }
 
 			$wsal_footer_link = 'https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-melapress-name-link';
 			$wsal_link        = 'https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=wsal&utm_campaign=footer-plugin-name-link';

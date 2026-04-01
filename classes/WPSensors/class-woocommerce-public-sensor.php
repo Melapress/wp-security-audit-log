@@ -159,6 +159,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 
 			$post_type = '';
 
+			if ( ! $post ) {
+				return array(
+					'name'  => '',
+					'value' => '',
+				);
+			}
+
 			if ( \method_exists( $post, 'get_id' ) ) {
 				$post_type = get_post_type( $post->get_id() );
 			} else {
@@ -382,6 +389,11 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 
 			// Set post object.
 			$post = get_post( $product_id );
+
+			// Return early if we don't have a post object, as we need it to get the editor link and other details for the alert.
+			if ( ! $post ) {
+				return;
+			}
 
 			// Set username.
 			$username = '';

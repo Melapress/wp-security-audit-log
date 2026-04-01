@@ -503,17 +503,30 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 
 			if ( $order instanceof \WC_Order || $order instanceof \WC_Order_Refund ) {
 				if ( isset( $order->get_items()[ $item_id ] ) ) {
-					$item    = $order->get_items()[ $item_id ];
+					$item = $order->get_items()[ $item_id ];
+
+					if ( ! $item instanceof \WC_Order_Item_Product ) {
+						return;
+					}
+
 					$product = $item->get_product();
+
+					if ( $product instanceof WC_Product ) {
+						$product_name = $product->get_name();
+						$product_id   = $product->get_id();
+					} else {
+						$product_name = $item->get_name();
+						$product_id   = $item->get_product_id();
+					}
 
 					$order_post = wc_get_order( $order_id );
 					$edit_link  = self::get_editor_link( $order_post );
 					$event_data = array(
 						'OrderID'          => esc_attr( $order_id ),
 						'OrderTitle'       => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order ),
-						'ProductTitle'     => $product->get_name(),
-						'ProductID'        => $product->get_id(),
-						'SKU'              => WooCommerce_Sensor::get_product_sku( $product->get_id() ),
+						'ProductTitle'     => $product_name,
+						'ProductID'        => $product_id,
+						'SKU'              => WooCommerce_Sensor::get_product_sku( $product_id ),
 						'OrderStatus'      => \wc_get_order_status_name( $order_post->get_status() ),
 						'OrderStatusSlug'  => $order_post->get_status(),
 						'PostStatus'       => 'wc-' . $order_post->get_status(),
@@ -638,15 +651,24 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 						$order        = wc_get_order( $order_id );
 						$order_post   = wc_get_order( $order_id );
 						$edit_link    = self::get_editor_link( $order_post );
+
+						if ( $product instanceof WC_Product ) {
+							$product_name = $product->get_name();
+							$product_id   = $product->get_id();
+						} else {
+							$product_name = $item->get_name();
+							$product_id   = $item->get_product_id();
+						}
+
 						if ( isset( $output[ 'order_item_qty' . $item_id ] ) && intval( $output[ 'order_item_qty' . $item_id ] ) !== intval( $old_quantity ) ) {
 							$event_data = array(
 								'OrderID'          => esc_attr( $order_id ),
 								'OrderTitle'       => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order ),
-								'ProductID'        => $product->get_id(),
-								'SKU'              => WooCommerce_Sensor::get_product_sku( $product->get_id() ),
+								'ProductID'        => $product_id,
+								'SKU'              => WooCommerce_Sensor::get_product_sku( $product_id ),
 								'NewQuantity'      => $output[ 'order_item_qty' . $item_id ],
 								'OldQuantity'      => $old_quantity,
-								'ProductTitle'     => $product->get_name(),
+								'ProductTitle'     => $product_name,
 								'OrderStatus'      => \wc_get_order_status_name( $order_post->get_status() ),
 								'OrderStatusSlug'  => $order_post->get_status(),
 								'PostStatus'       => 'wc-' . $order_post->get_status(),

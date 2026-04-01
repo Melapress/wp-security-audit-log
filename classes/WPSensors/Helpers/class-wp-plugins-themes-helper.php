@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors\Helpers;
 
+use WSAL\Helpers\WP_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -200,6 +202,36 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\WP_Plugins_Themes_Helper' ) ) {
 			}
 
 			return $theme_event_data;
+		}
+
+		/**
+		 * Get the active/inactive status label for a plugin.
+		 *
+		 * @param string $plugin_file - Relative path to the plugin file (e.g. "akismet/akismet.php").
+		 *
+		 * @return string - Translated "Active" or "Inactive" label.
+		 *
+		 * @since 5.6.2
+		 */
+		public static function get_plugin_status_label( string $plugin_file ): string {
+			return WP_Helper::is_plugin_active( $plugin_file )
+				? \esc_html__( 'Active', 'wp-security-audit-log' )
+				: \esc_html__( 'Inactive', 'wp-security-audit-log' );
+		}
+
+		/**
+		 * Get the active/inactive status label for a theme.
+		 *
+		 * @param string $theme_slug - Theme directory slug (e.g. "twentytwentyfive").
+		 *
+		 * @return string - Translated "Active" or "Inactive" label.
+		 *
+		 * @since 5.6.2
+		 */
+		public static function get_theme_status_label( string $theme_slug ): string {
+			return ( \get_stylesheet() === $theme_slug )
+				? \esc_html__( 'Active', 'wp-security-audit-log' )
+				: \esc_html__( 'Inactive', 'wp-security-audit-log' );
 		}
 	}
 }
