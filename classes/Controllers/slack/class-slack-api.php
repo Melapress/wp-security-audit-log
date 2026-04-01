@@ -8,7 +8,7 @@
  * @since 5.3.4
  *
  * @copyright  2026 Melapress
- * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  *
  * @see       https://wordpress.org/plugins/wp-security-audit-log/
  */
@@ -86,9 +86,35 @@ if ( ! class_exists( '\WSAL\Controllers\Slack\Slack_API' ) ) {
 				self::$error = $response->get_error_message();
 
 				return false;
-			} else {
+			}
+
+			$response_data = json_decode( \wp_remote_retrieve_body( $response ), true );
+
+			if ( ! is_array( $response_data ) ) {
+				self::$error = \esc_html__( 'Unexpected response from Slack API.', 'wp-security-audit-log' );
+
+				return false;
+			}
+
+			if ( ! empty( $response_data['ok'] ) ) {
 				return true;
 			}
+
+			$raw_error = $response_data['error'] ?? 'unknown_error';
+
+			$suffix = ' ' . \esc_html__( 'Please edit Slack settings, save them, and try to send another test message.', 'wp-security-audit-log' );
+
+			$error_map = array(
+				'channel_not_found' => \esc_html__( 'The specified Slack channel was not found.', 'wp-security-audit-log' ) . $suffix,
+				'missing_scope'     => \esc_html__( 'The bot token is missing required permissions.', 'wp-security-audit-log' ) . $suffix,
+				'invalid_auth'      => \esc_html__( 'The bot token is invalid or expired.', 'wp-security-audit-log' ) . $suffix,
+				'not_authed'        => \esc_html__( 'No bot token was provided.', 'wp-security-audit-log' ) . $suffix,
+				'token_revoked'     => \esc_html__( 'The bot token has been revoked.', 'wp-security-audit-log' ) . $suffix,
+			);
+
+			self::$error = isset( $error_map[ $raw_error ] ) ? $error_map[ $raw_error ] : $raw_error . '.' . $suffix;
+
+			return false;
 		}
 
 		/**
@@ -144,7 +170,7 @@ if ( ! class_exists( '\WSAL\Controllers\Slack\Slack_API' ) ) {
 		public static function get_slack_error(): string {
 			$error = self::$error;
 			if ( \is_array( self::$error ) ) {
-				$error = print_r( self::$error, true );
+				$error = print_r( self::$error, true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 			}
 
 			return (string) $error;

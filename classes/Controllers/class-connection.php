@@ -260,7 +260,7 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 				$error_code = mysqli_connect_errno(); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_connect_errno
 
 				if ( 1045 === $error_code ) {
-					throw new \Exception( __( 'Error establishing a database connection. DB username or password are not valid.' ), $error_code ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+					throw new \Exception( __( 'Error establishing a database connection. DB username or password are not valid.', 'wp-security-audit-log' ), $error_code ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				} else {
 					$error_message = mysqli_connect_error(); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_connect_error
 					// if we get an error message from mysqli then use it otherwise use a generic message.

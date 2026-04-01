@@ -21,9 +21,9 @@ use WSAL\Controllers\Slack\Slack;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Controllers\Twilio\Twilio;
-use WSAL\Controllers\Slack\Slack_API;
-use WSAL\Controllers\Twilio\Twilio_API;
+use WSAL\Helpers\Encryption_Helper;
 use WSAL\Helpers\Settings\Settings_Builder;
+use WSAL\Helpers\Credential_Settings_Helper;
 use WSAL\Entities\Custom_Notifications_Entity;
 use WSAL\WP_Sensors\Helpers\Woocommerce_Helper;
 use WSAL\Extensions\Helpers\Notification_Helper;
@@ -444,10 +444,9 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				'jquery-ui-draggable',
 				'wp-color-picker',
 				'jquery-ui-autocomplete',
+				'wp-i18n',
 			);
 
-			// phpcs:disable
-			// phpcs:enable
 
 			\wp_enqueue_script(
 				'wsal-notifications-admin-scripts',
@@ -1036,6 +1035,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		 * @return array
 		 *
 		 * @since 5.2.0
+		 * @since 5.6.2 - Decrypt encrypted credentials on read, trigger lazy migration for plaintext values.
 		 */
 		public static function get_global_notifications_setting(): array {
 			if ( null === self::$global_notifications_setting ) {
@@ -1053,6 +1053,17 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				if ( isset( self::$global_notifications_setting['slack_notifications_body'] ) ) {
 					self::$global_notifications_setting['slack_notifications_body'] = json_decode( self::$global_notifications_setting['slack_notifications_body'] );
 				}
+
+				$decryption_result = Credential_Settings_Helper::decrypt_credentials( self::$global_notifications_setting );
+
+				self::$global_notifications_setting = $decryption_result['settings'];
+
+				$needs_migration = $decryption_result['needs_migration'];
+
+				if ( $needs_migration ) {
+					$migrated_settings = Credential_Settings_Helper::migrate_plaintext_credentials( self::$global_notifications_setting );
+					Settings_Helper::set_option_value( self::NOTIFICATIONS_SETTINGS_NAME, $migrated_settings );
+				}
 			}
 
 			return self::$global_notifications_setting;
@@ -1066,6 +1077,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		 * @return void
 		 *
 		 * @since 5.2.0
+		 * @since 5.6.2 - Encrypt credential values before writing to DB, reset static cache.
 		 */
 		public static function set_global_notifications_setting( array $settings ) {
 			if ( isset( $settings['email_notifications_body'] ) ) {
@@ -1078,15 +1090,24 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				$settings['slack_notifications_body'] = json_encode( $settings['slack_notifications_body'] );
 			}
 
+			/**
+			 * Ensure all credential values are encrypted before writing to the DB.
+			 * Callers may pass decrypted plaintext (e.g. from the static cache),
+			 * so any value that is not already encrypted is treated as plaintext.
+			 */
+			$settings = Credential_Settings_Helper::encrypt_credentials( $settings );
+
 			Settings_Helper::set_option_value(
 				self::NOTIFICATIONS_SETTINGS_NAME,
 				$settings
 			);
 
-			self::$global_notifications_setting = $settings;
+			self::$global_notifications_setting = null;
 		}
 
 		/**
+		 * Migrate legacy plaintext credentials to encrypted storage.
+		 *
 		 * Returns the notification titles used in the notifications UI
 		 *
 		 * @return array
@@ -1403,13 +1424,14 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		}
 
 		/**
-		 * Checks and validates the data for the settings.
+		 * Checks and validates the data for the notification settings.
 		 *
 		 * @param array $post_array - The array with all the data provided.
 		 *
 		 * @return void
 		 *
 		 * @since 5.1.1
+		 * @since 5.6.2 - Added masked value guard and credential encryption on save.
 		 */
 		private static function settings_check_and_save( array $post_array ) {
 			if ( ! \current_user_can( 'manage_options' ) ) {
@@ -1418,32 +1440,47 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 
 			$current_settings = Settings_Helper::get_option_value( self::NOTIFICATIONS_SETTINGS_NAME, array() );
 
-			$options = array();
+			/**
+			 * When a credential field is submitted unchanged, the form sends back a masked value (e.g. "xoxb****Fh3p") instead of the real token.
+			 * So we avoid this in two steps:
+			 *
+			 * 1. Preserve the real encrypted values from the DB for unchanged fields.
+			 * 2. Clear the masked values from the POST data so downstream validation doesn't treat them
+			 * as new credentials to validate against the API, and skips them.
+			 */
 
-			if ( isset( $post_array['twilio_notification_account_sid'] ) && ! empty( $post_array['twilio_notification_account_sid'] ) &&
-			isset( $post_array['twilio_notification_auth_token'] ) && ! empty( $post_array['twilio_notification_auth_token'] ) &&
-			isset( $post_array['twilio_notification_phone_number'] ) && ! empty( $post_array['twilio_notification_phone_number'] ) ) {
-				$twilio_valid =
-				Twilio_API::check_credentials(
-					(string) \sanitize_text_field( \wp_unslash( $post_array['twilio_notification_account_sid'] ) ),
-					(string) \sanitize_text_field( \wp_unslash( $post_array['twilio_notification_auth_token'] ) ),
-					(string) \sanitize_text_field( \wp_unslash( $post_array['twilio_notification_phone_number'] ) )
-				);
-				if ( $twilio_valid ) {
-					$options['twilio_notification_account_sid']  = \sanitize_text_field( \wp_unslash( $post_array['twilio_notification_account_sid'] ) );
-					$options['twilio_notification_auth_token']   = \sanitize_text_field( \wp_unslash( $post_array['twilio_notification_auth_token'] ) );
-					$options['twilio_notification_phone_number'] = \sanitize_text_field( \wp_unslash( $post_array['twilio_notification_phone_number'] ) );
+			/**
+			 * Options is necessary to preserve encrypted values when encrypted settings aren't edited. E.g. when user only changes "default Email address(es)".
+			 * This method just merges the current encrypted setting values with the new POST data.
+			 */
+			$options = Credential_Settings_Helper::get_encrypted_unchanged_credentials( $post_array, $current_settings );
+
+			// Updating $post_array is necessary to skip validation for masked values when they are not edited, which would fail API validation.
+			$post_array = Credential_Settings_Helper::empty_masked_values_from_post_data( $post_array, $current_settings );
+
+			/**
+			 * Validate and encrypt Twilio credentials. If validation fails the values are silently discarded.
+			 * Masked (unchanged) fields were already preserved by get_unchanged_credentials().
+			 */
+			$twilio_sid   = \sanitize_text_field( \wp_unslash( $post_array['twilio_notification_account_sid'] ?? '' ) );
+			$twilio_auth  = \sanitize_text_field( \wp_unslash( $post_array['twilio_notification_auth_token'] ?? '' ) );
+			$twilio_phone = \sanitize_text_field( \wp_unslash( $post_array['twilio_notification_phone_number'] ?? '' ) );
+
+			if ( '' !== $twilio_sid && '' !== $twilio_auth && '' !== $twilio_phone ) {
+				$twilio_result = Credential_Settings_Helper::validate_and_save_twilio( $twilio_sid, $twilio_auth, $twilio_phone, $options );
+
+				if ( false !== $twilio_result ) {
+					$options = $twilio_result;
 				}
 			}
 
-			if (
-			isset( $post_array['slack_notification_auth_token'] ) && ! empty( $post_array['slack_notification_auth_token'] ) ) {
-				$slack_valid =
-				Slack_API::verify_slack_token(
-					(string) \sanitize_text_field( \wp_unslash( $post_array['slack_notification_auth_token'] ) ),
-				);
-				if ( $slack_valid ) {
-					$options['slack_notification_auth_token'] = \sanitize_text_field( \wp_unslash( $post_array['slack_notification_auth_token'] ) );
+			$slack_token = \sanitize_text_field( \wp_unslash( $post_array['slack_notification_auth_token'] ?? '' ) );
+
+			if ( '' !== $slack_token ) {
+				$slack_result = Credential_Settings_Helper::validate_and_save_slack( $slack_token, $options );
+
+				if ( false !== $slack_result ) {
+					$options = $slack_result;
 				}
 			}
 
@@ -1524,7 +1561,13 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			$options['shorten_notification_urls'] = ( ( isset( $post_array['shorten_notification_urls'] ) ) ? filter_var( $post_array['shorten_notification_urls'], FILTER_VALIDATE_BOOLEAN ) : false );
 
 			if ( isset( $post_array['notification_bitly_shorten_key'] ) ) {
-				$options['notification_bitly_shorten_key'] = ( ( isset( $post_array['notification_bitly_shorten_key'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_bitly_shorten_key'] ) ) : '' );
+				$bitly_value = \sanitize_text_field( \wp_unslash( $post_array['notification_bitly_shorten_key'] ) );
+
+				if ( '' !== $bitly_value && ! Encryption_Helper::is_masked( $bitly_value ) ) {
+					$options['notification_bitly_shorten_key'] = Encryption_Helper::encrypt( $bitly_value );
+				} elseif ( '' === $bitly_value ) {
+					$options['notification_bitly_shorten_key'] = '';
+				}
 			}
 
 			$default = ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) ? true : false;

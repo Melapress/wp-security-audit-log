@@ -32,9 +32,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 	/**
-	 * Listing view object (Instance of WSAL_AuditLogListView).
+	 * Listing view object (Instance of \WSAL\ListAdminEvents\List_Events).
 	 *
-	 * @var WSAL_AuditLogListView
+	 * @var \WSAL\ListAdminEvents\List_Events
 	 */
 	protected $view;
 
@@ -353,9 +353,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			check_admin_referer( 'bulk-logs' );
 		}
 
-		$wpnonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : false; // View nonce.
-		$search  = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false; // Search.
-		$site_id = isset( $_GET['wsal-cbid'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['wsal-cbid'] ) ) : false; // Site id.
+		// Search.
+		$search = isset( $_GET['s'] ) ? \sanitize_text_field( \wp_unslash( $_GET['s'] ) ) : false;
+
+		// Site id.
+		$site_id = isset( $_GET['wsal-cbid'] ) ? (int) \sanitize_text_field( \wp_unslash( $_GET['wsal-cbid'] ) ) : false;
 
 		$search_save = ( isset( $_REQUEST['wsal-save-search-name'] ) && ! empty( $_REQUEST['wsal-save-search-name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['wsal-save-search-name'] ) ) ) : false;
 
@@ -414,7 +416,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				 *
 				 * This action hook is triggered before displaying the audit log view.
 				 *
-				 * @param WSAL_AuditLogListView $this->_view - Audit log view object.
+				 * @param \WSAL\ListAdminEvents\List_Events $this->_view - Audit log view object.
 				 */
 				do_action( 'wsal_auditlog_before_view', $this->get_view() );
 
@@ -438,7 +440,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				 *
 				 * This action hook is triggered after displaying the audit log view.
 				 *
-				 * @param WSAL_AuditLogListView $this->_view - Audit log view object.
+				 * @param \WSAL\ListAdminEvents\List_Events $this->_view - Audit log view object.
 				 */
 				do_action( 'wsal_auditlog_after_view', $this->get_view() );
 		?>

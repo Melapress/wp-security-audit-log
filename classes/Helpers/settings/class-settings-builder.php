@@ -17,11 +17,12 @@ namespace WSAL\Helpers\Settings;
 
 use WSAL\Helpers\WP_Helper;
 use WSAL\MainWP\MainWP_Addon;
+use WSAL\Views\Notifications;
 use WSAL\MainWP\MainWP_Helper;
 use WSAL\Controllers\Constants;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Entities\Occurrences_Entity;
-use WSAL\Views\Notifications;
+use WSAL\Helpers\Credential_Settings_Helper;
 use WSAL\Entities\Custom_Notifications_Entity;
 use WSAL\Extensions\Helpers\Notification_Helper;
 
@@ -751,6 +752,8 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 					self::hint();
 				}
 
+				self::active_constant_notice();
+
 				echo '</div>';
 
 			}
@@ -777,7 +780,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 
 			if ( ! empty( self::$settings['hint'] ) && 'error_text' !== self::$option_type ) {
 				?>
-				<span class="extra-text">
+				<span class="wsal-extra-text">
 				<?php echo self::$settings['hint']; ?>
 				</span>
 				<?php
@@ -794,6 +797,23 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 				<span style="line-height: 2;">
 				<?php echo self::$settings['info']; ?>
 				</span>
+				<?php
+			}
+		}
+
+		/**
+		 * Renders a warning notice when a PHP constant override is active for the current field.
+		 *
+		 * @return void
+		 *
+		 * @since 6.0.0
+		 */
+		private static function active_constant_notice() {
+			if ( Credential_Settings_Helper::has_active_constant( self::$item_id ) ) {
+				?>
+				<p class="wsal-message-hint wsal-message-warning wsal-constant-notice">
+					<span><?php echo \esc_html( Credential_Settings_Helper::get_constant_alert_text( self::$item_id ) ); ?></span>
+				</p>
 				<?php
 			}
 		}

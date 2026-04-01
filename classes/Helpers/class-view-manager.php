@@ -45,7 +45,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		/**
 		 * Active view.
 		 *
-		 * @var WSAL_AbstractView|null
+		 * @var \WSAL_AbstractView|null
 		 */
 		protected static $active_view = false;
 
@@ -67,7 +67,6 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				'\WSAL\Views\Premium_Features',
 			);
 
-            // phpcs:ignore
 
 			/**
 			 * Skipped Views.
@@ -269,18 +268,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					}
 				}
 
-                // phpcs:disable
-                /* @free:start */
-                // phpcs:enable
-				// add_submenu_page(
-				// 'wsal-auditlog',
-				// 'Pricing',
-				// '<span class="fs-submenu-item wp-security-audit-log pricing ">Pricing&nbsp;&nbsp;➤</span>',
-				// 'read', // No capability requirement.
-				// 'pricing',
-				// array(),
-				// 300
-				// );
+				// @free:start
 				add_submenu_page(
 					'wsal-auditlog',
 					'Upgrade',
@@ -290,9 +278,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					array(),
 					301
 				);
-                // phpcs:disable
-                /* @free:end */
-                // phpcs:enable
+				// @free:end
 			}
 		}
 
@@ -353,6 +339,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 			self::reorder_views();
 
 			$new_links = array();
+
 			foreach ( self::$views as $view ) {
 				if ( \call_user_func( array( $view, 'has_plugin_shortcut_link' ) ) ) {
 					$new_links[] = '<a href="' . add_query_arg( 'page', \call_user_func( array( $view, 'get_safe_view_name' ) ), \network_admin_url( 'admin.php' ) ) . '">' . \call_user_func( array( $view, 'get_name' ) ) . '</a>';
@@ -368,30 +355,9 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		}
 
 		/**
-		 * Returns page id of current page (or false on error).
-		 *
-		 * @return int
-		 *
-		 * @since 5.0.0
-		 */
-		protected static function get_backend_page_index() {
-			// Get current view via $_GET array.
-			$current_view = ( isset( $_GET['page'] ) ) ? \sanitize_text_field( \wp_unslash( $_GET['page'] ) ) : '';
-
-			if ( isset( $current_view ) ) {
-				foreach ( self::$views as $i => $view ) {
-					if ( \call_user_func( array( $view, 'get_safe_view_name' ) ) === $current_view ) {
-						return $i;
-					}
-				}
-			}
-			return false;
-		}
-
-		/**
 		 * Returns the current active view or null if none.
 		 *
-		 * @return WSAL_AbstractView|null
+		 * @return \WSAL_AbstractView|null
 		 *
 		 * @since 5.0.0
 		 */
@@ -437,7 +403,11 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 			}
 
 			global $pagenow;
-			if ( 'admin.php' === $pagenow && ( isset( $_GET['page'] ) && 'wsal-auditlog-pricing' === $_GET['page'] ) ) {
+
+			$is_auditlog_price_page = ( isset( $_GET['page'] ) && 'wsal-auditlog-pricing' === \sanitize_text_field( \wp_unslash( $_GET['page'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			// No nonce needed, this only reads the standard WP admin routing parameter for a strict string comparison.
+			if ( 'admin.php' === $pagenow && $is_auditlog_price_page ) {
 				?>
 				<style>
 					.fs-full-size-wrapper {
@@ -569,8 +539,8 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				return;
 			}
 
-			// Get page query parameter.
-            $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore
+			// No nonce needed, this only reads the standard WP admin routing parameter for a strict string comparison.
+			$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			if ( 'wsal-auditlog-account' === $page ) {
 				echo '<style type="text/css">#fs_sites {display:none;}</style>';

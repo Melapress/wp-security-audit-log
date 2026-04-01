@@ -76,6 +76,31 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 		}
 
 		/**
+		 * Sanitize a CSV row before writing it to the file.
+		 *
+		 * Casts all values to strings, strips &nbsp; HTML entities, and sanitizes
+		 * each field to prevent formula injection in spreadsheet software.
+		 *
+		 * @param array $row - The row values to sanitize.
+		 *
+		 * @return array - The sanitized row.
+		 *
+		 * @since 5.6.2
+		 */
+		private static function sanitize_csv_row( array $row ): array {
+			// Ensure all values are strings to prevent PHP warnings.
+			$ensure_string = array_map( 'strval', $row );
+
+			// Strip &nbsp; HTML entities before writing.
+			$remove_html_encoded_space = str_replace( '&nbsp;', ' ', $ensure_string );
+
+			// Sanitize values to prevent formula injection in spreadsheet software.
+			$clean_row = array_map( array( self::class, 'sanitize_csv_field' ), $remove_html_encoded_space );
+
+			return $clean_row;
+		}
+
+		/**
 		 * Writes the CSV file to the specified location.
 		 *
 		 * @param int   $step - Current step.
@@ -156,10 +181,7 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 						}
 					}
 
-					// Ensure all values are strings and strip &nbsp; HTML entities before writing.
-					$current_row = array_map( 'strval', $current_row );
-
-					$current_row = str_replace( '&nbsp;', ' ', $current_row );
+					$current_row = self::sanitize_csv_row( $current_row );
 
 					fputcsv( $output, $current_row, $csv_export_separator, $enclosure, '\\' );
 				}
@@ -215,16 +237,39 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 						}
 					}
 
-					// Ensure all values are strings and strip &nbsp; HTML entities before writing.
-					$current_row = array_map( 'strval', $current_row );
-
-					$current_row = str_replace( '&nbsp;', ' ', $current_row );
+					$current_row = self::sanitize_csv_row( $current_row );
 
 					fputcsv( $output, $current_row, $csv_export_separator, $enclosure, '\\' );
 				}
 			}
 
 			fclose( $output );
+		}
+
+		/**
+		 * Sanitize a CSV field value to prevent formula injection.
+		 *
+		 * Prefixes values starting with formula-triggering characters with a single
+		 * quote to prevent spreadsheet software from interpreting them as formulas.
+		 *
+		 * @param string $value - The cell value to sanitize.
+		 *
+		 * @return string - The sanitized value.
+		 *
+		 * @since 5.6.2
+		 */
+		private static function sanitize_csv_field( string $value ): string {
+			if ( '' === $value ) {
+				return $value;
+			}
+
+			$first_char = $value[0];
+
+			if ( in_array( $first_char, array( '=', '+', '-', '@', "\t", "\r" ), true ) ) {
+				return "'" . $value;
+			}
+
+			return $value;
 		}
 
 		/**

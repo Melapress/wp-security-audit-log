@@ -407,7 +407,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 
 			foreach ( $meta_array as $name => $value ) {
 				if ( \is_array( $value ) || is_object( $value ) ) {
-					$value = \print_r( (array) $value, \true );
+					$value = \print_r( (array) $value, \true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 				}
 				$cached_message .= $name . ' : ' . $value . '<br>';
 			}

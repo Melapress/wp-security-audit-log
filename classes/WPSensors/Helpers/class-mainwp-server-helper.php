@@ -233,7 +233,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 			Alert_Manager::trigger_event(
 				5031,
 				array(
-					'Theme' => (object) array(
+					'Theme'       => (object) array(
 						'Name'                   => $theme->Name, // phpcs:ignore
 						'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore
 						'Description'            => $theme->Description, // phpcs:ignore
@@ -241,6 +241,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 						'Version'                => $theme->Version, // phpcs:ignore
 						'get_template_directory' => $theme->get_template_directory(),
 					),
+					'ThemeStatus' => WP_Plugins_Themes_Helper::get_theme_status_label( $theme->get_stylesheet() ),
 				)
 			);
 		}
@@ -267,8 +268,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 					Alert_Manager::trigger_event(
 						5004,
 						array(
-							'PluginFile' => $plugin_file,
-							'PluginData' => (object) array(
+							'PluginFile'   => $plugin_file,
+							'PluginData'   => (object) array(
 								'Name'          => $plugin_data['Name'],
 								'PluginURI'     => $plugin_data['PluginURI'],
 								'PluginRepoUrl' => WP_Plugins_Themes_Sensor::get_plugin_wp_repo_url( $plugin_slug ),
@@ -276,7 +277,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 								'Author'        => $plugin_data['Author'],
 								'Network'       => $plugin_data['Network'] ? 'True' : 'False',
 							),
-							'OldVersion' => $old_version,
+							'OldVersion'   => $old_version,
+							'PluginStatus' => WP_Plugins_Themes_Helper::get_plugin_status_label( $plugin_file ),
 						)
 					);
 				}

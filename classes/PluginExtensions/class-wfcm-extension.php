@@ -10,6 +10,11 @@ declare(strict_types=1);
 
 namespace WSAL\PluginExtensions;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ! class_exists( '\WSAL\PluginExtensions\WFCM_Extension' ) ) {
 	/**
 	 * Class provides basic information about WSAL extension for WFCM.

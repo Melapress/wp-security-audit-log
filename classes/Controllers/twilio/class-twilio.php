@@ -6,7 +6,7 @@
  * @subpackage twilio
  * @since 5.1.1
  * @copyright  2026 Melapress
- * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  */
 
@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace WSAL\Controllers\Twilio;
 
 use WSAL\Views\Notifications;
+use WSAL\Helpers\Credential_Settings_Helper;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
@@ -103,16 +104,19 @@ if ( ! class_exists( '\WSAL\Controllers\Twilio\Twilio' ) ) {
 		}
 
 		/**
-		 * Stores the Twilio Credentials key via AJAX request
+		 * Stores the Twilio Credentials key via AJAX request.
+		 *
+		 * Encrypts all three credential values before persisting them.
 		 *
 		 * @return void
 		 *
 		 * @since 5.1.1
+		 * @since 5.6.2 - Encrypt credentials before saving.
 		 */
 		public static function store_twilio_api_key_ajax() {
 			if ( \wp_doing_ajax() ) {
-				if ( isset( $_REQUEST['_wpnonce'] ) ) {
-					$nonce_check = \wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_REQUEST['_wpnonce'] ) ), self::NONCE_NAME );
+				if ( isset( $_POST['_wpnonce'] ) ) {
+					$nonce_check = \wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), self::NONCE_NAME );
 					if ( ! $nonce_check ) {
 						\wp_send_json_error( new \WP_Error( 500, \esc_html__( 'Nonce checking failed', 'wp-security-audit-log' ) ), 400 );
 					}
@@ -125,28 +129,57 @@ if ( ! class_exists( '\WSAL\Controllers\Twilio\Twilio' ) ) {
 
 			if ( \current_user_can( 'manage_options' ) ) {
 
-				if ( isset( $_REQUEST['twilio_sid'] ) && ! empty( $_REQUEST['twilio_sid'] ) &&
-				isset( $_REQUEST['twilio_auth'] ) && ! empty( $_REQUEST['twilio_auth'] ) &&
-				isset( $_REQUEST['twilio_id'] ) && ! empty( $_REQUEST['twilio_id'] ) ) {
-					$twilio_valid =
-					Twilio_API::check_credentials(
-						(string) \sanitize_text_field( \wp_unslash( $_REQUEST['twilio_sid'] ) ),
-						(string) \sanitize_text_field( \wp_unslash( $_REQUEST['twilio_auth'] ) ),
-						(string) \sanitize_text_field( \wp_unslash( $_REQUEST['twilio_id'] ) )
-					);
-					if ( $twilio_valid ) {
-						$options                                     = Notifications::get_global_notifications_setting();
-						$options['twilio_notification_account_sid']  = \sanitize_text_field( \wp_unslash( $_REQUEST['twilio_sid'] ) );
-						$options['twilio_notification_auth_token']   = \sanitize_text_field( \wp_unslash( $_REQUEST['twilio_auth'] ) );
-						$options['twilio_notification_phone_number'] = \sanitize_text_field( \wp_unslash( $_REQUEST['twilio_id'] ) );
+				$twilio_sid   = \sanitize_text_field( \wp_unslash( $_POST['twilio_sid'] ?? '' ) );
+				$twilio_auth  = \sanitize_text_field( \wp_unslash( $_POST['twilio_auth'] ?? '' ) );
+				$twilio_phone = \sanitize_text_field( \wp_unslash( $_POST['twilio_id'] ?? '' ) );
+				$options      = Notifications::get_global_notifications_setting();
 
-						Notifications::set_global_notifications_setting( $options );
+				$sid_masked   = Credential_Settings_Helper::is_submitted_credential_unchanged( $twilio_sid, $options['twilio_notification_account_sid'] ?? '' );
+				$auth_masked  = Credential_Settings_Helper::is_submitted_credential_unchanged( $twilio_auth, $options['twilio_notification_auth_token'] ?? '' );
+				$phone_masked = Credential_Settings_Helper::is_submitted_credential_unchanged( $twilio_phone, $options['twilio_notification_phone_number'] ?? '' );
 
-						\wp_send_json_success();
-					}
-
-					\wp_send_json_error( __( 'TWILIO: No keys and numbers provided or the provided ones are invalid. Please check and provide the details again.', 'wp-security-audit-log' ) . Twilio_API::get_twilio_error() );
+				/**
+				 * If all three fields are unchanged, the user changed nothing.
+				 * Keep the existing DB values and return success immediately.
+				 */
+				if ( $sid_masked && $auth_masked && $phone_masked ) {
+					\wp_send_json_success();
 				}
+
+				/**
+				 * If some fields are masked and others are new, substitute the
+				 * stored decrypted values for the masked fields so validation
+				 * can run against a complete set of credentials.
+				 */
+				if ( $sid_masked ) {
+					$twilio_sid = $options['twilio_notification_account_sid'] ?? '';
+				}
+
+				if ( $auth_masked ) {
+					$twilio_auth = $options['twilio_notification_auth_token'] ?? '';
+				}
+
+				if ( $phone_masked ) {
+					$twilio_phone = $options['twilio_notification_phone_number'] ?? '';
+				}
+
+				$result = Credential_Settings_Helper::validate_and_save_twilio(
+					$twilio_sid,
+					$twilio_auth,
+					$twilio_phone,
+					$options
+				);
+
+				if ( false !== $result ) {
+					Notifications::set_global_notifications_setting( $result );
+					\wp_send_json_success();
+				}
+
+				$twilio_cred_error_message = \__( 'Invalid Twilio credentials: No keys and numbers provided or the provided ones are invalid. Please check and provide the details again.', 'wp-security-audit-log' );
+
+				$concat_twilio_error = \esc_html( $twilio_cred_error_message . Twilio_API::get_twilio_error() );
+
+				\wp_send_json_error( $concat_twilio_error );
 			}
 			\wp_send_json_error( new \WP_Error( 500, \esc_html__( 'Not allowed', 'wp-security-audit-log' ) ), 400 );
 		}
@@ -211,13 +244,22 @@ if ( ! class_exists( '\WSAL\Controllers\Twilio\Twilio' ) ) {
 		/**
 		 * Returns the currently stored Twilio SID key or false if there is none.
 		 *
+		 * PHP constant \WSAL_TWILIO_ACCOUNT_SID takes priority over the DB value.
+		 *
 		 * @return bool|string
 		 *
 		 * @since 5.1.1
+		 * @since 5.6.2 - Added constant override and encrypted storage support.
 		 */
 		public static function get_twilio_sid_key() {
 			if ( null === self::$sid_key ) {
 				self::$sid_key = false;
+
+				if ( defined( '\WSAL_TWILIO_ACCOUNT_SID' ) && '' !== \WSAL_TWILIO_ACCOUNT_SID ) {
+					self::$sid_key = \WSAL_TWILIO_ACCOUNT_SID;
+
+					return self::$sid_key;
+				}
 
 				if ( isset( self::get_settings()['twilio_notification_account_sid'] ) ) {
 					self::$sid_key = self::get_settings()['twilio_notification_account_sid'];
@@ -230,13 +272,22 @@ if ( ! class_exists( '\WSAL\Controllers\Twilio\Twilio' ) ) {
 		/**
 		 * Returns the currently stored Twilio AUTH key or false if there is none.
 		 *
+		 * PHP constant \WSAL_TWILIO_AUTH_TOKEN takes priority over the DB value.
+		 *
 		 * @return bool|string
 		 *
 		 * @since 5.1.1
+		 * @since 5.6.2 - Added constant override and encrypted storage support.
 		 */
 		public static function get_twilio_auth_key() {
 			if ( null === self::$auth_key ) {
 				self::$auth_key = false;
+
+				if ( defined( '\WSAL_TWILIO_AUTH_TOKEN' ) && '' !== \WSAL_TWILIO_AUTH_TOKEN ) {
+					self::$auth_key = \WSAL_TWILIO_AUTH_TOKEN;
+
+					return self::$auth_key;
+				}
 
 				if ( isset( self::get_settings()['twilio_notification_auth_token'] ) ) {
 					self::$auth_key = self::get_settings()['twilio_notification_auth_token'];
@@ -247,15 +298,24 @@ if ( ! class_exists( '\WSAL\Controllers\Twilio\Twilio' ) ) {
 		}
 
 		/**
-		 * Returns the currently stored Twilio AUTH key or false if there is none.
+		 * Returns the currently stored Twilio phone number / alphanumeric ID or false if there is none.
+		 *
+		 * PHP constant \WSAL_TWILIO_PHONE_NUMBER takes priority over the DB value.
 		 *
 		 * @return bool|string
 		 *
 		 * @since 5.1.1
+		 * @since 5.6.2 - Added constant override and encrypted storage support.
 		 */
 		public static function get_twilio_number_id_key() {
 			if ( null === self::$number_id_key ) {
 				self::$number_id_key = false;
+
+				if ( defined( '\WSAL_TWILIO_PHONE_NUMBER' ) && '' !== \WSAL_TWILIO_PHONE_NUMBER ) {
+					self::$number_id_key = \WSAL_TWILIO_PHONE_NUMBER;
+
+					return self::$number_id_key;
+				}
 
 				if ( isset( self::get_settings()['twilio_notification_phone_number'] ) ) {
 					self::$number_id_key = self::$settings['twilio_notification_phone_number'];

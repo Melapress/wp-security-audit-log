@@ -8,7 +8,7 @@
  * @since 4.5.0
  *
  * @copyright  2026 Melapress
- * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  *
  * @see       https://wordpress.org/plugins/wp-security-audit-log/
  */

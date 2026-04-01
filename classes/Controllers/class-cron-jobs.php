@@ -12,10 +12,11 @@ declare(strict_types=1);
 
 namespace WSAL\Controllers;
 
-use WSAL\Entities\Occurrences_Entity;
-use WSAL\Helpers\Settings_Helper;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Views\Notifications;
+use WSAL\MainWP\MainWP_Helper;
+use WSAL\Helpers\Settings_Helper;
+use WSAL\Entities\Occurrences_Entity;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -112,6 +113,7 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			\add_filter( 'cron_schedules', array( __CLASS__, 'recurring_schedules' ), PHP_INT_MAX );
 			\add_filter( 'wsal_cron_hooks', array( __CLASS__, 'settings_hooks' ) );
 			\add_filter( 'after_setup_theme', array( __CLASS__, 'initialize_hooks' ), 30000 );
+			\add_action( 'update_option_start_of_week', array( __CLASS__, 'reschedule_weekly_crons' ) );
 
 			if ( Settings_Helper::get_boolean_option_value( 'pruning-date-e', false ) ) {
 				\add_action( 'wsal_cleanup', array( Occurrences_Entity::class, 'prune_records' ) );
@@ -384,14 +386,56 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		}
 
 		/**
+		 * Returns the next occurrence of the WP start-of-week day as a strtotime-compatible string.
+		 *
+		 * @param string $time_prefix - The time prefix to use (e.g. '00:00' or '03:00').
+		 *
+		 * @return string
+		 *
+		 * @since 5.6.2
+		 */
+		private static function get_next_week_start( string $time_prefix = '00:00' ): string {
+			$days = array(
+				0 => 'sunday',
+				1 => 'monday',
+				2 => 'tuesday',
+				3 => 'wednesday',
+				4 => 'thursday',
+				5 => 'friday',
+				6 => 'saturday',
+			);
+
+			$start_of_week = (int) \get_option( 'start_of_week', 1 );
+			$day_name      = $days[ $start_of_week ] ?? 'monday';
+
+			return $time_prefix . ' next ' . $day_name;
+		}
+
+		/**
+		 * Unschedules weekly cron jobs so they get recreated with the new start-of-week day.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.2
+		 */
+		public static function reschedule_weekly_crons() {
+			self::un_schedule_event( 'wsal_periodic_reports_weekly' );
+			self::un_schedule_event( 'wsal_summary_weekly_report' );
+		}
+
+		/**
 		 * Initializes the plugin cron jobs.
 		 *
 		 * @return void
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.2 Weekly cron jobs respect the WP start_of_week setting.
 		 */
 		public static function initialize_hooks() {
 			$hooks_array = self::CRON_JOBS_NAMES;
+
+			$hooks_array['wsal_periodic_reports_weekly']['next_run'] = self::get_next_week_start( '00:00' );
+			$hooks_array['wsal_summary_weekly_report']['next_run']   = self::get_next_week_start( '03:00' );
 
 			if ( WP_Helper::is_multisite() || 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
 				/*
@@ -468,6 +512,100 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 				}
 
 				\add_action( $name, $parameters['hook'] );
+			}
+		}
+
+		/**
+		 * Legacy cron hook names that may still exist on older installs.
+		 *
+		 * @since 5.6.2
+		 */
+		public const LEGACY_CRON_HOOKS = array(
+			'wsal_cleanup',
+			'wsal_delete_logins',
+			'wsal_daily_summary_report',
+			'wsal_auto_destroy_sessions',
+		);
+
+		/**
+		 * Extension cron hooks registered via the wsal_cron_hooks filter.
+		 *
+		 * These cannot be discovered at deactivation time because the filter
+		 * callbacks may not be loaded yet, so they are listed here explicitly.
+		 *
+		 * @since 5.6.2
+		 */
+		public const EXTENSION_CRON_HOOKS = array(
+			'wsal_run_archiving',
+		);
+
+		/**
+		 * Unschedules all WSAL cron jobs. Called on plugin deactivation.
+		 *
+		 * Clears all hooks from the CRON_JOBS_NAMES constant, any dynamically
+		 * registered hooks stored in the cron_jobs_options setting, extension
+		 * hooks registered via filter, and legacy hooks that may still exist
+		 * on older installs.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.2
+		 */
+		public static function single_site_unschedule_all_cron_jobs() {
+			$hooks = array_keys( self::CRON_JOBS_NAMES );
+
+			$dynamic_hooks = Settings_Helper::get_option_value( self::CRON_JOBS_SETTINGS_NAME, array() );
+
+			if ( ! empty( $dynamic_hooks ) ) {
+				$hooks = array_merge( $hooks, array_keys( $dynamic_hooks ) );
+			}
+
+			$hooks = array_merge( $hooks, self::LEGACY_CRON_HOOKS );
+			$hooks = array_merge( $hooks, self::EXTENSION_CRON_HOOKS );
+			$hooks = array_merge( $hooks, array_keys( MainWP_Helper::CRON_JOBS ) );
+
+			foreach ( $hooks as $hook_name ) {
+				\wp_clear_scheduled_hook( $hook_name );
+			}
+		}
+
+		/**
+		 * Unschedules all WSAL cron jobs across all sites in a multisite network. Called on plugin deactivation in a multisite context.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.2
+		 */
+		public static function multisite_unschedule_all_cron_jobs() {
+			// By default get_sites only returns 100 sites, so we need to set 'number' to 0 to get all of them.
+			$sites = \get_sites(
+				array(
+					'fields' => 'ids',
+					'number' => 0,
+				)
+			);
+
+			foreach ( $sites as $site_id ) {
+				\switch_to_blog( $site_id );
+				self::single_site_unschedule_all_cron_jobs();
+				\restore_current_blog();
+			}
+		}
+
+		/**
+		 * Unschedules all WSAL cron jobs. Routes to single-site or multisite cleanup based on context.
+		 *
+		 * @param bool $network_deactivating - Whether the plugin is being deactivated network-wide.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.2
+		 */
+		public static function unschedule_all_cron_jobs( $network_deactivating = false ) {
+			if ( $network_deactivating && WP_Helper::is_multisite() ) {
+				self::multisite_unschedule_all_cron_jobs();
+			} else {
+				self::single_site_unschedule_all_cron_jobs();
 			}
 		}
 	}

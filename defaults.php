@@ -2222,6 +2222,7 @@ function set_wsal_alerts() {
 						esc_html__( 'Updated version', 'wp-security-audit-log' )  => '%PluginData->Version%',
 						esc_html__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%',
 						esc_html__( 'Previous version', 'wp-security-audit-log' ) => '%OldVersion%',
+						esc_html__( 'Status', 'wp-security-audit-log' )           => '%PluginStatus%',
 					),
 					Constants::wsaldefaults_build_links( array( 'PluginRepoUrl' ) ),
 					'plugin',
@@ -2385,6 +2386,7 @@ function set_wsal_alerts() {
 					array(
 						esc_html__( 'New version', 'wp-security-audit-log' )      => '%Theme->Version%',
 						esc_html__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%',
+						esc_html__( 'Status', 'wp-security-audit-log' )           => '%ThemeStatus%',
 					),
 					array(),
 					'theme',

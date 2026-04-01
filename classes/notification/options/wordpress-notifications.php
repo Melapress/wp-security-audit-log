@@ -15,6 +15,11 @@ use WSAL\Controllers\Twilio\Twilio;
 use WSAL\Helpers\Settings\Settings_Builder;
 use WSAL\Extensions\Helpers\Notification_Helper;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $built_in_notifications = (array) Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
 
 $defaults = '';

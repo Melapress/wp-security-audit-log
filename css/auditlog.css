@@ -667,17 +667,3 @@ a.inspector-active {
     border-color: #2271b1 !important;
     background-color: #2271b1 !important;
 }
-
-#wsal_try_search {
-	background: #009344;
-    display: flex;
-    color: white;
-    padding: 5px 1px 5px 10px;
-    border-radius: 3px;
-    line-height: 29px;
-    font-size: 12px;
-}
-
-#wsal_try_search > span {
-	margin-left: 10px;
-}

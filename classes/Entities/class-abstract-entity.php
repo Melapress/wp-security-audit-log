@@ -1397,7 +1397,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 						$results = array();
 					}
 				} else {
-					Logger::log( 'Error: ' . (string) $_wpdb->last_error . ' Line: ' . __LINE__ . ' File: ' . __FILE__ . ' SQL data: query - ' . $query . ' Values: ' . \print_r( $sql_values, true ) );
+					Logger::log( 'Error: ' . (string) $_wpdb->last_error . ' Line: ' . __LINE__ . ' File: ' . __FILE__ . ' SQL data: query - ' . $query . ' Values: ' . \print_r( $sql_values, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 				}
 			}
 			$_wpdb->suppress_errors( false );

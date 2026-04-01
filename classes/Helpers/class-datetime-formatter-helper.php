@@ -117,7 +117,7 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 
 			self::$show_milliseconds             = Settings_Helper::get_show_milliseconds();
 			self::$date_format                   = Settings_Helper::get_date_format();
-			self::$time_format                   = Settings_Helper::get_time_format();
+			self::$time_format                   = self::enrich_time_format( Settings_Helper::get_time_format() );
 			self::$datetime_format               = Settings_Helper::get_datetime_format();
 			self::$datetime_format_no_linebreaks = Settings_Helper::get_datetime_format( false );
 		}
@@ -178,8 +178,10 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 				return $result;
 			}
 
-			// Timezone adjustment.
-			$timezone_adjusted_timestamp = (int) ( $do_timezone_offset ? $timestamp + self::$gmt_offset_sec : $timestamp );
+			// Timezone adjustment, preserve fractional part for milliseconds before casting to int.
+			$adjusted_float              = $do_timezone_offset ? $timestamp + self::$gmt_offset_sec : $timestamp;
+			$milliseconds                = substr( number_format( fmod( (float) $adjusted_float, 1 ), 3 ), 2 );
+			$timezone_adjusted_timestamp = (int) $adjusted_float;
 
 			// Milliseconds in format (this is probably not necessary, but we keep it just to be 100% sure).
 			if ( ! self::$show_milliseconds ) {
@@ -192,14 +194,49 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 
 			// Milliseconds value.
 			if ( self::$show_milliseconds ) {
-				$result = str_replace(
-					'$$$',
-					substr( number_format( fmod( $timezone_adjusted_timestamp, 1 ), 3 ), 2 ),
-					$result
-				);
+				$result = str_replace( '$$$', $milliseconds, $result );
 			}
 
 			return $result;
+		}
+
+		/**
+		 * Enriches a time format string with seconds and optionally milliseconds.
+		 *
+		 * Works with standard PHP date() format characters:
+		 * g — 12-hour hour without leading zero (1–12)
+		 * i — minutes with leading zero (00–59)
+		 * s — seconds with leading zero (00–59)
+		 * A — uppercase AM/PM
+		 *
+		 * @param string $time_format - The raw WordPress time format string.
+		 *
+		 * @return string - The enriched time format string. Example: 'g:i A' becomes 'g:i:s A'.
+		 *
+		 * @since 5.6.2
+		 */
+		private static function enrich_time_format( string $time_format ): string {
+			$suffix = '';
+
+			// Append seconds if the format does not already include them.
+			if ( false === stripos( $time_format, 's' ) ) {
+				$suffix .= ':s';
+			}
+
+			// Append milliseconds placeholder so it can be replaced with the real value later.
+			if ( self::$show_milliseconds ) {
+				$suffix .= '.$$$';
+			}
+
+			// Nothing to enrich — return the original format unchanged.
+			if ( '' === $suffix ) {
+				return $time_format;
+			}
+
+			// Insert suffix before AM/PM indicator, or append at end.
+			$enriched = preg_replace( '/(?i)(\s+A)/', $suffix . '$1', $time_format, 1, $count );
+
+			return $count ? $enriched : $time_format . $suffix;
 		}
 
 		/**
