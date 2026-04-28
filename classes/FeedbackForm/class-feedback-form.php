@@ -108,6 +108,8 @@ if ( ! class_exists( '\WSAL\FeedbackForm\Feedback_Form' ) ) {
 				true
 			);
 
+			\wp_set_script_translations( 'wsal-feedback-form-scripts', 'wp-security-audit-log', WSAL_BASE_DIR . 'languages' );
+
 			\wp_localize_script(
 				'wsal-feedback-form-scripts',
 				'wsalFeedbackForm',
@@ -214,6 +216,32 @@ if ( ! class_exists( '\WSAL\FeedbackForm\Feedback_Form' ) ) {
 					</div>
 				<?php endforeach; ?>
 
+				<p class="wsal-validation wsal-reason-validation" hidden role="alert" aria-atomic="true">
+					<?php
+					echo \wp_kses(
+						sprintf(
+							/* translators: 1: Bolded "Submit & Deactivate" label. 2: Bolded "Skip & Deactivate" label. */
+							\esc_html__( 'Please select one of the reasons and click %1$s. If you would like to deactivate the plugin without sharing feedback, click %2$s.', 'wp-security-audit-log' ),
+							'<strong>' . \esc_html__( 'Submit & Deactivate', 'wp-security-audit-log' ) . '</strong>',
+							'<strong>' . \esc_html__( 'Skip & Deactivate', 'wp-security-audit-log' ) . '</strong>'
+						),
+						array( 'strong' => array() )
+					);
+					?>
+				</p>
+				<p class="wsal-validation wsal-feedback-validation" hidden role="alert" aria-atomic="true">
+					<?php
+					echo \wp_kses(
+						sprintf(
+							/* translators: 1: Bolded "Submit & Deactivate" label. 2: Bolded "Skip & Deactivate" label. */
+							\esc_html__( 'Please provide a few more details and click %1$s. If you would like to deactivate the plugin without sharing feedback, click %2$s.', 'wp-security-audit-log' ),
+							'<strong>' . \esc_html__( 'Submit & Deactivate', 'wp-security-audit-log' ) . '</strong>',
+							'<strong>' . \esc_html__( 'Skip & Deactivate', 'wp-security-audit-log' ) . '</strong>'
+						),
+						array( 'strong' => array() )
+					);
+					?>
+				</p>
 				<div class="wsal-actions">
 					<button type="button" class="wsal-submit"><?php \esc_html_e( 'Submit & Deactivate', 'wp-security-audit-log' ); ?></button>
 					<button type="button" class="wsal-dismiss"><?php \esc_html_e( 'Skip & Deactivate', 'wp-security-audit-log' ); ?></button>

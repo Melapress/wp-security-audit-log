@@ -79,6 +79,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8000,
 					WSAL_INFORMATIONAL,
 					__( 'User created new forum', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name. */
 					__( 'Created a new forum called %ForumName%.', 'wp-security-audit-log' ),
 					array(),
 					array( __( 'View the forum in editor', 'wp-security-audit-log' ) => '%EditorLinkForum%' ),
@@ -89,6 +90,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8001,
 					WSAL_MEDIUM,
 					__( 'User changed status of a forum', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name; %NewStatus%: new status. */
 					__( 'Changed the status of the forum %ForumName% to %NewStatus%.', 'wp-security-audit-log' ),
 					array(
 						__( 'Previous status', 'wp-security-audit-log' ) => '%OldStatus%',
@@ -103,6 +105,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8002,
 					WSAL_MEDIUM,
 					__( 'User changed visibility of a forum', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name; %NewVisibility%: new visibility. */
 					__( 'Changed the visibility of the forum %ForumName% to %NewVisibility%.', 'wp-security-audit-log' ),
 					array(
 						__( 'Previous visibility', 'wp-security-audit-log' ) => '%OldVisibility%',
@@ -117,6 +120,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8003,
 					WSAL_LOW,
 					__( 'User changed the URL of a forum', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name. */
 					__( 'Changed the URL of the forum %ForumName%.', 'wp-security-audit-log' ),
 					array(
 						__( 'Previous URL', 'wp-security-audit-log' ) => '%OldUrl%',
@@ -132,6 +136,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8004,
 					WSAL_INFORMATIONAL,
 					__( 'User changed order of a forum', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name; %NewOrder%: new order. */
 					__( 'Changed the sorting order of the forum %ForumName% to %NewOrder%.', 'wp-security-audit-log' ),
 					array(
 						__( 'Previous sorting order', 'wp-security-audit-log' ) => '%OldOrder%',
@@ -146,6 +151,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8005,
 					WSAL_HIGH,
 					__( 'User moved forum to trash', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name. */
 					__( 'Moved the forum %ForumName% to trash.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -156,6 +162,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8006,
 					WSAL_HIGH,
 					__( 'User permanently deleted forum', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name. */
 					__( 'Permanently deleted the forum %ForumName%.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -166,6 +173,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8007,
 					WSAL_HIGH,
 					__( 'User restored forum from trash', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name. */
 					__( 'Restored the forum %ForumName% from trash.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -176,6 +184,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8008,
 					WSAL_LOW,
 					__( 'User changed the parent of a forum', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name; %NewParent%: new parent. */
 					__( 'Changed the parent of the forum %ForumName% to %NewParent%.', 'wp-security-audit-log' ),
 					array(
 						__( 'Previous parent', 'wp-security-audit-log' ) => '%OldParent%',
@@ -190,6 +199,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\BBPress_Custom_Alerts' ) ) {
 					8011,
 					WSAL_LOW,
 					__( 'User changed type of a forum', 'wp-security-audit-log' ),
+					/* translators: %ForumName%: forum name; %NewType%: new type. */
 					__( 'Changed the type of the forum %ForumName% to %NewType%.', 'wp-security-audit-log' ),
 					array(
 						__( 'Previous type', 'wp-security-audit-log' ) => '%OldType%',

@@ -489,6 +489,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					9023,
 					WSAL_MEDIUM,
 					esc_html__( 'User added the Downloadable File to a product', 'wp-security-audit-log' ),
+					/* translators: %FileName%: file name; %ProductTitle%: product title. */
 					esc_html__( 'Added the downloadable file %FileName% to the product %ProductTitle%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Product ID', 'wp-security-audit-log' ) => '%PostID%',
@@ -506,6 +507,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					9024,
 					WSAL_MEDIUM,
 					esc_html__( 'User Removed the Downloadable File from a product', 'wp-security-audit-log' ),
+					/* translators: %FileName%: file name; %ProductTitle%: product title. */
 					esc_html__( 'Removed the downloadable file %FileName% from the product %ProductTitle%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Product ID', 'wp-security-audit-log' ) => '%PostID%',
@@ -820,6 +822,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					9120,
 					WSAL_HIGH,
 					esc_html__( 'User added a webhook', 'wp-security-audit-log' ),
+					/* translators: %HookName%: hook name; %EventType%: event type. */
 					esc_html__( 'The webhook %HookName% was %EventType%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Topic', 'wp-security-audit-log' ) => '%Topic%',
@@ -1514,6 +1517,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					9111,
 					WSAL_MEDIUM,
 					esc_html__( 'A Checkout endpoint has been modified', 'wp-security-audit-log' ),
+					/* translators: %endpoint_name%: endpoint name; %new_value%: new value. */
 					__( 'Changed the <strong>Checkout endpoint</strong> %endpoint_name% to %new_value%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous endpoint value', 'wp-security-audit-log' ) => '%old%',
@@ -1526,6 +1530,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					9112,
 					WSAL_MEDIUM,
 					esc_html__( 'An Account endpoint has been modified', 'wp-security-audit-log' ),
+					/* translators: %endpoint_name%: endpoint name; %new_value%: new value. */
 					__( 'Changed the <strong>Account endpoint</strong> %endpoint_name% to %new_value%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous endpoint value', 'wp-security-audit-log' ) => '%old%',
@@ -1754,6 +1759,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					9074,
 					WSAL_HIGH,
 					esc_html__( 'User enabled/disabled a payment gateway', 'wp-security-audit-log' ),
+					/* translators: %GatewayName%: gateway name. */
 					esc_html__( 'Changed the status of the payment gateway %GatewayName%.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -1776,6 +1782,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					9076,
 					WSAL_HIGH,
 					esc_html__( 'User modified a payment gateway', 'wp-security-audit-log' ),
+					/* translators: %GatewayName%: gateway name. */
 					esc_html__( 'Changed the settings of the %GatewayName% payment gateway.', 'wp-security-audit-log' ),
 					array(),
 					array(),

@@ -456,6 +456,8 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				false
 			);
 
+			\wp_set_script_translations( 'wsal-notifications-admin-scripts', 'wp-security-audit-log', WSAL_BASE_DIR . 'languages' );
+
 			\wp_enqueue_style(
 				'wsal-notifications-admin-style',
 				WSAL_BASE_URL . 'classes/Helpers/settings/admin/style.css',

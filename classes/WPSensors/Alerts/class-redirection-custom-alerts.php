@@ -180,6 +180,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Redirection_Custom_Alerts' ) ) {
 					10509,
 					WSAL_MEDIUM,
 					__( 'Created a new Redirection Group', 'wp-security-audit-log' ),
+					/* translators: %GroupTitle%: group title. */
 					__( 'Created a new Redirection Group %GroupTitle%', 'wp-security-audit-log' ),
 
 					array(

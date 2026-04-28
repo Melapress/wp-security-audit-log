@@ -286,6 +286,7 @@ function set_wsal_alerts() {
 					1009,
 					WSAL_LOW,
 					esc_html__( 'The plugin terminated an idle session for a user', 'wp-security-audit-log' ),
+					/* translators: %username%: username. */
 					esc_html__( 'The plugin terminated an idle session for the user %username%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Role', 'wp-security-audit-log' )       => '%TargetUserRole%',
@@ -380,6 +381,7 @@ function set_wsal_alerts() {
 					2010,
 					WSAL_MEDIUM,
 					esc_html__( 'User uploaded file to the Uploads directory', 'wp-security-audit-log' ),
+					/* translators: %FileName%: file name. */
 					esc_html__( 'Uploaded a file called %FileName%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Directory', 'wp-security-audit-log' ) => '%FilePath%',
@@ -392,6 +394,7 @@ function set_wsal_alerts() {
 					2011,
 					WSAL_LOW,
 					esc_html__( 'User deleted file from Uploads directory', 'wp-security-audit-log' ),
+					/* translators: %FileName%: file name. */
 					esc_html__( 'Deleted the file %FileName%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Directory', 'wp-security-audit-log' ) => '%FilePath%',
@@ -709,6 +712,7 @@ function set_wsal_alerts() {
 					2133,
 					WSAL_INFORMATIONAL,
 					esc_html__( 'Ownership of the post has changed', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %user%: user name. */
 					esc_html__( 'Has taken over the post %PostTitle% from %user%', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Post ID', 'wp-security-audit-log' )        => '%PostID%',
@@ -807,6 +811,7 @@ function set_wsal_alerts() {
 				array(
 					2123,
 					WSAL_INFORMATIONAL,
+					/* translators: %old_name%: old name; %new_name%: new name. */
 					esc_html__( 'Renamed the tag %old_name% to %new_name%.', 'wp-security-audit-log' ),
 					'',
 					array(
@@ -902,6 +907,7 @@ function set_wsal_alerts() {
 					2127,
 					WSAL_LOW,
 					esc_html__( 'User changed category name', 'wp-security-audit-log' ),
+					/* translators: %old_name%: old name; %new_name%: new name. */
 					esc_html__( 'Renamed the category %old_name% to %new_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Slug', 'wp-security-audit-log' )          => '%slug%',
@@ -1381,30 +1387,35 @@ function set_wsal_alerts() {
 					2003,
 					E_NOTICE,
 					esc_html__( 'User modified a draft blog post', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Modified the draft post with the %PostTitle%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2029,
 					E_NOTICE,
 					esc_html__( 'User created a new post with custom post type and saved it as draft', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Created a new custom post called %PostTitle% of type %PostType%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2030,
 					E_NOTICE,
 					esc_html__( 'User published a post with custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %PostUrl%: post URL; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Published a custom post %PostTitle% of type %PostType%. Post URL is %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2031,
 					E_NOTICE,
 					esc_html__( 'User modified a post with custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %PostUrl%: post URL; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Modified the custom post %PostTitle% of type %PostType%. Post URL is %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2032,
 					E_NOTICE,
 					esc_html__( 'User modified a draft post with custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Modified the draft custom post %PostTitle% of type is %PostType%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
@@ -1423,108 +1434,126 @@ function set_wsal_alerts() {
 					2035,
 					E_CRITICAL,
 					esc_html__( 'User restored post with custom post type from trash', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %EditorLinkPost%: post editor link. */
 					esc_html__( 'The custom post %PostTitle% of type %PostType% has been restored from trash. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2036,
 					E_NOTICE,
 					esc_html__( 'User changed the category of a post with custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %OldCategories%: old categories; %NewCategories%: new categories; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Changed the category(ies) of the custom post %PostTitle% of type %PostType% from %OldCategories% to %NewCategories%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2037,
 					E_NOTICE,
 					esc_html__( 'User changed the URL of a post with custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %OldUrl%: old URL; %NewUrl%: new URL; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Changed the URL of the custom post %PostTitle% of type %PostType% from %OldUrl% to %NewUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2038,
 					E_NOTICE,
 					esc_html__( 'User changed the author or post with custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %OldAuthor%: old author; %NewAuthor%: new author; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Changed the author of custom post %PostTitle% of type %PostType% from %OldAuthor% to %NewAuthor%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2039,
 					E_NOTICE,
 					esc_html__( 'User changed the status of post with custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %OldStatus%: old status; %NewStatus%: new status; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Changed the status of custom post %PostTitle% of type %PostType% from %OldStatus% to %NewStatus%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2040,
 					E_WARNING,
 					esc_html__( 'User changed the visibility of a post with custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %OldVisibility%: old visibility; %NewVisibility%: new visibility; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Changed the visibility of the custom post %PostTitle% of type %PostType% from %OldVisibility% to %NewVisibility%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2041,
 					E_NOTICE,
 					esc_html__( 'User changed the date of post with custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %OldDate%: old date; %NewDate%: new date; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Changed the date of the custom post %PostTitle% of type %PostType% from %OldDate% to %NewDate%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2056,
 					E_CRITICAL,
 					esc_html__( 'User created a custom field for a custom post type', 'wp-security-audit-log' ),
+					/* translators: %MetaKey%: custom field name; %MetaValue%: custom field value; %PostTitle%: post title; %PostType%: post type; %EditorLinkPost%: post editor link; %MetaLink%: custom field link. */
 					esc_html__( 'Created a new custom field %MetaKey% with value %MetaValue% in custom post %PostTitle% of type %PostType%. %EditorLinkPost%.<br>%MetaLink%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2057,
 					E_CRITICAL,
 					esc_html__( 'User updated a custom field for a custom post type', 'wp-security-audit-log' ),
+					/* translators: %MetaKey%: custom field name; %MetaValueOld%: old custom field value; %MetaValueNew%: new custom field value; %PostTitle%: post title; %PostType%: post type; %EditorLinkPost%: post editor link; %MetaLink%: custom field link. */
 					esc_html__( 'Modified the value of the custom field %MetaKey% from %MetaValueOld% to %MetaValueNew% in custom post %PostTitle% of type %PostType% %EditorLinkPost%.<br>%MetaLink%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2058,
 					E_CRITICAL,
 					esc_html__( 'User deleted a custom field from a custom post type', 'wp-security-audit-log' ),
+					/* translators: %MetaKey%: custom field name; %MetaID%: custom field ID; %PostTitle%: post title; %PostType%: post type; %EditorLinkPost%: post editor link; %MetaLink%: custom field link. */
 					esc_html__( 'Deleted the custom field %MetaKey% with id %MetaID% from custom post %PostTitle% of type %PostType% %EditorLinkPost%.<br>%MetaLink%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2063,
 					E_CRITICAL,
 					esc_html__( 'User updated a custom field name for a custom post type', 'wp-security-audit-log' ),
+					/* translators: %MetaKeyOld%: old custom field name; %MetaKeyNew%: new custom field name; %PostTitle%: post title; %PostType%: post type; %EditorLinkPost%: post editor link; %MetaLink%: custom field link. */
 					esc_html__( 'Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in custom post %PostTitle% of type %PostType% %EditorLinkPost%.<br>%MetaLink%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2067,
 					E_WARNING,
 					esc_html__( 'User modified content for a published custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostUrl%: post URL; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Modified the content of the published custom post type %PostTitle%. Post URL is %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2068,
 					E_NOTICE,
 					esc_html__( 'User modified content for a draft post', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %RevisionLink%: revision link; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Modified the content of the draft post %PostTitle%.%RevisionLink% %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2070,
 					E_NOTICE,
 					esc_html__( 'User modified content for a draft custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Modified the content of the draft custom post type %PostTitle%.%EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2072,
 					E_NOTICE,
 					esc_html__( 'User modified content of a post', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %RevisionLink%: revision link; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Modified the content of post %PostTitle% which is submitted for review.%RevisionLink% %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2076,
 					E_NOTICE,
 					esc_html__( 'User scheduled a custom post type', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PublishingDate%: publishing date; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Scheduled the custom post type %PostTitle% to be published %PublishingDate%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2088,
 					E_NOTICE,
 					esc_html__( 'User changed title of a custom post type', 'wp-security-audit-log' ),
+					/* translators: %OldTitle%: old title; %NewTitle%: new title; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Changed the title of the custom post %OldTitle% to %NewTitle%. %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2104,
 					E_NOTICE,
 					esc_html__( 'User opened a custom post type in the editor', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostType%: post type; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Opened the custom post %PostTitle% of type %PostType% in the editor. View the post: %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 				array(
@@ -1549,6 +1578,7 @@ function set_wsal_alerts() {
 					2108,
 					E_NOTICE,
 					esc_html__( 'A plugin modified a custom post', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %EditorLinkPost%: post editor link. */
 					esc_html__( 'Plugin modified the custom post %PostTitle%. View the post: %EditorLinkPost%.', 'wp-security-audit-log' ),
 				),
 			),
@@ -1566,24 +1596,28 @@ function set_wsal_alerts() {
 					2004,
 					E_NOTICE,
 					esc_html__( 'User created a new WordPress page and saved it as draft', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Created a new page called %PostTitle% and saved it as draft. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2005,
 					E_NOTICE,
 					esc_html__( 'User published a WordPress page', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostUrl%: post URL; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Published a page called %PostTitle%. Page URL is %PostUrl%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2006,
 					E_NOTICE,
 					esc_html__( 'User modified a published WordPress page', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostUrl%: post URL; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Modified the published page %PostTitle%. Page URL is %PostUrl%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2007,
 					E_NOTICE,
 					esc_html__( 'User modified a draft WordPress page', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostID%: post ID; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Modified the draft page %PostTitle%. Page ID is %PostID%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
@@ -1602,90 +1636,105 @@ function set_wsal_alerts() {
 					2015,
 					E_CRITICAL,
 					esc_html__( 'User restored a WordPress page from trash', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Page %PostTitle% has been restored from trash. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2018,
 					E_NOTICE,
 					esc_html__( 'User changed page URL', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %OldUrl%: old URL; %NewUrl%: new URL; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Changed the URL of the page %PostTitle% from %OldUrl% to %NewUrl%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2020,
 					E_NOTICE,
 					esc_html__( 'User changed page author', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %OldAuthor%: old author; %NewAuthor%: new author; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Changed the author of the page %PostTitle% from %OldAuthor% to %NewAuthor%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2022,
 					E_NOTICE,
 					esc_html__( 'User changed page status', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %OldStatus%: old status; %NewStatus%: new status; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Changed the status of the page %PostTitle% from %OldStatus% to %NewStatus%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2026,
 					E_WARNING,
 					esc_html__( 'User changed the visibility of a page post', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %OldVisibility%: old visibility; %NewVisibility%: new visibility; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Changed the visibility of the page %PostTitle% from %OldVisibility% to %NewVisibility%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2028,
 					E_NOTICE,
 					esc_html__( 'User changed the date of a page post', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %OldDate%: old date; %NewDate%: new date; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Changed the date of the page %PostTitle% from %OldDate% to %NewDate%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2059,
 					E_CRITICAL,
 					esc_html__( 'User created a custom field for a page', 'wp-security-audit-log' ),
+					/* translators: %MetaKey%: custom field name; %MetaValue%: custom field value; %PostTitle%: post title; %EditorLinkPage%: page editor link; %MetaLink%: custom field link. */
 					esc_html__( 'Created a new custom field called %MetaKey% with value %MetaValue% in the page %PostTitle% %EditorLinkPage%.<br>%MetaLink%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2060,
 					E_CRITICAL,
 					esc_html__( 'User updated a custom field value for a page', 'wp-security-audit-log' ),
+					/* translators: %MetaKey%: custom field name; %MetaValueOld%: old custom field value; %MetaValueNew%: new custom field value; %PostTitle%: post title; %EditorLinkPage%: page editor link; %MetaLink%: custom field link. */
 					esc_html__( 'Modified the value of the custom field %MetaKey% from %MetaValueOld% to %MetaValueNew% in the page %PostTitle% %EditorLinkPage%.<br>%MetaLink%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2061,
 					E_CRITICAL,
 					esc_html__( 'User deleted a custom field from a page', 'wp-security-audit-log' ),
+					/* translators: %MetaKey%: custom field name; %MetaID%: custom field ID; %PostTitle%: post title; %EditorLinkPage%: page editor link; %MetaLink%: custom field link. */
 					esc_html__( 'Deleted the custom field %MetaKey% with id %MetaID% from page %PostTitle% %EditorLinkPage%<br>%MetaLink%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2064,
 					E_CRITICAL,
 					esc_html__( 'User updated a custom field name for a page', 'wp-security-audit-log' ),
+					/* translators: %MetaKeyOld%: old custom field name; %MetaKeyNew%: new custom field name; %PostTitle%: post title; %EditorLinkPage%: page editor link; %MetaLink%: custom field link. */
 					esc_html__( 'Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in the page %PostTitle% %EditorLinkPage%.<br>%MetaLink%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2066,
 					E_WARNING,
 					esc_html__( 'User modified content for a published page', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PostUrl%: post URL; %RevisionLink%: revision link; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Modified the content of the published page %PostTitle%. Page URL is %PostUrl%. %RevisionLink% %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2069,
 					E_NOTICE,
 					esc_html__( 'User modified content for a draft page', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %RevisionLink%: revision link; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Modified the content of draft page %PostTitle%.%RevisionLink% %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2075,
 					E_NOTICE,
 					esc_html__( 'User scheduled a page', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %PublishingDate%: publishing date; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Scheduled the page %PostTitle% to be published %PublishingDate%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2087,
 					E_NOTICE,
 					esc_html__( 'User changed title of a page', 'wp-security-audit-log' ),
+					/* translators: %OldTitle%: old title; %NewTitle%: new title; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Changed the title of the page %OldTitle% to %NewTitle%. %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
 					2102,
 					E_NOTICE,
 					esc_html__( 'User opened a page in the editor', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Opened the page %PostTitle% in the editor. View the page: %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 				array(
@@ -1746,6 +1795,7 @@ function set_wsal_alerts() {
 					2107,
 					E_NOTICE,
 					esc_html__( 'A plugin modified a page', 'wp-security-audit-log' ),
+					/* translators: %PostTitle%: post title; %EditorLinkPage%: page editor link. */
 					esc_html__( 'Plugin modified the page %PostTitle%. View the page: %EditorLinkPage%.', 'wp-security-audit-log' ),
 				),
 			),
@@ -1885,6 +1935,7 @@ function set_wsal_alerts() {
 					4015,
 					WSAL_LOW,
 					esc_html__( 'User updated a custom field value for a user', 'wp-security-audit-log' ),
+					/* translators: %custom_field_name%: custom field name; %TargetUsername%: target username. */
 					esc_html__( 'Changed the value of the custom field %custom_field_name% in the user profile %TargetUsername%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Role', 'wp-security-audit-log' )           => '%Roles%',
@@ -1901,6 +1952,7 @@ function set_wsal_alerts() {
 					4016,
 					WSAL_LOW,
 					esc_html__( 'User created a custom field value for a user', 'wp-security-audit-log' ),
+					/* translators: %custom_field_name%: custom field name; %TargetUsername%: target username. */
 					esc_html__( 'Created the custom field %custom_field_name% in the user profile %TargetUsername%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Role', 'wp-security-audit-log' )               => '%Roles%',
@@ -1991,6 +2043,7 @@ function set_wsal_alerts() {
 					4025,
 					WSAL_CRITICAL,
 					esc_html__( 'User created an application password', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name. */
 					esc_html__( 'The application password %friendly_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Role', 'wp-security-audit-log' )                               => '%roles%',
@@ -2005,6 +2058,7 @@ function set_wsal_alerts() {
 					4026,
 					WSAL_CRITICAL,
 					esc_html__( 'User created an application password', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %login%: user login. */
 					esc_html__( 'The application password %friendly_name% for the user %login%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Role', 'wp-security-audit-log' )                               => '%roles%',
@@ -2148,6 +2202,7 @@ function set_wsal_alerts() {
 					4024,
 					WSAL_LOW,
 					esc_html__( 'Network user has signed-up', 'wp-security-audit-log' ),
+					/* translators: %email_address%: email address. */
 					esc_html__( 'User with the email address %email_address% has signed up to the network.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Username', 'wp-security-audit-log' )  => '%username%',
@@ -2318,6 +2373,7 @@ function set_wsal_alerts() {
 					2051,
 					WSAL_HIGH,
 					esc_html__( 'User changed a file using the plugin editor', 'wp-security-audit-log' ),
+					/* translators: %File%: file name. */
 					esc_html__( 'Modified the file %File% with the plugin editor.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -2396,6 +2452,7 @@ function set_wsal_alerts() {
 					2046,
 					WSAL_HIGH,
 					esc_html__( 'User changed a file using the theme editor', 'wp-security-audit-log' ),
+					/* translators: %Theme%: theme name; %File%: file name. */
 					esc_html__( 'Modified the file %Theme%/%File% with the theme editor.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -2471,6 +2528,7 @@ function set_wsal_alerts() {
 					6000,
 					WSAL_INFORMATIONAL,
 					esc_html__( 'Events automatically pruned by system', 'wp-security-audit-log' ),
+					/* translators: %EventCount%: number of events. */
 					esc_html__( 'System automatically deleted %EventCount% events from the activity log.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -2504,6 +2562,7 @@ function set_wsal_alerts() {
 					6038,
 					WSAL_CRITICAL,
 					esc_html__( 'Deleted all the data about a user from the activity log.', 'wp-security-audit-log' ),
+					/* translators: %user%: user name. */
 					__( 'Deleted all the data about the user <strong>%user%</strong> from the activity log.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Role', 'wp-security-audit-log' ) => '%Role%',
@@ -2518,6 +2577,7 @@ function set_wsal_alerts() {
 					6039,
 					WSAL_CRITICAL,
 					esc_html__( 'Deleted all the data of a specific type from the activity log.', 'wp-security-audit-log' ),
+					/* translators: %deleted_data_type%: deleted data type; %deleted_data%: deleted data. */
 					esc_html__( 'Deleted all the data about the %deleted_data_type% %deleted_data% from the activity log.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Number of events deleted', 'wp-security-audit-log' ) => '%sum_deleted_events%',
@@ -2587,7 +2647,9 @@ function set_wsal_alerts() {
 				array(
 					6050,
 					WSAL_HIGH,
+					/* translators: %user%: user name. */
 					esc_html__( 'The user %user% to / from the list of users who can view the activity log', 'wp-security-audit-log' ),
+					/* translators: %user%: user name. */
 					esc_html__( 'The user %user% to / from the list of users who can view the activity log.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous list of users who had access to view the activity log', 'wp-security-audit-log' ) => '%previous_users%',
@@ -2622,6 +2684,7 @@ function set_wsal_alerts() {
 					6053,
 					WSAL_LOW,
 					esc_html__( 'A user was added to / from the list of excluded users from the activity log', 'wp-security-audit-log' ),
+					/* translators: %user%: user name. */
 					esc_html__( 'The user %user% to / from the list of excluded users from the activity log.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous list of users', 'wp-security-audit-log' ) => '%previous_users%',
@@ -2670,6 +2733,7 @@ function set_wsal_alerts() {
 					6057,
 					WSAL_LOW,
 					esc_html__( 'A custom field was added to / from the list of excluded custom fields from the activity log', 'wp-security-audit-log' ),
+					/* translators: %custom_field%: custom field. */
 					esc_html__( 'The custom field %custom_field% to / from the list of excluded custom fields from the activity log.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous list of Custom fields', 'wp-security-audit-log' ) => '%previous_fields%',
@@ -2682,6 +2746,7 @@ function set_wsal_alerts() {
 					6058,
 					WSAL_LOW,
 					esc_html__( 'A custom field was added to / from the list of excluded user profile custom fields from the activity log', 'wp-security-audit-log' ),
+					/* translators: %custom_field%: custom field. */
 					esc_html__( 'The custom field %custom_field% to / from the list of excluded user profile custom fields from the activity log.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous list of user profile Custom fields', 'wp-security-audit-log' ) => '%previous_fields%',
@@ -3337,6 +3402,7 @@ function set_wsal_alerts() {
 					6063,
 					WSAL_INFORMATIONAL,
 					esc_html__( 'Added Site Icon', 'wp-security-audit-log' ),
+					/* translators: %filename%: filename. */
 					__( 'Added a new website Site Icon %filename%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'New directory', 'wp-security-audit-log' ) => '%new_path%',
@@ -3350,6 +3416,7 @@ function set_wsal_alerts() {
 					6064,
 					WSAL_INFORMATIONAL,
 					esc_html__( 'Changed the Site Icon', 'wp-security-audit-log' ),
+					/* translators: %old_filename%: old filename; %filename%: filename. */
 					__( 'Changed the Site Icon from %old_filename% to %filename%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Old directory', 'wp-security-audit-log' ) => '%old_path%',
@@ -3364,6 +3431,7 @@ function set_wsal_alerts() {
 					6065,
 					WSAL_INFORMATIONAL,
 					esc_html__( 'Removed the Site Icon', 'wp-security-audit-log' ),
+					/* translators: %old_filename%: old filename. */
 					__( 'Removed site icon %old_filename%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Old directory', 'wp-security-audit-log' ) => '%old_path%',
@@ -3463,6 +3531,7 @@ function set_wsal_alerts() {
 					6061,
 					WSAL_LOW,
 					esc_html__( 'Email was sent', 'wp-security-audit-log' ),
+					/* translators: %EmailAddress%: email address. */
 					__( 'Email was sent to %EmailAddress%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Subject', 'wp-security-audit-log' ) => '%EmailSubject%',

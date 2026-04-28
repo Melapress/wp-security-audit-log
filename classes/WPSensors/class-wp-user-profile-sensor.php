@@ -52,6 +52,18 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		private static $old_superadmins;
 
 		/**
+		 * Per-request store of recorded user role changes.
+		 *
+		 * Keyed by user id. Each entry has 'added' and 'removed' arrays populated
+		 * by the add_user_role / remove_user_role hooks.
+		 *
+		 * @var array
+		 *
+		 * @since 5.6.3
+		 */
+		private static $pending_role_changes = array();
+
+		/**
 		 * Inits the main hooks
 		 *
 		 * @return void
@@ -60,7 +72,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		 */
 		public static function early_init() {
 			add_action( 'profile_update', array( __CLASS__, 'event_user_updated' ), 10, 2 );
-			add_action( 'set_user_role', array( __CLASS__, 'event_user_role_changed' ), 10, 3 );
 			add_action( 'delete_user', array( __CLASS__, 'event_user_deleted' ) );
 			add_action( 'wpmu_delete_user', array( __CLASS__, 'event_user_deleted' ) );
 			add_action( 'edit_user_profile', array( __CLASS__, 'event_open_profile' ), 10, 1 );
@@ -70,6 +81,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 			add_action( 'revoked_super_admin', array( __CLASS__, 'event_super_access_revoked' ), 10, 1 );
 			add_action( 'update_user_meta', array( __CLASS__, 'event_application_password_added' ), 10, 4 );
 			add_action( 'retrieve_password', array( __CLASS__, 'event_password_reset_link_sent' ), 10, 1 );
+
+			add_action( 'add_user_role', array( __CLASS__, 'record_role_added' ), 10, 2 );
+			add_action( 'remove_user_role', array( __CLASS__, 'record_role_removed' ), 10, 2 );
+			add_action( 'wp_update_user', array( __CLASS__, 'process_role_changes_for_updated_user' ), 10, 1 );
 
 			add_action( 'admin_page_access_denied', array( __CLASS__, 'event_admin_page_access_denied' ), 10 );
 
@@ -87,7 +102,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		public static function event_admin_page_access_denied() {
 			$admin_page = '';
 
-			$admin_page = sanitize_text_field( wp_unslash( $_GET['page'] ?? '' ) );
+			$admin_page = \sanitize_text_field( \wp_unslash( $_GET['page'] ?? '' ) );
 
 			// Get the current admin page file.
 			$pagenow = $GLOBALS['pagenow'] ?? '';
@@ -213,18 +228,18 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		 * Method: Support for Ultimate Member email change
 		 * alert.
 		 *
-		 * @param int     $user_id - User ID.
-		 * @param WP_User $old_userdata - Old WP_User object.
+		 * @param int      $user_id - User ID.
+		 * @param \WP_User $old_userdata - Old WP_User object.
 		 *
 		 * @since 4.5.0
 		 */
 		public static function event_user_updated( $user_id, $old_userdata ) {
 			// Get new user data.
-			$new_userdata = get_userdata( $user_id );
+			$new_userdata = \get_userdata( $user_id );
 
 			// Alert if user password is changed.
 			if ( $old_userdata->user_pass !== $new_userdata->user_pass ) {
-				$event      = get_current_user_id() === $user_id ? 4003 : 4004;
+				$event      = \get_current_user_id() === $user_id ? 4003 : 4004;
 				$user_roles = implode( ', ', array_map( array( __CLASS__, 'filter_role_names' ), $new_userdata->roles ) );
 				Alert_Manager::trigger_event(
 					$event,
@@ -303,7 +318,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'Roles'          => $user_roles,
 						'FirstName'      => $new_userdata->user_firstname,
 						'LastName'       => $new_userdata->user_lastname,
-						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => \add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 						'TargetUserData' => (object) array(
 							'Username'  => $new_userdata->user_login,
 							'FirstName' => $new_userdata->user_firstname,
@@ -314,67 +329,211 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 					)
 				);
 			}
+		}
 
-			// Alert if role has changed via Members plugin.
-			if ( isset( $_POST['members_user_roles'] ) && ! empty( $_POST['members_user_roles'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				if ( $old_userdata->roles !== $_POST['members_user_roles'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-					self::event_user_role_changed( $user_id, $_POST['members_user_roles'], $old_userdata->roles, true );
-				}
+		/**
+		 * Records an added user role in the pending role changes property.
+		 *
+		 * @param int    $user_id - ID of the user gaining the role.
+		 * @param string $role    - Slug of the role being added.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.3
+		 */
+		public static function record_role_added( $user_id, $role ) {
+			self::init_pending_role_change_prop( $user_id );
+			self::$pending_role_changes[ $user_id ]['added'][] = $role;
+		}
+
+		/**
+		 * Records a removed user role in the pending role changes property.
+		 *
+		 * @param int    $user_id - ID of the user losing the role.
+		 * @param string $role    - Slug of the role being removed.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.3
+		 */
+		public static function record_role_removed( $user_id, $role ) {
+			self::init_pending_role_change_prop( $user_id );
+			self::$pending_role_changes[ $user_id ]['removed'][] = $role;
+		}
+
+		/**
+		 * Initialises the pending role change property with the correct structure if it doesn't already exist.
+		 *
+		 * @param int $user_id - User id to initialise the bucket for.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.3
+		 */
+		private static function init_pending_role_change_prop( $user_id ) {
+			if ( ! isset( self::$pending_role_changes[ $user_id ] ) ) {
+				self::$pending_role_changes[ $user_id ] = array(
+					'added'   => array(),
+					'removed' => array(),
+				);
 			}
 		}
 
 		/**
-		 * Triggered when a user role is changed.
+		 * Process the changed user roles in the request, and fire event 4002 if necessary.
 		 *
-		 * @param int     $user_id         User ID of the user.
-		 * @param string  $new_role        New role.
-		 * @param array   $old_roles       Array of old roles.
-		 * @param boolean $use_posted_data If true, posted user data is used.
+		 * Calculates the final role changes for the updated user, then fires event 4002 once with
+		 * the roles before and after the update. Skips when no actual role change was recorded for the user.
 		 *
-		 * @since 4.5.0
+		 * @param int $user_id - Updated user id.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.3
 		 */
-		public static function event_user_role_changed( $user_id, $new_role, $old_roles, $use_posted_data = false ) {
-			// Get WP_User object.
-			$user = get_userdata( $user_id );
-
-			// Check if $user is false then return.
-			if ( ! $user ) {
+		public static function process_role_changes_for_updated_user( $user_id ) {
+			// Return early if we don't have pending role changes for this user.
+			if ( ! isset( self::$pending_role_changes[ $user_id ] ) ) {
 				return;
 			}
 
-			$roles_to_process = ( $use_posted_data ) ? $new_role : $user->roles;
+			$changes = self::$pending_role_changes[ $user_id ];
 
-			$old_roles = array_map( array( __CLASS__, 'filter_role_names' ), $old_roles );
-			$new_roles = array_map( array( __CLASS__, 'filter_role_names' ), $roles_to_process );
+			$user = \get_userdata( $user_id );
 
-			// Get roles.
-			$old_roles = is_array( $old_roles ) ? implode( ', ', $old_roles ) : '';
-			$new_roles = is_array( $new_roles ) ? implode( ', ', $new_roles ) : '';
-
-			// Alert if roles are changed.
-			if ( $old_roles !== $new_roles ) {
-				Alert_Manager::trigger_event_if(
-					4002,
-					array(
-						'TargetUserID'   => $user_id,
-						'TargetUsername' => $user->user_login,
-						'OldRole'        => $old_roles,
-						'NewRole'        => $new_roles,
-						'FirstName'      => $user->user_firstname,
-						'LastName'       => $user->user_lastname,
-						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
-						'TargetUserData' => (object) array(
-							'Username'  => $user->user_login,
-							'FirstName' => $user->user_firstname,
-							'LastName'  => $user->user_lastname,
-							'Email'     => $user->user_email,
-							'Roles'     => $new_roles ? $new_roles : 'none',
-						),
-						'multisite_text' => WP_Helper::is_multisite() ? get_current_blog_id() : false,
-					),
-					array( __CLASS__, 'must_not_contain_user_changes' )
-				);
+			// If user is not valid, empty the pending changes and return early.
+			if ( ! ( $user instanceof \WP_User ) ) {
+				unset( self::$pending_role_changes[ $user_id ] );
+				return;
 			}
+
+			// Get the real roles set after updating the user.
+			$final_roles = array_values( (array) $user->roles );
+
+			// Count how many times each role was added.
+			$add_counts = array_count_values( $changes['added'] );
+
+			// Count how many times each role was removed.
+			$remove_counts = array_count_values( $changes['removed'] );
+
+			// Get a list of all roles that were affected by add/remove operations in this request.
+			$affected_roles = array_unique( array_merge( array_keys( $add_counts ), array_keys( $remove_counts ) ) );
+
+			$added   = array();
+			$removed = array();
+
+			// Process each role affected by add/remove operations in this request.
+			foreach ( $affected_roles as $role ) {
+				$toggles = ( $add_counts[ $role ] ?? 0 ) + ( $remove_counts[ $role ] ?? 0 );
+
+				/**
+				 * If the number of roles switch (add and remove) are even, it means the role is back to its original state.
+				 * E.g. add, remove, add, remove = 4. Role is still removed.
+				 * E.g. add, remove, add = 3. Role is added.
+				 *
+				 * This works because WP and this method will never count here same state in a row.
+				 */
+				if ( 0 === $toggles % 2 ) {
+					continue;
+				}
+
+				// Check if this role is present in the final roles.
+				if ( in_array( $role, $final_roles, true ) ) {
+					// If yes, then this role was added.
+					$added[] = $role;
+				} else {
+					// If not, then this role was removed.
+					$removed[] = $role;
+				}
+			}
+
+			// If we have any added or removed roles, we need to trigger the role change event.
+			if ( ! empty( $added ) || ! empty( $removed ) ) {
+				/**
+				 * Deduct initial roles before saving. Use final roles and check what was actually added and removed.
+				 */
+				$initial_roles = array_values(
+					array_unique(
+						array_merge(
+							array_diff( $final_roles, $added ),
+							$removed
+						)
+					)
+				);
+
+				self::trigger_role_change_event( $user, $initial_roles, $final_roles, $added, $removed );
+			}
+
+			// Reset the pending changes for this user.
+			unset( self::$pending_role_changes[ $user_id ] );
+		}
+
+		/**
+		 * Fires event 4002 with the final role change details.
+		 *
+		 * @param \WP_User $user          - The affected user.
+		 * @param array    $initial_roles - Role slugs the user had before the change.
+		 * @param array    $final_roles   - Role slugs the user has after the change.
+		 * @param array    $added_roles   - Role slugs added during this request.
+		 * @param array    $removed_roles - Role slugs removed during this request.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.3
+		 */
+		private static function trigger_role_change_event( $user, $initial_roles, $final_roles, $added_roles, $removed_roles ) {
+			$no_role_string = \esc_html__( 'no role', 'wp-security-audit-log' );
+
+			$old_label = self::format_role_list( $initial_roles, $no_role_string );
+			$new_label = self::format_role_list( $final_roles, $no_role_string );
+
+			if ( $old_label === $new_label ) {
+				return;
+			}
+
+			Alert_Manager::trigger_event_if(
+				4002,
+				array(
+					'TargetUserID'   => $user->ID,
+					'TargetUsername' => $user->user_login,
+					'OldRole'        => $old_label,
+					'NewRole'        => $new_label,
+					'AddedRoles'     => self::format_role_list( $added_roles, '' ),
+					'RemovedRoles'   => self::format_role_list( $removed_roles, '' ),
+					'FirstName'      => $user->user_firstname,
+					'LastName'       => $user->user_lastname,
+					'EditUserLink'   => \add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
+					'TargetUserData' => (object) array(
+						'Username'  => $user->user_login,
+						'FirstName' => $user->user_firstname,
+						'LastName'  => $user->user_lastname,
+						'Email'     => $user->user_email,
+						'Roles'     => $new_label ? $new_label : 'none',
+					),
+					'multisite_text' => WP_Helper::is_multisite() ? \get_current_blog_id() : false,
+				),
+				array( __CLASS__, 'must_not_contain_user_changes' )
+			);
+		}
+
+		/**
+		 * Formats an array of role slugs into a human-readable comma-separated list.
+		 *
+		 * @param array  $role_slugs    - Role slugs to format.
+		 * @param string $empty_fallback - String to return when the list is empty.
+		 *
+		 * @return string $label - Comma-separated role labels or the fallback.
+		 *
+		 * @since 5.6.3
+		 */
+		private static function format_role_list( $role_slugs, $empty_fallback ) {
+			if ( empty( $role_slugs ) ) {
+				return $empty_fallback;
+			}
+
+			$labels = array_map( array( __CLASS__, 'filter_role_names' ), $role_slugs );
+
+			return implode( ', ', $labels );
 		}
 
 		/**
@@ -385,7 +544,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function event_user_deleted( $user_id ) {
-			$user = get_userdata( $user_id );
+			$user = \get_userdata( $user_id );
 			$role = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
 			Alert_Manager::trigger_event_if(
 				4007,
@@ -427,7 +586,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
 						'Roles'          => $user_roles,
-						'EditUserLink'   => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => \add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
 						'TargetUserData' => (object) array(
 							'Username'  => $user->user_login,
 							'FirstName' => $user->user_firstname,
@@ -612,13 +771,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function on_user_register( $user_id ) {
-			if ( ! is_user_logged_in() ) {
+			if ( ! \is_user_logged_in() ) {
 				// We bail if the user is not logged in. That is no longer user creation, but a user registration.
 				return;
 			}
 
-			$user = get_userdata( $user_id );
-			if ( ! $user instanceof \WP_User ) {
+			$user = \get_userdata( $user_id );
+			if ( ! ( $user instanceof \WP_User ) ) {
 				// Bail if the user is not valid for some reason.
 				return;
 			}
@@ -636,7 +795,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 			$event_data = array(
 				'NewUserID'    => $user_id,
 				'NewUserData'  => (object) $new_user_data,
-				'EditUserLink' => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+				'EditUserLink' => \add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 			);
 
 			Alert_Manager::trigger_event( $event_code, $event_data, WP_Helper::is_multisite() );

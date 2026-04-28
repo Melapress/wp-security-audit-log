@@ -204,15 +204,24 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			<p><iframe class="wsal-youtube-embed" width="100%" height="315" src="https://www.youtube.com/embed/pgFEMIvKFTA?rel=0" frameborder="0" allowfullscreen></iframe></p>
 		</div>
 		<div class="wsal-help-section">
-			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Support', 'wp-security-audit-log' ); ?></h2>
-			<p>
-				<?php esc_html_e( 'Have you encountered or noticed any issues while using WP Activity Log plugin?', 'wp-security-audit-log' ); ?>
-				<?php esc_html_e( 'Or you want to report something to us? Click any of the options below to post on the plugin\'s forum or contact our support directly.', 'wp-security-audit-log' ); ?>
-			</p><p>
-				<a class="button" rel="noopener noreferrer" href="https://wordpress.org/support/plugin/wp-security-audit-log" target="_blank"><?php esc_html_e( 'Free Support Forum', 'wp-security-audit-log' ); ?></a>
-				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" rel="noopener noreferrer" href="https://melapress.com/support/submit-ticket/?utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank"><?php esc_html_e( 'Free Support Email', 'wp-security-audit-log' ); ?></a>
-			</p>
+			<h2 class="wsal-tab__heading"><?php \esc_html_e( 'Do you need help or want to report an issue?', 'wp-security-audit-log' ); ?></h2>
+			<?php if ( wsal_freemius()->is_premium() ) : ?>
+				<p>
+					<?php \esc_html_e( "If you've encountered a problem or would like to report an issue while using WP Activity Log, click the button below to open a support ticket. As a Premium user, you receive dedicated 1-to-1 email support.", 'wp-security-audit-log' ); ?>
+				</p>
+				<p>
+					<a class="button" rel="noopener noreferrer" href="<?php echo \esc_url( 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=about-us-premium-support' ); ?>" target="_blank"><?php \esc_html_e( 'Open a support ticket', 'wp-security-audit-log' ); ?></a>
+				</p>
+			<?php else : ?>
+				<p>
+					<?php \esc_html_e( "If you've encountered a problem or have something to report while using WP Activity Log, support for the free plugin users is provided via the plugin support forums. Dedicated 1-to-1 email support is available for premium users.", 'wp-security-audit-log' ); ?>
+				</p>
+				<p>
+					<a class="button" rel="noopener noreferrer" href="<?php echo \esc_url( 'https://wordpress.org/support/plugin/wp-security-audit-log' ); ?>" target="_blank"><?php \esc_html_e( 'Free Support Forums', 'wp-security-audit-log' ); ?></a>
+					&nbsp;
+					<a class="button" rel="noopener noreferrer" href="<?php echo \esc_url( 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=about-us-premium-support-free-user' ); ?>" target="_blank"><?php \esc_html_e( 'Upgrade to Get 1-to-1 Email Support', 'wp-security-audit-log' ); ?></a>
+				</p>
+			<?php endif; ?>
 		</div>
 		<div class="wsal-help-section">
 			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Documentation', 'wp-security-audit-log' ); ?></h2>
