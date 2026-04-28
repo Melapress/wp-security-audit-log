@@ -355,6 +355,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\ACF_Custom_Alerts' ) ) {
 					10021,
 					WSAL_LOW,
 					__( 'A Taxonomy term was renamed', 'wp-security-audit-log' ),
+					/* translators: %old_name%: old name; %new_name%: new name. */
 					__( 'Renamed the Taxonomy Term %old_name% to %new_name%.', 'wp-security-audit-log' ),
 					array(
 						__( 'Slug', 'wp-security-audit-log' ) => '%slug%',

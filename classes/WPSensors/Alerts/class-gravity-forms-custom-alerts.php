@@ -68,6 +68,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5700,
 					WSAL_LOW,
 					esc_html__( 'A form was created, modified', 'wp-security-audit-log' ),
+					/* translators: %form_name%: form name. */
 					esc_html__( 'The Form called %form_name%.', 'wp-security-audit-log' ),
 
 					array(
@@ -100,6 +101,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5702,
 					WSAL_MEDIUM,
 					esc_html__( 'A form was permanently deleted', 'wp-security-audit-log' ),
+					/* translators: %form_name%: form name. */
 					esc_html__( 'Permanently deleted the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',
@@ -113,6 +115,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5703,
 					WSAL_MEDIUM,
 					esc_html__( 'A form setting was modified', 'wp-security-audit-log' ),
+					/* translators: %setting_name%: setting name; %form_name%: form name. */
 					esc_html__( 'The setting %setting_name% in form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous value', 'wp-security-audit-log' ) => '%old_setting_value%',
@@ -130,6 +133,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5704,
 					WSAL_LOW,
 					esc_html__( 'A form was duplicated', 'wp-security-audit-log' ),
+					/* translators: %original_form_name%: original form name. */
 					esc_html__( 'Duplicated the form %original_form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'New form name', 'wp-security-audit-log' ) => '%new_form_name%',
@@ -147,6 +151,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5715,
 					WSAL_MEDIUM,
 					esc_html__( 'A field was created, modified or deleted', 'wp-security-audit-log' ),
+					/* translators: %field_name%: field name; %form_name%: form name. */
 					esc_html__( 'The Field called %field_name% in the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Field type', 'wp-security-audit-log' ) => '%field_type%',
@@ -163,6 +168,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5709,
 					WSAL_LOW,
 					esc_html__( 'A form was submitted', 'wp-security-audit-log' ),
+					/* translators: %form_name%: form name. */
 					esc_html__( 'Submitted the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',
@@ -182,6 +188,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5705,
 					WSAL_MEDIUM,
 					esc_html__( 'A confirmation was created, modified or deleted', 'wp-security-audit-log' ),
+					/* translators: %confirmation_name%: confirmation name; %form_name%: form name. */
 					esc_html__( 'The Confirmation called %confirmation_name% in the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Confirmation type', 'wp-security-audit-log' ) => '%confirmation_type%',
@@ -199,6 +206,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5708,
 					WSAL_LOW,
 					esc_html__( 'A confirmation was activated or deactivated', 'wp-security-audit-log' ),
+					/* translators: %confirmation_name%: confirmation name; %form_name%: form name. */
 					esc_html__( 'The confirmation %confirmation_name% in the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',
@@ -217,6 +225,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5706,
 					WSAL_MEDIUM,
 					esc_html__( 'A notification was created, modified or deleted', 'wp-security-audit-log' ),
+					/* translators: %notification_name%: notification name; %form_name%: form name. */
 					esc_html__( 'The Notification called %notification_name% in the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',
@@ -232,6 +241,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5707,
 					WSAL_LOW,
 					esc_html__( 'A notification was activated or deactivated', 'wp-security-audit-log' ),
+					/* translators: %notification_name%: notification name; %form_name%: form name. */
 					esc_html__( 'Changed the status of the Notification called %notification_name% in the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',
@@ -250,6 +260,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5710,
 					WSAL_LOW,
 					esc_html__( 'An entry was starred or unstarred', 'wp-security-audit-log' ),
+					/* translators: %entry_title%: entry title. */
 					esc_html__( 'Entry title: %entry_title%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
@@ -266,6 +277,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5711,
 					WSAL_LOW,
 					esc_html__( 'An entry was marked as read or unread', 'wp-security-audit-log' ),
+					/* translators: %entry_title%: entry title; %form_name%: form name. */
 					esc_html__( 'The entry called %entry_title% from form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',
@@ -281,6 +293,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5712,
 					WSAL_MEDIUM,
 					esc_html__( 'An entry was moved to trash', 'wp-security-audit-log' ),
+					/* translators: %event_desc%: event description. */
 					esc_html__( 'Deleted the entry %event_desc%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
@@ -297,6 +310,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5713,
 					WSAL_MEDIUM,
 					esc_html__( 'An entry was permanently deleted', 'wp-security-audit-log' ),
+					/* translators: %entry_title%: entry title. */
 					esc_html__( 'Permanently deleted the entry %entry_title%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
@@ -311,6 +325,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5714,
 					WSAL_MEDIUM,
 					esc_html__( 'An entry note was created or deleted', 'wp-security-audit-log' ),
+					/* translators: %entry_note%: entry note. */
 					esc_html__( 'The entry note %entry_note%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Entry title', 'wp-security-audit-log' ) => '%entry_title%',
@@ -328,6 +343,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5717,
 					WSAL_MEDIUM,
 					esc_html__( 'An entry was edited', 'wp-security-audit-log' ),
+					/* translators: %entry_name%: entry name. */
 					esc_html__( 'The entry %entry_name% was edited.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
@@ -347,6 +363,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5716,
 					WSAL_HIGH,
 					esc_html__( 'A plugin setting was changed.', 'wp-security-audit-log' ),
+					/* translators: %setting_name%: setting name. */
 					esc_html__( 'Changed the plugin setting %setting_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous value', 'wp-security-audit-log' ) => '%old_value%',
@@ -360,6 +377,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5718,
 					WSAL_LOW,
 					esc_html__( 'Form entries were imported / exported.', 'wp-security-audit-log' ),
+					/* translators: %form_name%: form name. */
 					esc_html__( 'The entries from the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',
@@ -374,6 +392,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5719,
 					WSAL_LOW,
 					esc_html__( 'A form was imported / exported.', 'wp-security-audit-log' ),
+					/* translators: %form_name%: form name. */
 					esc_html__( 'The form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',
@@ -386,6 +405,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					5720,
 					\WSAL_MEDIUM,
 					esc_html__( 'A form was activated / deactivated.', 'wp-security-audit-log' ),
+					/* translators: %form_name%: form name. */
 					esc_html__( 'The form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',

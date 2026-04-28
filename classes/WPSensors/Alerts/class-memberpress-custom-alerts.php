@@ -195,6 +195,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Memberpress_Custom_Alerts' ) ) {
 					6210,
 					WSAL_HIGH,
 					esc_html__( 'A setting was modified.', 'wp-security-audit-log' ),
+					/* translators: %setting_name%: setting name. */
 					esc_html__( 'Setting %setting_name% was modified.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous value', 'wp-security-audit-log' ) => '%previous_value%',

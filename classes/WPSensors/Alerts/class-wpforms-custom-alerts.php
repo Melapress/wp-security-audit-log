@@ -81,6 +81,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5501,
 					WSAL_MEDIUM,
 					esc_html__( 'A field was created, modified or deleted from a form.', 'wp-security-audit-log' ),
+					/* translators: %field_name%: field name; %form_name%: form name. */
 					esc_html__( 'The Field called %field_name% in the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%PostID%',
@@ -112,6 +113,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5503,
 					WSAL_LOW,
 					esc_html__( 'A notification was added to a form, enabled or modified', 'wp-security-audit-log' ),
+					/* translators: %notifiation_name%: notification name; %form_name%: form name. */
 					esc_html__( 'The Notification called %notifiation_name% in the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%PostID%',
@@ -127,6 +129,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5504,
 					WSAL_MEDIUM,
 					esc_html__( 'An entry was deleted', 'wp-security-audit-log' ),
+					/* translators: %entry_email%: entry email. */
 					esc_html__( 'Deleted the Entry with the email address %entry_email%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Entry ID', 'wp-security-audit-log' )  => '%entry_id%',
@@ -144,6 +147,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5505,
 					WSAL_LOW,
 					esc_html__( 'Notifications were enabled or disabled in a form', 'wp-security-audit-log' ),
+					/* translators: %form_name%: form name. */
 					esc_html__( 'Changed the status of all the notifications in the form %form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%PostID%',
@@ -159,6 +163,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5506,
 					WSAL_LOW,
 					esc_html__( 'A form was renamed', 'wp-security-audit-log' ),
+					/* translators: %old_form_name%: old form name; %new_form_name%: new form name. */
 					esc_html__( 'Renamed the form %old_form_name% to %new_form_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%PostID%',
@@ -174,6 +179,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5507,
 					WSAL_MEDIUM,
 					esc_html__( 'An entry was modified', 'wp-security-audit-log' ),
+					/* translators: %entry_id%: entry ID. */
 					esc_html__( 'Modified the Entry with ID %entry_id%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'From form', 'wp-security-audit-log' )      => '%form_name%',
@@ -208,6 +214,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5508,
 					WSAL_HIGH,
 					esc_html__( 'Plugin access settings were changed', 'wp-security-audit-log' ),
+					/* translators: %setting_name%: setting name. */
 					esc_html__( 'Changed the WPForms access setting %setting_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous privileges', 'wp-security-audit-log' ) => '%old_value%',
@@ -235,6 +242,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5510,
 					WSAL_HIGH,
 					esc_html__( 'A service integration was added or deleted', 'wp-security-audit-log' ),
+					/* translators: %service_name%: service name. */
 					esc_html__( 'A service integration with %service_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Connection name', 'wp-security-audit-log' ) => '%connection_name%',
@@ -304,6 +312,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5516,
 					WSAL_MEDIUM,
 					esc_html__( 'A notification name was renamed', 'wp-security-audit-log' ),
+					/* translators: %old_name%: old name; %new_name%: new name. */
 					esc_html__( 'Renamed the notification %old_name% to %new_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
@@ -333,6 +342,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5518,
 					WSAL_MEDIUM,
 					esc_html__( 'A confirmation was added / removed', 'wp-security-audit-log' ),
+					/* translators: %confirmation_name%: confirmation name. */
 					esc_html__( 'The confirmation %confirmation_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Form name', 'wp-security-audit-log' ) => '%form_name%',
@@ -347,6 +357,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WPForms_Custom_Alerts' ) ) {
 					5519,
 					WSAL_MEDIUM,
 					esc_html__( 'A Confirmation Type type was modified', 'wp-security-audit-log' ),
+					/* translators: %confirmation_name%: confirmation name. */
 					__( 'Changed the <strong>Confirmation Type</strong> of the confirmation %confirmation_name%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'New Confirmation Type', 'wp-security-audit-log' ) => '%new_value%',

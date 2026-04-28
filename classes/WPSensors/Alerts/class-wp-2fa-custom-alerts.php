@@ -126,6 +126,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 					7812,
 					WSAL_MEDIUM,
 					esc_html__( 'A WP 2FA User has been unblocked', 'wp-security-audit-log' ),
+					/* translators: %user%: user name. */
 					__( 'The user %user% which was blocked by WP 2FA was unblocked. The user can proceed to log in and configure 2FA.', 'wp-security-audit-log' ),
 					array(),
 					Constants::wsaldefaults_build_links( array( 'EditUserLink' ) ),
@@ -168,6 +169,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 					7802,
 					WSAL_MEDIUM,
 					esc_html__( 'WP 2FA enforcement list was modified', 'wp-security-audit-log' ),
+					/* translators: %changed_list%: changed list. */
 					__( 'Changed the list of %changed_list% on which 2FA is enforced.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous list', 'wp-security-audit-log' ) => '%old_list%',
@@ -181,6 +183,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 					7803,
 					WSAL_MEDIUM,
 					esc_html__( 'WP 2FA exclusion list was modified', 'wp-security-audit-log' ),
+					/* translators: %changed_list%: changed list. */
 					__( 'Changed the list of %changed_list% on which 2FA is excluded.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous list', 'wp-security-audit-log' ) => '%old_list%',
