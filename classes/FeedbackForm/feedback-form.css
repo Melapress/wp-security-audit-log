@@ -49,6 +49,12 @@
 	padding: 0.5rem;
 }
 
+#wp-security-audit-log-popover .wsal-validation {
+	color: #b00020;
+	margin: 0;
+	max-width: 400px;
+}
+
 #wp-security-audit-log-popover .wsal-actions {
 	display: flex;
 	gap: 1rem;

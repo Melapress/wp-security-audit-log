@@ -15,6 +15,115 @@
 	}
 
 	let deactivateButton = null;
+	const feedbackFieldSelector = 'textarea, input[type="text"]';
+	const reasonValidationMessage = deactivationPopover.querySelector(
+		'.wsal-reason-validation'
+	);
+	const feedbackValidationMessage = deactivationPopover.querySelector(
+		'.wsal-feedback-validation'
+	);
+
+	/**
+	 * Normalize free-text feedback before validation or submission.
+	 *
+	 * @param {string} feedbackValue The feedback field value.
+	 * @param {boolean} trimValue Whether to trim whitespace.
+	 *
+	 * @since 5.6.3
+	 */
+	const sanitizeFeedbackValue = (feedbackValue, trimValue = true) => {
+		const sanitizedFeedbackValue = String(feedbackValue || '')
+			.replace(/&(?:lt|gt|#60|#62|#x3c|#x3e);/gi, '')
+			.replace(/[<>]/g, '');
+
+		return trimValue ? sanitizedFeedbackValue.trim() : sanitizedFeedbackValue;
+	};
+
+	/**
+	 * Show a validation message, or hide all validation messages.
+	 *
+	 * @param {HTMLElement|null} validationElement The message element to show.
+	 *
+	 * @since 5.6.3
+	 */
+	const toggleValidationMessage = (validationElement = null) => {
+		[reasonValidationMessage, feedbackValidationMessage].forEach(
+			(messageElement) => {
+				if (messageElement) {
+					messageElement.hidden = messageElement !== validationElement;
+				}
+			}
+		);
+	};
+
+	/**
+	 * Toggle the selected feedback field and reset the others.
+	 *
+	 * @param {HTMLElement|null} reasonWrapper The selected reason wrapper.
+	 *
+	 * @since 5.6.3
+	 */
+	const toggleFeedbackFields = (reasonWrapper = null) => {
+		deactivationPopover
+			.querySelectorAll('.wsal-feedback-wrapper')
+			.forEach((feedbackWrapper) => {
+				feedbackWrapper.style.display = 'none';
+
+				const feedbackField = feedbackWrapper.querySelector(
+					feedbackFieldSelector
+				);
+
+				if (feedbackField) {
+					feedbackField.value = '';
+				}
+			});
+
+		if (!reasonWrapper) {
+			return;
+		}
+
+		const feedbackWrapper = reasonWrapper.querySelector(
+			'.wsal-feedback-wrapper'
+		);
+		if (feedbackWrapper) {
+			feedbackWrapper.style.display = 'block';
+		}
+	};
+
+	/**
+	 * Get the selected reason data from the popover.
+	 *
+	 * @return {Object|null} The selected reason data or null.
+	 *
+	 * @since 5.6.3
+	 */
+	const getSelectedReasonData = () => {
+		const checkedRadio = deactivationPopover.querySelector(
+			'input[name="reason"]:checked'
+		);
+
+		if (!checkedRadio) {
+			return null;
+		}
+
+		const reasonWrapper = checkedRadio.closest('.wsal-reason-wrapper');
+		const feedbackField = reasonWrapper
+			? reasonWrapper.querySelector(feedbackFieldSelector)
+			: null;
+		const feedbackValue = feedbackField
+			? sanitizeFeedbackValue(feedbackField.value)
+			: '';
+
+		if (feedbackField) {
+			feedbackField.value = feedbackValue;
+		}
+
+		return {
+			feedbackField: feedbackField,
+			feedbackValue: feedbackValue,
+			reason: checkedRadio.value
+		};
+	};
 
 	/**
 	 * Send a POST request to the remote server.
@@ -32,7 +141,7 @@
 
 		try {
 			return await response.json();
-		} catch (e) {
+		} catch (error) {
 			return {};
 		}
 	};
@@ -40,8 +149,8 @@
 	// Intercept at document level in capture phase runs before any other handler.
 	document.addEventListener(
 		'click',
-		function (e) {
-			const target = e.target.closest('span.deactivate a');
+		(clickEvent) => {
+			const target = clickEvent.target.closest('span.deactivate a');
 
 			if (!target) {
 				return;
@@ -54,9 +163,11 @@
 
 			deactivateButton = target;
 
-			e.preventDefault();
-			e.stopPropagation();
-			e.stopImmediatePropagation();
+			clickEvent.preventDefault();
+			clickEvent.stopPropagation();
+			clickEvent.stopImmediatePropagation();
+
+			toggleValidationMessage();
 
 			deactivationPopover.showPopover();
 		},
@@ -64,58 +175,51 @@
 	);
 
 	// Show/hide the feedback fields based on the selected reason.
-	let activeWrapper = null;
+	deactivationPopover.addEventListener('click', (clickEvent) => {
+		const reasonWrapper = clickEvent.target.closest('.wsal-reason-wrapper');
 
-	deactivationPopover
-		.querySelectorAll('.wsal-reason-wrapper')
-		.forEach((reasonWrapper) => {
-			reasonWrapper.addEventListener('click', () => {
-				// Return early if clicking on the active element
-				if (reasonWrapper === activeWrapper) {
-					return;
-				}
+		if (!reasonWrapper || !deactivationPopover.contains(reasonWrapper)) {
+			return;
+		}
 
-				activeWrapper = reasonWrapper;
+		const reasonRadio = reasonWrapper.querySelector('input[type="radio"]');
 
-				// Ensure the radio button in this wrapper is checked.
-				const radio = reasonWrapper.querySelector('input[type="radio"]');
+		toggleValidationMessage();
 
-				if (radio) {
-					radio.checked = true;
-				}
+		if (!reasonRadio || reasonRadio.checked) {
+			return;
+		}
 
-				// Hide all feedback fields first.
-				deactivationPopover
-					.querySelectorAll('.wsal-feedback-wrapper')
-					.forEach((feedbackWrapper) => {
-						feedbackWrapper.style.display = 'none';
+		reasonRadio.checked = true;
+		toggleFeedbackFields(reasonWrapper);
+	});
 
-						// Clear feedback values when switching options.
-						const field = feedbackWrapper.querySelector(
-							'textarea, input[type="text"]'
-						);
+	deactivationPopover.addEventListener('change', (changeEvent) => {
+		if (!changeEvent.target.matches('input[name="reason"]')) {
+			return;
+		}
 
-						if (field) {
-							field.value = '';
-						}
-					});
+		toggleValidationMessage();
+		toggleFeedbackFields(changeEvent.target.closest('.wsal-reason-wrapper'));
+	});
 
-				const feedbackWrapper = reasonWrapper.querySelector(
-					'.wsal-feedback-wrapper'
-				);
+	deactivationPopover.addEventListener('input', (inputEvent) => {
+		if (!inputEvent.target.matches(feedbackFieldSelector)) {
+			return;
+		}
 
-				// Display the clicked reason feedback wrapper if exists.
-				if (feedbackWrapper) {
-					feedbackWrapper.style.display = 'block';
-				}
-			});
-		});
+		inputEvent.target.value = sanitizeFeedbackValue(
+			inputEvent.target.value,
+			false
+		);
+		toggleValidationMessage();
+	});
 
 	// Handle clicking on the dismiss button skip feedback, deactivate directly.
 	deactivationPopover
 		.querySelector('button.wsal-dismiss')
-		.addEventListener('click', (e) => {
-			e.preventDefault();
+		.addEventListener('click', (dismissEvent) => {
+			dismissEvent.preventDefault();
 
 			if (deactivateButton) {
 				window.location.href = deactivateButton.href;
@@ -126,38 +230,39 @@
 	deactivationPopover
 		.querySelector('button.wsal-close-button')
 		.addEventListener('click', () => {
+			toggleValidationMessage();
 			deactivationPopover.hidePopover();
 		});
 
-	// Handle clicking on the submit button to send feedback, then deactivate.
+	// Handle clicking on the submit button to validate, send feedback, then deactivate.
 	deactivationPopover
 		.querySelector('button.wsal-submit')
-		.addEventListener('click', async (e) => {
-			e.preventDefault();
+		.addEventListener('click', async (submitEvent) => {
+			submitEvent.preventDefault();
 
-			const checkedRadio = deactivationPopover.querySelector(
-				'input[name="reason"]:checked'
-			);
+			const selectedReasonData = getSelectedReasonData();
 
-			const reason = checkedRadio ? checkedRadio.value : 'no-reason-given';
+			if (!selectedReasonData) {
+				toggleValidationMessage(reasonValidationMessage);
 
-			const activeReasonWrapper = checkedRadio
-				? checkedRadio.closest('.wsal-reason-wrapper')
-				: null;
+				return;
+			}
 
-			const feedbackField = activeReasonWrapper
-				? activeReasonWrapper.querySelector('textarea, input[type="text"]')
-				: null;
+			const { feedbackField, feedbackValue, reason } = selectedReasonData;
+
+			if (feedbackField && !feedbackValue) {
+				toggleValidationMessage(feedbackValidationMessage);
+				feedbackField.focus();
+
+				return;
+			}
 
 			const requestData = {
 				action: 'plugin_deactivation',
 				plugin: wsalFeedbackForm.plugin,
 				site: wsalFeedbackForm.siteUrl,
 				reason: reason,
-				feedback:
-					feedbackField && feedbackField.value
-						? feedbackField.value
-						: 'no-feedback-detail-available'
+				feedback: feedbackValue || 'no-feedback-detail-available'
 			};
 
 			// Hide the popover and show deactivating feedback after collecting form data.
@@ -189,7 +294,7 @@
 						requestData
 					);
 				}
-			} catch (e) {
+			} catch (error) {
 				// Silent fail in case this fetch fails, feedback lost, deactivation continues.
 			}
 

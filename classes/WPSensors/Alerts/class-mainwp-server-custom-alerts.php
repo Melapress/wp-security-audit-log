@@ -65,6 +65,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7700,
 					WSAL_CRITICAL,
 					esc_html__( 'User added the child site', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %LineBreak%: line break; %site_url%: site URL. */
 					esc_html__( 'The child site %friendly_name% %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -75,6 +76,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7701,
 					WSAL_CRITICAL,
 					esc_html__( 'User removed the child site', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %LineBreak%: line break; %site_url%: site URL. */
 					esc_html__( 'The child site %friendly_name% %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -85,6 +87,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7702,
 					WSAL_MEDIUM,
 					esc_html__( 'User edited the child site', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %LineBreak%: line break; %site_url%: site URL. */
 					esc_html__( 'The child site %friendly_name% %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -95,6 +98,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7703,
 					WSAL_INFORMATIONAL,
 					esc_html__( 'User synced data with the child site', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %LineBreak%: line break; %site_url%: site URL. */
 					esc_html__( 'Synced data with the child %friendly_name% %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -115,6 +119,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7705,
 					WSAL_CRITICAL,
 					esc_html__( 'User installed the extension', 'wp-security-audit-log' ),
+					/* translators: %extension_name%: extension name. */
 					esc_html__( 'The extension %extension_name%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -125,6 +130,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7706,
 					WSAL_HIGH,
 					esc_html__( 'User activated the extension', 'wp-security-audit-log' ),
+					/* translators: %extension_name%: extension name. */
 					esc_html__( 'The extension %extension_name%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -135,6 +141,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7707,
 					WSAL_HIGH,
 					esc_html__( 'User deactivated the extension', 'wp-security-audit-log' ),
+					/* translators: %extension_name%: extension name. */
 					esc_html__( 'The extension %extension_name%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -145,6 +152,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7708,
 					WSAL_CRITICAL,
 					esc_html__( 'User uninstalled the extension', 'wp-security-audit-log' ),
+					/* translators: %extension_name%: extension name. */
 					esc_html__( 'The extension %extension_name%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -155,6 +163,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7709,
 					WSAL_INFORMATIONAL,
 					esc_html__( 'User added/removed extension to/from the menu', 'wp-security-audit-log' ),
+					/* translators: %extension%: extension name; %option%: menu action. */
 					esc_html__( 'The extension %extension% %option% the MainWP menu', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -165,6 +174,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7710,
 					WSAL_LOW,
 					esc_html__( 'Extension failed to retrieve the activity log of a child site', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %LineBreak%: line break; %site_url%: site URL. */
 					esc_html__( 'Failed to retrieve the activity log of the child site %friendly_name% %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -195,6 +205,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7713,
 					WSAL_MEDIUM,
 					esc_html__( 'Changed the enforcement settings of the Child sites activity log settings', 'wp-security-audit-log' ),
+					/* translators: %LineBreak%: line break; %old_status%: old status; %new_status%: new status. */
 					esc_html__( 'The status of the <strong>Child sites activity log settings</strong> %LineBreak% Previous status: %old_status% %LineBreak% New status: %new_status%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -205,6 +216,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7714,
 					WSAL_MEDIUM,
 					esc_html__( 'Added or removed a child site from the Child sites activity log settings', 'wp-security-audit-log' ),
+					/* translators: %LineBreak%: line break; %friendly_name%: friendly name; %site_url%: site URL. */
 					esc_html__( 'A child site to / from the <strong>Child sites activity log settings</strong> %LineBreak% Site name: %friendly_name% %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -235,6 +247,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7717,
 					WSAL_HIGH,
 					esc_html__( 'The propagation of the Child sites activity log settings failed on a child site site', 'wp-security-audit-log' ),
+					/* translators: %LineBreak%: line break; %friendly_name%: friendly name; %site_url%: site URL; %message%: error message. */
 					esc_html__( 'The propagation of the <strong>Child sites activity log settings</strong> failed on this site %LineBreak% Site name: %friendly_name% %LineBreak% URL: %site_url% %LineBreak% Error message: %message%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -340,6 +353,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7750,
 					WSAL_INFORMATIONAL,
 					esc_html__( 'User added a monitor for site', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %LineBreak%: line break; %site_url%: site URL. */
 					esc_html__( 'A monitor for the site %friendly_name% in Advanced Uptime Monitor extension %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -350,6 +364,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7751,
 					WSAL_MEDIUM,
 					esc_html__( 'User deleted a monitor for site', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %LineBreak%: line break; %site_url%: site URL. */
 					esc_html__( 'The monitor for the site %friendly_name% in Advanced Uptime Monitor extension %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -360,6 +375,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7752,
 					WSAL_INFORMATIONAL,
 					esc_html__( 'User started the monitor for the site', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %LineBreak%: line break; %site_url%: site URL. */
 					esc_html__( 'The monitor for the site %friendly_name% in Advanced Uptime Monitor extension %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -370,6 +386,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\MainWP_Server_Custom_Alerts' ) ) {
 					7753,
 					WSAL_MEDIUM,
 					esc_html__( 'User stopped the monitor for the site', 'wp-security-audit-log' ),
+					/* translators: %friendly_name%: friendly name; %LineBreak%: line break; %site_url%: site URL. */
 					esc_html__( 'Paused the monitor for the site %friendly_name% in Advanced Uptime Monitor extension %LineBreak% URL: %site_url%', 'wp-security-audit-log' ),
 					array(),
 					array(),

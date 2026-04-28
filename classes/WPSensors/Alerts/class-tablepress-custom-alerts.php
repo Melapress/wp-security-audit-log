@@ -205,6 +205,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Tablepress_Custom_Alerts' ) ) {
 					8908,
 					WSAL_MEDIUM,
 					__( 'A table option was modified', 'wp-security-audit-log' ),
+					/* translators: %option_name%: option name; %table_name%: table name. */
 					__( 'Changed the status of the table option %option_name% in %table_name%', 'wp-security-audit-log' ),
 
 					array(

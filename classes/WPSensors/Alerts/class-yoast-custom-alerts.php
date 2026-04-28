@@ -84,6 +84,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 					8859,
 					WSAL_LOW,
 					esc_html__( 'Changed the status of plugin setting', 'wp-security-audit-log' ),
+					/* translators: %feature_name%: feature name. */
 					esc_html__( 'Changed the status of the %feature_name% plugin feature.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -94,6 +95,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 					8860,
 					WSAL_LOW,
 					esc_html__( 'Changed the status of the crawl optimization setting', 'wp-security-audit-log' ),
+					/* translators: %feature_name%: feature name. */
 					esc_html__( 'Changed the status of the crawl optimization setting %feature_name% in the plugin settings.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -278,6 +280,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 					8840,
 					WSAL_MEDIUM,
 					esc_html__( "Reset the site's SEO settings to default", 'wp-security-audit-log' ),
+					/* translators: %old%: site ID. */
 					esc_html__( 'Reset the SEO settings of the site %old% to default.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Site ID', 'wp-security-audit-log' ) => '%old%',
@@ -292,6 +295,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 					8842,
 					WSAL_HIGH,
 					esc_html__( 'Disabled a plugin feature networkwide', 'wp-security-audit-log' ),
+					/* translators: %feature_name%: feature name. */
 					esc_html__( 'Disabled the plugin feature %feature_name% networkwide.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -302,6 +306,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 					8843,
 					WSAL_HIGH,
 					esc_html__( 'Allowed site administrators to toggle a plugin feature on or off for their site', 'wp-security-audit-log' ),
+					/* translators: %feature_name%: feature name. */
 					esc_html__( 'Allowed site administrators to toggle the plugin feature %feature_name% on or off on their sites.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -520,6 +525,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 					8855,
 					WSAL_MEDIUM,
 					esc_html__( 'A new plain / regex redirect was added', 'wp-security-audit-log' ),
+					/* translators: %redirect_code%: redirect code; %redirect_type%: redirect type; %old_url%: old URL. */
 					__( 'A <strong>%redirect_code%</strong> %redirect_type% redirect for the old URL <strong>%old_url%.</strong>', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'New URL', 'wp-security-audit-log' ) => '%new_url%',
@@ -549,6 +555,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 					8857,
 					WSAL_MEDIUM,
 					esc_html__( 'A plain / regex redirect was deleted', 'wp-security-audit-log' ),
+					/* translators: %redirect_code%: redirect code; %redirect_type%: redirect type; %old_url%: old URL. */
 					__( 'A <strong>%redirect_code%</strong> %redirect_type% redirect for the URL <strong>%old_url%</strong> was deleted.', 'wp-security-audit-log' ),
 					array(),
 					array(),
