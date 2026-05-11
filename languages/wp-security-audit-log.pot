@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v3.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Activity Log 5.6.3\n"
+"Project-Id-Version: WP Activity Log 5.6.3.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-security-audit-log\n"
 "Last-Translator: Melapress <info@melapress.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-28T07:32:20+00:00\n"
+"POT-Creation-Date: 2026-05-11T14:53:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-security-audit-log\n"
@@ -391,11 +391,11 @@ msgstr ""
 msgid "Query params:"
 msgstr ""
 
-#: classes/Controllers/class-alert.php:481
+#: classes/Controllers/class-alert.php:496
 msgid "Revisions are not enabled. Enable revisions to view the content changes. Read more."
 msgstr ""
 
-#: classes/Controllers/class-alert.php:483
+#: classes/Controllers/class-alert.php:498
 #: classes/Controllers/class-constants.php:509
 #: defaults.php:133
 msgid "View the content changes"
@@ -1105,11 +1105,11 @@ msgstr ""
 msgid "Nickname: "
 msgstr ""
 
-#: classes/Helpers/class-view-manager.php:147
+#: classes/Helpers/class-view-manager.php:148
 msgid "WP Activity Log requires Website File Changes Monitor 1.6.0. Please upgrade that plugin."
 msgstr ""
 
-#: classes/Helpers/class-view-manager.php:350
+#: classes/Helpers/class-view-manager.php:356
 msgid "Get Premium!"
 msgstr ""
 

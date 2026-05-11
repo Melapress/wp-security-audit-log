@@ -127,6 +127,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 
 			add_action( 'admin_head', array( __CLASS__, 'hide_freemius_sites_section' ) );
+			\add_action( 'admin_head', array( __CLASS__, 'print_menu_badge_style' ) );
 
 			// Check if WFCM is running by seeing if we have the version defined.
 			if ( defined( 'WFCM_VERSION' ) && ( version_compare( \WFCM_VERSION, '1.6.0', '<' ) ) ) {
@@ -283,49 +284,54 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		}
 
 		/**
-		 * Returns the HTML that shows baboon notifications about the banners we have not confirmed.
+		 * Returns the badge HTML appended to the WP Activity Log top-level menu title.
 		 *
 		 * @return string
 		 *
 		 * @since 5.2.2
 		 */
 		public static function get_updates_count_html(): string {
-			$count      = Notices::get_number_of_notices();
-			$count_html = '';
+			$count = Notices::get_number_of_notices();
 
-			if ( 0 < $count ) {
-				$style = '<style>
-					#wsal-notices-menu .update-count {
-						position: absolute !important;
-						top: 2px !important;
-						right: 4px !important;
-						min-width: 20px !important;
-						margin-right: 2px !important;
-						line-height: 1.2rem !important;
-						background: #d63638 !important;
-						border-radius: 50% !important;
-						display: inline-block !important;
-						vertical-align: top !important;
-						z-index: 26 !important;
-						font-weight: bold !important;
-					}
-					#wsal-notices-menu.update-plugins {
-						display: inline !important;
-						background: none !important;
-					}
-				</style>';
-
-				$count_html = $style;
-
-				/**
-				 * . sprintf(
-				 * ' <span id="wsal-notices-menu" class="update-plugins"><span class="update-count">%d</span></span>',
-				 * \number_format_i18n( $count )
-				 * );
-				 */
+			if ( 0 >= $count ) {
+				return '';
 			}
 
-			return $count_html;
+			return sprintf(
+				' <span id="wsal-notices-menu" class="update-plugins"><span class="update-count">%s</span></span>',
+				\esc_html( \number_format_i18n( $count ) )
+			);
+		}
+
+		/**
+		 * Prints the inline <style> block that styles the menu badge.
+		 *
+		 * @return void
+		 *
+		 * @since 6.0.0
+		 */
+		public static function print_menu_badge_style() {
+			if ( 0 >= Notices::get_number_of_notices() ) {
+				return;
+			}
+
+			echo '<style>
+				#wsal-notices-menu .update-count {
+					position: absolute;
+					top: 2px;
+					right: 6px;
+					min-width: 20px;
+					line-height: 20px;
+					background: #d63638;
+					border-radius: 50%;
+					font-weight: bold;
+				}
+
+				#adminmenu #wsal-notices-menu.update-plugins {
+					display: inline;
+					background: none;
+				}
+			</style>';
 		}
 
 		/**
