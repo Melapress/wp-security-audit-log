@@ -348,7 +348,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 				}
 			}
 
-			if ( isset( $alert['links'] ) && ! empty( $alert['links'] ) && \is_array( $alert['links'] ) && \in_array( '%PostUrl%', $alert['links'] ) && Settings_Helper::get_url_parameters() ) {
+			if ( isset( $alert['links'] ) && ! empty( $alert['links'] ) && \is_array( $alert['links'] ) && \in_array( '%PostUrl%', $alert['links'], true ) && Settings_Helper::get_url_parameters() ) {
 				if ( isset( $meta_data['PostUrl'] ) ) {
 					$return = $meta_data['PostUrl'];
 
@@ -360,16 +360,25 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 
 					if ( $processed_url && isset( $processed_url['query'] ) ) {
 						$params = array();
-						parse_str( $processed_url['query'], $params );
+						\wp_parse_str( $processed_url['query'], $params );
 
 						if ( ! empty( $params ) ) {
 
-							$return_temp = esc_html__( 'Query params:', 'wp-security-audit-log' );
-							$return      = '';
+							$return_temp        = \esc_html__( 'Query params:', 'wp-security-audit-log' );
+							$return             = '';
+							$query_params_parts = array();
 							foreach ( $params as $key => $value ) {
-								$return .= $key . '=' . $value . ', ';
+								if ( is_array( $value ) ) {
+									$value = \wp_json_encode( $value );
+
+									if ( false === $value ) {
+										$value = '';
+									}
+								}
+
+								$query_params_parts[] = \esc_html( (string) $key ) . '=' . \esc_html( (string) $value );
 							}
-							$return = rtrim( $return, ', ' );
+							$return = implode( ', ', $query_params_parts );
 							$return = $return_temp . ' ' . $configuration['highlight_start_tag'] . $return . $configuration['highlight_end_tag'] . $configuration['end_of_line'];
 
 							$result = $return . \str_replace( array( 'http://%PostUrl%', 'https://%PostUrl%' ), $meta_data['PostUrl'], $result );
@@ -476,6 +485,12 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 			return $result;
 		}
 
+		/**
+		 * Gets the post revision link title.
+		 *
+		 * @return string $title - Post revision link title.
+		 * @since 5.4.0
+		 */
 		private static function get_revision_link_title(): string {
 			if ( \defined( 'WP_POST_REVISIONS' ) && ! WP_POST_REVISIONS ) {
 				return esc_html__( 'Revisions are not enabled. Enable revisions to view the content changes. Read more.', 'wp-security-audit-log' );

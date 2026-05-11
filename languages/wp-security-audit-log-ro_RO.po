@@ -833,11 +833,11 @@ msgstr ""
 msgid "Query params:"
 msgstr ""
 
-#: classes/Controllers/class-alert.php:481
+#: classes/Controllers/class-alert.php:496
 msgid "Revisions are not enabled. Enable revisions to view the content changes. Read more."
 msgstr ""
 
-#: classes/Controllers/class-alert.php:483
+#: classes/Controllers/class-alert.php:498
 #: classes/Controllers/class-constants.php:509
 #: defaults.php:133
 msgid "View the content changes"
@@ -1343,11 +1343,11 @@ msgstr ""
 msgid "Nickname: "
 msgstr ""
 
-#: classes/Helpers/class-view-manager.php:147
+#: classes/Helpers/class-view-manager.php:148
 msgid "WP Activity Log requires Website File Changes Monitor 1.6.0. Please upgrade that plugin."
 msgstr ""
 
-#: classes/Helpers/class-view-manager.php:350
+#: classes/Helpers/class-view-manager.php:356
 msgid "Get Premium!"
 msgstr ""
 
