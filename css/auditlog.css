@@ -146,19 +146,15 @@ td.column-user {
 	width: 140px;
 }
 
-.more-info {
-    float: right;
-    display: block;
-    width: auto;
-    height: 15px;
-    color: #FFF;
-    font-size: 11px !important;
-    line-height: 27px !important;
-    text-align: center;
-    border-radius: 32px;
-    padding: 0 8px !important;
-    border-color: #ddd !important;
-    background: #f6f7f7;
+body.wp-admin .more-info {
+	float: right;
+	width: auto;
+	min-height: 30px;
+	font-size: 11px ;
+	line-height: 27px ;
+	text-align: center;
+	padding: 0 8px ;
+	border-color: #ddd ;
 }
 
 .more-info:hover {
@@ -666,4 +662,59 @@ a.inspector-active {
 	color: #fff !important;
     border-color: #2271b1 !important;
     background-color: #2271b1 !important;
+}
+
+.wsal-search-helper-text {
+	position: absolute;
+	bottom: calc(100% + 16px);
+	left: 0;
+	display: flex;
+	max-width: 280px;
+	padding: 8px;
+	border-radius: 5px;
+	background: #fff;
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16);
+	line-height: 1.4;
+	font-size: 12px;
+	gap: 4px;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transform: translateY(4px);
+	transition: opacity 200ms ease, transform 200ms ease, visibility 200ms ease;
+	z-index: 100;
+}
+
+.wsal-search-helper-text-visible {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+	transform: translateY(0);
+}
+
+.wsal-search-helper-text span.dashicons.dashicons-info {
+    color: #12692f;
+}
+
+.wsal-inspector-cta {
+	margin-top: 12px;
+}
+
+.wsal-inspector-cta a {
+	text-decoration: underline;
+}
+
+.wsal-inspector-cta .wsal-custom-notifications-lock {
+	margin-left: 2px;
+}
+
+.wsal-custom-notifications-lock {
+	position: relative;
+	display: inline-block;
+	background-color: #5f687a;
+	width: 18px;
+	height: 18px;
+	top: 2px;
+	-webkit-mask: url('../classes/Free/assets/images/locked-icon.svg') no-repeat center / contain;
+	mask: url('../classes/Free/assets/images/locked-icon.svg') no-repeat center / contain;
 }

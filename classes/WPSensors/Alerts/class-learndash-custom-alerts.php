@@ -81,6 +81,40 @@ if ( ! \class_exists( '\WSAL\WP_Sensors\Alerts\LearnDash_Custom_Alerts' ) ) {
 			return \array_merge( $alerts, self::get_default_disabled_alerts() );
 		}
 
+		// @free:start
+		/**
+		 * Returns LearnDash free event IDs that have additional related events available only in WSAL Premium.
+		 *
+		 * Used to render an upgrade CTA at the bottom of the affected events in the log viewer.
+		 *
+		 * @return int[] $event_ids - Free event IDs that should display the premium CTA.
+		 *
+		 * @since 5.6.4
+		 */
+		public static function get_free_version_events(): array {
+			return array( 11000, 11001, 11004, 11021, 11200, 11201, 11207, 11216, 11301, 11400, 11401, 11405, 11500, 11501, 11504 );
+		}
+
+		/**
+		 * Add links to the events that have related events available only in premium.
+		 *
+		 * @param array $links - Existing event_id => label map.
+		 *
+		 * @return array $links - Merged event_id => label map.
+		 *
+		 * @since 5.6.4
+		 */
+		public static function add_link_to_free_events( array $links ): array {
+			$text = \esc_html__( 'Need more LearnDash coverage? Premium tracks additional events.', 'wp-security-audit-log' );
+
+			foreach ( self::get_free_version_events() as $event_id ) {
+				$links[ $event_id ] = $text;
+			}
+
+			return $links;
+		}
+		// @free:end
+
 		/**
 		 * Returns an array with all the events attached to the sensor (if there are different types of events, this method will merge them into one array - the events ids will be used as keys)
 		 *

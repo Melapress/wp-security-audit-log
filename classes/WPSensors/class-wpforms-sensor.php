@@ -168,10 +168,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 		public static function event_form_saved( $post_id, $post, $update ) {
 			$post_id             = absint( $post_id ); // Making sure that the post id is integer.
 			$form                = get_post( $post_id );
+
+			if ( ! $post instanceof \WP_Post || ! $form instanceof \WP_Post || 'wpforms' !== $form->post_type ) {
+				return;
+			}
+
+			$form_title          = (string) $form->post_title;
 			$has_alert_triggered = false; // Create a variable so we can determine if an alert has already fired.
 
 			// Handling form creation. First lets check an old post was set and its not flagged as an update, then finally check its not a duplicate.
-			if ( ! isset( self::$old_post->post_title ) && ! $update && ! preg_match( '/\s\(ID #[0-9].*?\)/', $form->post_title ) && 'wpforms' === $post->post_type ) {
+			if ( ! isset( self::$old_post->post_title ) && ! $update && ! preg_match( '/\s\(ID #[0-9].*?\)/', $form_title ) && 'wpforms' === $post->post_type ) {
 				$alert_code  = 5500;
 				$editor_link = self::create_form_post_editor_link( $post_id );
 
@@ -208,7 +214,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 			}
 
 			// Handling duplicated forms by checking to see if the post has ID # in the title.
-			if ( preg_match( '/\s\(ID #[0-9].*?\)/', $form->post_title ) && 'wpforms' === $form->post_type ) {
+			if ( preg_match( '/\s\(ID #[0-9].*?\)/', $form_title ) && 'wpforms' === $form->post_type ) {
 				$post_created  = new \DateTime( $form->post_date_gmt );
 				$post_modified = new \DateTime( $form->post_modified_gmt );
 				$alert_code    = 5502;

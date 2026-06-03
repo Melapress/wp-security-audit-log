@@ -3081,6 +3081,32 @@ function set_wsal_alerts() {
 					'system',
 					'updated',
 				),
+				array(
+					6081,
+					WSAL_MEDIUM,
+					esc_html__( 'AI connector connected', 'wp-security-audit-log' ),
+					/* translators: %ConnectorName%: AI connector name. */
+					esc_html__( 'Connected the %ConnectorName% AI connector.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Provider plugin', 'wp-security-audit-log' ) => '%ConnectorPlugin%',
+					),
+					array(),
+					'system',
+					'connected',
+				),
+				array(
+					6082,
+					WSAL_MEDIUM,
+					esc_html__( 'AI connector disconnected', 'wp-security-audit-log' ),
+					/* translators: %ConnectorName%: AI connector name. */
+					esc_html__( 'Disconnected the %ConnectorName% AI connector.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Provider plugin', 'wp-security-audit-log' ) => '%ConnectorPlugin%',
+					),
+					array(),
+					'system',
+					'disconnected',
+				),
 				/**
 				 * Alerts: Advertising Extensions
 				 *

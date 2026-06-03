@@ -417,6 +417,15 @@ body.has-overlay #wsal-page-overlay {
   line-height: 2.15384615;
 }
 
+.option-item.wsal-custom-notifications-unlock p {
+	margin: 0;
+	margin-bottom: 24px;
+}
+
+.option-item.wsal-custom-notifications-unlock p:last-child {
+  margin-bottom: 0;
+}
+
 .option-item .wsal-custom-builder-selector {
   padding: 3px 0px;
   width: calc(100%);
@@ -2523,6 +2532,17 @@ a.toggle-section:before {
 
 div.postbox .wsal-section-title:first-child {
   margin-top: 0;
+}
+
+.wsal-custom-notifications-lock {
+  position: relative;
+  display: inline-block;
+  background-color: #5f687a;
+  width: 18px;
+  height: 18px;
+  top: 2px;
+  -webkit-mask: url('../../../Free/assets/images/locked-icon.svg') no-repeat center / contain;
+  mask: url('../../../Free/assets/images/locked-icon.svg') no-repeat center / contain;
 }
 
 .wsal-section-tabs {

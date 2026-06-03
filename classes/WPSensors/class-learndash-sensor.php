@@ -152,6 +152,13 @@ if ( ! \class_exists( '\WSAL\WP_Sensors\LearnDash_Sensor' ) ) {
 					array( LearnDash_Custom_Alerts::class, 'add_default_disabled_alerts' )
 				);
 
+				// @free:start
+				\add_filter(
+					'wsal_free_additional_event_links',
+					array( LearnDash_Custom_Alerts::class, 'add_link_to_free_events' )
+				);
+				// @free:end
+
 				self::maybe_apply_first_detection_disabled_alerts();
 
 				\add_filter(

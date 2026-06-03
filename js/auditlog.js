@@ -68,6 +68,34 @@ window['WsalAuditLogRefreshed'] = function () {
 	});
 };
 
+jQuery(() => {
+  /**
+   * Display helper text when free search input is focused and hide it after a delay when it loses focus.
+   * 
+   * @since 5.6.4
+   */
+	const searchInput = jQuery('.wsal-search-controls .wsal_search_input');
+	const searchHelperText = jQuery('.wsal-search-helper-text');
+	const searchHelperTextHideDelay = 2000;
+	let searchHelperTextHideTimer;
+
+	if (!searchInput.length || !searchHelperText.length) {
+		return;
+	}
+
+	searchInput.on('focus', () => {
+		clearTimeout(searchHelperTextHideTimer);
+		searchHelperText.addClass('wsal-search-helper-text-visible');
+	});
+	searchInput.on('blur', () => {
+		clearTimeout(searchHelperTextHideTimer);
+
+		searchHelperTextHideTimer = setTimeout(() => {
+			searchHelperText.removeClass('wsal-search-helper-text-visible');
+		}, searchHelperTextHideDelay);
+	});
+});
+
 function WsalAuditLogInit(_WsalData) {
 	// WsalData = _WsalData;
 	// var WsalTkn = WsalData.autorefresh.token;
@@ -309,73 +337,6 @@ function download_failed_login_log(element) {
 			download('failed_logins.log', data);
 		}
 	});
-}
-
-/**
- * Onclick event handler to implement user's choice to either
- * opt in or out of freemius.
- *
- * @param {string} element - Current element.
- */
-function wsal_freemius_opt_in( element ) {
-	var nonce  = jQuery( '#wsal-freemius-opt-nonce' ).val(); // Nonce.
-	var choice = jQuery( element ).data( 'opt' ); // Choice.
-
-	jQuery.ajax( {
-		type: 'POST',
-		url: ajaxurl,
-		async: true,
-		data: {
-			action: 'wsal_freemius_opt_in',
-			opt_nonce: nonce,
-			choice: choice
-		},
-		success: function( data ) {
-			location.reload();
-		},
-		error: function( xhr, textStatus, error ) {
-			console.log( xhr.statusText );
-			console.log( textStatus );
-			console.log( error );
-		}
-	} );
-}
-
-/**
- * Onclick event handler to dismiss advert.
- *
- * @since 3.2.4
- *
- * @param {string} element - Current element.
- */
-function wsal_dismiss_advert(element) {
-	var advertNonce   = jQuery( '#wsal-dismiss-advert' ).val(); // Nonce.
-	var dismissAdvert = jQuery( element ).data( 'advert' ); // Advert to be dismissed.
-
-	jQuery.ajax( {
-		type: 'POST',
-		url: ajaxurl,
-		async: true,
-		dataType: 'json',
-		data: {
-			action: 'wsal_dismiss_advert',
-			nonce: advertNonce,
-			advert: dismissAdvert
-		},
-		success: function( data ) {
-			if ( data.success ) {
-				var advertNotice = jQuery( element ).parents( 'div.wsal_notice' );
-				advertNotice.fadeOut();
-			} else {
-				console.log( data.message );
-			}
-		},
-		error: function( xhr, textStatus, error ) {
-			console.log( xhr.statusText );
-			console.log( textStatus );
-			console.log( error );
-		}
-	} );
 }
 
 /**

@@ -14,12 +14,12 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: classes/FeedbackForm/class-feedback-form.php:169
-#: classes/WPSensors/class-wpforms-sensor.php:1003
+#: classes/WPSensors/class-wpforms-sensor.php:1009
 msgid "Other"
 msgstr "Otro"
 
-#: classes/ListAdminEvents/class-list-events.php:1117
-#: classes/ListAdminEvents/class-list-events.php:1121
+#: classes/ListAdminEvents/class-list-events.php:1139
+#: classes/ListAdminEvents/class-list-events.php:1143
 #: classes/MainWPAddon/class-mainwp-helper.php:131
 msgid "All Sites"
 msgstr "Todos Sitios"
@@ -34,7 +34,7 @@ msgstr "Código"
 msgid "Type"
 msgstr "Tipo"
 
-#: classes/ListAdminEvents/class-list-events.php:257
+#: classes/ListAdminEvents/class-list-events.php:277
 #: classes/notification/class-notification-helper.php:170
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:142
 #: classes/WPSensors/class-yoast-seo-sensor.php:1573
@@ -50,13 +50,13 @@ msgstr "Nombre de usuario"
 msgid "Source IP"
 msgstr "Fuente IP"
 
-#: classes/ListAdminEvents/class-list-events.php:266
-#: classes/ListAdminEvents/class-list-events.php:273
+#: classes/ListAdminEvents/class-list-events.php:286
+#: classes/ListAdminEvents/class-list-events.php:293
 #: classes/notification/class-notification-helper.php:182
 msgid "Site"
 msgstr "Sitio"
 
-#: classes/ListAdminEvents/class-list-events.php:277
+#: classes/ListAdminEvents/class-list-events.php:297
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:145
 msgid "Message"
 msgstr "Mensaje"
@@ -69,32 +69,35 @@ msgstr "Código de error desconocido."
 #: classes/Controllers/class-constants.php:142
 #: classes/Controllers/class-constants.php:365
 #: classes/Helpers/class-user-utils.php:255
-#: classes/ListAdminEvents/class-list-events.php:596
-#: classes/WPSensors/class-wp-system-sensor.php:481
+#: classes/ListAdminEvents/class-list-events.php:616
 #: classes/WPSensors/class-wp-system-sensor.php:482
+#: classes/WPSensors/class-wp-system-sensor.php:483
 #: classes/WPSensors/Helpers/class-learndash-helper.php:747
+#: classes/WPSensors/Helpers/class-wp-ai-connectors-helper.php:224
+#: classes/WPSensors/Helpers/class-wp-ai-connectors-helper.php:228
 msgid "Unknown"
 msgstr "Desconocido"
 
-#: classes/Controllers/class-alert-manager.php:1404
-#: classes/ListAdminEvents/class-list-events.php:620
+#: classes/Controllers/class-alert-manager.php:1406
+#: classes/ListAdminEvents/class-list-events.php:640
 #: defaults.php:2295
 #: defaults.php:2310
 msgid "Plugin"
 msgstr "Plugin"
 
-#: classes/ListAdminEvents/class-list-events.php:622
+#: classes/ListAdminEvents/class-list-events.php:642
 #: defaults.php:2218
 msgid "Plugins"
 msgstr "Plugins"
 
-#: classes/Controllers/class-alert-manager.php:1403
-#: classes/ListAdminEvents/class-list-events.php:631
+#: classes/Controllers/class-alert-manager.php:1405
+#: classes/ListAdminEvents/class-list-events.php:651
 #: classes/Migration/class-migration.php:836
 #: classes/Migration/class-migration.php:841
 #: classes/notification/class-notification-template.php:1960
 #: classes/notification/class-notification-template.php:1977
 #: classes/notification/class-notification-template.php:1999
+#: classes/WPSensors/Alerts/class-ai-wp-plugin-alerts.php:47
 #: defaults.php:3004
 msgid "System"
 msgstr "Sistema"
@@ -127,7 +130,7 @@ msgstr "Privado"
 #: classes/notification/class-notifications.php:1193
 #: classes/notification/class-notifications.php:1440
 #: classes/notification/class-notifications.php:1651
-#: classes/Views/AuditLog.php:397
+#: classes/Views/AuditLog.php:280
 #: classes/Views/Settings.php:343
 #: classes/Views/ToggleAlerts.php:139
 msgid "You do not have sufficient permissions to access this page."
@@ -182,7 +185,7 @@ msgstr "Versión"
 msgid "Active"
 msgstr "Activo"
 
-#: classes/Free/assets/nav-bar.php:283
+#: classes/Free/assets/nav-bar.php:296
 #: classes/Views/Settings.php:183
 #: classes/Views/Settings.php:197
 #: classes/WPSensors/Helpers/class-gravityforms-helper.php:196
@@ -222,9 +225,9 @@ msgstr "UTC"
 msgid "Description"
 msgstr "Descripción"
 
-#: classes/Controllers/class-alert-manager.php:1402
+#: classes/Controllers/class-alert-manager.php:1404
 #: classes/Helpers/class-widget-manager.php:87
-#: classes/ListAdminEvents/class-list-events.php:258
+#: classes/ListAdminEvents/class-list-events.php:278
 #: defaults.php:1812
 msgid "User"
 msgstr "Usuario"
@@ -854,15 +857,15 @@ msgstr "Usuario ha cambiado un archivo usando el editor de plugin"
 msgid "Events automatically pruned by system"
 msgstr "Eventos automáticamente podados por el sistema"
 
-#: defaults.php:3103
+#: defaults.php:3129
 msgid "Option Anyone Can Register in WordPress settings changed"
 msgstr "Opción Cualquiera Puede Registrarse en Ajustes de WordPress ha sido cambiada"
 
-#: defaults.php:3113
+#: defaults.php:3139
 msgid "New User Default Role changed"
 msgstr "Rol Predeterminado de Nuevo Usuario ha sido cambiado"
 
-#: defaults.php:3126
+#: defaults.php:3152
 msgid "WordPress Administrator Notification email changed"
 msgstr "Email de notificaciones del administrador de WordPress ha sido cambiada"
 
@@ -871,11 +874,11 @@ msgstr "Email de notificaciones del administrador de WordPress ha sido cambiada"
 msgid "WordPress was updated"
 msgstr "WordPress ha sido actualizado"
 
-#: defaults.php:3139
+#: defaults.php:3165
 msgid "User changes the WordPress Permalinks"
 msgstr "Usuario cambia Enlaces permanentes de WordPress"
 
-#: defaults.php:3095
+#: defaults.php:3121
 #, no-php-format
 msgid "%PromoName% %PromoMessage%"
 msgstr "%PromoName% %PromoMessage%"
@@ -953,31 +956,31 @@ msgstr "Ha activado tema en la red"
 msgid "Deactivated theme from network"
 msgstr "Tema desactivado por la red"
 
-#: classes/Controllers/class-alert-manager.php:1405
+#: classes/Controllers/class-alert-manager.php:1407
 msgid "Database"
 msgstr "Base de datos"
 
-#: defaults.php:3585
+#: defaults.php:3611
 msgid "Theme created tables"
 msgstr "Tema ha creado tablas"
 
-#: defaults.php:3597
+#: defaults.php:3623
 msgid "Theme modified tables structure"
 msgstr "Tema ha modificado estructura de tablas"
 
-#: defaults.php:3609
+#: defaults.php:3635
 msgid "Theme deleted tables"
 msgstr "Tema ha borrado tablas"
 
-#: defaults.php:3621
+#: defaults.php:3647
 msgid "Unknown component created tables"
 msgstr "Desconocido componente ha creado tablas"
 
-#: defaults.php:3633
+#: defaults.php:3659
 msgid "Unknown component modified tables structure"
 msgstr "Desconocido componente ha modificado estructura de tablas"
 
-#: defaults.php:3645
+#: defaults.php:3671
 msgid "Unknown component deleted tables"
 msgstr "Desconocido componente ha borrado tablas"
 
@@ -1246,7 +1249,7 @@ msgid "Logout"
 msgstr ""
 
 #: classes/Controllers/class-alert-manager.php:1330
-#: classes/Views/AuditLog.php:769
+#: classes/Views/AuditLog.php:620
 msgid "Installed"
 msgstr ""
 
@@ -1396,121 +1399,121 @@ msgstr ""
 msgid "Available"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1382
+#: classes/Controllers/class-alert-manager.php:1384
 msgid "unknown type"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1406
+#: classes/Controllers/class-alert-manager.php:1408
 #: defaults.php:985
 msgid "Post"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1407
+#: classes/Controllers/class-alert-manager.php:1409
 msgid "File"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1408
+#: classes/Controllers/class-alert-manager.php:1410
 msgid "Tag"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1409
+#: classes/Controllers/class-alert-manager.php:1411
 #: classes/Writers/class-html-writer.php:477
 #: defaults.php:79
 msgid "Comment"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1410
+#: classes/Controllers/class-alert-manager.php:1412
 msgid "Setting"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1411
+#: classes/Controllers/class-alert-manager.php:1413
 msgid "System Setting"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1412
+#: classes/Controllers/class-alert-manager.php:1414
 msgid "Cron Jobs"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1413
+#: classes/Controllers/class-alert-manager.php:1415
 msgid "MainWP Network"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1414
+#: classes/Controllers/class-alert-manager.php:1416
 #: classes/WPSensors/Helpers/class-mainwp-server-helper.php:49
 msgid "MainWP"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1415
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:198
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:214
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:231
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:306
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:322
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:336
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:352
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:366
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:380
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:396
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:413
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:590
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:606
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:621
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:635
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:650
+#: classes/Controllers/class-alert-manager.php:1417
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:232
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:248
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:265
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:340
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:356
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:370
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:386
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:400
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:414
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:430
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:447
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:624
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:640
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:655
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:669
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:684
 msgid "Category"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1416
+#: classes/Controllers/class-alert-manager.php:1418
 msgid "Custom Field"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1417
+#: classes/Controllers/class-alert-manager.php:1419
 msgid "Widget"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1418
+#: classes/Controllers/class-alert-manager.php:1420
 msgid "Menu"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1419
+#: classes/Controllers/class-alert-manager.php:1421
 msgid "Theme"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1420
+#: classes/Controllers/class-alert-manager.php:1422
 msgid "Activity log"
 msgstr ""
 
 #. Plugin Name of the plugin
 #: wp-security-audit-log.php
-#: classes/Controllers/class-alert-manager.php:1421
+#: classes/Controllers/class-alert-manager.php:1423
 #: classes/FeedbackForm/class-feedback-form.php:180
 #: classes/MainWPAddon/class-mainwp-addon.php:146
 msgid "WP Activity Log"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1422
+#: classes/Controllers/class-alert-manager.php:1424
 msgid "Multisite Network"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1423
+#: classes/Controllers/class-alert-manager.php:1425
 msgid "IP Address"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1441
+#: classes/Controllers/class-alert-manager.php:1443
 msgid "unknown object"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1657
+#: classes/Controllers/class-alert-manager.php:1659
 #: classes/Views/ToggleAlerts.php:380
 msgid "Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress."
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1658
+#: classes/Controllers/class-alert-manager.php:1660
 #: classes/Views/ToggleAlerts.php:422
 msgid "Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1659
+#: classes/Controllers/class-alert-manager.php:1661
 #: classes/WPSensors/Helpers/class-woocommerce-helper.php:115
 msgid "Keep a log of visitor orders, stock changes and other public events?"
 msgstr ""
@@ -1523,11 +1526,11 @@ msgstr ""
 msgid "Query params:"
 msgstr ""
 
-#: classes/Controllers/class-alert.php:496
+#: classes/Controllers/class-alert.php:577
 msgid "Revisions are not enabled. Enable revisions to view the content changes. Read more."
 msgstr ""
 
-#: classes/Controllers/class-alert.php:498
+#: classes/Controllers/class-alert.php:579
 #: classes/Controllers/class-constants.php:509
 #: defaults.php:133
 msgid "View the content changes"
@@ -1685,8 +1688,8 @@ msgstr ""
 #: classes/Controllers/class-constants.php:507
 #: classes/WPSensors/Alerts/class-acf-custom-alerts.php:180
 #: classes/WPSensors/Alerts/class-acf-custom-alerts.php:318
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:216
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:398
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:250
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:432
 #: classes/WPSensors/Alerts/class-multisite-custom-alerts.php:68
 #: classes/WPSensors/Alerts/class-multisite-custom-alerts.php:80
 #: classes/WPSensors/Alerts/class-multisite-custom-alerts.php:92
@@ -1705,8 +1708,8 @@ msgid "View attachment page"
 msgstr ""
 
 #: classes/Controllers/class-constants.php:511
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:270
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:555
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:304
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:589
 #: defaults.php:138
 msgid "View tag"
 msgstr ""
@@ -1818,29 +1821,29 @@ msgstr ""
 msgid "The plugin detected connectivity issues coming from your external database connection. Please check the status of your external database connection and try again!"
 msgstr ""
 
-#: classes/Free/assets/nav-bar.php:255
-#: classes/Views/AuditLog.php:273
+#: classes/Free/assets/nav-bar.php:268
+#: classes/Views/AuditLog.php:156
 msgid "Log viewer"
 msgstr ""
 
-#: classes/Free/assets/nav-bar.php:269
+#: classes/Free/assets/nav-bar.php:282
 #: classes/notification/class-notifications.php:387
 #: classes/notification/class-notifications.php:396
 msgid "Notifications"
 msgstr ""
 
-#: classes/Free/assets/nav-bar.php:297
+#: classes/Free/assets/nav-bar.php:310
 #: classes/Views/ToggleAlerts.php:37
 #: classes/Views/ToggleAlerts.php:51
 msgid "Enable/Disable Events"
 msgstr ""
 
-#: classes/Free/assets/nav-bar.php:311
+#: classes/Free/assets/nav-bar.php:324
 #: classes/Views/Help.php:142
 msgid "Help & Contact Us"
 msgstr ""
 
-#: classes/Free/assets/nav-bar.php:316
+#: classes/Free/assets/nav-bar.php:235
 msgid "Unlock extra features with WP Activity Log Premium"
 msgstr ""
 
@@ -1940,7 +1943,7 @@ msgstr ""
 #: classes/Helpers/class-notices.php:221
 #: classes/Helpers/class-notices.php:254
 #: classes/Helpers/class-notices.php:536
-#: classes/Writers/class-csv-writer.php:304
+#: classes/Writers/class-csv-writer.php:411
 msgid "nonce is not provided or incorrect"
 msgstr ""
 
@@ -1969,7 +1972,7 @@ msgid "Dismiss this notice."
 msgstr ""
 
 #: classes/Helpers/class-plugin-settings-helper.php:303
-#: classes/WPSensors/class-learndash-sensor.php:366
+#: classes/WPSensors/class-learndash-sensor.php:373
 #: classes/WPSensors/Helpers/class-learndash-helper.php:221
 msgid "Not set"
 msgstr ""
@@ -2009,35 +2012,35 @@ msgid "Keep all data"
 msgstr ""
 
 #: classes/Helpers/class-user-utils.php:172
-#: classes/MainWPAddon/class-mainwp-helper.php:855
+#: classes/MainWPAddon/class-mainwp-helper.php:878
 msgid "Username: "
 msgstr ""
 
 #: classes/Helpers/class-user-utils.php:173
-#: classes/MainWPAddon/class-mainwp-helper.php:856
+#: classes/MainWPAddon/class-mainwp-helper.php:879
 msgid "First name: "
 msgstr ""
 
 #: classes/Helpers/class-user-utils.php:174
-#: classes/MainWPAddon/class-mainwp-helper.php:857
+#: classes/MainWPAddon/class-mainwp-helper.php:880
 msgid "Last Name: "
 msgstr ""
 
 #: classes/Helpers/class-user-utils.php:175
-#: classes/MainWPAddon/class-mainwp-helper.php:858
+#: classes/MainWPAddon/class-mainwp-helper.php:881
 msgid "Email: "
 msgstr ""
 
 #: classes/Helpers/class-user-utils.php:176
-#: classes/MainWPAddon/class-mainwp-helper.php:859
+#: classes/MainWPAddon/class-mainwp-helper.php:882
 msgid "Nickname: "
 msgstr ""
 
-#: classes/Helpers/class-view-manager.php:148
+#: classes/Helpers/class-view-manager.php:147
 msgid "WP Activity Log requires Website File Changes Monitor 1.6.0. Please upgrade that plugin."
 msgstr ""
 
-#: classes/Helpers/class-view-manager.php:356
+#: classes/Helpers/class-view-manager.php:304
 msgid "Get Premium!"
 msgstr ""
 
@@ -2048,10 +2051,9 @@ msgstr ""
 msgid "Access Denied."
 msgstr ""
 
-#: classes/Views/AuditLog.php:570
-#: classes/Views/AuditLog.php:578
-#: classes/Views/AuditLog.php:619
-#: classes/Views/AuditLog.php:933
+#: classes/Views/AuditLog.php:494
+#: classes/Views/AuditLog.php:502
+#: classes/Views/AuditLog.php:784
 #: classes/Views/class-setup-wizard.php:113
 #: classes/Views/Settings.php:246
 #: classes/Views/Settings.php:1878
@@ -2067,14 +2069,14 @@ msgid "No events found."
 msgstr ""
 
 #: classes/Helpers/class-widget-manager.php:88
-#: classes/ListAdminEvents/class-list-events.php:260
+#: classes/ListAdminEvents/class-list-events.php:280
 #: classes/notification/class-notification-helper.php:104
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:143
 msgid "Object"
 msgstr ""
 
 #: classes/Helpers/class-widget-manager.php:89
-#: classes/ListAdminEvents/class-list-events.php:261
+#: classes/ListAdminEvents/class-list-events.php:281
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:144
 msgid "Event Type"
 msgstr ""
@@ -2265,13 +2267,13 @@ msgstr ""
 msgid "Create custom notification"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:255
+#: classes/ListAdminEvents/class-list-events.php:275
 #: defaults.php:763
 #: defaults.php:778
 msgid "ID"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:256
+#: classes/ListAdminEvents/class-list-events.php:276
 #: classes/notification/class-notification-helper.php:86
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:141
 #: classes/Views/ToggleAlerts.php:244
@@ -2279,64 +2281,64 @@ msgstr ""
 msgid "Severity"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:259
+#: classes/ListAdminEvents/class-list-events.php:279
 msgid "IP"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:415
+#: classes/ListAdminEvents/class-list-events.php:435
 msgid "No logs found"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:566
+#: classes/ListAdminEvents/class-list-events.php:586
 msgid "Alert description not found."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:576
+#: classes/ListAdminEvents/class-list-events.php:596
 msgid "This event is disabled."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:624
+#: classes/ListAdminEvents/class-list-events.php:644
 msgid "Unregistered user"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:628
+#: classes/ListAdminEvents/class-list-events.php:648
 msgid "Deleted user"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:680
-#: classes/ListAdminEvents/class-list-events.php:691
+#: classes/ListAdminEvents/class-list-events.php:700
+#: classes/ListAdminEvents/class-list-events.php:711
 msgid "Show me all activity originating from this IP Address"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:735
+#: classes/ListAdminEvents/class-list-events.php:755
 msgid "View all details of this change"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:737
+#: classes/ListAdminEvents/class-list-events.php:757
 msgid "Close inspector."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:737
+#: classes/ListAdminEvents/class-list-events.php:757
 msgid "Event data inspector"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:737
+#: classes/ListAdminEvents/class-list-events.php:757
 msgid "More details..."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:806
+#: classes/ListAdminEvents/class-list-events.php:826
 msgid "Disable this type of event IDs"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:807
+#: classes/ListAdminEvents/class-list-events.php:827
 msgid "Do not keep a log of this user(s)' actions"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:808
+#: classes/ListAdminEvents/class-list-events.php:828
 msgid "Do not keep a log of these IP addresses"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:1051
+#: classes/ListAdminEvents/class-list-events.php:1071
 msgid "Records per page"
 msgstr ""
 
@@ -2354,8 +2356,8 @@ msgid "Extension Settings"
 msgstr ""
 
 #: classes/MainWPAddon/class-mainwp-helper.php:132
-#: classes/MainWPAddon/class-mainwp-helper.php:699
-#: classes/MainWPAddon/class-mainwp-helper.php:702
+#: classes/MainWPAddon/class-mainwp-helper.php:722
+#: classes/MainWPAddon/class-mainwp-helper.php:725
 #: classes/WPSensors/Alerts/class-mainwp-server-custom-alerts.php:45
 msgid "MainWP Dashboard"
 msgstr ""
@@ -2364,11 +2366,11 @@ msgstr ""
 msgid " (Current site)"
 msgstr ""
 
-#: classes/MainWPAddon/class-mainwp-helper.php:156
+#: classes/MainWPAddon/class-mainwp-helper.php:157
 msgid "Retrieve Activity Logs Now"
 msgstr ""
 
-#: classes/MainWPAddon/class-mainwp-helper.php:276
+#: classes/MainWPAddon/class-mainwp-helper.php:299
 msgid "Client site is using older version of the plugin - please update all client sites"
 msgstr ""
 
@@ -2657,6 +2659,7 @@ msgstr ""
 
 #: classes/notification/class-notification-helper.php:207
 #: classes/notification/class-notification-template.php:264
+#: classes/WPSensors/Alerts/class-ai-wp-plugin-alerts.php:46
 #: defaults.php:3003
 msgid "WordPress & System"
 msgstr ""
@@ -3150,42 +3153,38 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: classes/notification/options/notifications-highlights.php:78
+#: classes/notification/options/notifications-highlights.php:71
 msgid "Use this section to configure a daily or weekly activity log summary, or both. This gives you a regular overview of key events."
 msgstr ""
 
-#: classes/notification/options/notifications-highlights.php:80
-msgid "Customize your summary notifications by selecting which highlights to include and specifying the email address(es) where the summaries should be sent. This helps you stay informed about important activity on your site without needing to review the full log."
-msgstr ""
-
-#: classes/notification/options/notifications-highlights.php:87
+#: classes/notification/options/notifications-highlights.php:84
 msgid "Daily Activity log highlights email"
 msgstr ""
 
-#: classes/notification/options/notifications-highlights.php:96
+#: classes/notification/options/notifications-highlights.php:93
 msgid "Send me a summary of what happens every day. "
 msgstr ""
 
-#: classes/notification/options/notifications-highlights.php:111
-#: classes/notification/options/notifications-highlights.php:172
+#: classes/notification/options/notifications-highlights.php:108
+#: classes/notification/options/notifications-highlights.php:169
 msgid "Send empty summary emails "
 msgstr ""
 
-#: classes/notification/options/notifications-highlights.php:118
-#: classes/notification/options/notifications-highlights.php:179
+#: classes/notification/options/notifications-highlights.php:115
+#: classes/notification/options/notifications-highlights.php:176
 msgid "Do you want to receive an email even if there are no event IDs that match the criteria for the periodic reports? "
 msgstr ""
 
-#: classes/notification/options/notifications-highlights.php:139
-#: classes/notification/options/notifications-highlights.php:191
+#: classes/notification/options/notifications-highlights.php:136
+#: classes/notification/options/notifications-highlights.php:188
 msgid "Send test report now (one day data)"
 msgstr ""
 
-#: classes/notification/options/notifications-highlights.php:148
+#: classes/notification/options/notifications-highlights.php:145
 msgid "Weekly Activity log highlights email"
 msgstr ""
 
-#: classes/notification/options/notifications-highlights.php:157
+#: classes/notification/options/notifications-highlights.php:154
 msgid "Send me a summary of what happens every week. "
 msgstr ""
 
@@ -3213,6 +3212,7 @@ msgstr ""
 msgid "View WP Activity Logs"
 msgstr ""
 
+#: classes/MainWPAddon/class-mainwp-helper.php:206
 #: classes/Select2/class-select2-wpws.php:111
 #: classes/Views/Settings.php:280
 msgid "Insecure request."
@@ -3221,6 +3221,7 @@ msgstr ""
 #: classes/Free/assets/upgrade-to-premium.php:173
 #: classes/Views/addons/html-view.php:88
 #: classes/Views/addons/html-view.php:113
+#: classes/Views/class-premium-features.php:303
 msgid "Get WP Activity Log Premium"
 msgstr ""
 
@@ -3232,55 +3233,19 @@ msgstr ""
 msgid "Screenshots"
 msgstr ""
 
-#: classes/Views/AuditLog.php:119
-msgid "Instant SMS & email alerts, search & filters, reports, users sessions management and much more!"
-msgstr ""
-
-#: classes/Views/AuditLog.php:120
-msgid "Upgrade to premium to get more out of your activity logs!"
-msgstr ""
-
-#: classes/Views/AuditLog.php:123
-msgid "See who logged in on your site in real-time, generate reports, get SMS & email alerts of critical changes and more!"
-msgstr ""
-
-#: classes/Views/AuditLog.php:124
-msgid "Unlock these and other powerful features with WP Activity Log Premium."
-msgstr ""
-
-#: classes/Views/AuditLog.php:221
-msgid "Help WP Activity Log improve."
-msgstr ""
-
-#: classes/Views/AuditLog.php:222
-msgid "You can help us improve the plugin by opting in to share non-sensitive data about the plugin usage. The technical data will be shared over a secure channel. Activity log data will never be shared. When you opt-in, you also subscribe to our announcement and newsletter (you can opt-out at any time). If you would rather not opt-in, we will not collect any data."
-msgstr ""
-
-#: classes/Views/AuditLog.php:222
-msgid "Read more about what data we collect and how."
-msgstr ""
-
-#: classes/Views/AuditLog.php:224
-msgid "Sure, opt-in"
-msgstr ""
-
-#: classes/Views/AuditLog.php:225
-msgid "No, thank you"
-msgstr ""
-
-#: classes/Views/AuditLog.php:250
+#: classes/Views/AuditLog.php:133
 msgid "Activity Log Viewer"
 msgstr ""
 
-#: classes/Views/AuditLog.php:459
+#: classes/Views/AuditLog.php:342
 msgid "Thank you for installing WP Activity Log! To help you get started, we’ve prepared a setup wizard to guide you through configuring the plugin’s basic settings. Would you like to run the setup wizard now?"
 msgstr ""
 
-#: classes/Views/AuditLog.php:461
+#: classes/Views/AuditLog.php:344
 msgid "Note: You can adjust all the settings configured in the wizard later from the plugin's settings page."
 msgstr ""
 
-#: classes/Views/AuditLog.php:464
+#: classes/Views/AuditLog.php:347
 #: classes/Views/class-setup-wizard.php:622
 #: classes/Views/Settings.php:500
 #: classes/Views/Settings.php:524
@@ -3292,7 +3257,7 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: classes/Views/AuditLog.php:465
+#: classes/Views/AuditLog.php:348
 #: classes/Views/class-setup-wizard.php:627
 #: classes/Views/Settings.php:505
 #: classes/Views/Settings.php:529
@@ -3305,161 +3270,53 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: classes/Views/AuditLog.php:594
+#: classes/Views/AuditLog.php:518
 msgid "No users found."
 msgstr ""
 
-#: classes/Views/AuditLog.php:659
-msgid "Freemius opt choice selected."
-msgstr ""
-
-#: classes/Views/AuditLog.php:666
-msgid "Freemius opt choice not found."
-msgstr ""
-
-#: classes/Views/AuditLog.php:763
+#: classes/Views/AuditLog.php:614
 msgid "Close inspector"
 msgstr ""
 
-#: classes/Views/AuditLog.php:766
+#: classes/Views/AuditLog.php:617
 msgid "Install and activate extension"
 msgstr ""
 
-#: classes/Views/AuditLog.php:767
+#: classes/Views/AuditLog.php:618
 msgid "Installing extension"
 msgstr ""
 
-#: classes/Views/AuditLog.php:768
+#: classes/Views/AuditLog.php:619
 msgid "Other extension installing"
 msgstr ""
 
-#: classes/Views/AuditLog.php:770
+#: classes/Views/AuditLog.php:621
 msgid "Installed... reloading page"
 msgstr ""
 
-#: classes/Views/AuditLog.php:771
+#: classes/Views/AuditLog.php:622
 msgid "Problem enabling"
 msgstr ""
 
-#: classes/Views/AuditLog.php:867
+#: classes/Views/AuditLog.php:718
 msgid "WordPress Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:868
+#: classes/Views/AuditLog.php:719
 msgid "When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install."
 msgstr ""
 
-#: classes/Views/AuditLog.php:869
+#: classes/Views/AuditLog.php:720
 msgid "Thank you for using WP Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:919
+#: classes/Views/AuditLog.php:770
 msgid "You do not have sufficient permissions to dismiss this notice."
 msgstr ""
 
 #: classes/Views/class-premium-features.php:64
 #: classes/Views/class-premium-features.php:72
 msgid "Premium Features"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:224
-msgid "Premium features"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:229
-msgid "Receive instant SMS &#38; email alerts"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:231
-msgid "Know what is happening on your websites without having to login! Get instantly alerted of any user activities or site changes via SMS messages and emails. You can start right away with the built-in notifications or even create your own notification triggers."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:238
-msgid "Generate activity log reports"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:240
-msgid "Generate user and system reports from the activity log including the update log. Reports are fully configurable and include White Labelling options. You can also schedule daily, weekly, monthly, or quarterly reports to be sent automatically to your inbox."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:247
-msgid "Manage users sessions in real-time"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:249
-msgid "Use the real-time user activity monitor to remotely terminate sessions, block simultaneous same-user sessions, and automatically terminate idle sessions; with email notifications so that you can truly manage your WordPress from anywhere."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:256
-msgid "Easily track down specific activity"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:258
-msgid "Use the extensive built-in filters to fine tune the log viewer search results and easily track down specific WordPress system and user changes. Filter configurations can also be saved for future use to find what you are looking for within seconds."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:264
-msgid "Store the logs in an external database"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:266
-msgid "Improve the security posture of your website and store the activity log in an external database. By doing so you also safeguard the integrity of the logs in an unfortunate case of a website hack."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:273
-msgid "Archive old activity log data"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:275
-msgid "Configure the plugin to automatically archive log data that is older than a specific period to another database. Keep the log organized, easier to search, compact, and blazing fast."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:281
-msgid "Logs &#38; business systems integration"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:283
-msgid "Mirror the activity log in real time to your central logs management system so you do not have to log in to the websites and see what is happening from one central place. WP Activity Log supports AWS CloudWatch, Loggly, Slack, and others."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:290
-msgid "Mirror the activity log to log files"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:292
-msgid "Mirror the activity logs to a log file as a backup, while making it easier to import the activity log to your custom logs management system. Configure the plugin to write the activity log to a log file so the logs can be read and parsed by your system."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:299
-msgid "Send activity logs directly to third party systems"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:301
-msgid "When you send the activity log to a log file or a third party logs management system you can configure the plugin to not write any activity log data to the database, avoiding redundant data."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:308
-msgid "Export &#38; import plugin settings configuration"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:310
-msgid "Export the plugin settings configuration to keep a backup, or to import the same plugin configuration on other websites, allowing you to have a base configuration and easily propagate it to other websites."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:317
-msgid "Delete specific activity log data"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:319
-msgid "Need to delete data for a specific user, IP address, or another object? Use the activity log data manager to delete specific data that you do not want in your log."
-msgstr ""
-
-#: classes/Views/class-premium-features.php:326
-msgid "Premium support"
-msgstr ""
-
-#: classes/Views/class-premium-features.php:328
-msgid "Get professional email support within just a few hours from people who care. Our knowledgeable support team is proud of our 8-hour average response time."
 msgstr ""
 
 #: classes/Views/class-setup-wizard.php:123
@@ -3493,8 +3350,7 @@ msgid "Where should the plugin send your activity log summary?"
 msgstr ""
 
 #: classes/Views/class-setup-wizard.php:239
-#: classes/Views/class-setup-wizard.php:1000
-#: classes/Views/class-setup-wizard.php:1001
+#: classes/Views/class-setup-wizard.php:1014
 msgid "Finish"
 msgstr ""
 
@@ -3666,36 +3522,12 @@ msgstr ""
 msgid "You’re all set!"
 msgstr ""
 
-#: classes/Views/class-setup-wizard.php:957
-msgid "WP Activity Log is now ready and it has already started recording changes and user actions on your WordPress site. To help you make the most of the plugin, check out these helpful resources:"
-msgstr ""
-
-#: classes/Views/class-setup-wizard.php:962
+#: classes/Views/class-setup-wizard.php:983
 msgid "Getting started with WP Activity Log"
 msgstr ""
 
-#: classes/Views/class-setup-wizard.php:967
-msgid "What are events and event IDs"
-msgstr ""
-
-#: classes/Views/class-setup-wizard.php:972
-msgid "The complete list of all the event IDs"
-msgstr ""
-
-#: classes/Views/class-setup-wizard.php:977
+#: classes/Views/class-setup-wizard.php:998
 msgid "Knowledge base and support documentation"
-msgstr ""
-
-#: classes/Views/class-setup-wizard.php:982
-msgid "WP Activity Log plugin features"
-msgstr ""
-
-#: classes/Views/class-setup-wizard.php:992
-msgid "We are confident WP Activity Log will meet your activity monitoring needs. If you have any questions, feature suggestions, or feedback, feel free to "
-msgstr ""
-
-#: classes/Views/class-setup-wizard.php:992
-msgid "contact us anytime!"
 msgstr ""
 
 #: classes/Views/Help.php:85
@@ -4748,16 +4580,16 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-bbpress-custom-alerts.php:342
 #: classes/WPSensors/Alerts/class-bbpress-custom-alerts.php:356
 #: classes/WPSensors/Alerts/class-bbpress-custom-alerts.php:368
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:244
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:256
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:268
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:280
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:426
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:438
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:450
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:462
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:553
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:565
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:278
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:290
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:302
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:314
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:460
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:472
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:484
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:496
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:587
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:599
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1964
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1978
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1990
@@ -4913,8 +4745,8 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:551
 #: classes/WPSensors/Alerts/class-yoast-custom-alerts.php:842
 #: defaults.php:443
-#: defaults.php:3270
-#: defaults.php:3282
+#: defaults.php:3296
+#: defaults.php:3308
 msgid "Previous URL"
 msgstr ""
 
@@ -5077,7 +4909,7 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-bbpress-custom-alerts.php:406
 #: classes/WPSensors/Alerts/class-bbpress-custom-alerts.php:462
 #: defaults.php:1840
-#: defaults.php:3116
+#: defaults.php:3142
 msgid "Previous role"
 msgstr ""
 
@@ -5275,8 +5107,8 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-wpforms-custom-alerts.php:332
 #: classes/WPSensors/Alerts/class-yoast-custom-alerts.php:518
 #: defaults.php:1944
-#: defaults.php:3206
-#: defaults.php:3238
+#: defaults.php:3232
+#: defaults.php:3264
 msgid "Previous value"
 msgstr ""
 
@@ -5742,14 +5574,14 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-memberpress-custom-alerts.php:71
 #: classes/WPSensors/Alerts/class-memberpress-custom-alerts.php:85
 #: classes/WPSensors/Alerts/class-memberpress-custom-alerts.php:102
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:70
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:86
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:104
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:120
 msgid "Membership ID"
 msgstr ""
 
 #: classes/WPSensors/Alerts/class-memberpress-custom-alerts.php:74
 #: classes/WPSensors/Alerts/class-memberpress-custom-alerts.php:91
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:75
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:109
 msgid "View Membership"
 msgstr ""
 
@@ -6078,9 +5910,9 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-yoast-custom-alerts.php:826
 #: defaults.php:2641
 #: defaults.php:2677
-#: defaults.php:3294
-#: defaults.php:3381
-#: defaults.php:3394
+#: defaults.php:3320
+#: defaults.php:3407
+#: defaults.php:3420
 msgid "Previous setting"
 msgstr ""
 
@@ -6098,70 +5930,70 @@ msgstr ""
 msgid "Paid Memberships Pro"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:67
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:101
 msgid "A membership level was created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:68
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:102
 #, no-php-format
 msgid "Membership level %LevelName% was created."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:71
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:105
 msgid "Membership Billing"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:72
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:106
 msgid "Membership Expires"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:83
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:117
 msgid "A membership level was permanently deleted."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:84
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:118
 #, no-php-format
 msgid "Permanently deleted the membership level: %LevelName%"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:95
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:129
 msgid "A membership level was assigned to a user."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:96
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:130
 #, no-php-format
 msgid "Membership level %LevelName% was assigned to user %UserName%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:98
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:117
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:132
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:151
 msgid "User ID"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:99
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:118
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:133
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:152
 msgid "Level ID"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:100
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:119
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:134
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:153
 #: defaults.php:1813
 #: defaults.php:1828
 msgid "Email"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:101
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:120
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:135
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:154
 msgid "First Name"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:102
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:121
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:136
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:155
 msgid "Last Name"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:103
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:122
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:137
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:156
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:2633
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:2649
 #: defaults.php:266
@@ -6194,16 +6026,16 @@ msgstr ""
 msgid "Role"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:106
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:125
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:140
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:159
 msgid "View Member"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:114
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:148
 msgid "A membership level was removed from a user."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:115
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:149
 #, no-php-format
 msgid "Membership level %LevelName% was removed from user %UserName%."
 msgstr ""
@@ -7806,7 +7638,7 @@ msgid "Changed the <strong>base location</strong> of the store to %NewLocation%.
 msgstr ""
 
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1179
-#: defaults.php:3129
+#: defaults.php:3155
 msgid "Previous address"
 msgstr ""
 
@@ -8026,8 +7858,8 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1436
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1448
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1460
-#: defaults.php:3306
-#: defaults.php:3318
+#: defaults.php:3332
+#: defaults.php:3344
 msgid "Previous page"
 msgstr ""
 
@@ -10127,12 +9959,12 @@ msgstr ""
 #: classes/WPSensors/class-acf-sensor.php:242
 #: classes/WPSensors/class-acf-sensor.php:243
 #: classes/WPSensors/class-gravity-forms-sensor.php:1519
-#: classes/WPSensors/class-paid-memberships-pro-sensor.php:144
-#: classes/WPSensors/class-paid-memberships-pro-sensor.php:145
-#: classes/WPSensors/class-paid-memberships-pro-sensor.php:177
-#: classes/WPSensors/class-paid-memberships-pro-sensor.php:178
-#: classes/WPSensors/class-paid-memberships-pro-sensor.php:211
-#: classes/WPSensors/class-paid-memberships-pro-sensor.php:212
+#: classes/WPSensors/class-paid-memberships-pro-sensor.php:152
+#: classes/WPSensors/class-paid-memberships-pro-sensor.php:153
+#: classes/WPSensors/class-paid-memberships-pro-sensor.php:185
+#: classes/WPSensors/class-paid-memberships-pro-sensor.php:186
+#: classes/WPSensors/class-paid-memberships-pro-sensor.php:219
+#: classes/WPSensors/class-paid-memberships-pro-sensor.php:220
 #: classes/WPSensors/class-woocommerce-public-sensor.php:740
 #: classes/WPSensors/class-woocommerce-sensor.php:1124
 #: classes/WPSensors/class-yoast-seo-sensor.php:373
@@ -10802,7 +10634,7 @@ msgstr ""
 msgid "Emails"
 msgstr ""
 
-#: classes/WPSensors/class-paid-memberships-pro-sensor.php:124
+#: classes/WPSensors/class-paid-memberships-pro-sensor.php:132
 #: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1619
 #: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1627
 #: classes/WPSensors/Helpers/class-paid-memberships-pro-helper.php:225
@@ -11086,58 +10918,58 @@ msgstr ""
 msgid "sites & users can be registered"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:319
+#: classes/WPSensors/class-wp-system-sensor.php:320
 msgid "Unknown or Invalid (non-existing)"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:845
-#: classes/WPSensors/class-wp-system-sensor.php:846
+#: classes/WPSensors/class-wp-system-sensor.php:894
+#: classes/WPSensors/class-wp-system-sensor.php:895
 msgid "latest posts"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:845
-#: classes/WPSensors/class-wp-system-sensor.php:846
+#: classes/WPSensors/class-wp-system-sensor.php:894
+#: classes/WPSensors/class-wp-system-sensor.php:895
 msgid "static page"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:1013
+#: classes/WPSensors/class-wp-system-sensor.php:1062
 msgid "automatically update to all new versions of WordPress"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:1013
+#: classes/WPSensors/class-wp-system-sensor.php:1062
 msgid "automatically update maintenance and security releases only"
 msgstr ""
 
 #: classes/WPSensors/class-wpforms-sensor.php:144
-#: classes/WPSensors/class-wpforms-sensor.php:843
+#: classes/WPSensors/class-wpforms-sensor.php:849
 msgid "No email provided"
 msgstr ""
 
-#: classes/WPSensors/class-wpforms-sensor.php:339
-#: classes/WPSensors/class-wpforms-sensor.php:358
-#: classes/WPSensors/class-wpforms-sensor.php:411
+#: classes/WPSensors/class-wpforms-sensor.php:345
+#: classes/WPSensors/class-wpforms-sensor.php:364
+#: classes/WPSensors/class-wpforms-sensor.php:417
 msgid "Default confirmation"
 msgstr ""
 
-#: classes/WPSensors/class-wpforms-sensor.php:459
-#: classes/WPSensors/class-wpforms-sensor.php:478
-#: classes/WPSensors/class-wpforms-sensor.php:527
+#: classes/WPSensors/class-wpforms-sensor.php:465
+#: classes/WPSensors/class-wpforms-sensor.php:484
+#: classes/WPSensors/class-wpforms-sensor.php:533
 msgid "Default Notification"
 msgstr ""
 
-#: classes/WPSensors/class-wpforms-sensor.php:1001
+#: classes/WPSensors/class-wpforms-sensor.php:1007
 msgid "Own"
 msgstr ""
 
-#: classes/WPSensors/class-wpforms-sensor.php:1005
+#: classes/WPSensors/class-wpforms-sensor.php:1011
 msgid "N/A"
 msgstr ""
 
-#: classes/WPSensors/class-wpforms-sensor.php:1064
+#: classes/WPSensors/class-wpforms-sensor.php:1070
 msgid "Mailchimp"
 msgstr ""
 
-#: classes/WPSensors/class-wpforms-sensor.php:1066
+#: classes/WPSensors/class-wpforms-sensor.php:1072
 msgid "GetResponse"
 msgstr ""
 
@@ -11353,11 +11185,11 @@ msgstr ""
 msgid "Twitter metadata"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:118
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:135
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:151
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:167
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:183
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:152
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:169
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:185
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:201
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:217
 #: classes/WPSensors/class-yoast-seo-sensor.php:1830
 #: defaults.php:852
 msgid "Categories"
@@ -11641,23 +11473,11 @@ msgstr ""
 msgid "Multisite network"
 msgstr ""
 
-#: classes/Writers/class-csv-writer.php:309
-msgid "query is not provided or incorrect"
-msgstr ""
-
-#: classes/Writers/class-csv-writer.php:315
-msgid "Unrecognized format"
-msgstr ""
-
-#: classes/Writers/class-csv-writer.php:324
-msgid "order is not provided or incorrect"
-msgstr ""
-
-#: classes/Writers/class-csv-writer.php:329
+#: classes/Writers/class-csv-writer.php:432
 msgid "step is not provided or incorrect"
 msgstr ""
 
-#: classes/Writers/class-csv-writer.php:334
+#: classes/Writers/class-csv-writer.php:436
 msgid "records is not provided or incorrect"
 msgstr ""
 
@@ -13439,481 +13259,485 @@ msgstr ""
 msgid "WordPress core translation files updated."
 msgstr ""
 
-#: defaults.php:3094
+#: defaults.php:3120
 msgid "Advertising Extensions"
 msgstr ""
 
-#: defaults.php:3099
+#: defaults.php:3125
 msgid "WordPress Site Settings"
 msgstr ""
 
-#: defaults.php:3104
+#: defaults.php:3130
 msgid "The <strong>Membership</strong> setting <strong>Anyone can register</strong>."
 msgstr ""
 
-#: defaults.php:3114
+#: defaults.php:3140
 msgid "Changed the <strong>New user default role</strong> WordPress setting."
 msgstr ""
 
-#: defaults.php:3117
+#: defaults.php:3143
 msgid "New role"
 msgstr ""
 
-#: defaults.php:3127
+#: defaults.php:3153
 msgid "Change the <strong>Administrator email address</strong> in the WordPress settings."
 msgstr ""
 
-#: defaults.php:3130
+#: defaults.php:3156
 msgid "New address"
 msgstr ""
 
-#: defaults.php:3140
+#: defaults.php:3166
 msgid "Changed the <strong>WordPress permalinks</strong>."
 msgstr ""
 
-#: defaults.php:3142
+#: defaults.php:3168
 msgid "Previous permalinks"
 msgstr ""
 
-#: defaults.php:3143
+#: defaults.php:3169
 msgid "New permalinks"
 msgstr ""
 
-#: defaults.php:3152
+#: defaults.php:3178
 msgid "Enabled/Disabled the option Discourage search engines from indexing this site"
 msgstr ""
 
-#: defaults.php:3153
+#: defaults.php:3179
 msgid "Changed the status of the WordPress setting <strong>Search engine visibility</strong> (Discourage search engines from indexing this site)"
 msgstr ""
 
-#: defaults.php:3162
+#: defaults.php:3188
 msgid "Enabled/Disabled comments on all the website"
 msgstr ""
 
-#: defaults.php:3163
+#: defaults.php:3189
 msgid "Changed the status of the WordPress setting <strong>Allow people to submit comments on new posts</strong>."
 msgstr ""
 
-#: defaults.php:3173
+#: defaults.php:3199
 msgid "Enabled/Disabled the option Comment author must fill out name and email"
 msgstr ""
 
-#: defaults.php:3174
+#: defaults.php:3200
 msgid "Changed the status of the WordPress setting <strong>.Comment author must fill out name and email</strong>."
 msgstr ""
 
-#: defaults.php:3183
+#: defaults.php:3209
 msgid "Enabled/Disabled the option Users must be logged in and registered to comment"
 msgstr ""
 
-#: defaults.php:3184
+#: defaults.php:3210
 msgid "Changed the status of the WordPress setting <strong>Users must be registered and logged in to comment</strong>."
 msgstr ""
 
-#: defaults.php:3193
+#: defaults.php:3219
 msgid "Enabled/Disabled the option to automatically close comments"
 msgstr ""
 
-#: defaults.php:3194
+#: defaults.php:3220
 #, no-php-format
 msgid "Changed the status of the WordPress setting <strong>Automatically close comments after %Value% days</strong>."
 msgstr ""
 
-#: defaults.php:3203
+#: defaults.php:3229
 msgid "Changed the value of the option Automatically close comments"
 msgstr ""
 
-#: defaults.php:3204
+#: defaults.php:3230
 #, no-php-format
 msgid "Changed the value of the WordPress setting <strong>Automatically close comments after a number of days</strong> to %NewValue%."
 msgstr ""
 
-#: defaults.php:3215
+#: defaults.php:3241
 msgid "Enabled/Disabled the option for comments to be manually approved"
 msgstr ""
 
-#: defaults.php:3216
+#: defaults.php:3242
 msgid "Changed the value of the WordPress setting <strong>Comments must be manualy approved</strong>."
 msgstr ""
 
-#: defaults.php:3225
+#: defaults.php:3251
 msgid "Enabled/Disabled the option for an author to have previously approved comments for the comments to appear"
 msgstr ""
 
-#: defaults.php:3226
+#: defaults.php:3252
 msgid "Changed the value of the WordPress setting <strong>Comment author must have a previously approved comment</strong>."
 msgstr ""
 
-#: defaults.php:3235
+#: defaults.php:3261
 msgid "Changed the number of links that a comment must have to be held in the queue"
 msgstr ""
 
-#: defaults.php:3236
+#: defaults.php:3262
 #, no-php-format
 msgid "Changed the value of the WordPress setting <strong>Hold a comment in the queue if it contains links</strong> to %NewValue% links."
 msgstr ""
 
-#: defaults.php:3247
+#: defaults.php:3273
 msgid "Modified the list of keywords for comments moderation"
 msgstr ""
 
-#: defaults.php:3248
+#: defaults.php:3274
 msgid "Modified the list of keywords for comments moderation in WordPress."
 msgstr ""
 
-#: defaults.php:3257
+#: defaults.php:3283
 msgid "Modified the list of keywords for comments blacklisting"
 msgstr ""
 
-#: defaults.php:3258
+#: defaults.php:3284
 msgid "Modified the list of <strong>Disallowed comment keys</strong> (keywords) for comments blacklisting in WordPress."
 msgstr ""
 
-#: defaults.php:3267
+#: defaults.php:3293
 msgid "Option WordPress Address (URL) in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3268
+#: defaults.php:3294
 #, no-php-format
 msgid "Changed the <strong>WordPress address (URL)</strong> to %new_url%."
 msgstr ""
 
-#: defaults.php:3279
+#: defaults.php:3305
 msgid "Option Site Address (URL) in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3280
+#: defaults.php:3306
 #, no-php-format
 msgid "Changed the <strong>Site address (URL)</strong> to %new_url%."
 msgstr ""
 
-#: defaults.php:3291
+#: defaults.php:3317
 msgid "Option Your homepage displays in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3292
+#: defaults.php:3318
 #, no-php-format
 msgid "Changed the <strong>Your homepage displays</strong> WordPress setting to %new_homepage%."
 msgstr ""
 
-#: defaults.php:3303
+#: defaults.php:3329
 msgid "Option homepage in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3304
+#: defaults.php:3330
 #, no-php-format
 msgid "Changed the <strong>Homepage</strong> in the WordPress settings to %new_page%."
 msgstr ""
 
-#: defaults.php:3315
+#: defaults.php:3341
 msgid "Option posts page in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3316
+#: defaults.php:3342
 #, no-php-format
 msgid "Changed the <strong> Posts</strong>  page in the WordPress settings to %new_page%."
 msgstr ""
 
-#: defaults.php:3328
+#: defaults.php:3354
 msgid "Option Timezone in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3329
+#: defaults.php:3355
 #, no-php-format
 msgid "Changed the <strong>Timezone</strong> in the WordPress settings to %new_timezone%."
 msgstr ""
 
-#: defaults.php:3331
+#: defaults.php:3357
 msgid "Previous timezone"
 msgstr ""
 
-#: defaults.php:3340
+#: defaults.php:3366
 msgid "Option Date format in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3341
+#: defaults.php:3367
 #, no-php-format
 msgid "Changed the <strong>Date format</strong> in the WordPress settings to %new_date_format%."
 msgstr ""
 
-#: defaults.php:3343
-#: defaults.php:3355
+#: defaults.php:3369
+#: defaults.php:3381
 msgid "Previous format"
 msgstr ""
 
-#: defaults.php:3352
-msgid "Option Time format in WordPress settings changed"
-msgstr ""
-
-#: defaults.php:3353
-#, no-php-format
-msgid "Changed the <strong>Time format</strong> in the WordPress settings to %new_time_format%."
-msgstr ""
-
-#: defaults.php:3365
-msgid "Option Automatic updates setting changed"
-msgstr ""
-
-#: defaults.php:3366
-msgid "Changed the <strong>Automatic updates</strong> setting."
-msgstr ""
-
-#: defaults.php:3368
-msgid "New setting status"
-msgstr ""
-
 #: defaults.php:3378
-msgid "Option Site Language setting changed"
+msgid "Option Time format in WordPress settings changed"
 msgstr ""
 
 #: defaults.php:3379
 #, no-php-format
-msgid "Changed the <strong>Site Language</strong> to %new_value%."
+msgid "Changed the <strong>Time format</strong> in the WordPress settings to %new_time_format%."
 msgstr ""
 
 #: defaults.php:3391
-msgid "Option Site Title changed"
+msgid "Option Automatic updates setting changed"
 msgstr ""
 
 #: defaults.php:3392
+msgid "Changed the <strong>Automatic updates</strong> setting."
+msgstr ""
+
+#: defaults.php:3394
+msgid "New setting status"
+msgstr ""
+
+#: defaults.php:3404
+msgid "Option Site Language setting changed"
+msgstr ""
+
+#: defaults.php:3405
+#, no-php-format
+msgid "Changed the <strong>Site Language</strong> to %new_value%."
+msgstr ""
+
+#: defaults.php:3417
+msgid "Option Site Title changed"
+msgstr ""
+
+#: defaults.php:3418
 #, no-php-format
 msgid "Changed the <strong>Site Title</strong> to %new_value%."
 msgstr ""
 
-#: defaults.php:3404
+#: defaults.php:3430
 msgid "Added Site Icon"
 msgstr ""
 
 #. translators: %filename%: filename.
-#: defaults.php:3406
+#: defaults.php:3432
 #, no-php-format,php-format
 msgid "Added a new website Site Icon %filename%."
 msgstr ""
 
-#: defaults.php:3408
-#: defaults.php:3423
+#: defaults.php:3434
+#: defaults.php:3449
 msgid "New directory"
 msgstr ""
 
-#: defaults.php:3418
+#: defaults.php:3444
 msgid "Changed the Site Icon"
 msgstr ""
 
-#: defaults.php:3422
-#: defaults.php:3437
+#: defaults.php:3448
+#: defaults.php:3463
 msgid "Old directory"
 msgstr ""
 
-#: defaults.php:3433
+#: defaults.php:3459
 msgid "Removed the Site Icon"
 msgstr ""
 
 #. translators: %old_filename%: old filename.
-#: defaults.php:3435
+#: defaults.php:3461
 #, no-php-format,php-format
 msgid "Removed site icon %old_filename%."
 msgstr ""
 
-#: defaults.php:3446
+#: defaults.php:3472
 msgid "New one time task (cron job) created"
 msgstr ""
 
-#: defaults.php:3447
+#: defaults.php:3473
 #, no-php-format
 msgid "A new one-time task called %task_name% has been scheduled."
 msgstr ""
 
-#: defaults.php:3449
+#: defaults.php:3475
 msgid "The task is scheduled to run on"
 msgstr ""
 
-#: defaults.php:3458
-msgid "New recurring task (cron job) created"
-msgstr ""
-
-#: defaults.php:3459
-#, no-php-format
-msgid "A new recurring task (cron job) called %task_name% has been created."
-msgstr ""
-
-#: defaults.php:3461
-msgid "Task's first run: "
-msgstr ""
-
-#: defaults.php:3462
-msgid "Task's interval: "
-msgstr ""
-
-#: defaults.php:3471
-msgid "Recurring task (cron job) modified"
-msgstr ""
-
-#: defaults.php:3472
-#, no-php-format
-msgid "The schedule of recurring task (cron job) called %task_name% has changed."
-msgstr ""
-
-#: defaults.php:3474
-msgid "Task's old schedule: "
-msgstr ""
-
-#: defaults.php:3475
-msgid "Task's new schedule: "
-msgstr ""
-
 #: defaults.php:3484
-msgid "One time task (cron job) executed"
+msgid "New recurring task (cron job) created"
 msgstr ""
 
 #: defaults.php:3485
 #, no-php-format
-msgid "The one-time task called %task_name% has been executed."
+msgid "A new recurring task (cron job) called %task_name% has been created."
 msgstr ""
 
 #: defaults.php:3487
-#: defaults.php:3499
-#: defaults.php:3521
-msgid "Task's schedule was: "
+msgid "Task's first run: "
 msgstr ""
 
-#: defaults.php:3496
-msgid "Recurring task (cron job) executed"
+#: defaults.php:3488
+msgid "Task's interval: "
 msgstr ""
 
 #: defaults.php:3497
+msgid "Recurring task (cron job) modified"
+msgstr ""
+
+#: defaults.php:3498
+#, no-php-format
+msgid "The schedule of recurring task (cron job) called %task_name% has changed."
+msgstr ""
+
+#: defaults.php:3500
+msgid "Task's old schedule: "
+msgstr ""
+
+#: defaults.php:3501
+msgid "Task's new schedule: "
+msgstr ""
+
+#: defaults.php:3510
+msgid "One time task (cron job) executed"
+msgstr ""
+
+#: defaults.php:3511
+#, no-php-format
+msgid "The one-time task called %task_name% has been executed."
+msgstr ""
+
+#: defaults.php:3513
+#: defaults.php:3525
+#: defaults.php:3547
+msgid "Task's schedule was: "
+msgstr ""
+
+#: defaults.php:3522
+msgid "Recurring task (cron job) executed"
+msgstr ""
+
+#: defaults.php:3523
 #, no-php-format
 msgid " The recurring task (cron job) called %task_name% has been executed."
 msgstr ""
 
-#: defaults.php:3508
+#: defaults.php:3534
 msgid "Deleted one-time task (cron job)"
 msgstr ""
 
-#: defaults.php:3509
+#: defaults.php:3535
 #, no-php-format
 msgid "The one-time task  (cron job) called %task_name% has been deleted."
 msgstr ""
 
-#: defaults.php:3518
+#: defaults.php:3544
 msgid "Deleted recurring task (cron job)"
 msgstr ""
 
-#: defaults.php:3519
+#: defaults.php:3545
 #, no-php-format
 msgid "The recurring task (cron job) called %task_name% has been deleted."
 msgstr ""
 
-#: defaults.php:3529
+#: defaults.php:3555
 msgid "Email Events"
 msgstr ""
 
-#: defaults.php:3533
+#: defaults.php:3559
 msgid "Email was sent"
 msgstr ""
 
 #. translators: %EmailAddress%: email address.
-#: defaults.php:3535
+#: defaults.php:3561
 #, no-php-format,php-format
 msgid "Email was sent to %EmailAddress%."
 msgstr ""
 
-#: defaults.php:3537
+#: defaults.php:3563
 msgid "Subject"
 msgstr ""
 
-#: defaults.php:3545
+#: defaults.php:3571
 msgid "Database Events"
 msgstr ""
 
-#: defaults.php:3549
+#: defaults.php:3575
 msgid "Plugin created table"
 msgstr ""
 
-#: defaults.php:3550
+#: defaults.php:3576
 msgid "The plugin %Plugin->Name% created this table in the database."
 msgstr ""
 
-#: defaults.php:3552
-#: defaults.php:3564
-#: defaults.php:3576
-#: defaults.php:3588
-#: defaults.php:3600
+#: defaults.php:3578
+#: defaults.php:3590
+#: defaults.php:3602
+#: defaults.php:3614
+#: defaults.php:3626
 msgid "Table"
 msgstr ""
 
-#: defaults.php:3561
+#: defaults.php:3587
 msgid "Plugin modified table structure"
 msgstr ""
 
-#: defaults.php:3562
+#: defaults.php:3588
 msgid "The plugin %Plugin->Name% modified the structure of a database table."
 msgstr ""
 
-#: defaults.php:3573
+#: defaults.php:3599
 msgid "Plugin deleted table"
 msgstr ""
 
-#: defaults.php:3574
+#: defaults.php:3600
 msgid "The plugin %Plugin->Name% deleted this table from the database."
 msgstr ""
 
-#: defaults.php:3586
+#: defaults.php:3612
 msgid "The theme %Theme->Name% created this tables in the database."
 msgstr ""
 
-#: defaults.php:3598
+#: defaults.php:3624
 msgid "The theme %Theme->Name% modified the structure of this database table"
 msgstr ""
 
-#: defaults.php:3610
+#: defaults.php:3636
 msgid "The theme %Theme->Name% deleted this table from the database."
 msgstr ""
 
-#: defaults.php:3612
-#: defaults.php:3624
-#: defaults.php:3636
-#: defaults.php:3648
-#: defaults.php:3660
-#: defaults.php:3672
-#: defaults.php:3684
+#: defaults.php:3638
+#: defaults.php:3650
+#: defaults.php:3662
+#: defaults.php:3674
+#: defaults.php:3686
+#: defaults.php:3698
+#: defaults.php:3710
 msgid "Tables"
 msgstr ""
 
-#: defaults.php:3622
+#: defaults.php:3648
 msgid "An unknown component created these tables in the database."
 msgstr ""
 
-#: defaults.php:3634
+#: defaults.php:3660
 msgid "An unknown component modified the structure of these database tables."
 msgstr ""
 
-#: defaults.php:3646
+#: defaults.php:3672
 msgid "An unknown component deleted these tables from the database."
 msgstr ""
 
-#: defaults.php:3657
+#: defaults.php:3683
 msgid "WordPress created tables"
 msgstr ""
 
-#: defaults.php:3658
+#: defaults.php:3684
 msgid "WordPress has created these tables in the database."
 msgstr ""
 
-#: defaults.php:3669
+#: defaults.php:3695
 msgid "WordPress modified tables structure"
 msgstr ""
 
-#: defaults.php:3670
+#: defaults.php:3696
 msgid "WordPress modified the structure of these database tables."
 msgstr ""
 
-#: defaults.php:3681
+#: defaults.php:3707
 msgid "WordPress deleted tables"
 msgstr ""
 
-#: defaults.php:3682
+#: defaults.php:3708
 msgid "WordPress deleted these tables from the database."
+msgstr ""
+
+#: classes/Controllers/class-alert-manager.php:1365
+msgid "Connected"
 msgstr ""
 
 #: classes/Helpers/settings/admin/wsal-notification-settings.js:41
@@ -14096,7 +13920,7 @@ msgid "Get offer now"
 msgstr ""
 
 #. translators: The column name.
-#: classes/ListAdminEvents/class-list-events.php:781
+#: classes/ListAdminEvents/class-list-events.php:801
 #, php-format
 msgid "Select %s"
 msgstr ""
@@ -14139,460 +13963,460 @@ msgstr ""
 msgid "Students"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:113
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:147
 msgid "A course was created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:114
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:148
 #, no-php-format
 msgid "Created the course %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:116
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:132
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:148
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:165
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:180
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:196
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:211
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:228
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:150
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:166
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:182
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:199
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:214
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:230
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:245
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:262
 msgid "Course ID"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:117
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:133
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:149
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:181
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:212
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:229
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:151
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:167
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:183
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:215
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:246
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:263
 msgid "Course author"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:119
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:136
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:152
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:168
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:184
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:199
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:215
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:232
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:153
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:170
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:186
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:202
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:218
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:233
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:249
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:266
 msgid "Course category"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:120
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:153
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:213
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:230
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:154
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:187
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:247
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:264
 msgid "Course status"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:129
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:163
 msgid "A course was published"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:130
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:164
 #, no-php-format
 msgid "Published the course %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:134
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:150
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:166
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:182
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:197
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:605
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:620
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:649
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:168
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:184
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:200
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:216
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:231
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:639
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:654
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:683
 msgid "Price type"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:145
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:179
 msgid "A course was moved to trash"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:146
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:180
 #, no-php-format
 msgid "Moved the course %PostTitle% to trash."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:162
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:196
 msgid "A course was permanently deleted"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:163
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:197
 #, no-php-format
 msgid "Permanently deleted the course %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:177
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:211
 msgid "A course was restored from trash"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:178
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:212
 #, no-php-format
 msgid "Restored the course %PostTitle% from trash."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:193
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:227
 msgid "A course was duplicated"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:194
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:228
 #, no-php-format
 msgid "Duplicated the course %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:208
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:242
 msgid "A course was viewed"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:209
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:243
 #, no-php-format
 msgid "Viewed the course %PostTitle% page."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:225
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:259
 msgid "A course was opened in the editor"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:226
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:260
 #, no-php-format
 msgid "Opened the course %PostTitle% in the editor."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:241
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:275
 msgid "Course category created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:242
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:276
 #, no-php-format
 msgid "Created the course category %TaxonomyTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:253
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:287
 msgid "Course category deleted"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:254
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:288
 #, no-php-format
 msgid "Deleted the course category %TaxonomyTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:265
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:299
 msgid "Course tag created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:266
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:300
 #, no-php-format
 msgid "Created the course tag %TaxonomyTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:277
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:311
 msgid "Course tag deleted"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:278
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:312
 #, no-php-format
 msgid "Deleted the course tag %TaxonomyTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:301
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:335
 msgid "A lesson was created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:302
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:336
 #, no-php-format
 msgid "Created the lesson %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:304
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:320
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:335
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:351
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:365
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:379
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:393
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:410
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:338
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:354
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:369
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:385
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:399
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:413
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:427
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:444
 msgid "Lesson ID"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:305
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:321
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:394
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:411
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:339
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:355
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:428
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:445
 msgid "Lesson author"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:307
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:323
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:337
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:353
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:367
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:381
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:397
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:414
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:341
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:357
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:371
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:387
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:401
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:415
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:431
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:448
 msgid "Lesson category"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:308
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:338
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:395
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:412
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:342
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:372
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:429
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:446
 msgid "Lesson status"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:317
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:351
 msgid "A lesson was published"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:318
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:352
 #, no-php-format
 msgid "Published the lesson %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:332
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:366
 msgid "A lesson was moved to trash"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:333
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:367
 #, no-php-format
 msgid "Moved the lesson %PostTitle% to trash."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:348
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:382
 msgid "A lesson was permanently deleted"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:349
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:383
 #, no-php-format
 msgid "Permanently deleted the lesson %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:362
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:396
 msgid "A lesson was restored from trash"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:363
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:397
 #, no-php-format
 msgid "Restored the lesson %PostTitle% from trash."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:376
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:410
 msgid "A lesson was duplicated"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:377
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:411
 #, no-php-format
 msgid "Duplicated the lesson %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:390
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:424
 msgid "A lesson was viewed"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:391
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:425
 #, no-php-format
 msgid "Viewed the lesson %PostTitle% page."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:407
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:441
 msgid "A lesson was opened in the editor"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:408
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:442
 #, no-php-format
 msgid "Opened the lesson %PostTitle% in the editor."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:423
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:457
 msgid "A lesson category was created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:424
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:458
 #, no-php-format
 msgid "Created the lesson category %TaxonomyTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:428
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:462
 msgid "View lesson category"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:435
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:469
 msgid "A lesson category was deleted"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:436
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:470
 #, no-php-format
 msgid "Deleted the lesson category %TaxonomyTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:447
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:481
 msgid "A lesson tag was created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:448
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:482
 #, no-php-format
 msgid "Created the lesson tag %TaxonomyTitle%"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:452
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:486
 msgid "View lesson tag"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:459
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:493
 msgid "A lesson tag was deleted"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:460
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:494
 #, no-php-format
 msgid "Deleted the lesson tag %TaxonomyTitle%"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:483
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:517
 msgid "A topic was created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:484
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:518
 #, no-php-format
 msgid "Created the topic %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:486
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:500
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:513
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:527
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:540
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:520
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:534
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:547
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:561
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:574
 msgid "Topic ID"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:487
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:501
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:514
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:528
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:541
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:521
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:535
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:548
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:562
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:575
 msgid "Topic category"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:488
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:515
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:522
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:549
 msgid "Topic status"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:497
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:531
 msgid "A topic was published"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:498
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:532
 #, no-php-format
 msgid "Published the topic %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:510
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:544
 msgid "A topic was moved to trash"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:511
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:545
 #, no-php-format
 msgid "Moved the topic %PostTitle% to trash."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:524
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:558
 msgid "A topic was permanently deleted"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:525
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:559
 #, no-php-format
 msgid "Permanently deleted the topic %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:537
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:571
 msgid "A topic was duplicated"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:538
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:572
 #, no-php-format
 msgid "Duplicated the topic %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:550
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:584
 msgid "Topic tag created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:551
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:585
 #, no-php-format
 msgid "Created the topic tag %TaxonomyTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:562
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:596
 msgid "Topic tag deleted"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:563
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:597
 #, no-php-format
 msgid "Deleted the topic tag %TaxonomyTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:586
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:620
 msgid "A group was created"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:587
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:621
 #, no-php-format
 msgid "Created the group %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:589
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:604
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:619
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:648
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:623
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:638
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:653
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:682
 msgid "Group author"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:591
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:607
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:622
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:636
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:651
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:625
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:641
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:656
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:670
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:685
 msgid "Group category"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:592
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:623
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:626
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:657
 msgid "Group status"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:601
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:635
 msgid "A group was published"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:602
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:636
 #, no-php-format
 msgid "Published the group %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:616
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:650
 msgid "A group was moved to trash"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:617
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:651
 #, no-php-format
 msgid "Moved the group %PostTitle% to trash."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:632
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:666
 msgid "A group was permanently deleted"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:633
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:667
 #, no-php-format
 msgid "Permanently deleted the group %PostTitle%."
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:645
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:679
 msgid "A group was restored from trash"
 msgstr ""
 
-#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:646
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:680
 #, no-php-format
 msgid "Restored the group %PostTitle% from trash."
 msgstr ""
@@ -14791,6 +14615,10 @@ msgstr ""
 msgid "User entered the wrong password while trying to access the password-protected post %PostTitle%."
 msgstr ""
 
+#: classes/MainWPAddon/class-mainwp-helper.php:210
+msgid "Access denied."
+msgstr ""
+
 #: classes/FeedbackForm/feedback-form.js:275
 msgid "Network Deactivating..."
 msgstr ""
@@ -14957,9 +14785,21 @@ msgid "Deleted all the data about the %deleted_data_type% %deleted_data% from th
 msgstr ""
 
 #. translators: %old_filename%: old filename; %filename%: filename.
-#: defaults.php:3420
+#: defaults.php:3446
 #, no-php-format,php-format
 msgid "Changed the Site Icon from %old_filename% to %filename%."
+msgstr ""
+
+#: classes/Controllers/class-alert-manager.php:1366
+msgid "Disconnected"
+msgstr ""
+
+#: classes/Controllers/class-alert.php:546
+msgid "Get instant alerts for events like this with Premium"
+msgstr ""
+
+#: classes/Controllers/class-alert.php:547
+msgid "Monitor and manage active user sessions with Premium"
 msgstr ""
 
 #. translators: 1: Bolded "Submit & Deactivate" label. 2: Bolded "Skip & Deactivate" label.
@@ -14972,6 +14812,178 @@ msgstr ""
 #: classes/FeedbackForm/class-feedback-form.php:237
 #, php-format
 msgid "Please provide a few more details and click %1$s. If you would like to deactivate the plugin without sharing feedback, click %2$s."
+msgstr ""
+
+#: classes/Free/assets/nav-bar.php:238
+msgid "Unlock Advanced Search & Filtering with Premium"
+msgstr ""
+
+#: classes/Free/assets/nav-bar.php:240
+msgid "Unlock Automated Reports & Alerts with Premium"
+msgstr ""
+
+#: classes/Free/assets/nav-bar.php:242
+msgid "Unlock User Session Management with Premium"
+msgstr ""
+
+#: classes/Free/assets/nav-bar.php:244
+msgid "Unlock More Logged Events with Premium"
+msgstr ""
+
+#: classes/Free/assets/nav-bar.php:246
+msgid "Unlock Priority Support with Premium"
+msgstr ""
+
+#: classes/ListAdminEvents/class-list-events.php:250
+msgid "Quickly find the exact log data you need with advanced filters and saved searches with"
+msgstr ""
+
+#: classes/ListAdminEvents/class-list-events.php:251
+msgid "Premium"
+msgstr ""
+
+#: classes/notification/options/notifications-highlights.php:202
+msgid "Custom activity log notifications"
+msgstr ""
+
+#: classes/notification/options/notifications-highlights.php:214
+msgid "Create custom report schedules, get instant alerts via email, SMS, and Slack, create advanced notification rules, and more."
+msgstr ""
+
+#: classes/notification/options/notifications-highlights.php:215
+msgid "Unlock Advanced Notifications"
+msgstr ""
+
+#: classes/Views/AuditLog.php:444
+msgid "Add note"
+msgstr ""
+
+#: classes/Views/AuditLog.php:445
+msgid "Add notes to activity log entries with Premium"
+msgstr ""
+
+#: classes/Views/AuditLog.php:450
+msgid "Get scheduled reports for content and publishing activity with Premium"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:242
+msgid "Unlock advanced activity log capabilities"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:244
+msgid "Get real-time alerts, advanced reporting, user session management, integrations, and more with WP Activity Log Premium."
+msgstr ""
+
+#: classes/Views/class-premium-features.php:245
+msgid "View Pricing"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:249
+msgid "instant alerts"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:251
+msgid "Get instantly alerted to critical activity"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:253
+msgid "Get instantly notified via email, SMS, or Slack when important user activity or website changes happen, without needing to log in to your website."
+msgstr ""
+
+#: classes/Views/class-premium-features.php:258
+msgid "WordPress activity log reports"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:260
+msgid "Stay informed with automated activity reports"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:262
+msgid "Generate configurable activity log and user reports, schedule automatic email delivery, and create white-labelled reports for clients and teams."
+msgstr ""
+
+#: classes/Views/class-premium-features.php:267
+msgid "WP Activity Log user sessions"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:269
+msgid "Prevent account sharing & manage user sessions"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:271
+msgid "See who is logged in to your website in real time, remotely terminate sessions, prevent simultaneous logins, and automatically log out idle users."
+msgstr ""
+
+#: classes/Views/class-premium-features.php:276
+msgid "easy activity log search"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:278
+msgid "Troubleshoot issues faster"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:280
+msgid "Quickly track down specific activity using advanced filters, saved searches, and detailed activity insights."
+msgstr ""
+
+#: classes/Views/class-premium-features.php:285
+msgid "activity log database"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:287
+msgid "Store and manage activity logs at scale"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:289
+msgid "Store logs in external databases, archive older data automatically, and integrate with services like AWS CloudWatch, Slack, and Loggly."
+msgstr ""
+
+#: classes/Views/class-premium-features.php:294
+msgid "premium support"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:296
+msgid "Get fast, professional support when you need it"
+msgstr ""
+
+#: classes/Views/class-premium-features.php:298
+msgid "Get fast, professional support from a real human with an average response time of under 8 hours."
+msgstr ""
+
+#: classes/Views/class-setup-wizard.php:965
+msgid "Monitor your website more efficiently with Premium"
+msgstr ""
+
+#: classes/Views/class-setup-wizard.php:968
+msgid "Save time with automated reports, stay informed with instant email notifications, and find important activity faster with advanced search and filtering."
+msgstr ""
+
+#: classes/Views/class-setup-wizard.php:968
+msgid "See what’s included in Premium"
+msgstr ""
+
+#: classes/Views/class-setup-wizard.php:976
+msgid "WP Activity Log is now configured and has already started recording changes and user activity on your WordPress website."
+msgstr ""
+
+#: classes/Views/class-setup-wizard.php:978
+msgid "To help you get the most out of the plugin, here are some useful resources:"
+msgstr ""
+
+#: classes/Views/class-setup-wizard.php:988
+msgid "Complete list of event IDs"
+msgstr ""
+
+#: classes/Views/class-setup-wizard.php:993
+msgid "Understanding events and event IDs"
+msgstr ""
+
+#: classes/Views/class-setup-wizard.php:1003
+msgid "WP Activity Log features and documentation"
+msgstr ""
+
+#: classes/Views/class-setup-wizard.php:1015
+msgid "Open Activity Log"
 msgstr ""
 
 #: classes/Views/Help.php:207
@@ -14998,6 +15010,81 @@ msgstr ""
 msgid "Upgrade to Get 1-to-1 Email Support"
 msgstr ""
 
+#: classes/WPSensors/Alerts/class-ai-wp-plugin-alerts.php:67
+msgid "AI master switch enabled / disabled"
+msgstr ""
+
+#. translators: %EventVerb%: Enabled or Disabled.
+#: classes/WPSensors/Alerts/class-ai-wp-plugin-alerts.php:69
+#, php-format
+msgid "%EventVerb% the AI master switch in the AI plugin settings."
+msgstr ""
+
+#: classes/WPSensors/Alerts/class-ai-wp-plugin-alerts.php:78
+msgid "AI plugin feature enabled / disabled"
+msgstr ""
+
+#. translators: %EventVerb%: Enabled or Disabled; %FeatureName%: AI plugin feature name.
+#: classes/WPSensors/Alerts/class-ai-wp-plugin-alerts.php:81
+#, php-format
+msgid "%EventVerb% the %FeatureName% feature in the AI plugin settings."
+msgstr ""
+
+#: classes/WPSensors/Alerts/class-ai-wp-plugin-alerts.php:83
+msgid "Feature slug"
+msgstr ""
+
+#: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:108
+msgid "Need more LearnDash coverage? Premium tracks additional events."
+msgstr ""
+
+#: classes/WPSensors/Alerts/class-paid-memberships-pro-custom-alerts.php:78
+msgid "Unlock more Paid Memberships Pro events with Premium."
+msgstr ""
+
 #: classes/WPSensors/class-wp-user-profile-sensor.php:485
 msgid "no role"
+msgstr ""
+
+#: classes/Writers/class-csv-writer.php:154
+msgid "Invalid export order."
+msgstr ""
+
+#: classes/Writers/class-csv-writer.php:165
+msgid "Invalid export order field."
+msgstr ""
+
+#: classes/Writers/class-csv-writer.php:169
+msgid "Invalid export order direction."
+msgstr ""
+
+#: classes/Writers/class-csv-writer.php:405
+msgid "You do not have permission to export audit log data."
+msgstr ""
+
+#: classes/Writers/class-csv-writer.php:419
+msgid "Export data is not provided or incorrect"
+msgstr ""
+
+#: defaults.php:3087
+msgid "AI connector connected"
+msgstr ""
+
+#. translators: %ConnectorName%: AI connector name.
+#: defaults.php:3089
+msgid "Connected the %ConnectorName% AI connector."
+msgstr ""
+
+#: defaults.php:3091
+#: defaults.php:3104
+msgid "Provider plugin"
+msgstr ""
+
+#: defaults.php:3100
+msgid "AI connector disconnected"
+msgstr ""
+
+#. translators: %ConnectorName%: AI connector name.
+#: defaults.php:3102
+msgid "Disconnected the %ConnectorName% AI connector."
 msgstr ""

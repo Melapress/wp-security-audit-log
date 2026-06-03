@@ -16,6 +16,7 @@ namespace WSAL\WP_Sensors;
 
 use WSAL\Controllers\Alert_Manager;
 use WSAL\WP_Sensors\Helpers\Paid_Memberships_Pro_Helper;
+use WSAL\WP_Sensors\Alerts\Paid_Memberships_Pro_Custom_Alerts;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,6 +70,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Paid_Memberships_Pro_Sensor' ) ) {
 					10,
 					2
 				);
+
+				// @free:start
+				\add_filter(
+					'wsal_free_additional_event_links',
+					array( Paid_Memberships_Pro_Custom_Alerts::class, 'add_link_to_free_events' )
+				);
+				// @free:end
 
 				if ( Paid_Memberships_Pro_Helper::is_pmp_active() ) {
 					\add_filter(

@@ -51,6 +51,40 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Paid_Memberships_Pro_Custom_Alerts
 			return array();
 		}
 
+		// @free:start
+		/**
+		 * Returns Paid Memberships Pro free event IDs that have additional related events available only in WSAL Premium.
+		 *
+		 * Used to render an upgrade CTA at the bottom of the affected events in the log viewer.
+		 *
+		 * @return int[] $event_ids - Free event IDs that should display the premium CTA.
+		 *
+		 * @since 5.6.4
+		 */
+		public static function get_free_version_events(): array {
+			return array( 9501, 9502, 9504, 9505 );
+		}
+
+		/**
+		 * Add links to the events that have related events available only in premium.
+		 *
+		 * @param array $links - Existing event_id => label map.
+		 *
+		 * @return array $links - Merged event_id => label map.
+		 *
+		 * @since 5.6.4
+		 */
+		public static function add_link_to_free_events( array $links ): array {
+			$text = \esc_html__( 'Unlock more Paid Memberships Pro events with Premium.', 'wp-security-audit-log' );
+
+			foreach ( self::get_free_version_events() as $event_id ) {
+				$links[ $event_id ] = $text;
+			}
+
+			return $links;
+		}
+		// @free:end
+
 		/**
 		 * Returns array with all the events attached to the sensor. If there are different types of events, this method will merge them into one array.
 		 * The events ids will be used as keys.

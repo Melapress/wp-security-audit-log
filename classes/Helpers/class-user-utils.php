@@ -169,11 +169,11 @@ if ( ! class_exists( '\WSAL\Helpers\User_Utils' ) ) {
 				return '';
 			}
 
-			$tooltip  = '<strong>' . esc_attr__( 'Username: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_login . '</br>';
-			$tooltip .= ( ! empty( $user->data->first_name ) ) ? '<strong>' . esc_attr__( 'First name: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->first_name . '</br>' : '';
-			$tooltip .= ( ! empty( $user->data->last_name ) ) ? '<strong>' . esc_attr__( 'Last Name: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->last_name . '</br>' : '';
-			$tooltip .= '<strong>' . esc_attr__( 'Email: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_email . '</br>';
-			$tooltip .= '<strong>' . esc_attr__( 'Nickname: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_nicename . '</br></br>';
+			$tooltip  = '<strong>' . \esc_attr__( 'Username: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user->data->user_login ) . '</br>';
+			$tooltip .= ( ! empty( $user->data->first_name ) ) ? '<strong>' . \esc_attr__( 'First name: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user->data->first_name ) . '</br>' : '';
+			$tooltip .= ( ! empty( $user->data->last_name ) ) ? '<strong>' . \esc_attr__( 'Last Name: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user->data->last_name ) . '</br>' : '';
+			$tooltip .= '<strong>' . \esc_attr__( 'Email: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user->data->user_email ) . '</br>';
+			$tooltip .= '<strong>' . \esc_attr__( 'Nickname: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user->data->user_nicename ) . '</br></br>';
 
 			/**
 			 * WSAL Filter: `wsal_additional_user_tooltip_content'
@@ -185,7 +185,7 @@ if ( ! class_exists( '\WSAL\Helpers\User_Utils' ) ) {
 			 * @param string $content Blank string to append to.
 			 * @param object  $user  - User object.
 			 */
-			$additional_content = apply_filters( 'wsal_additional_user_tooltip_content', '', $user );
+			$additional_content = \wp_kses_post( (string) \apply_filters( 'wsal_additional_user_tooltip_content', '', $user ) );
 
 			$tooltip .= $additional_content;
 

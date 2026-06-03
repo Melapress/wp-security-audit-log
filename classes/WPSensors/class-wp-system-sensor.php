@@ -17,6 +17,7 @@ use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Helpers\DateTime_Formatter_Helper;
+use WSAL\WP_Sensors\Helpers\WP_AI_Connectors_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -524,6 +525,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 * @since 5.1.0
 		 */
 		public static function deleted_option( $option ) {
+			self::maybe_trigger_ai_connector_event( $option, 'deleted' );
 
 			// Site icon is changed - act accordingly.
 			if ( 'site_icon' === $option ) {
@@ -575,6 +577,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 * @since 5.1.0
 		 */
 		public static function added_option( $option, $new_value ) {
+			self::maybe_trigger_ai_connector_event( $option, 'added', null, $new_value );
 
 			// Site icon is added - act accordingly.
 			if ( 'site_icon' === $option ) {
@@ -610,6 +613,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 * @since 5.1.0
 		 */
 		public static function updated_option( $option, $old_value, $new_value ) {
+			self::maybe_trigger_ai_connector_event( $option, 'updated', $old_value, $new_value );
 
 			// Site icon is changed - act accordingly.
 			if ( 'site_icon' === $option ) {
@@ -671,6 +675,51 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						);
 					}
 				}
+			}
+		}
+
+		/**
+		 * Tracks AI connector API key option changes.
+		 *
+		 * @param mixed  $option - Option name.
+		 * @param string $option_action - Option action.
+		 * @param mixed  $old_value - The old option value.
+		 * @param mixed  $new_value - The new option value.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.4
+		 */
+		private static function maybe_trigger_ai_connector_event( $option, string $option_action, $old_value = null, $new_value = null ) {
+			if ( '' === WP_AI_Connectors_Helper::get_connector_slug_from_option_name( $option ) ) {
+				return;
+			}
+
+			if ( 'deleted' === $option_action ) {
+				if ( ! array_key_exists( $option, self::$old_option ) ) {
+					return;
+				}
+
+				$old_value = self::$old_option[ $option ]['value'];
+			}
+
+			$connected = WP_AI_Connectors_Helper::is_ai_connector_enabled( $option_action, $old_value, $new_value );
+
+			if ( null === $connected ) {
+				return;
+			}
+
+			$connector_data = WP_AI_Connectors_Helper::get_connector_event_data( $option );
+
+			if ( ! empty( $connector_data ) ) {
+				Alert_Manager::trigger_event(
+					$connected ? 6081 : 6082,
+					array(
+						'EventType'       => $connected ? 'connected' : 'disconnected',
+						'ConnectorName'   => $connector_data['name'],
+						'ConnectorPlugin' => $connector_data['plugin'],
+					)
+				);
 			}
 		}
 
