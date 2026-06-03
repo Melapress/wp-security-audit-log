@@ -66,7 +66,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 		 */
 		public static function init() {
 			\add_action( 'wsal_list_view_top_navigation', array( __CLASS__, 'show_top_navigation' ) );
-			\add_action( 'wp_ajax_retrieve_events_manually', array( __CLASS__, 'retrieve_events_manually' ) );
+			\add_action( 'wp_ajax_retrieve_events_manually', array( __CLASS__, 'ajax_retrieve_events_manually' ) );
 
 			\add_filter( 'wsal_get_user_image', array( __CLASS__, 'get_user_image' ), 10, 2 );
 			\add_filter( 'wsal_get_user_html', array( __CLASS__, 'get_user_html' ), 10, 2 );
@@ -153,7 +153,9 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 						}
 						?>
 					</select>
-					<input type="button" class="button" id="mwpal-wsal-manual-retrieve" value="<?php esc_html_e( 'Retrieve Activity Logs Now', 'wp-security-audit-log' ); ?>" />
+					<?php if ( Settings_Helper::current_user_can( 'edit' ) ) : ?>
+						<input type="button" class="button" id="mwpal-wsal-manual-retrieve" value="<?php \esc_html_e( 'Retrieve Activity Logs Now', 'wp-security-audit-log' ); ?>" />
+					<?php endif; ?>
 				</div>
 				<script>
 					jQuery( document ).ready( function() {
@@ -190,6 +192,27 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 				</script>
 				<?php
 			}
+		}
+
+		/**
+		 * AJAX callback for manually retrieving events from MainWP child sites.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.4
+		 */
+		public static function ajax_retrieve_events_manually() {
+			if ( ! isset( $_POST['nonce'] ) || false === \wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['nonce'] ) ), 'wsal-notifications-script-nonce' ) ) {
+				\wp_send_json_error( new \WP_Error( 'invalid_nonce', \esc_html__( 'Insecure request.', 'wp-security-audit-log' ) ), 403 );
+			}
+
+			if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
+				\wp_send_json_error( new \WP_Error( 'access_denied', \esc_html__( 'Access denied.', 'wp-security-audit-log' ) ), 403 );
+			}
+
+			self::retrieve_events_manually();
+
+			\wp_send_json_success();
 		}
 
 		/**
@@ -585,7 +608,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 
 							$tooltip = self::get_tooltip_user_content( $item_data['meta_values']['UserData'] );
 
-							$uhtml = '<a class="tooltip" data-darktooltip="' . esc_attr( $tooltip ) . '" data-user="' . $item_data['meta_values']['UserData']['display_name'] . '" href="' . $user_url . '" target="_blank">' . esc_html( self::get_display_label( $item_data['meta_values']['UserData'] ) ) . '</a>';
+							$uhtml = '<a class="tooltip" data-darktooltip="' . \esc_attr( $tooltip ) . '" data-user="' . \esc_attr( $item_data['meta_values']['UserData']['display_name'] ) . '" href="' . \esc_url( $user_url ) . '" target="_blank">' . \esc_html( self::get_display_label( $item_data['meta_values']['UserData'] ) ) . '</a>';
 						}
 					}
 				}
@@ -852,11 +875,11 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 		 */
 		private static function get_tooltip_user_content( array $user_data ) {
 
-			$tooltip  = '<strong>' . esc_attr__( 'Username: ', 'wp-security-audit-log' ) . '</strong>' . $user_data['display_name'] . '</br>';
-			$tooltip .= ( ! empty( $user_data['first_name'] ) ) ? '<strong>' . esc_attr__( 'First name: ', 'wp-security-audit-log' ) . '</strong>' . $user_data['first_name'] . '</br>' : '';
-			$tooltip .= ( ! empty( $user_data['last_name'] ) ) ? '<strong>' . esc_attr__( 'Last Name: ', 'wp-security-audit-log' ) . '</strong>' . $user_data['last_name'] . '</br>' : '';
-			$tooltip .= '<strong>' . esc_attr__( 'Email: ', 'wp-security-audit-log' ) . '</strong>' . $user_data['user_email'] . '</br>';
-			$tooltip .= '<strong>' . esc_attr__( 'Nickname: ', 'wp-security-audit-log' ) . '</strong>' . $user_data['user_nicename'] . '</br></br>';
+			$tooltip  = '<strong>' . \esc_attr__( 'Username: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user_data['display_name'] ) . '</br>';
+			$tooltip .= ( ! empty( $user_data['first_name'] ) ) ? '<strong>' . \esc_attr__( 'First name: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user_data['first_name'] ) . '</br>' : '';
+			$tooltip .= ( ! empty( $user_data['last_name'] ) ) ? '<strong>' . \esc_attr__( 'Last Name: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user_data['last_name'] ) . '</br>' : '';
+			$tooltip .= '<strong>' . \esc_attr__( 'Email: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user_data['user_email'] ) . '</br>';
+			$tooltip .= '<strong>' . \esc_attr__( 'Nickname: ', 'wp-security-audit-log' ) . '</strong>' . \esc_html( $user_data['user_nicename'] ) . '</br></br>';
 
 			/**
 			 * WSAL Filter: `wsal_additional_user_tooltip_content'
@@ -868,7 +891,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 			 * @param string $content Blank string to append to.
 			 * @param object  $user  - User data array.
 			 */
-			$additional_content = apply_filters( 'wsal_additional_user_tooltip_content', '', $user_data );
+			$additional_content = \wp_kses_post( (string) \apply_filters( 'wsal_additional_user_tooltip_content', '', $user_data ) );
 
 			$tooltip .= $additional_content;
 

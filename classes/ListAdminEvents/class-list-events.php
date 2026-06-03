@@ -180,7 +180,8 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						echo '<div style="clear:both; float:right">';
 						$this->search_box(
 							__( 'Search', 'wp-security-audit-log' ),
-							strtolower( $this->table_name ) . '-find'
+							strtolower( $this->table_name ) . '-find',
+							true
 						);
 						echo '</div>';
 					}
@@ -204,12 +205,16 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		/**
 		 * Displays the search box.
 		 *
-		 * @since 4.6.0
+		 * @param string $text - The 'submit' button label.
+		 * @param string $input_id - ID attribute value for the search input field.
+		 * @param bool   $show_search_cta - Whether to show the search CTA helper text.
 		 *
-		 * @param string $text     The 'submit' button label.
-		 * @param string $input_id ID attribute value for the search input field.
+		 * @return void - Outputs the search box markup.
+		 *
+		 * @since 4.6.0
+		 * @since 5.6.4 Added the $show_search_cta parameter.
 		 */
-		public function search_box( $text, $input_id ) {
+		public function search_box( $text, $input_id, $show_search_cta = false ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display parameter, sanitized before use.
 			if ( empty( $_GET['s'] ) && ! $this->has_items() ) {
 				return;
@@ -234,11 +239,26 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				echo '<input type="hidden" name="detached" value="' . \esc_attr( \sanitize_text_field( \wp_unslash( $_GET['detached'] ) ) ) . '" />'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			}
 			?>
-	<p class="search-box" style="position:relative">
-		<label class="screen-reader-text" for="<?php echo \esc_attr( $input_id ); ?>"><?php echo \esc_attr( $text ); ?>:</label>
-					<input type="search" id="<?php echo \esc_attr( $input_id ); ?>" class="wsal_search_input" name="s" value="<?php _admin_search_query(); ?>" />
-			<?php submit_button( $text, '', '', false, array( 'id' => 'search-submit' ) ); ?>
-	</p>
+			<p class="search-box" style="position:relative">
+				<label class="screen-reader-text" for="<?php echo \esc_attr( $input_id ); ?>"><?php echo \esc_attr( $text ); ?>:</label>
+					<?php
+					// @free:start
+					if ( $show_search_cta ) {
+						?>
+						<span class="wsal-search-helper-text">
+							<span class="dashicons dashicons-info" aria-hidden="true"></span>
+							<span><?php \esc_html_e( 'Quickly find the exact log data you need with advanced filters and saved searches with', 'wp-security-audit-log' ); ?>
+							<a href="<?php echo \esc_url( 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=audit-log-search-helper' ); ?>" target="_blank" rel="noopener noreferrer"><?php \esc_html_e( 'Premium', 'wp-security-audit-log' ); ?></a></span>
+						</span>
+						<?php
+					}
+					// @free:end
+					?>
+					<span class="wsal-search-controls">
+						<input type="search" id="<?php echo \esc_attr( $input_id ); ?>" class="wsal_search_input" name="s" value="<?php _admin_search_query(); ?>" />
+						<?php submit_button( $text, '', '', false, array( 'id' => 'search-submit' ) ); ?>
+					</span>
+			</p>
 			<?php
 		}
 
@@ -612,7 +632,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						// Additional user info tooltip.
 						$tooltip = User_Utils::get_tooltip_user_content( $user );
 
-						$uhtml = '<a class="tooltip" data-darktooltip="' . esc_attr( $tooltip ) . '" data-user="' . $user->user_login . '" href="' . $user_edit_link . '" target="_blank">' . esc_html( $display_name ) . '</a>';
+						$uhtml = '<a class="tooltip" data-darktooltip="' . \esc_attr( $tooltip ) . '" data-user="' . \esc_attr( $user->user_login ) . '" href="' . \esc_url( $user_edit_link ) . '" target="_blank">' . \esc_html( $display_name ) . '</a>';
 
 
 						$roles = User_Utils::get_roles_label( $item['user_roles'] );
@@ -1099,6 +1119,8 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 * Table navigation.
 		 *
 		 * @param string $which - Position of the nav.
+		 *
+		 * @since 5.6.4 - CSV export button now passes a server-side export token instead of a serialized query.
 		 */
 		public function extra_tablenav( $which ) {
 			// If the position is not top then render.

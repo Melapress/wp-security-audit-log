@@ -46,15 +46,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	protected $version;
 
 	/**
-	 * WSAL Adverts.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @var array
-	 */
-	private $adverts;
-
-	/**
 	 * Audit Log View Arguments.
 	 *
 	 * @since 3.3.1.1
@@ -81,12 +72,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_AjaxSearchSite', array( $this, 'ajax_search_site' ) );
 		add_action( 'wp_ajax_AjaxSwitchDB', array( $this, 'ajax_switch_db' ) );
 		add_action( 'wp_ajax_wsal_download_failed_login_log', array( $this, 'wsal_download_failed_login_log' ) );
-		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
 		add_action( 'wp_ajax_wsal_dismiss_setup_modal', array( __CLASS__, 'dismiss_setup_modal' ) );
 		// add_action( 'wp_ajax_wsal_dismiss_notice_addon_available', array( $this, 'dismiss_notice_addon_available' ) );
 		add_action( 'wp_ajax_wsal_dismiss_missing_aws_sdk_nudge', array( $this, 'dismiss_missing_aws_sdk_nudge' ) );
 		add_action( 'wp_ajax_wsal_dismiss_helper_plugin_needed_nudge', array( $this, 'dismiss_helper_plugin_needed_nudge' ) );
 		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( __CLASS__, 'dismiss_wp_pointer' ) );
+
+		// @free:start
+		\add_action( 'wsal_inspector_after_meta', array( __CLASS__, 'render_free_inspector_additional_links' ), 10, 1 );
+		// @free:end
 
 		add_action( 'all_admin_notices', array( '\WSAL\Helpers\Notices', 'init' ) );
 
@@ -108,128 +102,17 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->version = WSAL_VERSION;
-
-		// Set adverts array.
-		$this->adverts = array(
-			// 0 => array(
-			// 'head' => esc_html__( 'Upgrade to Premium and enable search filters so you can find the events you need within seconds, get notified via email or SMS about critical website changes, see who is logged-in to your website in real time, manage user sessions, create detailed reports, and much more!', 'wp-security-audit-log' ),
-			// 'desc' => esc_html__( '', 'wp-security-audit-log' ),
-			// ),
-			1 => array(
-				'head' => esc_html__( 'Instant SMS & email alerts, search & filters, reports, users sessions management and much more!', 'wp-security-audit-log' ),
-				'desc' => esc_html__( 'Upgrade to premium to get more out of your activity logs!', 'wp-security-audit-log' ),
-			),
-			2 => array(
-				'head' => esc_html__( 'See who logged in on your site in real-time, generate reports, get SMS & email alerts of critical changes and more!', 'wp-security-audit-log' ),
-				'desc' => esc_html__( 'Unlock these and other powerful features with WP Activity Log Premium.', 'wp-security-audit-log' ),
-			),
-		);
 	}
 
 	/**
 	 * Add premium extensions notice.
 	 *
 	 * Notices:
-	 *   1. Plugin advert.
-	 *   2. DB disconnection notice.
-	 *   3. Freemius opt-in/out notice.
+	 *   1. DB disconnection notice.
 	 */
 	public function admin_notices() {
 		$is_current_view = View_Manager::get_active_view() == $this; // phpcs:ignore
 
-		// Check if any of the extensions are activated.
-		if (
-			! \class_exists( 'WSAL_Ext_Plugin' )
-			&& ! \class_exists( 'WSAL_SearchExtension' )
-			&& ! \class_exists( 'WSAL_UserSessions_Plugin' )
-			&& ( 'anonymous' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) || // Anonymous mode option.
-			'skipped' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) )
-		) {
-			$wsal_premium_advert = \WSAL\Helpers\Settings_Helper::get_option_value( 'premium-advert', false ); // Get the advert to display.
-			$wsal_premium_advert = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
-
-			$more_info = add_query_arg(
-				array(
-					'utm_source'   => 'plugin',
-					'utm_medium'   => 'banner',
-					'utm_campaign' => 'wsal',
-					'utm_content'  => 'tell+me+more',
-				),
-				'https://melapress.com/features/'
-			);
-
-			if ( current_user_can( 'manage_options' ) && $is_current_view ) :
-
-				/*
-				?>
-				<div class="updated wsal_notice">
-					<div class="wsal_notice__wrapper">
-						<div class="wsal_notice__content">
-							<img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wsal-logo@2x.png">
-							<p>
-								<strong><?php echo isset( $this->adverts[ $wsal_premium_advert ]['head'] ) ? esc_html( $this->adverts[ $wsal_premium_advert ]['head'] ) : false; ?></strong><br>
-								<?php echo isset( $this->adverts[ $wsal_premium_advert ]['desc'] ) && ! empty( $this->adverts[ $wsal_premium_advert ]['desc'] ) ? esc_html( $this->adverts[ $wsal_premium_advert ]['desc'] ) : false; ?> <?php if ( isset( $this->adverts[ $wsal_premium_advert ]['desc'] ) && ! empty( $this->adverts[ $wsal_premium_advert ]['desc'] ) ) { ?>- <a href="<?php echo esc_url( $more_info ); ?>" target="_blank"><?php esc_html_e( 'Learn more', 'wp-security-audit-log' ); ?></a><?php } ?>
-							</p>
-						</div>
-						<!-- /.wsal_notice__content -->
-						<div class="wsal_notice__btns">
-							<?php
-							// Trial link arguments.
-							$trial_link = add_query_arg(
-								array(
-									'utm_source'   => 'plugin',
-									'utm_medium'   => 'banner',
-									'utm_campaign' => 'wsal',
-								),
-								'https://melapress.com/wordpress-activity-log/pricing/'
-							);
-
-							$buy_now = add_query_arg(
-								array(
-									'utm_source'   => 'plugin',
-									'utm_medium'   => 'banner',
-									'utm_campaign' => 'wsal',
-								),
-								'https://melapress.com/wordpress-activity-log/features/'
-							);
-							?>
-							<a href="<?php echo esc_url( $trial_link ); ?>" class="button button-primary wsal_notice__btn notice-cta" target="_blank"><?php esc_html_e( 'Get WP Activity Log Premium', 'wp-security-audit-log' ); ?></a>
-							<br>
-							<a href="<?php echo esc_url( $buy_now ); ?>" class="start-trial-link" style="text-transform: uppercase;" target="_blank"><?php esc_html_e( 'See plugin features', 'wp-security-audit-log' ); ?></a>
-						</div>
-						<!-- /.wsal_notice__btns -->
-					</div>
-					<!-- /.wsal_notice__wrapper -->
-				</div>
-				<?php */
-			endif;
-		}
-
-
-		// Check anonymous mode.
-		if ( 'anonymous' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) ) { // If user manually opt-out then don't show the notice.
-			if (
-				wsal_freemius()->is_anonymous() // Anonymous mode option.
-				&& wsal_freemius()->is_not_paying() // Not paying customer.
-				&& wsal_freemius()->has_api_connectivity() // Check API connectivity.
-				&& $is_current_view
-				&& Settings_Helper::current_user_can( 'edit' ) // Have permission to edit plugin settings.
-			) {
-				if ( ! WP_Helper::is_multisite() || ( WP_Helper::is_multisite() && is_network_admin() ) ) :
-					?>
-					<div class="notice notice-success">
-						<p><strong><?php esc_html_e( 'Help WP Activity Log improve.', 'wp-security-audit-log' ); ?></strong></p>
-						<p><?php echo esc_html__( 'You can help us improve the plugin by opting in to share non-sensitive data about the plugin usage. The technical data will be shared over a secure channel. Activity log data will never be shared. When you opt-in, you also subscribe to our announcement and newsletter (you can opt-out at any time). If you would rather not opt-in, we will not collect any data.', 'wp-security-audit-log' ) . ' <a href="https://melapress.com/support/kb/non-sensitive-diagnostic-data/" target="_blank">' . esc_html__( 'Read more about what data we collect and how.', 'wp-security-audit-log' ) . '</a>'; ?></p>
-						<p>
-							<a href="javascript:;" class="button button-primary" onclick="wsal_freemius_opt_in(this)" data-opt="yes"><?php esc_html_e( 'Sure, opt-in', 'wp-security-audit-log' ); ?></a>
-							<a href="javascript:;" class="button" onclick="wsal_freemius_opt_in(this)" data-opt="no"><?php esc_html_e( 'No, thank you', 'wp-security-audit-log' ); ?></a>
-							<input type="hidden" id="wsal-freemius-opt-nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-freemius-opt' ) ); ?>" />
-						</p>
-					</div>
-					<?php
-				endif;
-			}
-		}
 
 		// Display add-on available notice.
 		$screen = get_current_screen();
@@ -528,9 +411,50 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				echo '<strong>' . \esc_html( $item ) . ':</strong> <span style="opacity: 0.7;"><pre style="display:inline">' . \esc_html( $value ) . '</pre></span></br>';
 			}
 		}
+
+		$occurrence         = (array) Occurrences_Entity::load( 'id = %d', array( (int) $get_array['occurrence'] ), $wsal_db );
+		$inspected_alert_id = (int) ( $occurrence['alert_id'] ?? 0 );
+
+		\do_action( 'wsal_inspector_after_meta', $inspected_alert_id );
+
 		echo '</div>';
 		wp_die();
 	}
+
+	// @free:start
+	/**
+	 * Renders the free version additional inspector links for the inspected event.
+	 *
+	 * @param int $inspected_alert_id - The inspected alert ID.
+	 *
+	 * @return void
+	 *
+	 * @since 5.6.4
+	 */
+	public static function render_free_inspector_additional_links( int $inspected_alert_id ): void {
+		$notes_link_events   = array( 5000, 5001, 5002, 4007, 2051, 2046 );
+		$reports_link_events = array( 2000, 2001, 2100, 4000 );
+		$link_label          = '';
+		$link_title          = '';
+		$show_lock_icon      = false;
+
+		$inspector_link_url = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=inspector-cta-' . $inspected_alert_id;
+
+		if ( \in_array( $inspected_alert_id, $notes_link_events, true ) ) {
+			$link_label = \__( 'Add note', 'wp-security-audit-log' );
+			$link_title = \__( 'Add notes to activity log entries with Premium', 'wp-security-audit-log' );
+
+			$show_lock_icon = true;
+
+		} elseif ( \in_array( $inspected_alert_id, $reports_link_events, true ) ) {
+			$link_label = \__( 'Get scheduled reports for content and publishing activity with Premium', 'wp-security-audit-log' );
+		} else {
+			return;
+		}
+
+		echo '<div class="wsal-inspector-cta"><a href="' . \esc_url( $inspector_link_url ) . '" target="_blank" rel="noopener noreferrer"' . ( '' !== $link_title ? ' title="' . \esc_attr( $link_title ) . '"' : '' ) . '>' . \esc_html( $link_label ) . ( $show_lock_icon ? ' <span class="wsal-custom-notifications-lock" aria-hidden="true"></span>' : '' ) . '</a></div>';
+	}
+	// @free:end
 
 	/**
 	 * Ajax callback to search.
@@ -595,79 +519,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		die();
-	}
-
-	/**
-	 * Ajax callback to handle Freemius opt in/out.
-	 */
-	public function wsal_freemius_opt_in() {
-		// Die if not have access.
-		if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
-			die( 'Access Denied.' );
-		}
-
-		// Get post array through filter.
-		$nonce  = \sanitize_text_field( \wp_unslash( $_POST['opt_nonce'] ) ); // Nonce.
-		$choice = \sanitize_text_field( \wp_unslash( $_POST['choice'] ) ); // Choice selected by user.
-
-		// Verify nonce.
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-freemius-opt' ) ) {
-			// Nonce verification failed.
-			echo wp_json_encode(
-				array(
-					'success' => false,
-					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
-				)
-			);
-			exit();
-		}
-
-		// Check if choice is not empty.
-		if ( ! empty( $choice ) ) {
-			if ( 'yes' === $choice ) {
-				if ( ! WP_Helper::is_multisite() ) {
-					wsal_freemius()->opt_in(); // Opt in.
-				} else {
-					// Get sites.
-					$sites      = Freemius::get_sites();
-					$sites_data = array();
-
-					if ( ! empty( $sites ) ) {
-						foreach ( $sites as $site ) {
-							$sites_data[] = wsal_freemius()->get_site_info( $site );
-						}
-					}
-					wsal_freemius()->opt_in( false, false, false, false, false, false, false, false, $sites_data );
-				}
-
-				// Update Freemius state.
-				Settings_Helper::set_option_value( 'freemius_state', 'in', true );
-			} elseif ( 'no' === $choice ) {
-				if ( ! WP_Helper::is_multisite() ) {
-					wsal_freemius()->skip_connection(); // Opt out.
-				} else {
-					wsal_freemius()->skip_connection( null, true ); // Opt out for all websites.
-				}
-
-				// Update Freemius state.
-				Settings_Helper::set_option_value( 'freemius_state', 'skipped', true );
-			}
-
-			echo wp_json_encode(
-				array(
-					'success' => true,
-					'message' => esc_html__( 'Freemius opt choice selected.', 'wp-security-audit-log' ),
-				)
-			);
-		} else {
-			echo wp_json_encode(
-				array(
-					'success' => false,
-					'message' => esc_html__( 'Freemius opt choice not found.', 'wp-security-audit-log' ),
-				)
-			);
-		}
-		exit();
 	}
 
 	/**

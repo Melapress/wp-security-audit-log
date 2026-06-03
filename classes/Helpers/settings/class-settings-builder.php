@@ -806,7 +806,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 *
 		 * @return void
 		 *
-		 * @since 6.0.0
+		 * @since 5.6.3
 		 */
 		private static function active_constant_notice() {
 			if ( Credential_Settings_Helper::has_active_constant( self::$item_id ) ) {

@@ -115,6 +115,24 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 				}
 
 				/* Styles - START */
+				.wsal-premium-overview {
+					text-align: center;
+					margin-bottom: 40px;
+				}
+
+				.wsal-premium-overview h2 {
+					font-size: 1.375rem;
+					line-height: 1.25;
+					margin: 0 auto;
+					max-width: 728px;
+				}
+
+				.wsal-premium-overview .wsal-cta {
+					font-size: 1.125rem;
+					margin-top: 16px;
+					display: inline-block;
+				}
+
 				.wsal-features h1 {
 					color: #1A3060;
 					font-family: 'Quicksand', sans-serif;
@@ -197,7 +215,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 				/* Tablet and larger screens */
 				@media (min-width: 868px) {
 					.wsal-features h1 {
-						font-size: 3.4rem; /* Larger font size for tablets and above */
+						font-size: 2.8rem; /* Larger font size for tablets and above */
 					}
 
 					.wsal-feature-list {
@@ -221,116 +239,68 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 				/* Styles - END */
 			</style>
 			<section class="wsal-features">
-				<h1><strong><?php echo esc_html__( 'Premium features', 'wp-security-audit-log' ); ?></strong></h1>	
+				<h1><strong><?php echo esc_html__( 'Unlock advanced activity log capabilities', 'wp-security-audit-log' ); ?></strong></h1>	
+				<div class="wsal-premium-overview">
+					<h2><?php echo esc_html__( 'Get real-time alerts, advanced reporting, user session management, integrations, and more with WP Activity Log Premium.', 'wp-security-audit-log' ); ?></h2>
+					<p class="wsal-cta"><a href="<?php echo esc_url( 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=premium-features-top' ); ?>" target="_blank" class="wsal-cta-link"><?php echo esc_html__( 'View Pricing', 'wp-security-audit-log' ); ?></a></p>
+				</div>
 				<ul class="wsal-feature-list">
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-instant-alert.svg" alt="instant alerts">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-instant-alert.svg" alt="<?php echo esc_attr__( 'instant alerts', 'wp-security-audit-log' ); ?>">
 						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Receive instant SMS &#38; email alerts', 'wp-security-audit-log' ); ?></h2>
+							<h2><?php echo esc_html__( 'Get instantly alerted to critical activity', 'wp-security-audit-log' ); ?></h2>
 							<div>
-								<p><?php echo esc_html__( 'Know what is happening on your websites without having to login! Get instantly alerted of any user activities or site changes via SMS messages and emails. You can start right away with the built-in notifications or even create your own notification triggers.', 'wp-security-audit-log' ); ?></p>
+								<p><?php echo esc_html__( 'Get instantly notified via email, SMS, or Slack when important user activity or website changes happen, without needing to log in to your website.', 'wp-security-audit-log' ); ?></p>
 							</div>
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-user-sessions.svg" alt="WordPress activity log reports">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-user-sessions.svg" alt="<?php echo esc_attr__( 'WordPress activity log reports', 'wp-security-audit-log' ); ?>">
 						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Generate activity log reports', 'wp-security-audit-log' ); ?></h2>
+							<h2><?php echo esc_html__( 'Stay informed with automated activity reports', 'wp-security-audit-log' ); ?></h2>
 							<div>
-								<p><?php echo esc_html__( 'Generate user and system reports from the activity log including the update log. Reports are fully configurable and include White Labelling options. You can also schedule daily, weekly, monthly, or quarterly reports to be sent automatically to your inbox.', 'wp-security-audit-log' ); ?></p>
+								<p><?php echo esc_html__( 'Generate configurable activity log and user reports, schedule automatic email delivery, and create white-labelled reports for clients and teams.', 'wp-security-audit-log' ); ?></p>
 							</div>
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wp-activity-log-user-sessions.svg" alt="WP Activity Log user sessions">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wp-activity-log-user-sessions.svg" alt="<?php echo esc_attr__( 'WP Activity Log user sessions', 'wp-security-audit-log' ); ?>">
 						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Manage users sessions in real-time', 'wp-security-audit-log' ); ?></h2>
+							<h2><?php echo esc_html__( 'Prevent account sharing & manage user sessions', 'wp-security-audit-log' ); ?></h2>
 							<div>
-								<p><?php echo esc_html__( 'Use the real-time user activity monitor to remotely terminate sessions, block simultaneous same-user sessions, and automatically terminate idle sessions; with email notifications so that you can truly manage your WordPress from anywhere.', 'wp-security-audit-log' ); ?></p>
+								<p><?php echo esc_html__( 'See who is logged in to your website in real time, remotely terminate sessions, prevent simultaneous logins, and automatically log out idle users.', 'wp-security-audit-log' ); ?></p>
 							</div>
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-easy-search.svg" alt="easy activity log search">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-easy-search.svg" alt="<?php echo esc_attr__( 'easy activity log search', 'wp-security-audit-log' ); ?>">
 						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Easily track down specific activity', 'wp-security-audit-log' ); ?></h2>
+							<h2><?php echo esc_html__( 'Troubleshoot issues faster', 'wp-security-audit-log' ); ?></h2>
 							<div>
-								<p><?php echo esc_html__( 'Use the extensive built-in filters to fine tune the log viewer search results and easily track down specific WordPress system and user changes. Filter configurations can also be saved for future use to find what you are looking for within seconds.', 'wp-security-audit-log' ); ?></p>
-							</div>
-						</div>
-					</li>
-					<li><img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/database.svg" alt="activity log database">
-						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Store the logs in an external database', 'wp-security-audit-log' ); ?></h2>
-							<div>
-								<p><?php echo esc_html__( 'Improve the security posture of your website and store the activity log in an external database. By doing so you also safeguard the integrity of the logs in an unfortunate case of a website hack.', 'wp-security-audit-log' ); ?></p>
+								<p><?php echo esc_html__( 'Quickly track down specific activity using advanced filters, saved searches, and detailed activity insights.', 'wp-security-audit-log' ); ?></p>
 							</div>
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/manage-the-logs.svg" alt="manage logs activity">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/database.svg" alt="<?php echo esc_attr__( 'activity log database', 'wp-security-audit-log' ); ?>">
 						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Archive old activity log data', 'wp-security-audit-log' ); ?></h2>
+							<h2><?php echo esc_html__( 'Store and manage activity logs at scale', 'wp-security-audit-log' ); ?></h2>
 							<div>
-								<p><?php echo esc_html__( 'Configure the plugin to automatically archive log data that is older than a specific period to another database. Keep the log organized, easier to search, compact, and blazing fast.', 'wp-security-audit-log' ); ?></p>
-							</div>
-						</div>
-					</li>
-					<li><img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/integration-with-log-managment.svg" alt="integration with log management">
-						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Logs &#38; business systems integration', 'wp-security-audit-log' ); ?></h2>
-							<div>
-								<p><?php echo esc_html__( 'Mirror the activity log in real time to your central logs management system so you do not have to log in to the websites and see what is happening from one central place. WP Activity Log supports AWS CloudWatch, Loggly, Slack, and others.', 'wp-security-audit-log' ); ?></p>
+								<p><?php echo esc_html__( 'Store logs in external databases, archive older data automatically, and integrate with services like AWS CloudWatch, Slack, and Loggly.', 'wp-security-audit-log' ); ?></p>
 							</div>
 						</div>
 					</li>
 					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/mirror-the-log-files.svg" alt="mirror the log files">
+						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/premium-support.svg" alt="<?php echo esc_attr__( 'premium support', 'wp-security-audit-log' ); ?>">
 						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Mirror the activity log to log files', 'wp-security-audit-log' ); ?></h2>
+							<h2><?php echo esc_html__( 'Get fast, professional support when you need it', 'wp-security-audit-log' ); ?></h2>
 							<div>
-								<p><?php echo esc_html__( 'Mirror the activity logs to a log file as a backup, while making it easier to import the activity log to your custom logs management system. Configure the plugin to write the activity log to a log file so the logs can be read and parsed by your system.', 'wp-security-audit-log' ); ?></p>
-							</div>
-						</div>
-					</li>
-					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-send-activity-log.svg" alt="wsal send activity log">
-						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Send activity logs directly to third party systems', 'wp-security-audit-log' ); ?></h2>
-							<div>
-								<p><?php echo esc_html__( 'When you send the activity log to a log file or a third party logs management system you can configure the plugin to not write any activity log data to the database, avoiding redundant data.', 'wp-security-audit-log' ); ?></p>
-							</div>
-						</div>
-					</li>
-					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/plugin-setting-configuration.svg" alt="plugin setting configuration">
-						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Export &#38; import plugin settings configuration', 'wp-security-audit-log' ); ?></h2>
-							<div>
-								<p><?php echo esc_html__( 'Export the plugin settings configuration to keep a backup, or to import the same plugin configuration on other websites, allowing you to have a base configuration and easily propagate it to other websites.', 'wp-security-audit-log' ); ?></p>
-							</div>
-						</div>
-					</li>
-					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/wsal-specific-activity.svg" alt="wsal specific activity">
-						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Delete specific activity log data', 'wp-security-audit-log' ); ?></h2>
-							<div>
-								<p><?php echo esc_html__( 'Need to delete data for a specific user, IP address, or another object? Use the activity log data manager to delete specific data that you do not want in your log.', 'wp-security-audit-log' ); ?></p>
-							</div>
-						</div>
-					</li>
-					<li>
-						<img width="128" height="128" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Views/assets/images/premium-support.svg" alt="premium support">
-						<div class="wsal-feature-content">
-							<h2><?php echo esc_html__( 'Premium support', 'wp-security-audit-log' ); ?></h2>
-							<div>
-								<p><?php echo esc_html__( 'Get professional email support within just a few hours from people who care. Our knowledgeable support team is proud of our 8-hour average response time.', 'wp-security-audit-log' ); ?></p>
+								<p><?php echo esc_html__( 'Get fast, professional support from a real human with an average response time of under 8 hours.', 'wp-security-audit-log' ); ?></p>
 							</div>
 						</div>
 					</li>
 				</ul>
-				<p class="wsal-cta"><a href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=premium-features-page-cta" target="_blank" class="wsal-cta-link">Get WP Activity Log Premium</a></p>
+				<p class="wsal-cta"><a href="<?php echo \esc_url( 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=premium-features-page-cta-bottom' ); ?>" target="_blank" class="wsal-cta-link"><?php echo esc_html__( 'Get WP Activity Log Premium', 'wp-security-audit-log' ); ?></a></p>
 			</section>
 			<?php
 		}

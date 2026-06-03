@@ -482,8 +482,89 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 				unset( $link_label );
 			}
 
+			// @free:start
+			$result = self::add_free_version_additional_links( $result, $alert );
+			// @free:end
+
 			return $result;
 		}
+
+		// @free:start
+		/**
+		 * Adds the free version additional links for the alert.
+		 *
+		 * @param array $result - The link collection.
+		 * @param array $alert - The alert data.
+		 *
+		 * @return array $result - The link collection.
+		 * @since 5.6.4
+		 */
+		private static function add_free_version_additional_links( array $result, array $alert ): array {
+			$alert_id = (int) ( $alert['code'] ?? 0 );
+
+			if ( 0 >= $alert_id ) {
+				return $result;
+			}
+
+			$free_version_additional_links = self::get_free_version_viewer_additional_links();
+
+			$hook_additional_links = (array) \apply_filters( 'wsal_free_additional_event_links', array() );
+
+			foreach ( $hook_additional_links as $event_id => $link_labels ) {
+				foreach ( (array) $link_labels as $link_label ) {
+					$free_version_additional_links[ (int) $event_id ][] = (string) $link_label;
+				}
+			}
+
+			if ( ! isset( $free_version_additional_links[ $alert_id ] ) ) {
+				return $result;
+			}
+
+			foreach ( (array) $free_version_additional_links[ $alert_id ] as $link_label ) {
+				$link_url              = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=viewer-cta-' . $alert_id;
+				$result[ $link_label ] = array(
+					'url'              => $link_url,
+					'needs_formatting' => true,
+					'title'            => $link_label,
+					'label'            => $link_label,
+				);
+			}
+
+			return $result;
+		}
+
+		/**
+		 * Returns the free version additional links shown in the log viewer.
+		 *
+		 * Each entry maps an event ID to one or more link labels.
+		 *
+		 * @return array $links - Map of event ID to link labels.
+		 *
+		 * @since 5.6.4
+		 */
+		private static function get_free_version_viewer_additional_links(): array {
+			$alerts_link_label   = \esc_html__( 'Get instant alerts for events like this with Premium', 'wp-security-audit-log' );
+			$sessions_link_label = \esc_html__( 'Monitor and manage active user sessions with Premium', 'wp-security-audit-log' );
+
+			return array(
+				/**
+				 * General events.
+				 */
+				1004 => array( $alerts_link_label ),
+				4002 => array( $alerts_link_label ),
+				4008 => array( $alerts_link_label ),
+				4025 => array( $alerts_link_label ),
+				6004 => array( $alerts_link_label ),
+				/**
+				 * Session management-related events.
+				 */
+				1000 => array( $sessions_link_label ),
+				1005 => array( $sessions_link_label ),
+				1007 => array( $sessions_link_label ),
+				1009 => array( $sessions_link_label ),
+			);
+		}
+		// @free:end
 
 		/**
 		 * Gets the post revision link title.

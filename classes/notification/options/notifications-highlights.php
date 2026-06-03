@@ -67,18 +67,15 @@ $settings_url = \add_query_arg(
 	\network_admin_url( 'admin.php' )
 ) . '#wsal-options-tab-notification-settings';
 
-// phpcs:disable
-// phpcs:enable
+
+$general_settings_content = '<p>' . \esc_html__( 'Use this section to configure a daily or weekly activity log summary, or both. This gives you a regular overview of key events.', 'wp-security-audit-log' ) . '</p>';
+
 
 Settings_Builder::build_option(
 	array(
 		'id'      => 'general-settings-tab',
 		'type'    => 'html',
-		'content' => '<p>' . \wp_sprintf(
-			esc_html__( 'Use this section to configure a daily or weekly activity log summary, or both. This gives you a regular overview of key events.', 'wp-security-audit-log' ) . '</p>' .
-
-			'<p>' . esc_html__( 'Customize your summary notifications by selecting which highlights to include and specifying the email address(es) where the summaries should be sent. This helps you stay informed about important activity on your site without needing to review the full log.', 'wp-security-audit-log' ) . '</p>'
-		),
+		'content' => $general_settings_content,
 	)
 );
 
@@ -194,10 +191,36 @@ if ( isset( $notifications['notification_weekly_email_address'] ) && ! empty( $n
 	);
 }
 
+// @free:start
+if ( \wsal_freemius()->is_free_plan() ) {
+	$custom_notifications_lock = '<span class="wsal-custom-notifications-lock" aria-hidden="true"></span>';
+
+	$custom_notifications_unlock_url = \esc_url( 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=notifications-custom-activity-log-notifications' );
+
+	Settings_Builder::build_option(
+		array(
+			'title'         => \esc_html__( 'Custom activity log notifications', 'wp-security-audit-log' ) . ' ' . $custom_notifications_lock,
+			'id'            => 'custom-notifications-unlock-settings',
+			'type'          => 'header',
+			'settings_name' => Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME,
+		)
+	);
+
+	Settings_Builder::build_option(
+		array(
+			'id'      => 'custom-notifications-unlock',
+			'type'    => 'html',
+			'content' => '<div id="custom-notifications-unlock-item" class="option-item wsal-custom-notifications-unlock">' .
+				'<p>' . \esc_html__( 'Create custom report schedules, get instant alerts via email, SMS, and Slack, create advanced notification rules, and more.', 'wp-security-audit-log' ) . '</p>' .
+				'<p><a class="wsal-primary-button button" href="' . $custom_notifications_unlock_url . '" target="_blank" rel="noopener noreferrer">' . \esc_html__( 'Unlock Advanced Notifications', 'wp-security-audit-log' ) . '</a></p>' .
+			'</div>',
+		)
+	);
+}
+// @free:end
+
 // Sections include.
 
-// phpcs:disable
-// phpcs:enable
 ?>
 
 <input type="hidden" name="<?php echo Notifications::NOTIFICATIONS_SETTINGS_NAME;  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>[]" value="0" />
