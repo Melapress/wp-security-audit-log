@@ -160,7 +160,8 @@ function WsalSsasInit() {
 			SsasInp.addClass('loading');
 			SsasAjx = jQuery.post(WsalData.ajaxurl, {
 				action: 'AjaxSearchSite',
-				search: SsasVal
+				search: SsasVal,
+				nonce: wsalAuditLogArgs.viewerNonce
 			}, function (data) {
 				if (SsasAjx) SsasAjx = null;
 				SsasInp.removeClass('loading');

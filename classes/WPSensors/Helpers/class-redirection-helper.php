@@ -75,17 +75,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Redirection_Helper' ) ) {
 		 */
 		public static function is_redirection_active() {
 			if ( null === self::$plugin_active ) {
-				// self::$plugin_active = WP_Helper::is_plugin_active( 'redirection/redirection.php' );
-
-				// if ( WP_Helper::is_multisite() ) {
-					// Check if the plugin is active on the main site.
 				if ( defined( 'REDIRECTION_DB_VERSION' ) ) {
-					// Plugin is enabled, run your code...
 					self::$plugin_active = true;
 				} else {
 					self::$plugin_active = false;
 				}
-				// }
 			}
 
 			return self::$plugin_active;

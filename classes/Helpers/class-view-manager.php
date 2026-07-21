@@ -272,7 +272,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				add_submenu_page(
 					'wsal-auditlog',
 					'Upgrade',
-					'<span class="fs-submenu-item wp-security-audit-log pricing upgrade-mode" style="display: block; margin: 6px 10px 4px 0; padding: 8px 12px; border-radius: 5px; border: 1px solid #009344; background: linear-gradient(180deg, rgba(248, 231, 28, 0.20) 0%, rgba(56, 74, 47, 0.20) 100%), #009344; color: #fff; line-height: 1; text-align: center; font-size: 14px; font-weight: 600;">Upgrade</span>',
+					'<span class="fs-submenu-item wp-security-audit-log pricing upgrade-mode" style="color:#FF8977;">Upgrade to Premium</span>',
 					'read', // No capability requirement.
 					'upgrade',
 					array(),
@@ -300,7 +300,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 					if ( 1 === count( $new_links ) && ! wsal_freemius()->is__premium_only() ) {
 						// Trial link.
-						$trial_link  = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+						$trial_link  = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=plugins-page-get-premium';
 						$new_links[] = '<a style="font-weight:bold; color:#049443 !important" href="' . $trial_link . '" target="_blank">' . __( 'Get Premium!', 'wp-security-audit-log' ) . '</a>';
 					}
 				}

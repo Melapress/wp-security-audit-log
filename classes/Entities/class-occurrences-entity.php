@@ -378,7 +378,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 				$cached_message = isset( $cached_message ) ? $cached_message : sprintf(
 				/* Translators: 1: html that opens a link, 2: html that closes a link. */
 					__( 'This type of activity / change is no longer monitored. You can create your own custom event IDs to keep a log of such change. Read more about custom events %1$shere%2$s.', 'wp-security-audit-log' ),
-					'<a href="https://melapress.com/support/kb/create-custom-events-wordpress-activity-log/" rel="noopener noreferrer" target="_blank">',
+					'<a href="https://melapress.com/support/kb/create-custom-events-wordpress-activity-log/?utm_source=plugin&utm_medium=wsal&utm_campaign=event-custom-events-kb" rel="noopener noreferrer" target="_blank">',
 					'</a>'
 				);
 			}

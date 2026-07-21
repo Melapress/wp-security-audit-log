@@ -37,19 +37,20 @@ if ( ! class_exists( '\WSAL\Entities\DBConnection\MySQL_Connection' ) ) {
 		 * Overwrite wpdb class for set $allow_bail to false
 		 * and hide the print of the error
 		 *
-		 * @global string $wp_version
-		 * @param string $dbuser          - MySQL database user.
-		 * @param string $dbpassword      - MySQL database password.
-		 * @param string $dbname          - MySQL database name.
-		 * @param string $dbhost          - MySQL database host.
-		 * @param bool   $is_ssl          - Set if connection is SSL encrypted.
-		 * @param bool   $is_cc           - Set if connection has client certificates.
-		 * @param string $ssl_ca          - Certificate Authority.
-		 * @param string $ssl_cert        - Client Certificate.
-		 * @param string $ssl_key         - Client Key.
-		 * @param string $dbport          - MySQL database host.
+		 * @global string  $wp_version
+		 * @param string   $dbuser          - MySQL database user.
+		 * @param string   $dbpassword      - MySQL database password.
+		 * @param string   $dbname          - MySQL database name.
+		 * @param string   $dbhost          - MySQL database host.
+		 * @param bool     $is_ssl          - Set if connection is SSL encrypted.
+		 * @param bool     $is_cc           - Set if connection has client certificates.
+		 * @param string   $ssl_ca          - Certificate Authority.
+		 * @param string   $ssl_cert        - Client Certificate.
+		 * @param string   $ssl_key         - Client Key.
+		 * @param string   $dbport          - MySQL database host.
+		 * @param int|null $connect_timeout - Connection timeout in seconds.
 		 */
-		public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key, $dbport = '' ) {
+		public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key, $dbport = '', $connect_timeout = null ) {
 
 			if ( WP_DEBUG && WP_DEBUG_DISPLAY ) {
 				$this->show_errors();
@@ -92,7 +93,7 @@ if ( ! class_exists( '\WSAL\Entities\DBConnection\MySQL_Connection' ) ) {
 				}
 			}
 
-			$this->db_connect( false );
+			$this->db_connect( false, $connect_timeout );
 		}
 
 		/**
@@ -159,13 +160,15 @@ if ( ! class_exists( '\WSAL\Entities\DBConnection\MySQL_Connection' ) ) {
 		 * If $allow_bail is false, the lack of database connection will need
 		 * to be handled manually.
 		 *
-		 * @param bool $allow_bail Optional. Allows the function to bail. Default true.
+		 * @param bool     $allow_bail      - Optional. Allows the function to bail. Default true.
+		 * @param int|null $connect_timeout - Optional. Connection timeout in seconds.
 		 *
 		 * @return bool True with a successful connection, false on failure.
 		 * @since 3.0.0
 		 * @since 3.9.0 $allow_bail parameter added.
+		 * @since 5.6.5 $connect_timeout parameter added.
 		 */
-		public function db_connect( $allow_bail = true ) {
+		public function db_connect( $allow_bail = true, $connect_timeout = null ) {
 			$this->is_mysql = true;
 			$client_flags   = defined( 'MYSQL_CLIENT_FLAGS' ) ? MYSQL_CLIENT_FLAGS : 0;
 			if ( $this->use_mysqli ) {
@@ -177,6 +180,10 @@ if ( ! class_exists( '\WSAL\Entities\DBConnection\MySQL_Connection' ) ) {
 				mysqli_report( MYSQLI_REPORT_OFF ); // phpcs:ignore -- Direct DB access
 
 				$this->dbh = mysqli_init(); // phpcs:ignore
+
+				if ( null !== $connect_timeout && 0 < $connect_timeout ) {
+					mysqli_options( $this->dbh, MYSQLI_OPT_CONNECT_TIMEOUT, $connect_timeout ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_options -- Required before connecting because wpdb has no API for setting a connection timeout.
+				}
 
 				// mysqli_real_connect doesn't support the host param including a port or socket
 				// like mysql_connect does. This duplicates how mysql_connect detects a port and/or socket file.

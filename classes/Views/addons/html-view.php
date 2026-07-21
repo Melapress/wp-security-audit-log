@@ -12,11 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $utm_params = array(
 	'utm_source'   => 'plugin',
-	'utm_medium'   => 'button',
-	'utm_campaign' => 'wsal',
+	'utm_medium'   => 'wsal',
+	'utm_campaign' => 'premium-page-more-info',
 );
 
-$buy_now_utm_params = $utm_params;
+$buy_now_utm_params                 = $utm_params;
+$buy_now_utm_params['utm_campaign'] = 'premium-page-buy-now';
 
 if ( property_exists( $this, 'hook_suffix' ) ) {
 	switch ( $this->hook_suffix ) {
@@ -51,10 +52,10 @@ $more_info = add_query_arg(
 	'https://melapress.com/wordpress-activity-log/features/'
 );
 
-// Buy Now button link.
+// Buy Now button link. https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=premium-page-buy-now&utm_content=upgrade+now+reports .
 $buy_now        = add_query_arg(
 	$buy_now_utm_params,
-	'https://melapress.com/wordpress-activity-log/pricing/#utm_source=plugin&utm_medium=link&utm_campaign=wsal'
+	'https://melapress.com/wordpress-activity-log/pricing/'
 );
 $buy_now_target = ' target="_blank"';
 

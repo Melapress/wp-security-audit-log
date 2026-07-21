@@ -140,12 +140,12 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 				 * - Attach to the update hook from the Redirection plugin
 				 * - Collect object (current) to compare against
 				 */
-				\add_action(
+				\add_filter(
 					'rest_dispatch_request',
 					function ( $first, $request, $route, $handler ) use ( &$self ) {
 
 						if ( ! is_array( $handler['callback'] ) ) {
-							return;
+							return $first;
 						}
 
 						// Redirection REST is called - collecting data - start.
@@ -175,7 +175,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 									$self::add_redirect_old_object( intval( $item, 10 ), \Red_Item::get_by_id( $item ) );
 								}
 
-								\add_action(
+								\add_filter(
 									'rest_request_after_callbacks',
 									function ( $response, $handler, $request ) use ( &$self ) {
 										$alert_id = 10508;
@@ -201,7 +201,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 								);
 							} elseif ( 'disable' === $action ) {
 
-								\add_action(
+								\add_filter(
 									'rest_request_after_callbacks',
 									function ( $response, $handler, $request ) use ( &$self ) {
 										$alert_id = 10503;
@@ -226,7 +226,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 									3
 								);
 							} elseif ( 'enable' === $action ) {
-								\add_action(
+								\add_filter(
 									'rest_request_after_callbacks',
 									function ( $response, $handler, $request ) use ( &$self ) {
 										$alert_id = 10502;
@@ -251,7 +251,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 									3
 								);
 							} elseif ( 'reset' === $action ) {
-								\add_action(
+								\add_filter(
 									'rest_request_after_callbacks',
 									function ( $response, $handler, $request ) use ( &$self ) {
 										$alert_id = 10504;
@@ -277,49 +277,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 								);
 							}
 						}
-						// Redirection REST is called - collecting data - end.
-
-						// Redirection Group REST is called - collecting data - start.
-
-						/*
-						That is fot future use (groups part) this version focus is redirection
-						if ( isset( $handler['callback'] ) &&
-						isset( $handler['callback'][0] ) &&
-						isset( $handler['callback'][1] ) &&
-						is_a( $handler['callback'][0], '\Redirection_Api_Group' ) &&
-						'route_create' === $handler['callback'][1]
-						) {
-							\add_action(
-								'rest_request_after_callbacks',
-								function ( $response, $handler, $request ) use ( &$self ) {
-									global $wpdb;
-
-									$created_group_id = $wpdb->get_var( $wpdb->prepare( "SELECT MAX(id) FROM {$wpdb->prefix}redirection_groups LIMIT %d", 1 ) );
-
-									$group = \Red_Group::get( $created_group_id );
-
-									$variables = $self::set_default_redirection_group_array_values( $group );
-
-									$alert_id = 10509;
-									Alert_Manager::trigger_event( $alert_id, $variables );
-
-									return $response;
-								},
-								PHP_INT_MAX,
-								3
-							);
-						}
-						Groups part end.
-						*/
-						// Redirection Group REST is called - collecting data - start.
-
 						return $first;
 					},
 					PHP_INT_MAX,
 					4
 				);
 
-				\add_action(
+				\add_filter(
 					'redirection_update_redirect',
 					function ( $data ) use ( &$self ) {
 
@@ -429,10 +393,6 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 		private static function set_default_redirection_array_values( \Red_Item $data ): array {
 			$group = \Red_Group::get( $data->get_group_id() );
 
-			// $url = new \Red_Url( $data->get_url() );
-
-			// $target_url = $data->match->get_target_url( $data->get_match_url(), $data->get_url() );
-
 			$variables = array(
 				'Status'      => ( $data->is_enabled() ) ? \__( 'Activated', 'wp-security-audit-log' ) : \__( 'Deactivated', 'wp-security-audit-log' ),
 				'SourceURL'   => $data->get_match_url(),
@@ -450,29 +410,6 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\Redirection_Sensor' ) ) {
 				'position'    => $data->get_position(),
 				'group_id'    => $data->get_group_id(),
 				'EditorLink'  => self::get_redirection_link(),
-			);
-
-			return $variables;
-		}
-
-		/**
-		 * Populates Alert array with the defaults for the given redirection group
-		 *
-		 * @param \Red_Group $data - The redirection group object.
-		 *
-		 * @return array
-		 *
-		 * @since 5.1.0
-		 */
-		private static function set_default_redirection_group_array_values( \Red_Group $data ): array {
-			$module    = \Red_Module::get( $data->get_module_id() );
-			$variables = array(
-				'Status'      => ( $data->is_enabled() ) ? \__( 'Activated', 'wp-security-audit-log' ) : \__( 'Deactivated', 'wp-security-audit-log' ),
-				'ID'          => $data->get_id(),
-				'GroupTitle'  => $data->get_name(),
-				'ModuleID'    => $data->get_module_id(),
-				'ModuleTitle' => $module->get_name(),
-				'EditorLink'  => self::get_redirection_group_link(),
 			);
 
 			return $variables;

@@ -70,7 +70,7 @@ if ( ! class_exists( '\WSAL\Helpers\User_Utils' ) ) {
 		/**
 		 * Build the correct label to display for a given user.
 		 *
-		 * @param WP_User $user   WordPress user object.
+		 * @param \WP_User $user   WordPress user object.
 		 *
 		 * @return string
 		 *

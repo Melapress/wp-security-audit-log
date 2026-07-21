@@ -88,6 +88,13 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 					self::display_notice_upgrade();
 				}
 
+				// @free:start
+				$notice_feature_highlight = Settings_Helper::get_boolean_option_value( Abstract_Migration::FEATURE_HIGHLIGHT_NOTICE, false );
+				if ( $notice_feature_highlight ) {
+					self::display_feature_highlight_notice();
+				}
+				// @free:end
+
 				// if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
 				// $ebook = Settings_Helper::get_boolean_option_value( self::EBOOK_NOTICE, false );
 				// if ( ! $ebook ) {
@@ -132,6 +139,15 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				++self::$number_of_notices;
 			}
 
+			// @free:start
+			$notice_feature_highlight = Settings_Helper::get_boolean_option_value( Abstract_Migration::FEATURE_HIGHLIGHT_NOTICE, false );
+			if ( $notice_feature_highlight ) {
+				\add_action( 'wp_ajax_wsal_dismiss_feature_highlight_notice', array( __CLASS__, 'dismiss_feature_highlight_notice' ) );
+
+				++self::$number_of_notices;
+			}
+			// @free:end
+
 			// ! \WpSecurityAuditLog::get_plugin_version() does not work in this hook action, do not use it.
 			// if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
 			// $ebook = Settings_Helper::get_boolean_option_value( self::EBOOK_NOTICE, false );
@@ -175,10 +191,182 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 		 * Display upgrade notice.
 		 *
 		 * @since 5.1.0
+		 * @since 5.6.5 Replaced the large update banner with a minimal notice.
 		 */
 		public static function display_notice_upgrade() {
-			include_once WSAL_BASE_DIR . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'Free' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'plugin-update-card.php';
+			$message = sprintf(
+				/* translators: 1: Plugin name. 2: Plugin version number. */
+				\__( '%1$s has been updated to version %2$s', 'wp-security-audit-log' ),
+				'<strong>WP Activity Log</strong>',
+				'<strong>' . WSAL_VERSION . '</strong>'
+			);
+
+			?>
+			<style>
+				.wsal-update-notice {
+					position: relative;
+					background-color: #fff;
+					border: 1px solid #c3c4c7;
+					border-left: 4px solid #009344;
+					margin: 64px 20px 16px 0;
+					padding: 0 40px 0 12px;
+					font-size: 0.8125rem;
+				}
+
+				.wsal-update-notice p {
+					margin: 0.5em 0;
+				}
+
+				.wsal-update-notice a {
+					color: #009344;
+				}
+
+				.wsal-update-notice strong {
+					color: #009344;
+				}
+
+				.wsal-update-notice-close {
+					position: absolute;
+					top: 0;
+					right: 1px;
+					padding: 9px;
+					border: none;
+					margin: 0;
+					background: none;
+					color: #787c82;
+					cursor: pointer;
+				}
+
+				.wsal-update-notice-close::before {
+					content: "\f153";
+					font-family: dashicons;
+					font-style: normal;
+					font-weight: normal;
+					font-size: 1rem;
+					line-height: 1.25;
+					-webkit-font-smoothing: antialiased;
+				}
+
+				.wsal-update-notice-close:hover,
+				.wsal-update-notice-close:focus {
+					color: #d63638;
+				}
+			</style>
+			<div class="wsal-update-notice wsal-notice"<?php echo self::should_show_black_friday_notice() ? ' style="display: none;"' : ''; ?> data-dismiss-action="wsal_dismiss_upgrade_notice" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_upgrade_notice' ) ); ?>">
+				<p>
+					<?php echo \wp_kses( $message, Plugin_Settings_Helper::get_allowed_html_tags() ); ?>
+					&ndash; <a href="https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=plugin&utm_medium=wsal&utm_campaign=update-notice-changelog" target="_blank" rel="noopener"><?php \esc_html_e( 'view changelog', 'wp-security-audit-log' ); ?></a>
+				</p>
+				<button type="button" class="wsal-update-notice-close wsal-plugin-notice-close" aria-label="<?php \esc_attr_e( 'Dismiss this notice', 'wp-security-audit-log' ); ?>"></button>
+			</div>
+			<?php
 		}
+
+		// @free:start
+		/**
+		 * Display the feature highlight notice shown after a plugin upgrade.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.5
+		 */
+		public static function display_feature_highlight_notice() {
+			?>
+			<style>
+				.wsal-feature-highlight-notice {
+					position: relative;
+					display: flex;
+					gap: 16px;
+					background: #fafbf3;
+					border-radius: 5px;
+					box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
+					margin: 64px 20px 16px 0;
+					padding: 16px 48px 16px 16px;
+					color: #3c434a;
+				}
+
+				.wsal-update-notice ~ .wsal-feature-highlight-notice {
+					margin-top: 16px;
+				}
+
+				.wsal-feature-highlight-notice::before {
+					content: '';
+					background: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/wp-activity-log-icon.svg') no-repeat center / contain;
+					flex-shrink: 0;
+					height: 44px;
+					width: 44px;
+				}
+
+				.wsal-feature-highlight-notice h2 {
+					color: #3c434a;
+					font-size: 1.25rem;
+					font-weight: 600;
+					line-height: 1.3;
+					margin: 0 0 8px;
+					padding: 0;
+				}
+
+				.wsal-feature-highlight-notice p {
+					font-size: 0.875rem;
+					line-height: 1.6;
+					margin: 0 0 16px;
+				}
+
+				.wsal-feature-highlight-notice-upgrade {
+					background: #009344;
+					border-radius: 5px;
+					color: #fff;
+					display: inline-block;
+					font-size: 0.875rem;
+					line-height: 1;
+					padding: 8px 12px;
+					text-decoration: none;
+				}
+
+				.wsal-feature-highlight-notice-upgrade:hover,
+				.wsal-feature-highlight-notice-upgrade:focus {
+					background: #007a39;
+					color: #fff;
+				}
+
+				.wsal-feature-highlight-notice-close {
+					position: absolute;
+					top: 8px;
+					right: 5px;
+					padding: 6px;
+					border: none;
+					margin: 0;
+					background: none;
+					color: #787c82;
+					cursor: pointer;
+				}
+
+				.wsal-feature-highlight-notice-close::before {
+					content: "\f153";
+					font-family: dashicons;
+					font-style: normal;
+					font-weight: normal;
+					font-size: 1rem;
+					line-height: 1.25;
+					-webkit-font-smoothing: antialiased;
+				}
+
+				.wsal-feature-highlight-notice-close:hover,
+				.wsal-feature-highlight-notice-close:focus {
+					color: #d63638;
+				}
+			</style>
+			<div class="wsal-feature-highlight-notice wsal-notice" data-dismiss-action="wsal_dismiss_feature_highlight_notice" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_feature_highlight_notice' ) ); ?>">
+				<div>
+					<h2><?php \esc_html_e( 'Know about important changes before they become problems', 'wp-security-audit-log' ); ?></h2>
+					<p><?php \esc_html_e( 'Receive alerts for critical activity, monitor active user sessions, and keep a complete audit trail of everything happening on your site.', 'wp-security-audit-log' ); ?></p>
+					<a class="wsal-feature-highlight-notice-upgrade" href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=update-feature-highlight-banner" target="_blank" rel="noopener"><?php \esc_html_e( 'Unlock Premium Features', 'wp-security-audit-log' ); ?></a>
+				</div>
+				<button type="button" class="wsal-feature-highlight-notice-close wsal-plugin-notice-close" aria-label="<?php \esc_attr_e( 'Dismiss this notice', 'wp-security-audit-log' ); ?>"></button>
+			</div>
+			<?php
+		}
+		// @free:end
 
 		/**
 		 * Display upgrade notice.
@@ -206,6 +394,28 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 			Settings_Helper::delete_option_value( Abstract_Migration::UPGRADE_NOTICE );
 			\wp_send_json_success();
 		}
+
+		// @free:start
+		/**
+		 * Method: Ajax request handler to dismiss the feature highlight notice.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.5
+		 */
+		public static function dismiss_feature_highlight_notice() {
+			if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
+				\wp_send_json_error();
+			}
+
+			if ( ! \wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['nonce'] ?? '' ) ), 'dismiss_feature_highlight_notice' ) ) {
+				\wp_send_json_error( \esc_html__( 'nonce is not provided or incorrect', 'wp-security-audit-log' ) );
+			}
+
+			Settings_Helper::delete_option_value( Abstract_Migration::FEATURE_HIGHLIGHT_NOTICE );
+			\wp_send_json_success();
+		}
+		// @free:end
 
 		/**
 		 * Method: Ajax request handler to dismiss ebook notice.
@@ -731,11 +941,11 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 			<script>
 				document.addEventListener('DOMContentLoaded', function() {
 					const wsalBfNotice = document.getElementById('wsal-black-friday-notice');
-					const wsalUpgradeNotice = document.querySelector('.wsal-plugin-update');
+					const wsalUpgradeNotice = document.querySelector('.wsal-update-notice');
 
 					const wsalShowUpgradeNotice = () => {
 						if (wsalUpgradeNotice) {
-							wsalUpgradeNotice.style.display = 'flex';
+							wsalUpgradeNotice.style.display = 'block';
 						}
 					};
 

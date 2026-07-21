@@ -592,7 +592,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 		 */
 		private static function get_post_revision_link( $post_id, $url ): string {
 			if ( \defined( 'WP_POST_REVISIONS' ) && ! WP_POST_REVISIONS ) {
-				return 'https://melapress.com/wordpress-revisions-posts-pages/#utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+				return 'https://melapress.com/wordpress-revisions-posts-pages/?utm_source=plugin&utm_medium=wsal&utm_campaign=event-revisions-info';
 			} elseif ( '' !== $url ) {
 				return (string) WP_Content_Sensor::get_post_revision( $post_id );
 			} else {

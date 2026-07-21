@@ -56,6 +56,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 	 * 6064 Email was sent
 	 * 6079 WordPress core update available
 	 * 6080 WordPress core translation files updated
+	 * 6073 Requested to change the WordPress Administrator Notification email address
 	 *
 	 * @package    wsal
 	 * @subpackage sensors
@@ -115,6 +116,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 
 			// Update admin email alert.
 			\add_action( 'update_option_admin_email', array( __CLASS__, 'admin_email_changed' ), 10, 3 );
+
+			// Update network admin email alert.
+			if ( \is_multisite() ) {
+				\add_action( 'update_site_option_admin_email', array( __CLASS__, 'network_admin_email_changed' ), 10, 3 );
+			}
 
 			// Customizable settings for the dynamic theme editing start.
 			// Blogname change.
@@ -779,6 +785,21 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		}
 
 		/**
+		 * Alert: Network admin email change was confirmed.
+		 *
+		 * @param string $option - Option name.
+		 * @param mixed  $new_value - The new option value.
+		 * @param mixed  $old_value - The old option value.
+		 *
+		 * @return void
+		 *
+		 * @since 6.0.0
+		 */
+		public static function network_admin_email_changed( $option, $new_value, $old_value ) {
+			self::admin_email_changed( $old_value, $new_value, 'admin_email' );
+		}
+
+		/**
 		 * Method: Prune events function.
 		 *
 		 * @param int    $count The number of deleted events.
@@ -808,27 +829,24 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				return;
 			}
 
-			// Filter global arrays for security.
-			$post_array   = filter_input_array( INPUT_POST );
-			$get_array    = filter_input_array( INPUT_GET );
-			$server_array = filter_input_array( INPUT_SERVER );
-
 			$actype = '';
-			if ( ! empty( $server_array['SCRIPT_NAME'] ) ) {
-				$actype = basename( \sanitize_text_field( \wp_unslash( $server_array['SCRIPT_NAME'] ) ), '.php' );
+			if ( ! empty( $_SERVER['SCRIPT_NAME'] ) ) {
+				$actype = basename( \sanitize_text_field( \wp_unslash( $_SERVER['SCRIPT_NAME'] ) ), '.php' );
 			}
 
-			if ( isset( $post_array['action'] ) && 'toggle-auto-updates' === $post_array['action'] ) {
-				$event_id = ( 'theme' === $post_array['type'] ) ? 5029 : 5028;
+			$action = \sanitize_text_field( \wp_unslash( $_POST['action'] ?? '' ) );
+			if ( 'toggle-auto-updates' === $action ) {
+				$type     = \sanitize_text_field( \wp_unslash( $_POST['type'] ?? '' ) );
+				$asset    = \sanitize_text_field( \wp_unslash( $_POST['asset'] ?? '' ) );
+				$state    = \sanitize_text_field( \wp_unslash( $_POST['state'] ?? '' ) );
+				$event_id = ( 'theme' === $type ) ? 5029 : 5028;
 
-				$asset = \sanitize_text_field( \wp_unslash( $post_array['asset'] ) );
-
-				if ( 'theme' === $post_array['type'] ) {
+				if ( 'theme' === $type ) {
 					$all_themes       = \wp_get_themes();
 					$our_theme        = ( isset( $all_themes[ $asset ] ) ) ? $all_themes[ $asset ] : '';
 					$install_location = $our_theme->get_template_directory();
 					$name             = $our_theme->Name; // phpcs:ignore
-				} elseif ( 'plugin' === $post_array['type'] ) {
+				} elseif ( 'plugin' === $type ) {
 					$all_plugins = \get_plugins();
 					if ( ! \is_wp_error( \validate_plugin( $asset ) ) ) {
 						$our_plugin       = ( isset( $all_plugins[ $asset ] ) ) ? $all_plugins[ $asset ] : '';
@@ -843,7 +861,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'install_directory' => $install_location,
 							'name'              => $name,
-							'EventType'         => ( 'enable' === $post_array['state'] ) ? 'enabled' : 'disabled',
+							'EventType'         => ( 'enable' === $state ) ? 'enabled' : 'disabled',
 						)
 					);
 				}
@@ -854,11 +872,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			$is_permalink_page   = 'options-permalink' === $actype;
 
 			// WordPress URL changed.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] )
-			&& \wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
-			&& ! empty( $post_array['siteurl'] ) ) {
+			if ( $is_option_page && isset( $_POST['_wpnonce'] )
+			&& \wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' )
+			&& ! empty( $_POST['siteurl'] ) ) {
 				$old_siteurl = \get_option( 'siteurl' );
-				$new_siteurl = isset( $post_array['siteurl'] ) ? \sanitize_text_field( \wp_unslash( $post_array['siteurl'] ) ) : '';
+				$new_siteurl = isset( $_POST['siteurl'] ) ? \sanitize_text_field( \wp_unslash( $_POST['siteurl'] ) ) : '';
 				if ( $old_siteurl !== $new_siteurl ) {
 					Alert_Manager::trigger_event(
 						6024,
@@ -872,11 +890,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Site URL changed.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] )
-			&& \wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
-			&& ! empty( $post_array['home'] ) ) {
+			if ( $is_option_page && isset( $_POST['_wpnonce'] )
+			&& \wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' )
+			&& ! empty( $_POST['home'] ) ) {
 				$old_url = \get_option( 'home' );
-				$new_url = isset( $post_array['home'] ) ? \sanitize_text_field( \wp_unslash( $post_array['home'] ) ) : '';
+				$new_url = isset( $_POST['home'] ) ? \sanitize_text_field( \wp_unslash( $_POST['home'] ) ) : '';
 				if ( $old_url !== $new_url ) {
 					Alert_Manager::trigger_event(
 						6025,
@@ -889,10 +907,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				}
 			}
 
-			if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['show_on_front'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
+			if ( isset( $_POST['option_page'] ) && 'reading' === $_POST['option_page'] && isset( $_POST['show_on_front'] ) && isset( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'reading-options' ) ) {
 				$old_homepage = ( 'posts' === get_site_option( 'show_on_front' ) ) ? __( 'latest posts', 'wp-security-audit-log' ) : __( 'static page', 'wp-security-audit-log' );
-				$new_homepage = ( 'posts' === $post_array['show_on_front'] ) ? __( 'latest posts', 'wp-security-audit-log' ) : __( 'static page', 'wp-security-audit-log' );
+				$new_homepage = ( 'posts' === $_POST['show_on_front'] ) ? __( 'latest posts', 'wp-security-audit-log' ) : __( 'static page', 'wp-security-audit-log' );
 				if ( $old_homepage !== $new_homepage ) {
 					Alert_Manager::trigger_event(
 						6035,
@@ -904,10 +922,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				}
 			}
 
-			if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_on_front'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
+			if ( isset( $_POST['option_page'] ) && 'reading' === $_POST['option_page'] && isset( $_POST['page_on_front'] ) && isset( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'reading-options' ) ) {
 				$old_frontpage = get_the_title( get_site_option( 'page_on_front' ) );
-				$new_frontpage = get_the_title( $post_array['page_on_front'] );
+				$new_frontpage = get_the_title( \absint( $_POST['page_on_front'] ) );
 				if ( $old_frontpage !== $new_frontpage ) {
 					Alert_Manager::trigger_event(
 						6036,
@@ -919,10 +937,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				}
 			}
 
-			if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_for_posts'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
+			if ( isset( $_POST['option_page'] ) && 'reading' === $_POST['option_page'] && isset( $_POST['page_for_posts'] ) && isset( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'reading-options' ) ) {
 				$old_postspage = get_the_title( get_site_option( 'page_for_posts' ) );
-				$new_postspage = get_the_title( $post_array['page_for_posts'] );
+				$new_postspage = get_the_title( \absint( $_POST['page_for_posts'] ) );
 				if ( $old_postspage !== $new_postspage ) {
 					Alert_Manager::trigger_event(
 						6037,
@@ -935,14 +953,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Check timezone change.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['timezone_string'] ) ) {
-				self::check_timezone_change( $post_array );
+			if ( $is_option_page && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' ) && ! empty( $_POST['timezone_string'] ) ) {
+				self::check_timezone_change( $_POST );
 			}
 
 			// Check date format change.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['date_format'] ) ) {
+			if ( $is_option_page && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' ) && ! empty( $_POST['date_format'] ) ) {
 				$old_date_format = get_option( 'date_format' );
-				$new_date_format = ( '\c\u\s\t\o\m' === $post_array['date_format'] ) ? \sanitize_text_field( \wp_unslash( $post_array['date_format_custom'] ) ) : \sanitize_text_field( \wp_unslash( $post_array['date_format'] ) );
+				$date_format     = \sanitize_text_field( \wp_unslash( $_POST['date_format'] ) );
+				$new_date_format = ( '\c\u\s\t\o\m' === $date_format ) ? \sanitize_text_field( \wp_unslash( $_POST['date_format_custom'] ?? '' ) ) : $date_format;
 				if ( $old_date_format !== $new_date_format ) {
 					Alert_Manager::trigger_event(
 						6041,
@@ -956,9 +975,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Check time format change.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['time_format'] ) ) {
+			if ( $is_option_page && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' ) && ! empty( $_POST['time_format'] ) ) {
 				$old_time_format = get_option( 'time_format' );
-				$new_time_format = ( '\c\u\s\t\o\m' === $post_array['time_format'] ) ? \sanitize_text_field( \wp_unslash( $post_array['time_format_custom'] ) ) : \sanitize_text_field( \wp_unslash( $post_array['time_format'] ) );
+				$time_format     = \sanitize_text_field( \wp_unslash( $_POST['time_format'] ) );
+				$new_time_format = ( '\c\u\s\t\o\m' === $time_format ) ? \sanitize_text_field( \wp_unslash( $_POST['time_format_custom'] ?? '' ) ) : $time_format;
 				if ( $old_time_format !== $new_time_format ) {
 					Alert_Manager::trigger_event(
 						6042,
@@ -972,9 +992,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Registration Option.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ( get_option( 'users_can_register' ) xor isset( $post_array['users_can_register'] ) ) ) {
+			if ( $is_option_page && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' ) && ( get_option( 'users_can_register' ) xor isset( $_POST['users_can_register'] ) ) ) {
 				$old = get_option( 'users_can_register' ) ? 'enabled' : 'disabled';
-				$new = isset( $post_array['users_can_register'] ) ? 'enabled' : 'disabled';
+				$new = isset( $_POST['users_can_register'] ) ? 'enabled' : 'disabled';
 
 				if ( $old !== $new ) {
 					Alert_Manager::trigger_event(
@@ -988,9 +1008,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Default Role option.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['default_role'] ) ) {
+			if ( $is_option_page && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' ) && ! empty( $_POST['default_role'] ) ) {
 				$old = get_option( 'default_role' );
-				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['default_role'] ) ) );
+				$new = trim( \sanitize_text_field( \wp_unslash( $_POST['default_role'] ) ) );
 				if ( $old !== $new ) {
 					Alert_Manager::trigger_event(
 						6002,
@@ -1004,12 +1024,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Admin Email Option.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['admin_email'] ) ) {
+			if ( $is_option_page && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' ) && ! empty( $_POST['new_admin_email'] ) ) {
 				$old = get_option( 'admin_email' );
-				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['admin_email'] ) ) );
+				$new = trim( \sanitize_text_field( \wp_unslash( $_POST['new_admin_email'] ) ) );
 				if ( $old !== $new ) {
+					/**
+					 * Trigger an alert when someone attempts to change admin email in the general settings page.
+					 * Triggered on single site and multisite installations. In case of multisite, this can be triggered on both network and subsite levels.
+					 */
 					Alert_Manager::trigger_event(
-						6003,
+						6073,
 						array(
 							'OldEmail'      => $old,
 							'NewEmail'      => $new,
@@ -1020,12 +1044,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Admin Email of Network.
-			if ( $is_network_settings && isset( $post_array['_wpnonce'] ) && ! empty( $post_array['new_admin_email'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'siteoptions' ) ) {
+			if ( $is_network_settings && isset( $_POST['_wpnonce'] ) && ! empty( $_POST['new_admin_email'] ) && wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'siteoptions' ) ) {
 				$old = get_site_option( 'admin_email' );
-				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['new_admin_email'] ) ) );
+				$new = trim( \sanitize_text_field( \wp_unslash( $_POST['new_admin_email'] ) ) );
 				if ( $old !== $new ) {
 					Alert_Manager::trigger_event(
-						6003,
+						6073,
 						array(
 							'OldEmail'      => $old,
 							'NewEmail'      => $new,
@@ -1036,10 +1060,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Permalinks changed.
-			if ( $is_permalink_page && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-permalink' ) ) {
+			if ( $is_permalink_page && isset( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'update-permalink' ) ) {
 				$old = get_option( 'permalink_structure' );
-				$new = isset( $post_array['permalink_structure'] ) ? trim( \sanitize_text_field( \wp_unslash( $post_array['permalink_structure'] ) ) ) : '';
+				$new = isset( $_POST['permalink_structure'] ) ? trim( \sanitize_text_field( \wp_unslash( $_POST['permalink_structure'] ) ) ) : '';
 				if ( $old !== $new ) {
 					$plain_value = '/%p=123%/';
 					$old_pattern = '' === $old ? $plain_value : $old;
@@ -1057,9 +1081,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Enable core updates.
-			if ( isset( $get_array['action'] ) && 'core-major-auto-updates-settings' === $get_array['action'] && isset( $get_array['value'] )
-			&& wp_verify_nonce( $get_array['_wpnonce'], 'core-major-auto-updates-nonce' ) ) {
-				$status = ( 'enable' === $get_array['value'] ) ? esc_html__( 'automatically update to all new versions of WordPress', 'wp-security-audit-log' ) : esc_html__( 'automatically update maintenance and security releases only', 'wp-security-audit-log' );
+			if ( isset( $_GET['action'], $_GET['value'], $_GET['_wpnonce'] ) && 'core-major-auto-updates-settings' === \sanitize_text_field( \wp_unslash( $_GET['action'] ) )
+			&& wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_GET['_wpnonce'] ) ), 'core-major-auto-updates-nonce' ) ) {
+				$value  = \sanitize_text_field( \wp_unslash( $_GET['value'] ) );
+				$status = ( 'enable' === $value ) ? esc_html__( 'automatically update to all new versions of WordPress', 'wp-security-audit-log' ) : esc_html__( 'automatically update maintenance and security releases only', 'wp-security-audit-log' );
 				Alert_Manager::trigger_event(
 					6044,
 					array(
@@ -1069,9 +1094,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Site Language changed.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
-			&& isset( $post_array['WPLANG'] ) ) {
+			if ( $is_option_page && isset( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' )
+			&& isset( $_POST['WPLANG'] ) ) {
 				// Is there a better way to turn the language into a "nice name"?
 				require_once ABSPATH . 'wp-admin/includes/translation-install.php';
 				$available_translations = wp_get_available_translations();
@@ -1079,7 +1104,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				// When English (United States) is selected, the WPLANG post entry is empty so lets account for this.
 				$wplang_setting = get_option( 'WPLANG' );
 				$previous_value = ( ! empty( $wplang_setting ) ) ? $wplang_setting : 'en-US';
-				$new_value      = ( ! empty( $post_array['WPLANG'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['WPLANG'] ) ) : 'en-US';
+				$new_value      = ( ! empty( $_POST['WPLANG'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['WPLANG'] ) ) : 'en-US';
 
 				// Now lets turn these into a nice, native name - the same as shown to the user when choosing a language.
 				$previous_value = ( isset( $available_translations[ $previous_value ] ) ) ? $available_translations[ $previous_value ]['native_name'] : 'English (United States)';
@@ -1097,11 +1122,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Site title.
-			if ( $is_option_page && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
-			&& isset( $post_array['blogname'] ) ) {
+			if ( $is_option_page && isset( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['_wpnonce'] ) ), 'general-options' )
+			&& isset( $_POST['blogname'] ) ) {
 				$previous_value = get_option( 'blogname' );
-				$new_value      = ( ! empty( $post_array['blogname'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['blogname'] ) ) : '';
+				$new_value      = ( ! empty( $_POST['blogname'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['blogname'] ) ) : '';
 
 				if ( $previous_value !== $new_value ) {
 					Alert_Manager::trigger_event(

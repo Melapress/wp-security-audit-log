@@ -248,7 +248,7 @@ if ( in_array( $current_screen->base, array( 'toplevel_page_wsal-auditlog', 'top
 ?>
 
 <nav id="wsal-navbar">
-	<a href="https://www.melapress.com/wordpress-activity-log/" target="_blank" class="wsal-logo-link">
+	<a href="https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=wsal&utm_campaign=free-edition-header-logo" target="_blank" class="wsal-logo-link">
 		<img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/wp-activity-log-symbol.svg" alt="WP Activity Log" class="wsal-logo">
 	</a>
 	<div id="wsal-nav" class="nav">

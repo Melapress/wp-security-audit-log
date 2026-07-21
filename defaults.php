@@ -72,7 +72,7 @@ function wsaldefaults_build_links( $link_aliases = array() ) {
 					break;
 
 				case 'ContactSupport':
-					$result[ esc_html__( 'Contact Support', 'wp-security-audit-log' ) ] = 'https://melapress.com/contact/';
+					$result[ esc_html__( 'Contact Support', 'wp-security-audit-log' ) ] = 'https://melapress.com/contact/?utm_source=plugin&utm_medium=wsal&utm_campaign=event-contact-support';
 					break;
 
 				case 'CommentLink':
@@ -3083,7 +3083,7 @@ function set_wsal_alerts() {
 				),
 				array(
 					6081,
-					WSAL_MEDIUM,
+					WSAL_HIGH,
 					esc_html__( 'AI connector connected', 'wp-security-audit-log' ),
 					/* translators: %ConnectorName%: AI connector name. */
 					esc_html__( 'Connected the %ConnectorName% AI connector.', 'wp-security-audit-log' ),
@@ -3096,7 +3096,7 @@ function set_wsal_alerts() {
 				),
 				array(
 					6082,
-					WSAL_MEDIUM,
+					WSAL_HIGH,
 					esc_html__( 'AI connector disconnected', 'wp-security-audit-log' ),
 					/* translators: %ConnectorName%: AI connector name. */
 					esc_html__( 'Disconnected the %ConnectorName% AI connector.', 'wp-security-audit-log' ),
@@ -3158,6 +3158,19 @@ function set_wsal_alerts() {
 					array(),
 					'system-setting',
 					'modified',
+				),
+				array(
+					6073,
+					WSAL_CRITICAL,
+					esc_html__( 'Requested to change the Administrator email address', 'wp-security-audit-log' ),
+					__( 'Requested to change the <strong>Administrator email address</strong> in the WordPress settings.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Current address', 'wp-security-audit-log' ) => '%OldEmail%',
+						esc_html__( 'Requested new address', 'wp-security-audit-log' ) => '%NewEmail%',
+					),
+					array(),
+					'system-setting',
+					'submitted',
 				),
 				array(
 					6005,

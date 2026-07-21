@@ -162,8 +162,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p class="wsal-ebook-text">
 		<?php echo esc_html__( 'Learn how to leverage ', 'wp-security-audit-log' ); ?><strong>WP Activity Log</strong><?php echo esc_html__( ' and master WordPress oversight to supercharge the administration and security of your websites.', 'wp-security-audit-log' ); ?>
 		</p>
-		<a href="https://melapress.com/ebook-wordpress-oversight/?user-referral=log-ebook-plugin" target="_blank" class="wsal-ebook-cta-link"><?php echo esc_html__( 'Download your free copy today', 'wp-security-audit-log' ); ?></a>
-		<a href="https://www.melapress.com/ebook-wordpress-oversight/?user-referral=log-ebook-plugin" target="_blank" class="wsal-ebook-logo-link"><img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/melapress.svg" width="160" height="31" alt="Melapress"></a>
+		<a href="https://melapress.com/ebook-wordpress-oversight/?user-referral=log-ebook-plugin&utm_source=plugin&utm_medium=wsal&utm_campaign=ebook-card-cta" target="_blank" class="wsal-ebook-cta-link"><?php echo esc_html__( 'Download your free copy today', 'wp-security-audit-log' ); ?></a>
+		<a href="https://melapress.com/ebook-wordpress-oversight/?user-referral=log-ebook-plugin&utm_source=plugin&utm_medium=wsal&utm_campaign=ebook-card-logo" target="_blank" class="wsal-ebook-logo-link"><img src="<?php echo \esc_url( WSAL_BASE_URL ); ?>classes/Free/assets/images/melapress.svg" width="160" height="31" alt="Melapress"></a>
 	</div>
 	<button aria-label="Close button" class="wsal-ebook-close wsal-plugin-notice-close"></button>
 </div>

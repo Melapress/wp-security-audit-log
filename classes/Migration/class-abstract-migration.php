@@ -60,6 +60,13 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		public const UPGRADE_NOTICE = 'upgrade-notice-show';
 
 		/**
+		 * That is a global constant used for showing the feature highlight notice after an upgrade (free edition only).
+		 *
+		 * @since 5.6.5
+		 */
+		public const FEATURE_HIGHLIGHT_NOTICE = 'feature-highlight-notice-show';
+
+		/**
 		 * Extracted version from the DB (WP option)
 		 *
 		 * @var string
@@ -273,6 +280,10 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 
 				if ( '0.0.0' !== (string) static::$stored_version ) {
 					WP_Helper::set_global_option( self::UPGRADE_NOTICE, true );
+
+					// @free:start
+					WP_Helper::set_global_option( self::FEATURE_HIGHLIGHT_NOTICE, true );
+					// @free:end
 
 					/**
 					 * Reset survey dismiss so the banner reappears after each upgrade.

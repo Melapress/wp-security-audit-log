@@ -18,8 +18,8 @@ msgstr ""
 msgid "Other"
 msgstr "Otro"
 
-#: classes/ListAdminEvents/class-list-events.php:1139
-#: classes/ListAdminEvents/class-list-events.php:1143
+#: classes/ListAdminEvents/class-list-events.php:1151
+#: classes/ListAdminEvents/class-list-events.php:1155
 #: classes/MainWPAddon/class-mainwp-helper.php:131
 msgid "All Sites"
 msgstr "Todos Sitios"
@@ -70,8 +70,8 @@ msgstr "Código de error desconocido."
 #: classes/Controllers/class-constants.php:365
 #: classes/Helpers/class-user-utils.php:255
 #: classes/ListAdminEvents/class-list-events.php:616
-#: classes/WPSensors/class-wp-system-sensor.php:482
-#: classes/WPSensors/class-wp-system-sensor.php:483
+#: classes/WPSensors/class-wp-system-sensor.php:488
+#: classes/WPSensors/class-wp-system-sensor.php:489
 #: classes/WPSensors/Helpers/class-learndash-helper.php:747
 #: classes/WPSensors/Helpers/class-wp-ai-connectors-helper.php:224
 #: classes/WPSensors/Helpers/class-wp-ai-connectors-helper.php:228
@@ -130,13 +130,13 @@ msgstr "Privado"
 #: classes/notification/class-notifications.php:1193
 #: classes/notification/class-notifications.php:1440
 #: classes/notification/class-notifications.php:1651
-#: classes/Views/AuditLog.php:280
-#: classes/Views/Settings.php:343
+#: classes/Views/AuditLog.php:301
+#: classes/Views/Settings.php:346
 #: classes/Views/ToggleAlerts.php:139
 msgid "You do not have sufficient permissions to access this page."
 msgstr "No tienes suficientes permisos para acceder a esta página."
 
-#: classes/Views/Settings.php:1223
+#: classes/Views/Settings.php:1226
 msgid "Learn More"
 msgstr "Leer Más"
 
@@ -157,12 +157,12 @@ msgstr "Documentación del Plugin"
 msgid "Plugin Website"
 msgstr "Sitio Web del Plugin"
 
-#: classes/Views/Settings.php:359
+#: classes/Views/Settings.php:362
 #: classes/Views/ToggleAlerts.php:151
 msgid "Settings have been saved."
 msgstr "Ajustes has sido guardados."
 
-#: classes/Views/Settings.php:366
+#: classes/Views/Settings.php:369
 #: classes/Views/ToggleAlerts.php:157
 msgid "Error: "
 msgstr "Error:"
@@ -196,11 +196,11 @@ msgstr "Ajustes"
 msgid "General"
 msgstr "General"
 
-#: classes/Views/Settings.php:925
+#: classes/Views/Settings.php:928
 msgid "Email Address"
 msgstr "Correo electrónico"
 
-#: classes/Views/Settings.php:930
+#: classes/Views/Settings.php:933
 msgid "Display Name"
 msgstr "Nombre Público"
 
@@ -215,7 +215,7 @@ msgstr "Nombre Público"
 msgid "None"
 msgstr "Ninguno"
 
-#: classes/Views/Settings.php:1072
+#: classes/Views/Settings.php:1075
 msgid "UTC"
 msgstr "UTC"
 
@@ -874,7 +874,7 @@ msgstr "Email de notificaciones del administrador de WordPress ha sido cambiada"
 msgid "WordPress was updated"
 msgstr "WordPress ha sido actualizado"
 
-#: defaults.php:3165
+#: defaults.php:3178
 msgid "User changes the WordPress Permalinks"
 msgstr "Usuario cambia Enlaces permanentes de WordPress"
 
@@ -960,27 +960,27 @@ msgstr "Tema desactivado por la red"
 msgid "Database"
 msgstr "Base de datos"
 
-#: defaults.php:3611
+#: defaults.php:3624
 msgid "Theme created tables"
 msgstr "Tema ha creado tablas"
 
-#: defaults.php:3623
+#: defaults.php:3636
 msgid "Theme modified tables structure"
 msgstr "Tema ha modificado estructura de tablas"
 
-#: defaults.php:3635
+#: defaults.php:3648
 msgid "Theme deleted tables"
 msgstr "Tema ha borrado tablas"
 
-#: defaults.php:3647
+#: defaults.php:3660
 msgid "Unknown component created tables"
 msgstr "Desconocido componente ha creado tablas"
 
-#: defaults.php:3659
+#: defaults.php:3672
 msgid "Unknown component modified tables structure"
 msgstr "Desconocido componente ha modificado estructura de tablas"
 
-#: defaults.php:3671
+#: defaults.php:3684
 msgid "Unknown component deleted tables"
 msgstr "Desconocido componente ha borrado tablas"
 
@@ -1249,21 +1249,19 @@ msgid "Logout"
 msgstr ""
 
 #: classes/Controllers/class-alert-manager.php:1330
-#: classes/Views/AuditLog.php:620
+#: classes/Views/AuditLog.php:727
 msgid "Installed"
 msgstr ""
 
 #: classes/Controllers/class-alert-manager.php:1331
-#: classes/WPSensors/class-redirection-sensor.php:363
-#: classes/WPSensors/class-redirection-sensor.php:437
-#: classes/WPSensors/class-redirection-sensor.php:470
+#: classes/WPSensors/class-redirection-sensor.php:327
+#: classes/WPSensors/class-redirection-sensor.php:397
 msgid "Activated"
 msgstr ""
 
 #: classes/Controllers/class-alert-manager.php:1332
-#: classes/WPSensors/class-redirection-sensor.php:363
-#: classes/WPSensors/class-redirection-sensor.php:437
-#: classes/WPSensors/class-redirection-sensor.php:470
+#: classes/WPSensors/class-redirection-sensor.php:327
+#: classes/WPSensors/class-redirection-sensor.php:397
 msgid "Deactivated"
 msgstr ""
 
@@ -1537,16 +1535,16 @@ msgid "View the content changes"
 msgstr ""
 
 #. translators: 1 - mysqli error code, 2 - mysqli error message
-#: classes/Controllers/class-connection.php:271
+#: classes/Controllers/class-connection.php:286
 #, php-format
 msgid "Code %1$d: %2$s"
 msgstr ""
 
-#: classes/Controllers/class-connection.php:301
+#: classes/Controllers/class-connection.php:318
 msgid "There are connectivity issues with the database where the WordPress activity log is stored."
 msgstr ""
 
-#: classes/Controllers/class-connection.php:630
+#: classes/Controllers/class-connection.php:647
 msgid "External Storage"
 msgstr ""
 
@@ -1817,12 +1815,12 @@ msgstr ""
 msgid "This type of activity / change is no longer monitored. You can create your own custom event IDs to keep a log of such change. Read more about custom events %1$shere%2$s."
 msgstr ""
 
-#: classes/Entities/DBConnection/class-mysql-connection.php:225
+#: classes/Entities/DBConnection/class-mysql-connection.php:232
 msgid "The plugin detected connectivity issues coming from your external database connection. Please check the status of your external database connection and try again!"
 msgstr ""
 
 #: classes/Free/assets/nav-bar.php:268
-#: classes/Views/AuditLog.php:156
+#: classes/Views/AuditLog.php:159
 msgid "Log viewer"
 msgstr ""
 
@@ -1845,18 +1843,6 @@ msgstr ""
 
 #: classes/Free/assets/nav-bar.php:235
 msgid "Unlock extra features with WP Activity Log Premium"
-msgstr ""
-
-#: classes/Free/assets/plugin-update-card.php:137
-msgid "WP Activity Log has been updated to version "
-msgstr ""
-
-#: classes/Free/assets/plugin-update-card.php:139
-msgid "You are now running the latest version of WP Activity Log. To see what's been included in this update, refer to the plugin's release notes and change log where we list all new features, updates, and bug fixes."
-msgstr ""
-
-#: classes/Free/assets/plugin-update-card.php:142
-msgid "Read the release notes"
 msgstr ""
 
 #: classes/Free/assets/upgrade-to-premium.php:161
@@ -1939,35 +1925,36 @@ msgstr ""
 msgid "Current memory usage: "
 msgstr ""
 
-#: classes/Helpers/class-notices.php:203
-#: classes/Helpers/class-notices.php:221
-#: classes/Helpers/class-notices.php:254
-#: classes/Helpers/class-notices.php:536
+#: classes/Helpers/class-notices.php:391
+#: classes/Helpers/class-notices.php:412
+#: classes/Helpers/class-notices.php:431
+#: classes/Helpers/class-notices.php:464
+#: classes/Helpers/class-notices.php:746
 #: classes/Writers/class-csv-writer.php:411
 msgid "nonce is not provided or incorrect"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:260
-#: classes/Helpers/class-notices.php:284
+#: classes/Helpers/class-notices.php:470
+#: classes/Helpers/class-notices.php:494
 msgid "Failed to dismiss the survey. Please try again."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:362
+#: classes/Helpers/class-notices.php:572
 msgid "Want to know what the state of WordPress security is in 2025?"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:364
+#: classes/Helpers/class-notices.php:574
 msgid "Discover the latest insights in our 2025 WordPress Security Survey Report."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:366
+#: classes/Helpers/class-notices.php:576
 msgid "Read the survey"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:367
-#: classes/Helpers/class-notices.php:390
-#: classes/Helpers/class-notices.php:416
-#: classes/Helpers/class-notices.php:587
+#: classes/Helpers/class-notices.php:577
+#: classes/Helpers/class-notices.php:600
+#: classes/Helpers/class-notices.php:626
+#: classes/Helpers/class-notices.php:797
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -2007,7 +1994,7 @@ msgstr ""
 #: classes/Helpers/class-settings-helper.php:1922
 #: classes/Helpers/class-settings-helper.php:1938
 #: classes/Views/class-setup-wizard.php:691
-#: classes/Views/Settings.php:1954
+#: classes/Views/Settings.php:1957
 msgid "Keep all data"
 msgstr ""
 
@@ -2046,17 +2033,14 @@ msgstr ""
 
 #: classes/Views/class-setup-wizard.php:100
 #: classes/Views/Settings.php:233
-#: classes/Views/Settings.php:1888
-#: classes/Views/Settings.php:1910
+#: classes/Views/Settings.php:1891
+#: classes/Views/Settings.php:1913
 msgid "Access Denied."
 msgstr ""
 
-#: classes/Views/AuditLog.php:494
-#: classes/Views/AuditLog.php:502
-#: classes/Views/AuditLog.php:784
 #: classes/Views/class-setup-wizard.php:113
 #: classes/Views/Settings.php:246
-#: classes/Views/Settings.php:1878
+#: classes/Views/Settings.php:1881
 msgid "Nonce verification failed."
 msgstr ""
 
@@ -2167,14 +2151,14 @@ msgid "Bottom"
 msgstr ""
 
 #: classes/Helpers/settings/class-settings-builder.php:2143
-#: classes/Views/Settings.php:883
-#: classes/Views/Settings.php:1267
-#: classes/Views/Settings.php:1288
-#: classes/Views/Settings.php:1309
-#: classes/Views/Settings.php:1331
-#: classes/Views/Settings.php:1353
-#: classes/Views/Settings.php:1410
-#: classes/Views/Settings.php:1645
+#: classes/Views/Settings.php:886
+#: classes/Views/Settings.php:1270
+#: classes/Views/Settings.php:1291
+#: classes/Views/Settings.php:1312
+#: classes/Views/Settings.php:1334
+#: classes/Views/Settings.php:1356
+#: classes/Views/Settings.php:1413
+#: classes/Views/Settings.php:1648
 msgid "Remove"
 msgstr ""
 
@@ -2310,35 +2294,35 @@ msgstr ""
 msgid "Show me all activity originating from this IP Address"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:755
+#: classes/ListAdminEvents/class-list-events.php:763
 msgid "View all details of this change"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:757
+#: classes/ListAdminEvents/class-list-events.php:765
 msgid "Close inspector."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:757
+#: classes/ListAdminEvents/class-list-events.php:765
 msgid "Event data inspector"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:757
+#: classes/ListAdminEvents/class-list-events.php:765
 msgid "More details..."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:826
+#: classes/ListAdminEvents/class-list-events.php:838
 msgid "Disable this type of event IDs"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:827
+#: classes/ListAdminEvents/class-list-events.php:839
 msgid "Do not keep a log of this user(s)' actions"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:828
+#: classes/ListAdminEvents/class-list-events.php:840
 msgid "Do not keep a log of these IP addresses"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:1071
+#: classes/ListAdminEvents/class-list-events.php:1083
 msgid "Records per page"
 msgstr ""
 
@@ -2376,10 +2360,6 @@ msgstr ""
 
 #: classes/Migration/class-metadata-migration-440.php:110
 msgid "Activity log database update in progress."
-msgstr ""
-
-#: classes/Migration/class-metadata-migration-440.php:113
-msgid "<strong>UPGRADE notice: </strong> WP Activity Log is updating the database tables where the activity log is stored. The duration of this process varies depending on the size of the activity log. The upgrade is running in the background and won't affect your website. For more information please refer to this <a href=\"https://melapress.com/support/kb/upgrade-database-process-442/\" target=\"_blank\">knowledge base entry</a>."
 msgstr ""
 
 #: classes/Migration/class-migration.php:777
@@ -3219,98 +3199,98 @@ msgid "Insecure request."
 msgstr ""
 
 #: classes/Free/assets/upgrade-to-premium.php:173
-#: classes/Views/addons/html-view.php:88
-#: classes/Views/addons/html-view.php:113
+#: classes/Views/addons/html-view.php:89
+#: classes/Views/addons/html-view.php:114
 #: classes/Views/class-premium-features.php:303
 msgid "Get WP Activity Log Premium"
 msgstr ""
 
-#: classes/Views/addons/html-view.php:89
+#: classes/Views/addons/html-view.php:90
 msgid "See all features"
 msgstr ""
 
-#: classes/Views/addons/html-view.php:97
+#: classes/Views/addons/html-view.php:98
 msgid "Screenshots"
 msgstr ""
 
-#: classes/Views/AuditLog.php:133
+#: classes/Views/AuditLog.php:136
 msgid "Activity Log Viewer"
 msgstr ""
 
-#: classes/Views/AuditLog.php:342
+#: classes/Views/AuditLog.php:368
 msgid "Thank you for installing WP Activity Log! To help you get started, we’ve prepared a setup wizard to guide you through configuring the plugin’s basic settings. Would you like to run the setup wizard now?"
 msgstr ""
 
-#: classes/Views/AuditLog.php:344
+#: classes/Views/AuditLog.php:370
 msgid "Note: You can adjust all the settings configured in the wizard later from the plugin's settings page."
 msgstr ""
 
-#: classes/Views/AuditLog.php:347
+#: classes/Views/AuditLog.php:373
 #: classes/Views/class-setup-wizard.php:622
-#: classes/Views/Settings.php:500
-#: classes/Views/Settings.php:524
-#: classes/Views/Settings.php:591
-#: classes/Views/Settings.php:1167
-#: classes/Views/Settings.php:1485
-#: classes/Views/Settings.php:1515
-#: classes/Views/Settings.php:1546
+#: classes/Views/Settings.php:503
+#: classes/Views/Settings.php:527
+#: classes/Views/Settings.php:594
+#: classes/Views/Settings.php:1170
+#: classes/Views/Settings.php:1488
+#: classes/Views/Settings.php:1518
+#: classes/Views/Settings.php:1549
 msgid "Yes"
 msgstr ""
 
-#: classes/Views/AuditLog.php:348
+#: classes/Views/AuditLog.php:374
 #: classes/Views/class-setup-wizard.php:627
-#: classes/Views/Settings.php:505
-#: classes/Views/Settings.php:529
-#: classes/Views/Settings.php:623
-#: classes/Views/Settings.php:750
-#: classes/Views/Settings.php:1172
-#: classes/Views/Settings.php:1492
-#: classes/Views/Settings.php:1522
-#: classes/Views/Settings.php:1547
+#: classes/Views/Settings.php:508
+#: classes/Views/Settings.php:532
+#: classes/Views/Settings.php:626
+#: classes/Views/Settings.php:753
+#: classes/Views/Settings.php:1175
+#: classes/Views/Settings.php:1495
+#: classes/Views/Settings.php:1525
+#: classes/Views/Settings.php:1550
 msgid "No"
 msgstr ""
 
-#: classes/Views/AuditLog.php:518
+#: classes/Views/AuditLog.php:625
 msgid "No users found."
 msgstr ""
 
-#: classes/Views/AuditLog.php:614
+#: classes/Views/AuditLog.php:721
 msgid "Close inspector"
 msgstr ""
 
-#: classes/Views/AuditLog.php:617
+#: classes/Views/AuditLog.php:724
 msgid "Install and activate extension"
 msgstr ""
 
-#: classes/Views/AuditLog.php:618
+#: classes/Views/AuditLog.php:725
 msgid "Installing extension"
 msgstr ""
 
-#: classes/Views/AuditLog.php:619
+#: classes/Views/AuditLog.php:726
 msgid "Other extension installing"
 msgstr ""
 
-#: classes/Views/AuditLog.php:621
+#: classes/Views/AuditLog.php:728
 msgid "Installed... reloading page"
 msgstr ""
 
-#: classes/Views/AuditLog.php:622
+#: classes/Views/AuditLog.php:729
 msgid "Problem enabling"
 msgstr ""
 
-#: classes/Views/AuditLog.php:718
+#: classes/Views/AuditLog.php:826
 msgid "WordPress Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:719
+#: classes/Views/AuditLog.php:827
 msgid "When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install."
 msgstr ""
 
-#: classes/Views/AuditLog.php:720
+#: classes/Views/AuditLog.php:828
 msgid "Thank you for using WP Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:770
+#: classes/Views/AuditLog.php:885
 msgid "You do not have sufficient permissions to dismiss this notice."
 msgstr ""
 
@@ -3484,10 +3464,6 @@ msgstr ""
 msgid "12 months (Older data will be deleted.)"
 msgstr ""
 
-#: classes/Views/class-setup-wizard.php:699
-msgid "While the plugin efficiently stores data in your WordPress database, keeping more data will use more storage space. If you need to retain large amounts of activity log data, we recommend <a href=\"https://melapress.com/wordpress-activity-log/features/#utm_source=plugin&amp;utm_medium=referral&amp;utm_campaign=wsal&amp;utm_content=wizard+configuration\" rel=\"nofollow\" target=\"_blank\">upgrading to Premium</a> and using our database tools to store the activity log in an external database. You can also store the logs in third party services such as Loggly, AWS CloudWatch, Slack and other solutions"
-msgstr ""
-
 #: classes/Views/class-setup-wizard.php:778
 msgid ""
 "WP Activity Log will send you a weekly summary of key activities happening on your website. This includes important events such as user logins, password changes, plugin updates, activations, and changes to WordPress settings.\n"
@@ -3638,546 +3614,534 @@ msgstr ""
 msgid "Unknown settings tab."
 msgstr ""
 
-#: classes/Views/Settings.php:355
+#: classes/Views/Settings.php:358
 msgid "Message sent successfully."
 msgstr ""
 
-#: classes/Views/Settings.php:379
+#: classes/Views/Settings.php:382
 msgid "Old data successfully purged."
 msgstr ""
 
-#: classes/Views/Settings.php:385
+#: classes/Views/Settings.php:388
 msgid "No data is old enough to be purged."
 msgstr ""
 
-#: classes/Views/Settings.php:414
+#: classes/Views/Settings.php:417
 msgid "Send Message"
 msgstr ""
 
-#: classes/Views/Settings.php:424
+#: classes/Views/Settings.php:427
 msgid "Do you want to remove all data when the plugin is deleted?"
 msgstr ""
 
-#: classes/Views/Settings.php:481
+#: classes/Views/Settings.php:484
 msgid "Display latest events widget in Dashboard & Admin bar"
 msgstr ""
 
 #. translators: Max number of dashboard widget alerts.
-#: classes/Views/Settings.php:486
+#: classes/Views/Settings.php:489
 #, php-format
 msgid "The events widget displays the latest %d security events in the dashboard and the admin bar notification displays the latest event."
 msgstr ""
 
-#: classes/Views/Settings.php:494
+#: classes/Views/Settings.php:497
 msgid "Dashboard widget"
 msgstr ""
 
-#: classes/Views/Settings.php:515
+#: classes/Views/Settings.php:518
 msgid "Admin bar notification"
 msgstr ""
 
-#: classes/Views/Settings.php:542
+#: classes/Views/Settings.php:545
 msgid "Admin bar notification updates"
 msgstr ""
 
-#: classes/Views/Settings.php:551
+#: classes/Views/Settings.php:554
 msgid "Update in near real time"
 msgstr ""
 
-#: classes/Views/Settings.php:556
+#: classes/Views/Settings.php:559
 msgid "Update only on page refreshes"
 msgstr ""
 
-#: classes/Views/Settings.php:567
+#: classes/Views/Settings.php:570
 msgid "Add user notification on the WordPress login page"
 msgstr ""
 
-#: classes/Views/Settings.php:568
+#: classes/Views/Settings.php:571
 msgid "Many compliance regulations (such as the GDPR) require website administrators to tell the users of their website that all the changes they do when logged in are being logged."
 msgstr ""
 
-#: classes/Views/Settings.php:572
+#: classes/Views/Settings.php:575
 msgid "Login page notification"
 msgstr ""
 
-#: classes/Views/Settings.php:598
-msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://melapress.com/?utm_source=plugin&utm_medium=referral&utm_campaign=wsal&utm_content=settings+pages\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
-msgstr ""
-
-#: classes/Views/Settings.php:617
+#: classes/Views/Settings.php:620
 msgid "<strong>Note: </strong>"
 msgstr ""
 
-#: classes/Views/Settings.php:617
+#: classes/Views/Settings.php:620
 msgid "The only HTML code allowed in the login page notification is for links ( < a href >< /a > )."
 msgstr ""
 
-#: classes/Views/Settings.php:633
+#: classes/Views/Settings.php:636
 msgid "Is your website running behind a firewall or reverse proxy?"
 msgstr ""
 
 #. translators: Learn more link.
-#: classes/Views/Settings.php:638
+#: classes/Views/Settings.php:641
 #, php-format
 msgid "If your website is running behind a web application firewall or reverse proxy, use the setting below to select the HTTP header the plugin should retrieve the end user IP from - %s."
 msgstr ""
 
-#: classes/Views/Settings.php:639
-#: classes/Views/Settings.php:774
-#: classes/Views/Settings.php:822
+#: classes/Views/Settings.php:642
+#: classes/Views/Settings.php:777
+#: classes/Views/Settings.php:825
 msgid "learn more"
 msgstr ""
 
-#: classes/Views/Settings.php:646
+#: classes/Views/Settings.php:649
 msgid "Reverse proxy / firewall options"
 msgstr ""
 
-#: classes/Views/Settings.php:661
+#: classes/Views/Settings.php:664
 msgid "Yes (select the HTTP header your proxy / firewall uses)"
 msgstr ""
 
-#: classes/Views/Settings.php:740
+#: classes/Views/Settings.php:743
 msgid "Custom (specify the name of the HTTP header)"
 msgstr ""
 
-#: classes/Views/Settings.php:761
+#: classes/Views/Settings.php:764
 msgid "Who can change the plugin settings?"
 msgstr ""
 
 #. translators: Learn more link.
-#: classes/Views/Settings.php:773
+#: classes/Views/Settings.php:776
 #, php-format
 msgid "By default only users with administrator role (single site) and super administrator role (multisite) can change the settings of the plugin. Though you can restrict the privileges to just your user - %s."
 msgstr ""
 
-#: classes/Views/Settings.php:784
+#: classes/Views/Settings.php:787
 msgid "Restrict plugin access"
 msgstr ""
 
-#: classes/Views/Settings.php:789
-#: classes/Views/Settings.php:837
+#: classes/Views/Settings.php:792
+#: classes/Views/Settings.php:840
 msgid "Only me"
 msgstr ""
 
-#: classes/Views/Settings.php:796
+#: classes/Views/Settings.php:799
 msgid "All superadmins"
 msgstr ""
 
-#: classes/Views/Settings.php:798
+#: classes/Views/Settings.php:801
 msgid "All administrators"
 msgstr ""
 
-#: classes/Views/Settings.php:811
+#: classes/Views/Settings.php:814
 msgid "Allow other users to view the activity log"
 msgstr ""
 
-#: classes/Views/Settings.php:816
+#: classes/Views/Settings.php:819
 msgid "By default only super administrators and the child sites' administrators can view the WordPress activity log. Though you can change this by using the setting below."
 msgstr ""
 
-#: classes/Views/Settings.php:818
+#: classes/Views/Settings.php:821
 msgid "You can specify the username of the user that you want to allow. If you want to add all the users with a specific role, you can also specify their role here."
 msgstr ""
 
-#: classes/Views/Settings.php:831
-#: classes/Views/Settings.php:860
+#: classes/Views/Settings.php:834
+#: classes/Views/Settings.php:863
 msgid "Can view events"
 msgstr ""
 
-#: classes/Views/Settings.php:838
+#: classes/Views/Settings.php:841
 msgid "Super administators only"
 msgstr ""
 
-#: classes/Views/Settings.php:839
+#: classes/Views/Settings.php:842
 msgid "Super administators and site administrators"
 msgstr ""
 
-#: classes/Views/Settings.php:855
+#: classes/Views/Settings.php:858
 msgid "To allow someone who does not have an admin role to view the activity log, specify them in the below setting."
 msgstr ""
 
-#: classes/Views/Settings.php:860
+#: classes/Views/Settings.php:863
 msgid "Can also view events"
 msgstr ""
 
-#: classes/Views/Settings.php:866
-#: classes/Views/Settings.php:1260
-#: classes/Views/Settings.php:1281
-#: classes/Views/Settings.php:1302
-#: classes/Views/Settings.php:1324
-#: classes/Views/Settings.php:1346
-#: classes/Views/Settings.php:1402
+#: classes/Views/Settings.php:869
+#: classes/Views/Settings.php:1263
+#: classes/Views/Settings.php:1284
+#: classes/Views/Settings.php:1305
+#: classes/Views/Settings.php:1327
+#: classes/Views/Settings.php:1349
+#: classes/Views/Settings.php:1405
 msgid "Add"
 msgstr ""
 
-#: classes/Views/Settings.php:869
+#: classes/Views/Settings.php:872
 msgid "Specify the username or the users which do not have an admin role but can also see the WordPress activity role. You can also specify roles."
 msgstr ""
 
-#: classes/Views/Settings.php:895
+#: classes/Views/Settings.php:898
 msgid "Which email address should the plugin use as a from address?"
 msgstr ""
 
 #. translators: 1 - domain name derived from site URL.
-#: classes/Views/Settings.php:900
+#: classes/Views/Settings.php:903
 #, php-format
 msgid "By default, the plugin sends emails from wp-activity-log@%1$s. You can customize both the “From” email address and display name using the settings below."
 msgstr ""
 
-#: classes/Views/Settings.php:905
+#: classes/Views/Settings.php:908
 msgid "If you are using an SMTP plugin or an external email service, ensure the email address you configure here is allowed by your provider. Some providers may reject or block emails if the “From” address does not match the authenticated sending account."
 msgstr ""
 
-#: classes/Views/Settings.php:909
+#: classes/Views/Settings.php:912
 msgid "From e-mail & name"
 msgstr ""
 
-#: classes/Views/Settings.php:915
+#: classes/Views/Settings.php:918
 msgid "Use the email address "
 msgstr ""
 
-#: classes/Views/Settings.php:921
+#: classes/Views/Settings.php:924
 msgid "Use another email address"
 msgstr ""
 
-#: classes/Views/Settings.php:944
+#: classes/Views/Settings.php:947
 msgid "Do you want to hide the plugin from the list of installed plugins?"
 msgstr ""
 
-#: classes/Views/Settings.php:945
+#: classes/Views/Settings.php:948
 msgid "By default all installed plugins are listed in the Plugins page. Setting this option to \"Yes\" will remove WP Activity Log from the list of installed plugins for all users."
 msgstr ""
 
-#: classes/Views/Settings.php:946
+#: classes/Views/Settings.php:949
 msgid "NOTE: when a plugin update will be available for the plugin, it will be visible until the plugin is updated."
 msgstr ""
 
-#: classes/Views/Settings.php:950
+#: classes/Views/Settings.php:953
 msgid "Hide plugin in plugins page"
 msgstr ""
 
-#: classes/Views/Settings.php:955
+#: classes/Views/Settings.php:958
 msgid "Yes, hide the plugin from the list of installed plugins"
 msgstr ""
 
-#: classes/Views/Settings.php:960
+#: classes/Views/Settings.php:963
 msgid "No, do not hide the plugin"
 msgstr ""
 
-#: classes/Views/Settings.php:1022
+#: classes/Views/Settings.php:1025
 msgid "For how long do you want to keep the activity log events (Retention settings)?"
 msgstr ""
 
-#: classes/Views/Settings.php:1025
+#: classes/Views/Settings.php:1028
 msgid "The plugin uses an efficient way to store the activity log data in the WordPress database, though the more data you keep the more disk space will be required. "
 msgstr ""
 
-#: classes/Views/Settings.php:1026
-msgid "<a href=\"https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=link&utm_campaign=wsal\" target=\"_blank\">Upgrade to Premium</a> to store the activity log data in an external database."
-msgstr ""
-
-#: classes/Views/Settings.php:1047
+#: classes/Views/Settings.php:1050
 msgid "What timestamp you would like to see in the WordPress activity log?"
 msgstr ""
 
-#: classes/Views/Settings.php:1048
+#: classes/Views/Settings.php:1051
 msgid "Note that the WordPress' timezone might be different from that configured on the server so when you switch from UTC to WordPress timezone or vice versa you might notice a big difference."
 msgstr ""
 
-#: classes/Views/Settings.php:1052
+#: classes/Views/Settings.php:1055
 msgid "Events timestamp"
 msgstr ""
 
-#: classes/Views/Settings.php:1078
+#: classes/Views/Settings.php:1081
 msgid "Timezone configured on this WordPress website"
 msgstr ""
 
-#: classes/Views/Settings.php:1085
+#: classes/Views/Settings.php:1088
 msgid "Show milliseconds"
 msgstr ""
 
-#: classes/Views/Settings.php:1092
+#: classes/Views/Settings.php:1095
 msgid "Show Milliseconds in list view"
 msgstr ""
 
-#: classes/Views/Settings.php:1102
+#: classes/Views/Settings.php:1105
 msgid "Show the Query string from URLs (URL parameters) in the event metadata?"
 msgstr ""
 
-#: classes/Views/Settings.php:1103
+#: classes/Views/Settings.php:1106
 msgid "Some URLs contain a Query string with URL parameters, such as the UTM parameters. Use the below setting to configure the plugin to show these parameters are event metadata."
 msgstr ""
 
-#: classes/Views/Settings.php:1107
+#: classes/Views/Settings.php:1110
 msgid "Show Query string details in event metadata"
 msgstr ""
 
-#: classes/Views/Settings.php:1123
+#: classes/Views/Settings.php:1126
 msgid "What user information should be displayed in the WordPress activity log?"
 msgstr ""
 
-#: classes/Views/Settings.php:1124
+#: classes/Views/Settings.php:1127
 msgid "Usernames might not be the same as a user's first and last name so it can be difficult to recognize whose user was that did a change. When there is no first & last name or public display name configured the plugin will revert back to the WordPress username."
 msgstr ""
 
-#: classes/Views/Settings.php:1128
+#: classes/Views/Settings.php:1131
 msgid "User information in activity log"
 msgstr ""
 
-#: classes/Views/Settings.php:1134
+#: classes/Views/Settings.php:1137
 msgid "WordPress username"
 msgstr ""
 
-#: classes/Views/Settings.php:1139
+#: classes/Views/Settings.php:1142
 msgid "First name & last name"
 msgstr ""
 
-#: classes/Views/Settings.php:1144
+#: classes/Views/Settings.php:1147
 msgid "Configured public display name"
 msgstr ""
 
-#: classes/Views/Settings.php:1155
+#: classes/Views/Settings.php:1158
 msgid "Do you want to keep a log of WordPress background activity?"
 msgstr ""
 
-#: classes/Views/Settings.php:1157
+#: classes/Views/Settings.php:1160
 msgid "WordPress does a lot of things in the background that you do not necessarily need to know about, such as; deletion of post revisions, deletion of auto saved drafts etc. By default the plugin does not report them since there might be a lot and are irrelevant to the user."
 msgstr ""
 
-#: classes/Views/Settings.php:1162
+#: classes/Views/Settings.php:1165
 msgid "Enable events for WordPress background activity"
 msgstr ""
 
-#: classes/Views/Settings.php:1221
+#: classes/Views/Settings.php:1224
 msgid "Melapress File Monitor"
 msgstr ""
 
-#: classes/Views/Settings.php:1222
+#: classes/Views/Settings.php:1225
 msgid "To keep a log of file changes please install Melapress File Monitor, a plugin which is also developed by us."
 msgstr ""
 
-#: classes/Views/Settings.php:1223
+#: classes/Views/Settings.php:1226
 msgid "Install plugin now"
 msgstr ""
 
-#: classes/Views/Settings.php:1233
+#: classes/Views/Settings.php:1236
 msgid "Configure how often file changes scan run and other settings from the"
 msgstr ""
 
-#: classes/Views/Settings.php:1233
+#: classes/Views/Settings.php:1236
 msgid "Melapress File Monitor plugin settings"
 msgstr ""
 
-#: classes/Views/Settings.php:1252
+#: classes/Views/Settings.php:1255
 msgid "By default the plugin keeps a log of all user changes done on your WordPress website. Use the setting below to exclude any objects from the activity log. When an object is excluded from the activity log, any event in which that object is referred will not be logged in the activity log."
 msgstr ""
 
-#: classes/Views/Settings.php:1256
+#: classes/Views/Settings.php:1259
 msgid "Exclude users:"
 msgstr ""
 
-#: classes/Views/Settings.php:1277
+#: classes/Views/Settings.php:1280
 msgid "Exclude roles:"
 msgstr ""
 
-#: classes/Views/Settings.php:1298
+#: classes/Views/Settings.php:1301
 msgid "Exclude IP address(es):"
 msgstr ""
 
-#: classes/Views/Settings.php:1314
+#: classes/Views/Settings.php:1317
 msgid "You can exclude an individual IP address or a range of IP addresses. To exclude a range use the following format: [first IP]-[last octet of the last IP]. Example: 172.16.180.6-127."
 msgstr ""
 
-#: classes/Views/Settings.php:1320
+#: classes/Views/Settings.php:1323
 msgid "Exclude post type:"
 msgstr ""
 
-#: classes/Views/Settings.php:1336
+#: classes/Views/Settings.php:1339
 msgid "WordPress has the post and page post types by default though your website might use more post types (custom post types). You can exclude all post types, including the default WordPress ones."
 msgstr ""
 
-#: classes/Views/Settings.php:1342
+#: classes/Views/Settings.php:1345
 msgid "Exclude post status:"
 msgstr ""
 
-#: classes/Views/Settings.php:1358
+#: classes/Views/Settings.php:1361
 msgid "You can exclude posts which have a specific Post Status from the activity logs by specifying the Post Status in this setting."
 msgstr ""
 
-#: classes/Views/Settings.php:1365
+#: classes/Views/Settings.php:1368
 msgid "Exclude custom post fields:"
 msgstr ""
 
-#: classes/Views/Settings.php:1374
+#: classes/Views/Settings.php:1377
 msgid "Exclude custom user fields:"
 msgstr ""
 
-#: classes/Views/Settings.php:1415
+#: classes/Views/Settings.php:1418
 msgid "You can use the * wildcard to exclude multiple matching custom fields. For example to exclude all custom fields starting with wp123 enter wp123*"
 msgstr ""
 
-#: classes/Views/Settings.php:1443
+#: classes/Views/Settings.php:1446
 msgid "These settings are for advanced users."
 msgstr ""
 
-#: classes/Views/Settings.php:1444
-msgid "If you have any questions <a href=\"https://melapress.com/contact/?utm_source=plugin&utm_medium=referral&utm_source=plugin&utm_medium=link&utm_campaign=wsal\" target=\"_blank\">contact us</a>."
-msgstr ""
-
-#: classes/Views/Settings.php:1447
+#: classes/Views/Settings.php:1450
 msgid "Reset plugin settings to default"
 msgstr ""
 
-#: classes/Views/Settings.php:1448
+#: classes/Views/Settings.php:1451
 msgid "Use this button to <em>factory reset</em> the plugin. This means that all the configured settings will be reset to default and all email notifications, scheduled reports, external database / third party services connections, archiving and mirroring rule will be deleted. NOTE: the activity log data will not be purged. Use the setting below to purge the activity log."
 msgstr ""
 
-#: classes/Views/Settings.php:1452
+#: classes/Views/Settings.php:1455
 msgid "Reset Settings"
 msgstr ""
 
-#: classes/Views/Settings.php:1454
+#: classes/Views/Settings.php:1457
 msgid "RESET"
 msgstr ""
 
-#: classes/Views/Settings.php:1460
+#: classes/Views/Settings.php:1463
 msgid "Purge the WordPress activity log"
 msgstr ""
 
-#: classes/Views/Settings.php:1461
+#: classes/Views/Settings.php:1464
 msgid "Click the Purge button below to delete all the data from the WordPress activity log and start afresh."
 msgstr ""
 
-#: classes/Views/Settings.php:1465
+#: classes/Views/Settings.php:1468
 msgid "Purge Activity Log"
 msgstr ""
 
-#: classes/Views/Settings.php:1467
+#: classes/Views/Settings.php:1470
 msgid "PURGE"
 msgstr ""
 
-#: classes/Views/Settings.php:1468
+#: classes/Views/Settings.php:1471
 msgid "Activity log successfully purged"
 msgstr ""
 
-#: classes/Views/Settings.php:1475
+#: classes/Views/Settings.php:1478
 msgid "MainWP child site stealth mode"
 msgstr ""
 
-#: classes/Views/Settings.php:1476
+#: classes/Views/Settings.php:1479
 msgid "This option is enabled automatically when the plugin detects the MainWP Child plugin on the site. When this setting is enabled plugin access is restricted to the administrator who installs the plugin, the plugin is not shown in the list of installed plugins and no admin notifications are shown. Disable this option to change the plugin to the default setup."
 msgstr ""
 
-#: classes/Views/Settings.php:1480
+#: classes/Views/Settings.php:1483
 msgid "Enable MainWP child site stealth mode"
 msgstr ""
 
-#: classes/Views/Settings.php:1503
+#: classes/Views/Settings.php:1506
 msgid "Do you want to delete the plugin data from the database upon uninstall?"
 msgstr ""
 
-#: classes/Views/Settings.php:1504
+#: classes/Views/Settings.php:1507
 msgid "The plugin saves the activity log data and settings in the WordPress database. By default upon uninstalling the plugin the data is kept in the database so if it is installed again, you can still access the data. If the data is deleted it is not possible to recover it so you won't be able to access it again even when you reinstall the plugin."
 msgstr ""
 
-#: classes/Views/Settings.php:1508
+#: classes/Views/Settings.php:1511
 msgid "Remove data on uninstall"
 msgstr ""
 
-#: classes/Views/Settings.php:1533
+#: classes/Views/Settings.php:1536
 msgid "Are you sure you want to reset all the plugin settings to default? This action cannot be undone."
 msgstr ""
 
-#: classes/Views/Settings.php:1543
+#: classes/Views/Settings.php:1546
 msgid "Are you sure you want to purge all the activity log data?"
 msgstr ""
 
-#: classes/Views/Settings.php:1567
+#: classes/Views/Settings.php:1570
 msgid "MainWP Child plugin is not active on this website."
 msgstr ""
 
-#: classes/Views/Settings.php:1637
+#: classes/Views/Settings.php:1640
 msgid "The specified value is not a valid URL!"
 msgstr ""
 
-#: classes/Views/Settings.php:1638
+#: classes/Views/Settings.php:1641
 msgid "The specified value is not a valid post type!"
 msgstr ""
 
-#: classes/Views/Settings.php:1639
+#: classes/Views/Settings.php:1642
 msgid "The specified value is not a valid post status!"
 msgstr ""
 
-#: classes/Views/Settings.php:1640
+#: classes/Views/Settings.php:1643
 msgid "The specified value is not a valid IP address!"
 msgstr ""
 
-#: classes/Views/Settings.php:1641
+#: classes/Views/Settings.php:1644
 msgid "The specified value is not a user nor a role!"
 msgstr ""
 
-#: classes/Views/Settings.php:1642
+#: classes/Views/Settings.php:1645
 msgid "Filename cannot be added because it contains invalid characters."
 msgstr ""
 
-#: classes/Views/Settings.php:1643
+#: classes/Views/Settings.php:1646
 msgid "File extension cannot be added because it contains invalid characters."
 msgstr ""
 
-#: classes/Views/Settings.php:1644
+#: classes/Views/Settings.php:1647
 msgid "Directory cannot be added because it contains invalid characters."
 msgstr ""
 
-#: classes/Views/Settings.php:1646
+#: classes/Views/Settings.php:1649
 msgid "Please save any changes before switching tabs."
 msgstr ""
 
-#: classes/Views/Settings.php:1659
+#: classes/Views/Settings.php:1662
 msgid "You have to select at least one column!"
 msgstr ""
 
-#: classes/Views/Settings.php:1893
-#: classes/Views/Settings.php:1915
+#: classes/Views/Settings.php:1896
+#: classes/Views/Settings.php:1918
 msgid "Nonce Verification Failed."
 msgstr ""
 
-#: classes/Views/Settings.php:1901
+#: classes/Views/Settings.php:1904
 msgid "Plugin settings have been reset."
 msgstr ""
 
-#: classes/Views/Settings.php:1930
+#: classes/Views/Settings.php:1933
 msgid "Tables has been reset."
 msgstr ""
 
-#: classes/Views/Settings.php:1932
+#: classes/Views/Settings.php:1935
 msgid "Reset query failed."
 msgstr ""
 
-#: classes/Views/Settings.php:1947
+#: classes/Views/Settings.php:1950
 msgid "Activity log retention"
 msgstr ""
 
-#: classes/Views/Settings.php:1970
+#: classes/Views/Settings.php:1973
 msgid "Days"
 msgstr ""
 
-#: classes/Views/Settings.php:1971
+#: classes/Views/Settings.php:1974
 msgid "Months"
 msgstr ""
 
-#: classes/Views/Settings.php:1972
+#: classes/Views/Settings.php:1975
 msgid "Years"
 msgstr ""
 
-#: classes/Views/Settings.php:1987
+#: classes/Views/Settings.php:1990
 msgid "Delete events older than"
 msgstr ""
 
-#: classes/Views/Settings.php:2016
+#: classes/Views/Settings.php:2019
 msgid "You can run the purging process now by clicking the button below."
 msgstr ""
 
-#: classes/Views/Settings.php:2032
+#: classes/Views/Settings.php:2035
 msgid "Purge Old Data"
 msgstr ""
 
@@ -4203,10 +4167,6 @@ msgstr ""
 
 #: classes/Views/ToggleAlerts.php:221
 msgid "Log Level: "
-msgstr ""
-
-#: classes/Views/ToggleAlerts.php:229
-msgid "Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href=\"https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugin&utm_medium=link&utm_campaign=wsal\" target=\"_blank\">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of."
 msgstr ""
 
 #: classes/Views/ToggleAlerts.php:241
@@ -4745,8 +4705,8 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:551
 #: classes/WPSensors/Alerts/class-yoast-custom-alerts.php:842
 #: defaults.php:443
-#: defaults.php:3296
-#: defaults.php:3308
+#: defaults.php:3309
+#: defaults.php:3321
 msgid "Previous URL"
 msgstr ""
 
@@ -5107,8 +5067,8 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-wpforms-custom-alerts.php:332
 #: classes/WPSensors/Alerts/class-yoast-custom-alerts.php:518
 #: defaults.php:1944
-#: defaults.php:3232
-#: defaults.php:3264
+#: defaults.php:3245
+#: defaults.php:3277
 msgid "Previous value"
 msgstr ""
 
@@ -5910,9 +5870,9 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-yoast-custom-alerts.php:826
 #: defaults.php:2641
 #: defaults.php:2677
-#: defaults.php:3320
-#: defaults.php:3407
+#: defaults.php:3333
 #: defaults.php:3420
+#: defaults.php:3433
 msgid "Previous setting"
 msgstr ""
 
@@ -7858,8 +7818,8 @@ msgstr ""
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1436
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1448
 #: classes/WPSensors/Alerts/class-woocommerce-custom-alerts.php:1460
-#: defaults.php:3332
-#: defaults.php:3344
+#: defaults.php:3345
+#: defaults.php:3357
 msgid "Previous page"
 msgstr ""
 
@@ -10918,25 +10878,25 @@ msgstr ""
 msgid "sites & users can be registered"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:320
+#: classes/WPSensors/class-wp-system-sensor.php:326
 msgid "Unknown or Invalid (non-existing)"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:894
-#: classes/WPSensors/class-wp-system-sensor.php:895
+#: classes/WPSensors/class-wp-system-sensor.php:912
+#: classes/WPSensors/class-wp-system-sensor.php:913
 msgid "latest posts"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:894
-#: classes/WPSensors/class-wp-system-sensor.php:895
+#: classes/WPSensors/class-wp-system-sensor.php:912
+#: classes/WPSensors/class-wp-system-sensor.php:913
 msgid "static page"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:1062
+#: classes/WPSensors/class-wp-system-sensor.php:1087
 msgid "automatically update to all new versions of WordPress"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:1062
+#: classes/WPSensors/class-wp-system-sensor.php:1087
 msgid "automatically update maintenance and security releases only"
 msgstr ""
 
@@ -11369,7 +11329,7 @@ msgstr ""
 msgid "Rank Math Robots Meta"
 msgstr ""
 
-#: classes/WPSensors/Helpers/class-redirection-helper.php:120
+#: classes/WPSensors/Helpers/class-redirection-helper.php:114
 msgid "Reset"
 msgstr ""
 
@@ -13287,453 +13247,457 @@ msgstr ""
 msgid "New address"
 msgstr ""
 
-#: defaults.php:3166
+#: defaults.php:3179
 msgid "Changed the <strong>WordPress permalinks</strong>."
 msgstr ""
 
-#: defaults.php:3168
+#: defaults.php:3181
 msgid "Previous permalinks"
 msgstr ""
 
-#: defaults.php:3169
+#: defaults.php:3182
 msgid "New permalinks"
 msgstr ""
 
-#: defaults.php:3178
+#: defaults.php:3191
 msgid "Enabled/Disabled the option Discourage search engines from indexing this site"
 msgstr ""
 
-#: defaults.php:3179
+#: defaults.php:3192
 msgid "Changed the status of the WordPress setting <strong>Search engine visibility</strong> (Discourage search engines from indexing this site)"
 msgstr ""
 
-#: defaults.php:3188
+#: defaults.php:3201
 msgid "Enabled/Disabled comments on all the website"
 msgstr ""
 
-#: defaults.php:3189
+#: defaults.php:3202
 msgid "Changed the status of the WordPress setting <strong>Allow people to submit comments on new posts</strong>."
 msgstr ""
 
-#: defaults.php:3199
+#: defaults.php:3212
 msgid "Enabled/Disabled the option Comment author must fill out name and email"
 msgstr ""
 
-#: defaults.php:3200
+#: defaults.php:3213
 msgid "Changed the status of the WordPress setting <strong>.Comment author must fill out name and email</strong>."
 msgstr ""
 
-#: defaults.php:3209
+#: defaults.php:3222
 msgid "Enabled/Disabled the option Users must be logged in and registered to comment"
 msgstr ""
 
-#: defaults.php:3210
+#: defaults.php:3223
 msgid "Changed the status of the WordPress setting <strong>Users must be registered and logged in to comment</strong>."
 msgstr ""
 
-#: defaults.php:3219
+#: defaults.php:3232
 msgid "Enabled/Disabled the option to automatically close comments"
 msgstr ""
 
-#: defaults.php:3220
+#: defaults.php:3233
 #, no-php-format
 msgid "Changed the status of the WordPress setting <strong>Automatically close comments after %Value% days</strong>."
 msgstr ""
 
-#: defaults.php:3229
+#: defaults.php:3242
 msgid "Changed the value of the option Automatically close comments"
 msgstr ""
 
-#: defaults.php:3230
+#: defaults.php:3243
 #, no-php-format
 msgid "Changed the value of the WordPress setting <strong>Automatically close comments after a number of days</strong> to %NewValue%."
 msgstr ""
 
-#: defaults.php:3241
+#: defaults.php:3254
 msgid "Enabled/Disabled the option for comments to be manually approved"
 msgstr ""
 
-#: defaults.php:3242
+#: defaults.php:3255
 msgid "Changed the value of the WordPress setting <strong>Comments must be manualy approved</strong>."
 msgstr ""
 
-#: defaults.php:3251
+#: defaults.php:3264
 msgid "Enabled/Disabled the option for an author to have previously approved comments for the comments to appear"
 msgstr ""
 
-#: defaults.php:3252
+#: defaults.php:3265
 msgid "Changed the value of the WordPress setting <strong>Comment author must have a previously approved comment</strong>."
 msgstr ""
 
-#: defaults.php:3261
+#: defaults.php:3274
 msgid "Changed the number of links that a comment must have to be held in the queue"
 msgstr ""
 
-#: defaults.php:3262
+#: defaults.php:3275
 #, no-php-format
 msgid "Changed the value of the WordPress setting <strong>Hold a comment in the queue if it contains links</strong> to %NewValue% links."
 msgstr ""
 
-#: defaults.php:3273
+#: defaults.php:3286
 msgid "Modified the list of keywords for comments moderation"
 msgstr ""
 
-#: defaults.php:3274
+#: defaults.php:3287
 msgid "Modified the list of keywords for comments moderation in WordPress."
 msgstr ""
 
-#: defaults.php:3283
+#: defaults.php:3296
 msgid "Modified the list of keywords for comments blacklisting"
 msgstr ""
 
-#: defaults.php:3284
+#: defaults.php:3297
 msgid "Modified the list of <strong>Disallowed comment keys</strong> (keywords) for comments blacklisting in WordPress."
 msgstr ""
 
-#: defaults.php:3293
+#: defaults.php:3306
 msgid "Option WordPress Address (URL) in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3294
+#: defaults.php:3307
 #, no-php-format
 msgid "Changed the <strong>WordPress address (URL)</strong> to %new_url%."
 msgstr ""
 
-#: defaults.php:3305
+#: defaults.php:3318
 msgid "Option Site Address (URL) in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3306
+#: defaults.php:3319
 #, no-php-format
 msgid "Changed the <strong>Site address (URL)</strong> to %new_url%."
 msgstr ""
 
-#: defaults.php:3317
+#: defaults.php:3330
 msgid "Option Your homepage displays in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3318
+#: defaults.php:3331
 #, no-php-format
 msgid "Changed the <strong>Your homepage displays</strong> WordPress setting to %new_homepage%."
 msgstr ""
 
-#: defaults.php:3329
+#: defaults.php:3342
 msgid "Option homepage in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3330
+#: defaults.php:3343
 #, no-php-format
 msgid "Changed the <strong>Homepage</strong> in the WordPress settings to %new_page%."
 msgstr ""
 
-#: defaults.php:3341
-msgid "Option posts page in WordPress settings changed"
-msgstr ""
-
-#: defaults.php:3342
-#, no-php-format
-msgid "Changed the <strong> Posts</strong>  page in the WordPress settings to %new_page%."
-msgstr ""
-
 #: defaults.php:3354
-msgid "Option Timezone in WordPress settings changed"
+msgid "Option posts page in WordPress settings changed"
 msgstr ""
 
 #: defaults.php:3355
 #, no-php-format
-msgid "Changed the <strong>Timezone</strong> in the WordPress settings to %new_timezone%."
-msgstr ""
-
-#: defaults.php:3357
-msgid "Previous timezone"
-msgstr ""
-
-#: defaults.php:3366
-msgid "Option Date format in WordPress settings changed"
+msgid "Changed the <strong> Posts</strong>  page in the WordPress settings to %new_page%."
 msgstr ""
 
 #: defaults.php:3367
+msgid "Option Timezone in WordPress settings changed"
+msgstr ""
+
+#: defaults.php:3368
+#, no-php-format
+msgid "Changed the <strong>Timezone</strong> in the WordPress settings to %new_timezone%."
+msgstr ""
+
+#: defaults.php:3370
+msgid "Previous timezone"
+msgstr ""
+
+#: defaults.php:3379
+msgid "Option Date format in WordPress settings changed"
+msgstr ""
+
+#: defaults.php:3380
 #, no-php-format
 msgid "Changed the <strong>Date format</strong> in the WordPress settings to %new_date_format%."
 msgstr ""
 
-#: defaults.php:3369
-#: defaults.php:3381
+#: defaults.php:3382
+#: defaults.php:3394
 msgid "Previous format"
 msgstr ""
 
-#: defaults.php:3378
+#: defaults.php:3391
 msgid "Option Time format in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:3379
+#: defaults.php:3392
 #, no-php-format
 msgid "Changed the <strong>Time format</strong> in the WordPress settings to %new_time_format%."
 msgstr ""
 
-#: defaults.php:3391
+#: defaults.php:3404
 msgid "Option Automatic updates setting changed"
 msgstr ""
 
-#: defaults.php:3392
+#: defaults.php:3405
 msgid "Changed the <strong>Automatic updates</strong> setting."
 msgstr ""
 
-#: defaults.php:3394
+#: defaults.php:3407
 msgid "New setting status"
 msgstr ""
 
-#: defaults.php:3404
-msgid "Option Site Language setting changed"
-msgstr ""
-
-#: defaults.php:3405
-#, no-php-format
-msgid "Changed the <strong>Site Language</strong> to %new_value%."
-msgstr ""
-
 #: defaults.php:3417
-msgid "Option Site Title changed"
+msgid "Option Site Language setting changed"
 msgstr ""
 
 #: defaults.php:3418
 #, no-php-format
-msgid "Changed the <strong>Site Title</strong> to %new_value%."
+msgid "Changed the <strong>Site Language</strong> to %new_value%."
 msgstr ""
 
 #: defaults.php:3430
+msgid "Option Site Title changed"
+msgstr ""
+
+#: defaults.php:3431
+#, no-php-format
+msgid "Changed the <strong>Site Title</strong> to %new_value%."
+msgstr ""
+
+#: defaults.php:3443
 msgid "Added Site Icon"
 msgstr ""
 
 #. translators: %filename%: filename.
-#: defaults.php:3432
+#: defaults.php:3445
 #, no-php-format,php-format
 msgid "Added a new website Site Icon %filename%."
 msgstr ""
 
-#: defaults.php:3434
-#: defaults.php:3449
+#: defaults.php:3447
+#: defaults.php:3462
 msgid "New directory"
 msgstr ""
 
-#: defaults.php:3444
+#: defaults.php:3457
 msgid "Changed the Site Icon"
 msgstr ""
 
-#: defaults.php:3448
-#: defaults.php:3463
+#: defaults.php:3461
+#: defaults.php:3476
 msgid "Old directory"
 msgstr ""
 
-#: defaults.php:3459
+#: defaults.php:3472
 msgid "Removed the Site Icon"
 msgstr ""
 
 #. translators: %old_filename%: old filename.
-#: defaults.php:3461
+#: defaults.php:3474
 #, no-php-format,php-format
 msgid "Removed site icon %old_filename%."
 msgstr ""
 
-#: defaults.php:3472
+#: defaults.php:3485
 msgid "New one time task (cron job) created"
 msgstr ""
 
-#: defaults.php:3473
+#: defaults.php:3486
 #, no-php-format
 msgid "A new one-time task called %task_name% has been scheduled."
 msgstr ""
 
-#: defaults.php:3475
+#: defaults.php:3488
 msgid "The task is scheduled to run on"
 msgstr ""
 
-#: defaults.php:3484
-msgid "New recurring task (cron job) created"
-msgstr ""
-
-#: defaults.php:3485
-#, no-php-format
-msgid "A new recurring task (cron job) called %task_name% has been created."
-msgstr ""
-
-#: defaults.php:3487
-msgid "Task's first run: "
-msgstr ""
-
-#: defaults.php:3488
-msgid "Task's interval: "
-msgstr ""
-
 #: defaults.php:3497
-msgid "Recurring task (cron job) modified"
+msgid "New recurring task (cron job) created"
 msgstr ""
 
 #: defaults.php:3498
 #, no-php-format
-msgid "The schedule of recurring task (cron job) called %task_name% has changed."
+msgid "A new recurring task (cron job) called %task_name% has been created."
 msgstr ""
 
 #: defaults.php:3500
-msgid "Task's old schedule: "
+msgid "Task's first run: "
 msgstr ""
 
 #: defaults.php:3501
-msgid "Task's new schedule: "
+msgid "Task's interval: "
 msgstr ""
 
 #: defaults.php:3510
-msgid "One time task (cron job) executed"
+msgid "Recurring task (cron job) modified"
 msgstr ""
 
 #: defaults.php:3511
 #, no-php-format
-msgid "The one-time task called %task_name% has been executed."
+msgid "The schedule of recurring task (cron job) called %task_name% has changed."
 msgstr ""
 
 #: defaults.php:3513
-#: defaults.php:3525
-#: defaults.php:3547
-msgid "Task's schedule was: "
+msgid "Task's old schedule: "
 msgstr ""
 
-#: defaults.php:3522
-msgid "Recurring task (cron job) executed"
+#: defaults.php:3514
+msgid "Task's new schedule: "
 msgstr ""
 
 #: defaults.php:3523
+msgid "One time task (cron job) executed"
+msgstr ""
+
+#: defaults.php:3524
+#, no-php-format
+msgid "The one-time task called %task_name% has been executed."
+msgstr ""
+
+#: defaults.php:3526
+#: defaults.php:3538
+#: defaults.php:3560
+msgid "Task's schedule was: "
+msgstr ""
+
+#: defaults.php:3535
+msgid "Recurring task (cron job) executed"
+msgstr ""
+
+#: defaults.php:3536
 #, no-php-format
 msgid " The recurring task (cron job) called %task_name% has been executed."
 msgstr ""
 
-#: defaults.php:3534
+#: defaults.php:3547
 msgid "Deleted one-time task (cron job)"
 msgstr ""
 
-#: defaults.php:3535
+#: defaults.php:3548
 #, no-php-format
 msgid "The one-time task  (cron job) called %task_name% has been deleted."
 msgstr ""
 
-#: defaults.php:3544
+#: defaults.php:3557
 msgid "Deleted recurring task (cron job)"
 msgstr ""
 
-#: defaults.php:3545
+#: defaults.php:3558
 #, no-php-format
 msgid "The recurring task (cron job) called %task_name% has been deleted."
 msgstr ""
 
-#: defaults.php:3555
+#: defaults.php:3568
 msgid "Email Events"
 msgstr ""
 
-#: defaults.php:3559
+#: defaults.php:3572
 msgid "Email was sent"
 msgstr ""
 
 #. translators: %EmailAddress%: email address.
-#: defaults.php:3561
+#: defaults.php:3574
 #, no-php-format,php-format
 msgid "Email was sent to %EmailAddress%."
 msgstr ""
 
-#: defaults.php:3563
+#: defaults.php:3576
 msgid "Subject"
 msgstr ""
 
-#: defaults.php:3571
+#: defaults.php:3584
 msgid "Database Events"
 msgstr ""
 
-#: defaults.php:3575
+#: defaults.php:3588
 msgid "Plugin created table"
 msgstr ""
 
-#: defaults.php:3576
+#: defaults.php:3589
 msgid "The plugin %Plugin->Name% created this table in the database."
 msgstr ""
 
-#: defaults.php:3578
-#: defaults.php:3590
-#: defaults.php:3602
-#: defaults.php:3614
-#: defaults.php:3626
+#: defaults.php:3591
+#: defaults.php:3603
+#: defaults.php:3615
+#: defaults.php:3627
+#: defaults.php:3639
 msgid "Table"
 msgstr ""
 
-#: defaults.php:3587
+#: defaults.php:3600
 msgid "Plugin modified table structure"
 msgstr ""
 
-#: defaults.php:3588
+#: defaults.php:3601
 msgid "The plugin %Plugin->Name% modified the structure of a database table."
 msgstr ""
 
-#: defaults.php:3599
+#: defaults.php:3612
 msgid "Plugin deleted table"
 msgstr ""
 
-#: defaults.php:3600
+#: defaults.php:3613
 msgid "The plugin %Plugin->Name% deleted this table from the database."
 msgstr ""
 
-#: defaults.php:3612
+#: defaults.php:3625
 msgid "The theme %Theme->Name% created this tables in the database."
 msgstr ""
 
-#: defaults.php:3624
+#: defaults.php:3637
 msgid "The theme %Theme->Name% modified the structure of this database table"
 msgstr ""
 
-#: defaults.php:3636
+#: defaults.php:3649
 msgid "The theme %Theme->Name% deleted this table from the database."
 msgstr ""
 
-#: defaults.php:3638
-#: defaults.php:3650
-#: defaults.php:3662
-#: defaults.php:3674
-#: defaults.php:3686
-#: defaults.php:3698
-#: defaults.php:3710
+#: defaults.php:3651
+#: defaults.php:3663
+#: defaults.php:3675
+#: defaults.php:3687
+#: defaults.php:3699
+#: defaults.php:3711
+#: defaults.php:3723
 msgid "Tables"
 msgstr ""
 
-#: defaults.php:3648
+#: defaults.php:3661
 msgid "An unknown component created these tables in the database."
 msgstr ""
 
-#: defaults.php:3660
+#: defaults.php:3673
 msgid "An unknown component modified the structure of these database tables."
 msgstr ""
 
-#: defaults.php:3672
+#: defaults.php:3685
 msgid "An unknown component deleted these tables from the database."
 msgstr ""
 
-#: defaults.php:3683
+#: defaults.php:3696
 msgid "WordPress created tables"
 msgstr ""
 
-#: defaults.php:3684
+#: defaults.php:3697
 msgid "WordPress has created these tables in the database."
 msgstr ""
 
-#: defaults.php:3695
+#: defaults.php:3708
 msgid "WordPress modified tables structure"
 msgstr ""
 
-#: defaults.php:3696
+#: defaults.php:3709
 msgid "WordPress modified the structure of these database tables."
 msgstr ""
 
-#: defaults.php:3707
+#: defaults.php:3720
 msgid "WordPress deleted tables"
 msgstr ""
 
-#: defaults.php:3708
+#: defaults.php:3721
 msgid "WordPress deleted these tables from the database."
+msgstr ""
+
+#: classes/Views/AuditLog.php:491
+msgid "Add Note"
 msgstr ""
 
 #: classes/Controllers/class-alert-manager.php:1365
@@ -13760,7 +13724,7 @@ msgstr ""
 msgid "Completed"
 msgstr ""
 
-#: classes/Controllers/class-connection.php:263
+#: classes/Controllers/class-connection.php:278
 msgid "Error establishing a database connection. DB username or password are not valid."
 msgstr ""
 
@@ -13866,61 +13830,61 @@ msgstr ""
 msgid "This value is currently defined via the %s PHP constant and takes priority over the value saved in the database."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:308
+#: classes/Helpers/class-notices.php:518
 msgid "Failed to save the survey preference. Please try again."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:331
-#: classes/Helpers/class-notices.php:553
+#: classes/Helpers/class-notices.php:541
+#: classes/Helpers/class-notices.php:763
 msgid "Failed to dismiss the notice. Please try again."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:388
+#: classes/Helpers/class-notices.php:598
 msgid "Got 2 minutes? Help us shape the future of WP Activity Log"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:389
+#: classes/Helpers/class-notices.php:599
 msgid "Take the survey"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:411
+#: classes/Helpers/class-notices.php:621
 msgid "Great news! We've added support for LearnDash LMS."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:412
+#: classes/Helpers/class-notices.php:622
 msgid "You can now track course creation, lesson modifications, student enrollments, quiz completions, and more."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:413
+#: classes/Helpers/class-notices.php:623
 msgid "To help keep your activity log focused and efficient, we've carefully selected which events are enabled by default. You can review and customize which LearnDash events you want to track at any time."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:414
+#: classes/Helpers/class-notices.php:624
 msgid "Review Settings"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:415
+#: classes/Helpers/class-notices.php:625
 msgid "Not Now"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:580
+#: classes/Helpers/class-notices.php:790
 msgid "Upgrade to premium"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:583
+#: classes/Helpers/class-notices.php:793
 msgid "Black Friday"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:583
+#: classes/Helpers/class-notices.php:793
 msgid "sale now live!"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:585
+#: classes/Helpers/class-notices.php:795
 msgid "Get offer now"
 msgstr ""
 
 #. translators: The column name.
-#: classes/ListAdminEvents/class-list-events.php:801
+#: classes/ListAdminEvents/class-list-events.php:813
 #, php-format
 msgid "Select %s"
 msgstr ""
@@ -13930,7 +13894,7 @@ msgid "One or more notification settings could not be enabled because no email w
 msgstr ""
 
 #. translators: 1: retention period, 2: time until next scheduled cleanup.
-#: classes/Views/Settings.php:2011
+#: classes/Views/Settings.php:2014
 #, php-format
 msgid "The next scheduled purging of activity log data that is older than %1$s is in %2$s."
 msgstr ""
@@ -14785,7 +14749,7 @@ msgid "Deleted all the data about the %deleted_data_type% %deleted_data% from th
 msgstr ""
 
 #. translators: %old_filename%: old filename; %filename%: filename.
-#: defaults.php:3446
+#: defaults.php:3459
 #, no-php-format,php-format
 msgid "Changed the Site Icon from %old_filename% to %filename%."
 msgstr ""
@@ -14800,6 +14764,10 @@ msgstr ""
 
 #: classes/Controllers/class-alert.php:547
 msgid "Monitor and manage active user sessions with Premium"
+msgstr ""
+
+#: classes/Controllers/class-connection.php:294
+msgid "Error establishing a database connection."
 msgstr ""
 
 #. translators: 1: Bolded "Submit & Deactivate" label. 2: Bolded "Skip & Deactivate" label.
@@ -14834,12 +14802,43 @@ msgstr ""
 msgid "Unlock Priority Support with Premium"
 msgstr ""
 
+#. translators: 1: Plugin name. 2: Plugin version number.
+#: classes/Helpers/class-notices.php:199
+#, php-format
+msgid "%1$s has been updated to version %2$s"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:258
+msgid "view changelog"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:260
+#: classes/Helpers/class-notices.php:365
+msgid "Dismiss this notice"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:361
+msgid "Know about important changes before they become problems"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:362
+msgid "Receive alerts for critical activity, monitor active user sessions, and keep a complete audit trail of everything happening on your site."
+msgstr ""
+
+#: classes/Helpers/class-notices.php:363
+msgid "Unlock Premium Features"
+msgstr ""
+
 #: classes/ListAdminEvents/class-list-events.php:250
 msgid "Quickly find the exact log data you need with advanced filters and saved searches with"
 msgstr ""
 
 #: classes/ListAdminEvents/class-list-events.php:251
 msgid "Premium"
+msgstr ""
+
+#: classes/Migration/class-metadata-migration-440.php:113
+msgid "<strong>UPGRADE notice: </strong> WP Activity Log is updating the database tables where the activity log is stored. The duration of this process varies depending on the size of the activity log. The upgrade is running in the background and won't affect your website. For more information please refer to this <a href=\"https://melapress.com/support/kb/upgrade-database-process-442/?utm_source=plugin&utm_medium=wsal&utm_campaign=db-upgrade-notice-kb\" target=\"_blank\">knowledge base entry</a>."
 msgstr ""
 
 #: classes/notification/options/notifications-highlights.php:202
@@ -14854,16 +14853,24 @@ msgstr ""
 msgid "Unlock Advanced Notifications"
 msgstr ""
 
-#: classes/Views/AuditLog.php:444
-msgid "Add note"
-msgstr ""
-
-#: classes/Views/AuditLog.php:445
-msgid "Add notes to activity log entries with Premium"
-msgstr ""
-
-#: classes/Views/AuditLog.php:450
+#: classes/Views/AuditLog.php:470
 msgid "Get scheduled reports for content and publishing activity with Premium"
+msgstr ""
+
+#: classes/Views/AuditLog.php:529
+msgid "Add Notes to Activity Log Entries"
+msgstr ""
+
+#: classes/Views/AuditLog.php:530
+msgid "Keep important context alongside your activity log data by adding notes to individual log entries. Document investigations, explain changes, track follow-up actions, and collaborate more effectively with your team."
+msgstr ""
+
+#: classes/Views/AuditLog.php:531
+msgid "Available in WP Activity Log Premium."
+msgstr ""
+
+#: classes/Views/AuditLog.php:532
+msgid "Upgrade to Premium"
 msgstr ""
 
 #: classes/Views/class-premium-features.php:242
@@ -14950,6 +14957,10 @@ msgstr ""
 msgid "Get fast, professional support from a real human with an average response time of under 8 hours."
 msgstr ""
 
+#: classes/Views/class-setup-wizard.php:699
+msgid "While the plugin efficiently stores data in your WordPress database, keeping more data will use more storage space. If you need to retain large amounts of activity log data, we recommend <a href=\"https://melapress.com/wordpress-activity-log/features/?utm_source=plugin&amp;utm_medium=wsal&amp;utm_campaign=install-wizard-retention-upgrade\" rel=\"nofollow\" target=\"_blank\">upgrading to Premium</a> and using our database tools to store the activity log in an external database. You can also store the logs in third party services such as Loggly, AWS CloudWatch, Slack and other solutions"
+msgstr ""
+
 #: classes/Views/class-setup-wizard.php:965
 msgid "Monitor your website more efficiently with Premium"
 msgstr ""
@@ -15008,6 +15019,22 @@ msgstr ""
 
 #: classes/Views/Help.php:222
 msgid "Upgrade to Get 1-to-1 Email Support"
+msgstr ""
+
+#: classes/Views/Settings.php:601
+msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://melapress.com/?utm_source=plugin&utm_medium=wsal&utm_campaign=login-page-notification\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
+msgstr ""
+
+#: classes/Views/Settings.php:1029
+msgid "<a href=\"https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=settings-retention-upgrade\" target=\"_blank\">Upgrade to Premium</a> to store the activity log data in an external database."
+msgstr ""
+
+#: classes/Views/Settings.php:1447
+msgid "If you have any questions <a href=\"https://melapress.com/contact/?utm_source=plugin&utm_medium=wsal&utm_campaign=settings-advanced-contact-us\" target=\"_blank\">contact us</a>."
+msgstr ""
+
+#: classes/Views/ToggleAlerts.php:229
+msgid "Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href=\"https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugin&utm_medium=wsal&utm_campaign=toggle-events-event-ids-list\" target=\"_blank\">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of."
 msgstr ""
 
 #: classes/WPSensors/Alerts/class-ai-wp-plugin-alerts.php:67
@@ -15087,4 +15114,20 @@ msgstr ""
 #. translators: %ConnectorName%: AI connector name.
 #: defaults.php:3102
 msgid "Disconnected the %ConnectorName% AI connector."
+msgstr ""
+
+#: defaults.php:3165
+msgid "Requested to change the Administrator email address"
+msgstr ""
+
+#: defaults.php:3166
+msgid "Requested to change the <strong>Administrator email address</strong> in the WordPress settings."
+msgstr ""
+
+#: defaults.php:3168
+msgid "Current address"
+msgstr ""
+
+#: defaults.php:3169
+msgid "Requested new address"
 msgstr ""
