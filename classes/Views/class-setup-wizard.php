@@ -696,7 +696,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 				<em>
 					<?php
 					// Step help text.
-					$step_help = __( 'While the plugin efficiently stores data in your WordPress database, keeping more data will use more storage space. If you need to retain large amounts of activity log data, we recommend <a href="https://melapress.com/wordpress-activity-log/features/#utm_source=plugin&amp;utm_medium=referral&amp;utm_campaign=wsal&amp;utm_content=wizard+configuration" rel="nofollow" target="_blank">upgrading to Premium</a> and using our database tools to store the activity log in an external database. You can also store the logs in third party services such as Loggly, AWS CloudWatch, Slack and other solutions', 'wp-security-audit-log' );
+					$step_help = __( 'While the plugin efficiently stores data in your WordPress database, keeping more data will use more storage space. If you need to retain large amounts of activity log data, we recommend <a href="https://melapress.com/wordpress-activity-log/features/?utm_source=plugin&amp;utm_medium=wsal&amp;utm_campaign=install-wizard-retention-upgrade" rel="nofollow" target="_blank">upgrading to Premium</a> and using our database tools to store the activity log in an external database. You can also store the logs in third party services such as Loggly, AWS CloudWatch, Slack and other solutions', 'wp-security-audit-log' );
 
 					echo wp_kses( $step_help, Plugin_Settings_Helper::get_allowed_html_tags() );
 					?>

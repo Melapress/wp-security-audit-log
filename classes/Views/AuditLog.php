@@ -78,11 +78,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_dismiss_helper_plugin_needed_nudge', array( $this, 'dismiss_helper_plugin_needed_nudge' ) );
 		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( __CLASS__, 'dismiss_wp_pointer' ) );
 
+
 		// @free:start
 		\add_action( 'wsal_inspector_after_meta', array( __CLASS__, 'render_free_inspector_additional_links' ), 10, 1 );
+		\add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_free_add_note_assets' ) );
+		\add_action( 'admin_footer', array( __CLASS__, 'render_free_add_note_modal' ) );
 		// @free:end
 
-		add_action( 'all_admin_notices', array( '\WSAL\Helpers\Notices', 'init' ) );
+		add_action( 'all_admin_notices', array( '\WSAL\Helpers\Notices', 'init' ), PHP_INT_MAX );
 
 		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_pointers' ), 1000 );
@@ -163,24 +166,37 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		return 1;
 	}
 
+	/**
+	 * Collects the audit log view arguments (page, site id, order and search parameters) from the request.
+	 *
+	 * @return array $page_args - The audit log view arguments.
+	 *
+	 * @since 4.6.3
+	 */
 	public static function get_page_arguments(): array {
 		if ( null === self::$page_args ) {
 
 			self::$page_args = array();
 
-			self::$page_args['page']    = isset( $_REQUEST['page'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) : false;
+			/**
+			 * Nonce verification is not needed here: these are read-only list table arguments, also
+			 * carried by sorting and pagination links which never include a nonce. Requests that
+			 * submit form data are nonce-verified in render() and handle_form_submission().
+			 */
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			self::$page_args['page']    = isset( $_GET['page'] ) ? \sanitize_text_field( \wp_unslash( $_GET['page'] ) ) : false;
 			self::$page_args['site_id'] = WP_Helper::get_view_site_id();
 
 			self::$page_args['site_id'] = apply_filters( 'wsal_main_view_site_id', self::$page_args['site_id'] );
 
 			// Order arguments.
-			self::$page_args['order_by'] = isset( $_REQUEST['orderby'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : false;
-			self::$page_args['order']    = isset( $_REQUEST['order'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : false;
+			self::$page_args['order_by'] = isset( $_GET['orderby'] ) ? \sanitize_text_field( \wp_unslash( $_GET['orderby'] ) ) : false;
+			self::$page_args['order']    = isset( $_GET['order'] ) ? \sanitize_text_field( \wp_unslash( $_GET['order'] ) ) : false;
 
 			// Search arguments.
-			self::$page_args['search_term']    = ( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) ) : false;
-			self::$page_args['search_filters'] = ( isset( $_REQUEST['filters'] ) && is_array( $_REQUEST['filters'] ) ) ? array_map( 'sanitize_text_field', wp_unslash( $_REQUEST['filters'] ) ) : false;
-
+			self::$page_args['search_term']    = ! empty( $_GET['s'] ) ? trim( \sanitize_text_field( \wp_unslash( $_GET['s'] ) ) ) : false;
+			self::$page_args['search_filters'] = ( isset( $_GET['filters'] ) && is_array( $_GET['filters'] ) ) ? array_map( 'sanitize_text_field', \wp_unslash( $_GET['filters'] ) ) : false;
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		}
 
 		return self::$page_args;
@@ -231,9 +247,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			return; // Return if the current page is not auditlog's.
 		}
 
-		// Verify nonce for security.
-		if ( isset( $_GET['_wpnonce'] ) ) {
-			check_admin_referer( 'bulk-logs' );
+		/**
+		 * Nonce verification cannot be unconditional here: plain page views and
+		 * read-only audit log filters may come from admin links that carry no nonce.
+		 * Requests that can save search data or trigger referer cleanup originate
+		 * from the list table form, which always prints the 'bulk-logs' nonce.
+		 */
+		if ( isset( $_GET['_wpnonce'] ) || ! empty( $_GET['_wp_http_referer'] ) || ! empty( $_GET['wsal-save-search-name'] ) ) {
+			\check_admin_referer( 'bulk-logs' );
 		}
 
 		// Search.
@@ -242,7 +263,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Site id.
 		$site_id = isset( $_GET['wsal-cbid'] ) ? (int) \sanitize_text_field( \wp_unslash( $_GET['wsal-cbid'] ) ) : false;
 
-		$search_save = ( isset( $_REQUEST['wsal-save-search-name'] ) && ! empty( $_REQUEST['wsal-save-search-name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['wsal-save-search-name'] ) ) ) : false;
+		$search_save = ! empty( $_GET['wsal-save-search-name'] ) ? trim( \sanitize_text_field( \wp_unslash( $_GET['wsal-save-search-name'] ) ) ) : false;
 
 		if ( ! empty( $_GET['_wp_http_referer'] ) ) {
 			// Remove args array.
@@ -280,9 +301,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
 		}
 
-		// Verify nonce for security.
-		if ( isset( $_GET['_wpnonce'] ) ) {
-			check_admin_referer( 'bulk-logs' );
+		/**
+		 * Nonce verification cannot be unconditional here: plain page views and
+		 * read-only audit log filters may come from admin links that carry no nonce.
+		 * Requests that can save search data or trigger referer cleanup originate
+		 * from the list table form, which always prints the 'bulk-logs' nonce.
+		 */
+		if ( isset( $_GET['_wpnonce'] ) || ! empty( $_GET['_wp_http_referer'] ) || ! empty( $_GET['wsal-save-search-name'] ) ) {
+			\check_admin_referer( 'bulk-logs' );
 		}
 
 		$this->get_view()->prepare_items();
@@ -384,17 +410,19 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die( 'Access Denied.' );
 		}
 
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
+		// Verify nonce.
+		\check_ajax_referer( 'wsal_auditlog_viewer_nonce', 'nonce' );
 
-		if ( ! isset( $get_array['occurrence'] ) ) {
+		$occurrence_id = (int) \wp_unslash( $_GET['occurrence'] ?? 0 );
+
+		if ( empty( $occurrence_id ) ) {
 			die( 'Occurrence parameter expected.' );
 		}
 
 		$wsal_db = Connection::get_connection();
 
 
-		$alert_meta = Occurrences_Entity::get_meta_array( (int) $get_array['occurrence'], array(), $wsal_db );
+		$alert_meta = Occurrences_Entity::get_meta_array( $occurrence_id, array(), $wsal_db );
 
 		unset( $alert_meta['ReportText'] );
 
@@ -412,7 +440,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			}
 		}
 
-		$occurrence         = (array) Occurrences_Entity::load( 'id = %d', array( (int) $get_array['occurrence'] ), $wsal_db );
+		$occurrence         = (array) Occurrences_Entity::load( 'id = %d', array( $occurrence_id ), $wsal_db );
 		$inspected_alert_id = (int) ( $occurrence['alert_id'] ?? 0 );
 
 		\do_action( 'wsal_inspector_after_meta', $inspected_alert_id );
@@ -432,27 +460,112 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @since 5.6.4
 	 */
 	public static function render_free_inspector_additional_links( int $inspected_alert_id ): void {
-		$notes_link_events   = array( 5000, 5001, 5002, 4007, 2051, 2046 );
 		$reports_link_events = array( 2000, 2001, 2100, 4000 );
-		$link_label          = '';
-		$link_title          = '';
-		$show_lock_icon      = false;
 
-		$inspector_link_url = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=inspector-cta-' . $inspected_alert_id;
-
-		if ( \in_array( $inspected_alert_id, $notes_link_events, true ) ) {
-			$link_label = \__( 'Add note', 'wp-security-audit-log' );
-			$link_title = \__( 'Add notes to activity log entries with Premium', 'wp-security-audit-log' );
-
-			$show_lock_icon = true;
-
-		} elseif ( \in_array( $inspected_alert_id, $reports_link_events, true ) ) {
-			$link_label = \__( 'Get scheduled reports for content and publishing activity with Premium', 'wp-security-audit-log' );
-		} else {
+		if ( ! in_array( $inspected_alert_id, $reports_link_events, true ) ) {
 			return;
 		}
 
-		echo '<div class="wsal-inspector-cta"><a href="' . \esc_url( $inspector_link_url ) . '" target="_blank" rel="noopener noreferrer"' . ( '' !== $link_title ? ' title="' . \esc_attr( $link_title ) . '"' : '' ) . '>' . \esc_html( $link_label ) . ( $show_lock_icon ? ' <span class="wsal-custom-notifications-lock" aria-hidden="true"></span>' : '' ) . '</a></div>';
+		$inspector_link_url = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=inspector-cta-' . $inspected_alert_id;
+		$link_label         = \__( 'Get scheduled reports for content and publishing activity with Premium', 'wp-security-audit-log' );
+
+		echo '<div class="wsal-inspector-cta"><a href="' . \esc_url( $inspector_link_url ) . '" target="_blank" rel="noopener noreferrer">' . \esc_html( $link_label ) . '</a></div>';
+	}
+
+	/**
+	 * Renders the "Add Note" special button for an event row in the free version.
+	 *
+	 * @param array $event_item - Array with the current row event values as used in List_Events::format_column_value().
+	 *
+	 * @return string $btn_markup - The HTML of the locked add note button, or an empty string for events without the button.
+	 *
+	 * @since 5.6.5
+	 */
+	public static function render_free_add_note_trigger( array $event_item ): string {
+		$notes_button_events = array( 5000, 5001, 5002, 4007, 2051, 2046, 6024, 6025 );
+
+		if ( ! in_array( (int) ( $event_item['alert_id'] ?? 0 ), $notes_button_events, true ) ) {
+			return '';
+		}
+
+		$btn_markup = '<a class="wsal-free-add-note button button-secondary" href="#"><span class="wsal-custom-notifications-lock" aria-hidden="true"></span>' . \esc_html__( 'Add Note', 'wp-security-audit-log' ) . '</a>';
+
+		return $btn_markup;
+	}
+
+	/**
+	 * Enqueues the assets needed by the add note modal in the free version.
+	 *
+	 * @return void
+	 *
+	 * @since 5.6.5
+	 */
+	public static function enqueue_free_add_note_assets() {
+		$screen = function_exists( 'get_current_screen' ) ? \get_current_screen() : null;
+
+		if ( ! $screen || 0 !== strpos( $screen->id, 'toplevel_page_wsal-auditlog' ) ) {
+			return;
+		}
+
+		\wp_enqueue_style( 'wp-jquery-ui-dialog' );
+		\wp_enqueue_script( 'jquery-ui-dialog' );
+	}
+
+	/**
+	 * Renders the add note modal markup and inline script in the admin footer for the free version.
+	 *
+	 * @return void
+	 *
+	 * @since 5.6.5
+	 */
+	public static function render_free_add_note_modal() {
+		$screen = function_exists( 'get_current_screen' ) ? \get_current_screen() : null;
+
+		if ( ! $screen || 0 !== strpos( $screen->id, 'toplevel_page_wsal-auditlog' ) ) {
+			return;
+		}
+		?>
+
+		<div id="wsal-free-add-note-modal" style="display: none;" title="<?php echo \esc_attr__( 'Add Notes to Activity Log Entries', 'wp-security-audit-log' ); ?>">
+			<p><?php \esc_html_e( 'Keep important context alongside your activity log data by adding notes to individual log entries. Document investigations, explain changes, track follow-up actions, and collaborate more effectively with your team.', 'wp-security-audit-log' ); ?></p>
+			<p><strong><?php \esc_html_e( 'Available in WP Activity Log Premium.', 'wp-security-audit-log' ); ?></strong></p>
+			<a class="wsal-free-add-note-upgrade" href="<?php echo 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=add-note-popup'; ?>" target="_blank" rel="noopener noreferrer"><?php \esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></a>
+		</div>
+		<script>
+			jQuery( ( $ ) => {
+				const freeAddNoteModal = $( '#wsal-free-add-note-modal' );
+
+				freeAddNoteModal.dialog( {
+					autoOpen: false,
+					draggable: false,
+					modal: true,
+					resizable: false,
+					width: 'auto',
+					closeOnEscape: true,
+					classes: {
+						'ui-dialog': 'wsal-free-add-note-dialog',
+					},
+					open: () => {
+						$( 'body' ).css( 'overflow', 'hidden' );
+					},
+					close: () => {
+						$( 'body' ).css( 'overflow', '' );
+					},
+				} );
+
+				$( document ).on( 'click', '.wsal-free-add-note', ( event ) => {
+					event.preventDefault();
+					freeAddNoteModal.dialog( 'open' );
+				} );
+
+				$( document ).on( 'click', '.ui-widget-overlay', () => {
+					if ( freeAddNoteModal.dialog( 'isOpen' ) ) {
+						freeAddNoteModal.dialog( 'close' );
+					}
+				} );
+			} );
+		</script>
+		<?php
 	}
 	// @free:end
 
@@ -464,16 +577,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die( 'Access Denied.' );
 		}
 
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
+		// Verify nonce.
+		\check_ajax_referer( 'wsal_auditlog_viewer_nonce', 'nonce' );
 
-		if ( ! isset( $post_array['search'] ) ) {
+		$search = \sanitize_text_field( \wp_unslash( $_POST['search'] ?? '' ) );
+
+		if ( empty( $search ) ) {
 			die( 'Search parameter expected.' );
 		}
 		$grp1 = array();
 		$grp2 = array();
-
-		$search = $post_array['search'];
 
 		foreach ( WP_Helper::get_sites() as $site ) {
 			if ( stripos( $site->blogname, $search ) !== false ) {
@@ -490,18 +603,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * Ajax callback to download failed login log.
 	 */
 	public function wsal_download_failed_login_log() {
-		if ( ! isset( $_POST['download_nonce'] ) ) {
-			echo esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' );
-			die();
+		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
+			die( 'Access Denied.' );
 		}
-		// Get post array through filter.
-		$download_nonce = \sanitize_text_field( \wp_unslash( $_POST['download_nonce'] ) );
 
 		// Verify nonce.
-		if ( empty( $download_nonce ) || ! wp_verify_nonce( $download_nonce, 'wsal-download-failed-logins' ) ) {
-			echo esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' );
-			die();
-		}
+		\check_ajax_referer( 'wsal-download-failed-logins', 'download_nonce' );
 
 		// Get alert by id.
 		$alert_id = filter_input( INPUT_POST, 'alert_id', FILTER_SANITIZE_NUMBER_INT );
@@ -697,6 +804,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		);
 
 		// Add pointer options to script.
+		$valid_pointers['nonce'] = \wp_create_nonce( 'wsal_dismiss_wp_pointer' );
 		wp_localize_script( 'auditlog-pointer', 'wsalPointer', $valid_pointers );
 	}
 
@@ -735,6 +843,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @since 3.2.4
 	 */
 	public static function dismiss_wp_pointer() {
+		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
+			wp_die( 0 );
+		}
+
+		// Verify nonce.
+		\check_ajax_referer( 'wsal_dismiss_wp_pointer', 'nonce' );
+
 		if ( isset( $_POST['pointer'] ) ) {
 			$pointer = sanitize_text_field( wp_unslash( $_POST['pointer'] ) );
 
@@ -773,19 +888,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die();
 		}
 
-		// Filter $_POST array for security.
-		$nonce = isset( $_POST['nonce'] ) ? \sanitize_text_field( \wp_unslash( $_POST['nonce'] ) ) : false;
-
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal_dismiss_setup_modal' ) ) {
-			// Nonce verification failed.
-			echo wp_json_encode(
-				array(
-					'success' => false,
-					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
-				)
-			);
-			die();
-		}
+		// Verify nonce.
+		\check_ajax_referer( 'wsal_dismiss_setup_modal', 'nonce' );
 
 		Settings_Helper::set_boolean_option_value( 'setup-modal-dismissed', true, true );
 		wp_send_json_success();

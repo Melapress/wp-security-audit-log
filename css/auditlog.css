@@ -465,6 +465,62 @@ body.wp-admin .more-info {
 	border-radius: 0;
 }
 
+body.toplevel_page_wsal-auditlog .button.wsal-button.dashicons-filter, 
+body.toplevel_page_wsal-auditlog .wsal-widget-container.dashicons-left-input {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+body.toplevel_page_wsal-auditlog .button.wsal-button.dashicons-filter::before {
+	margin-top: 0;
+}
+
+body.toplevel_page_wsal-auditlog .wsal-widget-container.dashicons-left-input .dashicons.dashicons-calendar-alt {
+ left: 2px;
+}
+
+body.toplevel_page_wsal-auditlog .wsal-widget-container.dashicons-left-input > input[type="text"] {
+	padding-left: 28px!important;
+}
+
+body.mainwp-ui .button.wsal-button {
+	background-color: #fff;
+}
+
+body.mainwp-ui.mainwp-default-dark-theme .wsal-search-controls .button,
+body.mainwp-ui.mainwp-default-dark-theme .tablenav .button.action,
+body.mainwp-ui.mainwp-default-dark-theme .tablenav .button {
+	background-color: #2b2b2b;
+	border-color: #5c9fd6;
+	color: #fff;
+}
+
+body.mainwp-ui.mainwp-default-dark-theme .save-search-container img {
+	filter: invert(1) saturate(0) brightness(2);
+}
+
+body.mainwp-ui.mainwp-default-dark-theme .button.action:hover,
+body.mainwp-ui.mainwp-default-dark-theme .button:hover {
+	background-color: var(--wp-admin-theme-color);
+	color: #fff;
+}
+
+body.mainwp-ui .wp-core-ui .button.wsal-button:disabled,
+body.mainwp-ui .wp-core-ui .button.wsal-button.disabled {
+	background: #fff !important;
+}
+
+body.mainwp-ui.mainwp-default-dark-theme .wsal-filters-group p.description,
+body.mainwp-ui.mainwp-default-dark-theme .filter-col p.description {
+	color: #ccc;
+}
+
+body.mainwp-ui .wsal_search_input {
+	min-height: 32px;
+	box-sizing: border-box;
+}
+
 .button.wsal-button .dashicons-before:before {
 	vertical-align: text-bottom;
 }
@@ -490,6 +546,24 @@ body.wp-admin .more-info {
 
 .wp-list-table #data {
 	width: 80px;
+}
+
+body.mainwp-ui .wp-list-table #data {
+	width: 120px;
+}
+
+body.mainwp-ui td.data.column-data .more-info,
+body.mainwp-ui td.data.column-data .wsal-add-note {
+	display: block;
+	float: none;
+	width: 100%;
+	box-sizing: border-box;
+	text-align: center;
+	margin: 0 0 4px;
+}
+
+body.mainwp-ui td.data.column-data .wsal-copy-event-btns {
+	text-align: center;
 }
 
 .column-crtd {
@@ -623,6 +697,14 @@ td.wsal-grid-text-data {
 	height:inherit;
 }
 
+body.wsal-archive-mode-active #audit-log-viewer-content .tablenav.top {
+	display: flex;
+}
+
+body.wsal-archive-mode-active #audit-log-viewer-content .tablenav.top > .tablenav-pages {
+	margin-left: auto;
+}
+
 input#wsal_as_widget_event::-webkit-inner-spin-button,
 input#wsal_as_widget_event::-webkit-outer-spin-button {
 	-webkit-appearance: none;
@@ -672,7 +754,7 @@ a.inspector-active {
 	max-width: 280px;
 	padding: 8px;
 	border-radius: 5px;
-	background: #fff;
+	background-color: #fff;
 	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16);
 	line-height: 1.4;
 	font-size: 12px;
@@ -696,6 +778,48 @@ a.inspector-active {
     color: #12692f;
 }
 
+body.mainwp-default-dark-theme .wsal-search-helper-text {
+	background-color: #333;
+}
+
+body.mainwp-default-dark-theme span.dashicons.dashicons-info {
+ color: #1fb752;
+}
+
+body.mainwp-ui .wsal_search_input {
+	height: 32px;
+}
+
+body.mainwp-ui .wsal-widget-container input {
+	height: 40px;
+}
+
+body.mainwp-ui .wsal-search-controls {
+	margin-bottom: 16px;
+}
+
+body.mainwp-ui a.wsal-add-note.button.button-secondary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	border-color: #ddd;
+	min-height: 20px;
+	padding: 4px 0;
+	margin-bottom: 0;
+	font-size: 12px;
+	height: auto;
+	line-height: 1;
+}
+
+body.mainwp-ui a.wsal-add-note.button.button-secondary .wsal-note-icon {
+	line-height: 1;
+	vertical-align: middle;
+	width: 16px;
+	height: 14px;
+	font-size: 16px;
+}
+
 .wsal-inspector-cta {
 	margin-top: 12px;
 }
@@ -717,4 +841,102 @@ a.inspector-active {
 	top: 2px;
 	-webkit-mask: url('../classes/Free/assets/images/locked-icon.svg') no-repeat center / contain;
 	mask: url('../classes/Free/assets/images/locked-icon.svg') no-repeat center / contain;
+}
+
+/* Locked "Add Note" button shown in the free version, mirrors the premium .wsal-add-note button. */
+.wp-core-ui .wsal-free-add-note.button.button-secondary {
+	cursor: pointer;
+	font-size: 0.6875rem;
+	padding: 0.34em 0.5em 0.25em;
+	min-height: initial;
+	line-height: 1.5;
+	margin: 8px;
+	border-color: #ddd;
+	text-align: center;
+	float: right;
+}
+
+.wsal-free-add-note .wsal-custom-notifications-lock {
+	width: 12px;
+	height: 12px;
+	top: 1px;
+	margin-right: 4px;
+}
+
+@media (min-width: 783px) {
+	.wp-core-ui .wsal-free-add-note.button.button-secondary {
+		margin: 8px auto 0;
+	}
+}
+
+.toplevel_page_wsal-auditlog .ui-dialog.wsal-free-add-note-dialog {
+	background: #fafbf3;
+	border: none;
+	border-radius: 16px;
+	box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+	left: 50% !important;
+	max-width: 400px;
+	padding: 20px;
+	transform: translateX(-50%);
+	width: 100% !important;
+}
+
+.wsal-free-add-note-dialog .ui-dialog-titlebar.ui-widget-header {
+	align-items: center;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+	display: flex;
+	gap: 16px;
+	padding: 8px 0;
+}
+
+.wsal-free-add-note-dialog .ui-dialog-titlebar.ui-widget-header::before {
+	background: url('../classes/Free/assets/images/wp-activity-log-symbol-green.svg') no-repeat center / contain;
+	content: '';
+	flex-shrink: 0;
+	height: 44px;
+	width: 44px;
+}
+
+.wsal-free-add-note-dialog .ui-dialog-title {
+	color: #3c434a;
+	float: none;
+	font-size: 1.25rem;
+	font-weight: 600;
+	line-height: 1.3;
+	margin: 0;
+	white-space: normal;
+	width: auto;
+}
+
+#wsal-free-add-note-modal.ui-widget-content {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	color: #3c434a;
+	font-size: 0.875rem;
+	line-height: 1.6;
+	padding: 0;
+}
+
+#wsal-free-add-note-modal .wsal-free-add-note-upgrade {
+	background: #009344;
+	border-radius: 5px;
+	color: #fff;
+	display: inline-block;
+	font-size: 0.875rem;
+	line-height: 1;
+	margin-top: 4px;
+	padding: 12px;
+	text-decoration: none;
+  border: none;
+  box-shadow: none;
+}
+
+#wsal-free-add-note-modal .wsal-free-add-note-upgrade:hover,
+#wsal-free-add-note-modal .wsal-free-add-note-upgrade:focus {
+	background: #007a39;
+	color: #fff;
 }

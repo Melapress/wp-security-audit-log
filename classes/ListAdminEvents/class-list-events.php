@@ -751,11 +751,23 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					return $result;
 				case 'data':
-					$url     = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
-					$tooltip = esc_attr__( 'View all details of this change', 'wp-security-audit-log' );
+					$url = \add_query_arg(
+						array(
+							'action'     => 'AjaxInspector',
+							'occurrence' => (int) $item['id'],
+							'nonce'      => \wp_create_nonce( 'wsal_auditlog_viewer_nonce' ),
+						),
+						\admin_url( 'admin-ajax.php' )
+					);
 
-					$btns = '<a class="more-info button button-secondary data-event-inspector-link" data-darktooltip="' . $tooltip . '" data-inspector-active-text="' . __( 'Close inspector.', 'wp-security-audit-log' ) . '" title="' . __( 'Event data inspector', 'wp-security-audit-log' ) . '" href="' . $url . '">' . __( 'More details...', 'wp-security-audit-log' ) . '</a>';
+					$tooltip = \esc_attr__( 'View all details of this change', 'wp-security-audit-log' );
 
+					$btns = '<a class="more-info button button-secondary data-event-inspector-link" data-darktooltip="' . $tooltip . '" data-inspector-active-text="' . \esc_attr__( 'Close inspector.', 'wp-security-audit-log' ) . '" title="' . \esc_attr__( 'Event data inspector', 'wp-security-audit-log' ) . '" href="' . \esc_url( $url ) . '">' . \esc_html__( 'More details...', 'wp-security-audit-log' ) . '</a>';
+
+
+					// @free:start
+					$btns .= ' ' . \WSAL_Views_AuditLog::render_free_add_note_trigger( $item );
+					// @free:end
 
 					return $btns;
 
@@ -1173,7 +1185,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			global $wpdb;
 
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display parameter, sanitized before use.
-			$search_string = ( isset( $_GET['s'] ) ? \esc_sql( \sanitize_text_field( \wp_unslash( $_GET['s'] ) ) ) : '' );
+			$search_string = \sanitize_text_field( \wp_unslash( $_GET['s'] ?? '' ) );
 
 			if ( '' !== $search_string ) {
 				// @free:start
@@ -1184,8 +1196,11 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				// @free:end
 				unset( $column_names['created_on'] );
 				unset( $column_names['site_id'] );
+
+				$search = array();
+
 				foreach ( array_keys( $column_names ) as $value ) {
-					$search[] = array( $value . ' LIKE %s' => '%' . esc_sql( $wpdb->esc_like( $search_string ) ) . '%' );
+					$search[] = array( $value . ' LIKE %s' => '%' . $wpdb->esc_like( $search_string ) . '%' );
 				}
 
 				$query['OR'] = $search;
@@ -1195,8 +1210,8 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					$this->table::get_table_name( self::$wsal_db ) . '.id IN (
 					SELECT DISTINCT occurrence_id
 						FROM ' . Metadata_Entity::get_table_name( self::$wsal_db ) . '
-						WHERE TRIM(BOTH "\"" FROM value) LIKE %s
-					)' => '%' . $search_string . '%',
+						WHERE value LIKE %s
+					)' => '%' . $wpdb->esc_like( $search_string ) . '%',
 				);
 				// @free:end
 			}

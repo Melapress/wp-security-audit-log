@@ -231,14 +231,16 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		/**
 		 * Test the connection.
 		 *
-		 * @param array $connection_config - Connection configuration to test.
+		 * @param array    $connection_config - Connection configuration to test.
+		 * @param int|null $connect_timeout   - Optional. Connection timeout in seconds.
 		 *
-		 * @return bool
+		 * @return bool - Whether the connection succeeded.
 		 * @throws \Exception - Connection failed.
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.5 Added the connection timeout.
 		 */
-		public static function test_connection( ?array $connection_config = null ) {
+		public static function test_connection( ?array $connection_config = null, $connect_timeout = null ) {
 			error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING | E_DEPRECATED ) );
 			if ( ! $connection_config ) {
 				$connection_config = self::get_config();
@@ -252,7 +254,20 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 
 			$db_port_value = $connection_config['port'] ?? '';
 
-			$new_wpdb = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'], $db_port_value ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_connection
+			if ( null === $connect_timeout ) {
+				$connect_timeout = (int) ini_get( 'default_socket_timeout' );
+			}
+
+			/**
+			 * Filters the timeout used when validating a MySQL connection.
+			 *
+			 * @param int $connect_timeout - Connection timeout in seconds.
+			 *
+			 * @since 5.6.5
+			 */
+			$connect_timeout = (int) \apply_filters( 'wsal_connection_test_timeout', $connect_timeout );
+
+			$new_wpdb = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'], $db_port_value, $connect_timeout ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_connection -- A separate wpdb instance is required to validate the external connection without changing the global connection.
 
 			if ( isset( $new_wpdb->error ) && isset( $new_wpdb->dbh ) ) {
 				throw new \Exception( $new_wpdb->dbh->error, $new_wpdb->dbh->errno ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -275,6 +290,8 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 							$error_code  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 						);
 					}
+
+					throw new \Exception( \__( 'Error establishing a database connection.', 'wp-security-audit-log' ), $error_code ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are escaped by the caller when rendered.
 				}
 			} elseif ( isset( $new_wpdb->db_select_error ) ) {
 				throw new \Exception( 'Error: Database ' . $connection_config['db_name'] . ' is unknown.', 1046 ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped

@@ -11,6 +11,7 @@ jQuery(document).ready( function($) {
 			close: function() {
 				$.post( ajaxurl, {
 					pointer: pointer.pointer_id,
+					nonce: wsalPointer.nonce,
 					action: 'wsal_dismiss_wp_pointer'
 				});
 			}

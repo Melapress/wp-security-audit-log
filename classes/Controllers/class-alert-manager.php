@@ -776,7 +776,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				\esc_attr( $class ),
 				'<span style="color:#dc3232; font-weight:bold;">' . \esc_html__( 'ERROR:', 'wp-security-audit-log' ) . '</span>',
 				\esc_html( $message ),
-				'<a href="https://melapress.com/contact" target="_blank">' . \esc_html__( 'Contact us', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://melapress.com/contact/?utm_source=plugin&utm_medium=wsal&utm_campaign=error-notice-contact-us" target="_blank">' . \esc_html__( 'Contact us', 'wp-security-audit-log' ) . '</a>'
 			);
 		}
 

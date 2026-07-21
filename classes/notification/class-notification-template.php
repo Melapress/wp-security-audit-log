@@ -323,7 +323,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 									<table role="presentation" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="min-width: 100%;">
 										<tr>
 											<td align="center" style="padding: 20px 0 15px;">
-												<a href="https://melapress.com/wordpress-activity-log/#utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=top-logo" style="color:#1A3060; font-weight: 700;" target="_blank">
+												<a href="https://melapress.com/wordpress-activity-log/?utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=top-logo" style="color:#1A3060; font-weight: 700;" target="_blank">
 													<img src="' . $media['wp-activity-log'] . '" border="0" width="280" height="41" style="display: block;" alt="WP Activity Log"/>
 												</a>
 											</td>
@@ -1767,7 +1767,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 				<table role="presentation" width="640" border="0" cellpadding="0" cellspacing="0" role="presentation" class="responsive">
 					<tr>
 						<td align="center">
-							<a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=wpal_email&utm_medium=free_email&utm_campaign=events-upgrade-text" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>
+							<a href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=wpal_email&utm_medium=free_email&utm_campaign=events-upgrade-text" target="_blank" style="color: #009344;  display: inline-block;">' . __( 'Upgrade to Premium to see these events specifically', 'wp-security-audit-log' ) . '</a>
 						</td>
 					</tr>
 				</table>';
@@ -1807,7 +1807,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 									<td style="padding-top: 20px; padding-bottom: 20px;">
 										<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: none; border-radius: 4px;">
 											<tr>
-												<td style="border: 2px solid #D9E4FD; border-radius: 4px; background: #F0F4FE; font-family: \'Helvetica Neue\', Helvetica, Arial, \'Lucida Grande\', sans-serif; font-weight: normal; font-size: 18px; line-height: 24px; color: #485D89; padding-left: 24px; padding-right: 24px; padding-top: 20px; padding-bottom: 20px;"><span style="font-weight: bold;">Elevate your security:</span> Access advanced insights, real-time monitoring, and instant alerts for an enhanced WordPress management experience.  <br><a href="https://melapress.com/wordpress-activity-log/#utm_source=wpal_email&utm_medium=free_email&utm_campaign=learn-more-button-cta" target="_blank" style="text-decoration:none; color: #485D89; font-weight: bold; line-height: 28px; font-size: 16px; display: inline-block; margin-top: 6px; margin-bottom: 4px; background-color: #B9CCF7; border-radius: 3px; padding-left: 12px; padding-right: 12px; padding-top: 3px; padding-bottom: 3px;">LEARN MORE &#8680;</a></td>
+												<td style="border: 2px solid #D9E4FD; border-radius: 4px; background: #F0F4FE; font-family: \'Helvetica Neue\', Helvetica, Arial, \'Lucida Grande\', sans-serif; font-weight: normal; font-size: 18px; line-height: 24px; color: #485D89; padding-left: 24px; padding-right: 24px; padding-top: 20px; padding-bottom: 20px;"><span style="font-weight: bold;">Elevate your security:</span> Access advanced insights, real-time monitoring, and instant alerts for an enhanced WordPress management experience.  <br><a href="https://melapress.com/wordpress-activity-log/?utm_source=wpal_email&utm_medium=free_email&utm_campaign=learn-more-button-cta" target="_blank" style="text-decoration:none; color: #485D89; font-weight: bold; line-height: 28px; font-size: 16px; display: inline-block; margin-top: 6px; margin-bottom: 4px; background-color: #B9CCF7; border-radius: 3px; padding-left: 12px; padding-right: 12px; padding-top: 3px; padding-bottom: 3px;">LEARN MORE &#8680;</a></td>
 											</tr>
 										</table>
 									</td>
@@ -1844,7 +1844,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 										</tr>
 										<tr>
 											<td align="center" style="font-family: \'Helvetica Neue\', Helvetica, Arial, \'Lucida Grande\', sans-serif; font-size:18px;line-height:24px;color:#1A3060;font-weight: 400; padding:0px 10px 25px;" class="mob-body-text" >
-												Refer to our <a style="color: #009344;" href="https://melapress.com/support/kb/#utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=kb-link">knowledge base</a> for plugin documentation
+												Refer to our <a style="color: #009344;" href="https://melapress.com/support/kb/?utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=kb-link">knowledge base</a> for plugin documentation
 											</td>
 										</tr>
 									</table>
@@ -1889,12 +1889,12 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 			<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" bgcolor="#384A2F" style="min-width: 100%; background-image: url(' . $media['wsal-dg-footer-bg'] . '); background-repeat: no-repeat; background-position: top center; background-position-y: -1px;">
 				<tr>
 					<td width="100%" align="center" style="padding: 105px 0 16px 0;">
-						<a href="https://melapress.com/#utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=logo-footer" target="_blank"><img src="' . $media['melapress-icon'] . '" width="42" height="42" border="0" style="display: block;" alt="Melapress"/></a>
+						<a href="https://melapress.com/?utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=logo-footer" target="_blank"><img src="' . $media['melapress-icon'] . '" width="42" height="42" border="0" style="display: block;" alt="Melapress"/></a>
 					</td>
 				</tr>
 				<tr>
 					<td align="center" style="font-family: \'Helvetica Neue\', Helvetica, Arial, \'Lucida Grande\', sans-serif; font-size: 16px; line-height: 22px; color: #ffffff; padding-top: 25px;" class="footer-text">
-						If you\'re finding WP Activity Log helpful, consider trying our other plugins:<br> <a href=" https://melapress.com/wordpress-2fa/#utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=wp2fa-text-footer" target="_blank" style="color:#ffffff;">WP 2FA</a> and <a href="https://melapress.com/wordpress-login-security/#utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=mls-text-footer" target="_blank" style="color:#ffffff;">Melapress Login Security</a>.
+						If you\'re finding WP Activity Log helpful, consider trying our other plugins:<br> <a href="https://melapress.com/wordpress-2fa/?utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=wp2fa-text-footer" target="_blank" style="color:#ffffff;">WP 2FA</a> and <a href="https://melapress.com/wordpress-login-security/?utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=mls-text-footer" target="_blank" style="color:#ffffff;">Melapress Login Security</a>.
 					</td>
 				</tr>
 				<tr>
@@ -1903,7 +1903,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Template' ) ) {
 							<tr>
 								<td align="center" style="font-family: \'Helvetica Neue\', Helvetica, Arial, \'Lucida Grande\', sans-serif; font-size: 13px; line-height: 22px; color: #E5EFB0; padding-top: 25px;" class="footer-text">
 									This email is generated by WP Activity Log. To disable this daily overview navigate to the <a href="' . \add_query_arg( 'page', 'wsal-notifications', \network_admin_url( 'admin.php' ) ) . '#wsal-options-tab-notifications-highlights" target="_blank" style="color: #E5EFB0;">email notifications settings</a><br><br>
-									<a href="https://melapress.com/wordpress-activity-log/#utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=wpal-text-footer" target="_blank" style="color: #E5EFB0;">WP Activity Log</a> is developed and maintained by <a href="https://melapress.com/#utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=melapress-text-footer" target="_blank" style="color: #E5EFB0;">Melapress</a>.<br><span style="white-space: nowrap;">Melapress Blaak 520 Rotterdam,</span> <span style="white-space: nowrap;">Zuid-Holland 3011 TA Netherlands</span>
+									<a href="https://melapress.com/wordpress-activity-log/?utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=wpal-text-footer" target="_blank" style="color: #E5EFB0;">WP Activity Log</a> is developed and maintained by <a href="https://melapress.com/?utm_source=wpal_email&utm_medium=' . $set_link . '_email&utm_campaign=melapress-text-footer" target="_blank" style="color: #E5EFB0;">Melapress</a>.<br><span style="white-space: nowrap;">Melapress Blaak 520 Rotterdam,</span> <span style="white-space: nowrap;">Zuid-Holland 3011 TA Netherlands</span>
 								</td>
 							</tr>
 						</table>

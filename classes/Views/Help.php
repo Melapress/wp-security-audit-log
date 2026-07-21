@@ -281,7 +281,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			printf(
 				/* translators: Link to our contact form */
 				esc_html__( 'Please refer to the Help tab for links and information on how to open a support ticket, or access the database. If you have any other queries, please use our %1$scontact form %2$s', 'wp-security-audit-log' ),
-				'<a style="text-decoration:underline" href="https://melapress.com/contact/?utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank">',
+				'<a style="text-decoration:underline" href="https://melapress.com/contact/?utm_source=plugin&utm_medium=wsal&utm_campaign=help-page-contact-form" target="_blank">',
 				'</a>'
 			);
 			echo '</p>';

@@ -464,7 +464,7 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 				self::$wsal_built_links['cat_link']       = array( esc_html__( 'View category', 'wp-security-audit-log' ) => '%cat_link%' );
 				self::$wsal_built_links['ProductCatLink'] = array( esc_html__( 'View category', 'wp-security-audit-log' ) => '%ProductCatLink%' );
 
-				self::$wsal_built_links['ContactSupport'] = array( esc_html__( 'Contact Support', 'wp-security-audit-log' ) => 'https://melapress.com/contact/' );
+				self::$wsal_built_links['ContactSupport'] = array( esc_html__( 'Contact Support', 'wp-security-audit-log' ) => 'https://melapress.com/contact/?utm_source=plugin&utm_medium=wsal&utm_campaign=event-contact-support' );
 
 				self::$wsal_built_links['CommentLink'] = array(
 					\esc_html__( 'View Comment', 'wp-security-audit-log' ) => array(

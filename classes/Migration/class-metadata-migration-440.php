@@ -110,7 +110,7 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) && class_exists(
 						<strong><?php esc_html_e( 'Activity log database update in progress.', 'wp-security-audit-log' ); ?></strong>
 						<br />
 						<?php
-						echo \__( '<strong>UPGRADE notice: </strong> WP Activity Log is updating the database tables where the activity log is stored. The duration of this process varies depending on the size of the activity log. The upgrade is running in the background and won\'t affect your website. For more information please refer to this <a href="https://melapress.com/support/kb/upgrade-database-process-442/" target="_blank">knowledge base entry</a>.', 'wp-security-audit-log' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo \__( '<strong>UPGRADE notice: </strong> WP Activity Log is updating the database tables where the activity log is stored. The duration of this process varies depending on the size of the activity log. The upgrade is running in the background and won\'t affect your website. For more information please refer to this <a href="https://melapress.com/support/kb/upgrade-database-process-442/?utm_source=plugin&utm_medium=wsal&utm_campaign=db-upgrade-notice-kb" target="_blank">knowledge base entry</a>.', 'wp-security-audit-log' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						?>
 					</p>
 				</div>
