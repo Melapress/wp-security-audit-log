@@ -523,7 +523,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Remove all non-WP Mail SMTP plugin notices from our plugin pages.
+		 * Remove unrelated admin notices from WSAL plugin pages.
 		 *
 		 * @since 4.4.3
 		 */
@@ -629,11 +629,14 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Remove all non-WP Mail SMTP notices from the our plugin pages based on the provided action hook.
+		 * Remove callbacks unrelated to WSAL from the provided admin notice hook.
 		 *
 		 * @since 4.4.3
+		 * @since 5.6.6 - Cast callback identifiers to strings before lowercasing.
 		 *
-		 * @param string $action The name of the action.
+		 * @param string $action - The name of the action.
+		 *
+		 * @return void
 		 */
 		private static function remove_unrelated_actions( $action ) {
 			global $wp_filter;
@@ -653,11 +656,11 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 						) ||
 						( // Cover class static method callback case.
 							! empty( $name ) &&
-							false !== strpos( strtolower( $name ), WSAL_PREFIX )
+							false !== strpos( strtolower( (string) $name ), WSAL_PREFIX )
 						) ||
 						( // Cover class static method callback case.
 							! empty( $name ) &&
-							false !== strpos( strtolower( $name ), 'wsal\\' )
+							false !== strpos( strtolower( (string) $name ), 'wsal\\' )
 						)
 					) {
 						continue;

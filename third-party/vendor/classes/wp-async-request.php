@@ -11,7 +11,6 @@ namespace WSAL_Vendor;
  * Abstract WP_Async_Request class.
  *
  * @abstract
- * @internal
  */
 abstract class WP_Async_Request
 {

@@ -48,6 +48,7 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 		 * @return false|mixed|string|void|WP_Error
 		 *
 		 * @since 5.3.0
+		 * @since 5.6.6 - Escaped the EditorLinkOrder metadata URL.
 		 */
 		public static function format_meta_expression( $expression, $value, array $configuration, $occurrence_id = null, $metadata = array(), $wrap = true ) {
 			\add_filter( 'wsal_truncate_alert_value', array( __CLASS__, 'data_truncate' ), 10, 4 );
@@ -261,7 +262,7 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 					if ( ! isset( $metadata['EditorLinkOrder'] ) ) {
 						return '';
 					}
-					return $metadata['EditorLinkOrder'];
+					return \esc_url( $metadata['EditorLinkOrder'] );
 
 				default:
 					/**

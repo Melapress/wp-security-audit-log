@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v3.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Activity Log 5.6.5\n"
+"Project-Id-Version: WP Activity Log 5.6.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-security-audit-log\n"
 "Last-Translator: Melapress <info@melapress.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-21T14:12:14+00:00\n"
+"POT-Creation-Date: 2026-08-25T13:24:08+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-security-audit-log\n"
@@ -1198,29 +1198,29 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: classes/Helpers/class-wp-helper.php:788
-#: classes/Helpers/class-wp-helper.php:800
+#: classes/Helpers/class-wp-helper.php:791
+#: classes/Helpers/class-wp-helper.php:803
 msgid "Unknown Site"
 msgstr ""
 
-#: classes/Helpers/class-wp-helper.php:1208
+#: classes/Helpers/class-wp-helper.php:1211
 #: classes/WPSensors/class-gravity-forms-sensor.php:1604
 msgid "Not found"
 msgstr ""
 
-#: classes/Helpers/formatters/class-alert-formatter.php:65
+#: classes/Helpers/formatters/class-alert-formatter.php:66
 msgid "Exclude custom field from the monitoring"
 msgstr ""
 
-#: classes/Helpers/formatters/class-alert-formatter.php:108
+#: classes/Helpers/formatters/class-alert-formatter.php:109
 msgid "unknown"
 msgstr ""
 
-#: classes/Helpers/formatters/class-alert-formatter.php:185
+#: classes/Helpers/formatters/class-alert-formatter.php:186
 msgid "Download the log file."
 msgstr ""
 
-#: classes/Helpers/formatters/class-alert-formatter.php:225
+#: classes/Helpers/formatters/class-alert-formatter.php:226
 msgid "Upgrade event prior to WP Activity Log 5.0.0."
 msgstr ""
 
