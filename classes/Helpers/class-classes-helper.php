@@ -98,7 +98,20 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 		public static function get_subclasses_of_class( string $current_class, string $base_class, bool $exclude_abstracts = true ): array {
 
 			$matching_classes = array();
-			foreach ( array_keys( self::get_class_map() ) as $class_name ) {
+
+			/**
+			 * Composer's class map contains both WSAL classes and vendor dependencies.
+			 * Calling is_subclass_of() with an unloaded class name triggers autoloading,
+			 * which can load development tools that are not bootstrapped during WordPress
+			 * requests. Exclude vendor classes before performing subclass checks.
+			 */
+			$vendor_directory = \wp_normalize_path( WSAL_BASE_DIR . 'vendor/' );
+
+			foreach ( self::get_class_map() as $class_name => $class_file ) {
+				if ( 0 === strpos( \wp_normalize_path( $class_file ), $vendor_directory ) ) {
+					continue;
+				}
+
 				if ( $current_class !== $class_name && is_subclass_of( $class_name, $base_class ) ) {
 					if ( $exclude_abstracts && ( false !== strpos( $class_name, 'Abstract' ) ) ) {
 						continue;

@@ -21,11 +21,11 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-2: node_modules\n"
 "X-Poedit-SearchPathExcluded-3: languages\n"
 
-#: classes/Helpers/formatters/class-alert-formatter.php:108
+#: classes/Helpers/formatters/class-alert-formatter.php:109
 msgid "unknown"
 msgstr "neznáme"
 
-#: classes/Helpers/formatters/class-alert-formatter.php:185
+#: classes/Helpers/formatters/class-alert-formatter.php:186
 msgid "Download the log file."
 msgstr "Prevziať logový súbor."
 
@@ -336,8 +336,8 @@ msgstr ""
 msgid "Unknown error code."
 msgstr ""
 
-#: classes/Helpers/class-wp-helper.php:788
-#: classes/Helpers/class-wp-helper.php:800
+#: classes/Helpers/class-wp-helper.php:791
+#: classes/Helpers/class-wp-helper.php:803
 msgid "Unknown Site"
 msgstr ""
 
@@ -4918,11 +4918,11 @@ msgstr ""
 msgid "Get Premium!"
 msgstr ""
 
-#: classes/Helpers/formatters/class-alert-formatter.php:65
+#: classes/Helpers/formatters/class-alert-formatter.php:66
 msgid "Exclude custom field from the monitoring"
 msgstr ""
 
-#: classes/Helpers/formatters/class-alert-formatter.php:225
+#: classes/Helpers/formatters/class-alert-formatter.php:226
 msgid "Upgrade event prior to WP Activity Log 5.0.0."
 msgstr ""
 
@@ -11486,7 +11486,7 @@ msgstr ""
 msgid "restored"
 msgstr ""
 
-#: classes/Helpers/class-wp-helper.php:1208
+#: classes/Helpers/class-wp-helper.php:1211
 #: classes/WPSensors/class-gravity-forms-sensor.php:1604
 msgid "Not found"
 msgstr ""
