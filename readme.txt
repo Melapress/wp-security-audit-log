@@ -5,8 +5,8 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, event log, user tracking, logger, history 
 Requires at least: 5.5
-Tested up to: 7.1
-Stable tag: 5.6.6
+Tested up to: 7.1.1
+Stable tag: 5.6.7
 Requires PHP: 7.4
 
 The #1 user-rated activity log plugin for event logging, activity monitoring and change tracking.
@@ -239,24 +239,33 @@ These capabilities make WP Activity Log a **comprehensive solution for site secu
 
 == Changelog ==
 
-= 5.6.6 (2026-08-24) =
+= 5.6.7 (2026-09-22) =
 
  * **Security fix**
 
-	 *  Updated the PHP_CodeSniffer development dependency to version 3.13.6.
+	 *  Fixed an Administrator SQL Injection responsibly reported by Ananda Dhakal.
 
  * **Functionality & plugin improvements**
 
-	 *  Improved username search queries by using WordPress prepared statements.
-	 *  Replaced `json_encode()` with `wp_json_encode()` in Search extension AJAX responses for better character encoding support.
-	 *  Made connection validation messages translatable by passing them to JavaScript through WordPress localization.
-	 *  Improved order editor link handling by applying WordPress URL escaping.
-	 *  Added automated validation for Free builds to prevent Premium-only files or functionality from being included.
+	 *  Updated the External DB mirroring screen to use the plugin’s existing Select2 4.0.13 library instead of the legacy version.
+	 *  Improved multisite access checks for event details, the activity log viewer, and the Latest Events widget to respect site-level viewing permissions.
+	 *  Improved search input handling in post-title and post-ID searches in plugin settings and Select2 fields.
+	 *  Event `2008` (permanent post deletion) now identifies **System** as the actor and displays the server’s IP address for deletions triggered by WordPress cron, scheduled trash cleanup, or WP-CLI.
 
  * **Bug fixes**
 
-	 *  Fixed compatibility with WP 7.1 by addressing a fatal `strtolower()` error in the Log Viewer on PHP 8.2 and 8.3 when another plugin or theme registers a non-string callback identifier for admin notices.
-	 *  Fixed a fatal error on the Reports page and other file operations when WordPress cannot initialize its filesystem. The affected page now remains available and displays a clear warning.
-	 *  Fixed the file append option incorrectly replacing existing file contents instead of adding new content.
+	 *  Fixed user session policies for individual roles requiring the global session policies setting to be enabled.
+	 *  Fixed a banner styling conflict with Ultimate WordPress Auction Plugin that affected the activity log layout.
+	 *  Fixed missing refund amounts in WooCommerce order refund event `9041`.
+	 *  Fixed the custom notifications database table being left behind when uninstalling the plugin with **Delete all data on uninstall** enabled.
+	 *  Fixed event `2002` (modified post) being logged when a more specific event, such as `2065` (modified content), already covers the change.
+	 *  Fixed a fatal PHP error that prevented application password revocation when BuddyBoss or another plugin updated unrelated user metadata during the request.
+	 *  Fixed monthly reports missing activity from the last day of the month.
+	 *  Fixed event `9154` (opened a WooCommerce order) being logged again when the order page reloaded after saving changes.
+	 *  Fixed the basic search option disappearing after disconnecting a license.
+	 *  Fixed a fatal PHP error and missing event `5704` when duplicating a Gravity Forms form without notifications.
+	 *  Fixed auto-refresh on the User Sessions page and made the refresh notice available for translation.
+	 *  Fixed an issue with WP Mail SMTP’s **Force From Email** setting, which could cause email delivery failures.
+	 *  Fixed client IP detection when the selected proxy header contains multiple addresses, rather than recording the full address list or `Unknown`.
 
 Refer to the complete [plugin changelog](https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) for more detailed information about what was new, improved and fixed in previous version updates of WP Activity Log.

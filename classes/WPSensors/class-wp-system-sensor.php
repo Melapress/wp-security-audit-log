@@ -793,7 +793,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 *
 		 * @return void
 		 *
-		 * @since 5.6.6
+		 * @since 5.6.5
 		 */
 		public static function network_admin_email_changed( $option, $new_value, $old_value ) {
 			self::admin_email_changed( $old_value, $new_value, 'admin_email' );

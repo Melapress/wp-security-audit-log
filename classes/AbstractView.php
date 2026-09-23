@@ -67,7 +67,7 @@ abstract class WSAL_AbstractView {
 		// Handle admin notices.
 		\add_action( 'wp_ajax_AjaxDismissNotice', array( $this, 'ajax_dismiss_notice' ) );
 
-		\add_action( 'in_admin_footer', array( __CLASS__, 'in_admin_footer' ) );
+		\add_action( 'admin_footer', array( __CLASS__, 'in_admin_footer' ) );
 		\add_action( 'in_admin_header', array( __CLASS__, 'in_admin_header' ) );
 		\add_filter( 'admin_footer_text', array( __CLASS__, 'admin_footer_text' ) );
 		\add_filter( 'update_footer', array( __CLASS__, 'admin_footer_version_text' ), PHP_INT_MAX );
@@ -286,9 +286,12 @@ abstract class WSAL_AbstractView {
 
 
 	/**
-	 * Modifies the admin footer.
+	 * Renders the upgrade banner after the admin footer.
+	 *
+	 * @return void
 	 *
 	 * @since 5.1.1
+	 * @since 5.6.7 - Moved the banner outside the admin footer and isolated its positioning.
 	 */
 	public static function in_admin_footer() {
 
@@ -296,6 +299,32 @@ abstract class WSAL_AbstractView {
 
 		if ( isset( $current_screen ) && ( in_array( $current_screen->base, WpSecurityAuditLog::get_plugin_screens_array(), true ) ) ) {
 			if ( 'free' === WpSecurityAuditLog::get_plugin_version() ) {
+				?>
+				<style>
+					#wsal-persistant-cta {
+						/* Override the template's inline offset to place the banner below wpwrap. */
+						top: 100% !important;
+						margin-left: 160px;
+					}
+
+					.folded #wsal-persistant-cta {
+						margin-left: 36px;
+					}
+
+					@media only screen and (max-width: 960px) {
+						.auto-fold #wsal-persistant-cta {
+							margin-left: 36px;
+						}
+					}
+
+					@media screen and (max-width: 782px) {
+						#wsal-persistant-cta {
+							/* Preserve the banner's visibility when the WordPress footer is hidden. */
+							display: none;
+						}
+					}
+				</style>
+				<?php
 				include_once WSAL_BASE_DIR . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'Free' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'upgrade-to-premium.php';
 			}
 		}

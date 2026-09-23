@@ -239,7 +239,6 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 				return null;
 			}
 
-			// TODO: Handle function calls (and methods?).
 			$expr = explode( '->', $expr );
 			$meta = array_shift( $expr );
 			$meta = isset( $meta_data[ $meta ] ) ? $meta_data[ $meta ] : null;

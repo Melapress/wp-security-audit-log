@@ -145,12 +145,38 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		private static $query_order = array();
 
 		/**
+		 * Current event list instance used by the basic search render hook.
+		 *
+		 * @var List_Events|null
+		 *
+		 * @since 5.6.7
+		 */
+		private static $current_instance = null;
+
+		/**
+		 * Checks whether the current license includes Premium search.
+		 *
+		 * @return bool $is_premium_search_available - True when Premium search is available.
+		 *
+		 * @since 5.6.7
+		 */
+		private static function is_premium_search_available(): bool {
+			$is_premium_search_available = false;
+
+
+			return $is_premium_search_available;
+		}
+
+		/**
 		 * Default class constructor.
 		 *
-		 * @param stdClass $query_args Events query arguments.
+		 * @param array $query_args - Events query arguments.
+		 *
+		 * @return void - The event list is initialized.
 		 *
 		 * @since 4.6.0
 		 * @since 5.0.0 - Removed $plugin parameter - there is no longer main class dependency.
+		 * @since 5.6.7 - Registers basic search when Premium search is unavailable.
 		 */
 		public function __construct( $query_args ) {
 			self::$query_args = $query_args;
@@ -169,26 +195,13 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			self::$wsal_db = null;
 
 
-			$this->table_name = Occurrences_Entity::get_table_name( self::$wsal_db );
-			$this->table      = Occurrences_Entity::class;
+			$this->table_name       = Occurrences_Entity::get_table_name( self::$wsal_db );
+			$this->table            = Occurrences_Entity::class;
+			self::$current_instance = $this;
 
-			// @free:start
-			add_action(
-				'wsal_search_filters_list',
-				function ( $which ) {
-					if ( 'top' === $which ) {
-						echo '<div style="clear:both; float:right">';
-						$this->search_box(
-							__( 'Search', 'wp-security-audit-log' ),
-							strtolower( $this->table_name ) . '-find',
-							true
-						);
-						echo '</div>';
-					}
-				},
-				999
-			);
-			// @free:end
+			if ( ! self::is_premium_search_available() ) {
+				\add_action( 'wsal_search_filters_list', array( __CLASS__, 'render_basic_search_box' ), 999 );
+			}
 		}
 
 		/**
@@ -213,6 +226,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 *
 		 * @since 4.6.0
 		 * @since 5.6.4 Added the $show_search_cta parameter.
+		 * @since 5.6.7 - Allows the helper CTA when basic search is used in a Premium build.
 		 */
 		public function search_box( $text, $input_id, $show_search_cta = false ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display parameter, sanitized before use.
@@ -242,7 +256,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			<p class="search-box" style="position:relative">
 				<label class="screen-reader-text" for="<?php echo \esc_attr( $input_id ); ?>"><?php echo \esc_attr( $text ); ?>:</label>
 					<?php
-					// @free:start
 					if ( $show_search_cta ) {
 						?>
 						<span class="wsal-search-helper-text">
@@ -252,14 +265,36 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						</span>
 						<?php
 					}
-					// @free:end
 					?>
 					<span class="wsal-search-controls">
-						<input type="search" id="<?php echo \esc_attr( $input_id ); ?>" class="wsal_search_input" name="s" value="<?php _admin_search_query(); ?>" />
-						<?php submit_button( $text, '', '', false, array( 'id' => 'search-submit' ) ); ?>
+						<input type="search" id="<?php echo \esc_attr( $input_id ); ?>" class="wsal_search_input" name="s" value="<?php \_admin_search_query(); ?>" />
+						<?php \submit_button( $text, '', '', false, array( 'id' => 'search-submit' ) ); ?>
 					</span>
 			</p>
 			<?php
+		}
+
+		/**
+		 * Renders the basic search box when Premium search is unavailable.
+		 *
+		 * @param string $which - Navigation position.
+		 *
+		 * @return void - The basic search box is rendered when applicable.
+		 *
+		 * @since 5.6.7
+		 */
+		public static function render_basic_search_box( $which ) {
+			if ( 'top' !== $which || null === self::$current_instance ) {
+				return;
+			}
+
+			echo '<div style="clear:both; float:right">';
+			self::$current_instance->search_box(
+				\__( 'Search', 'wp-security-audit-log' ),
+				strtolower( self::$current_instance->table_name ) . '-find',
+				true
+			);
+			echo '</div>';
 		}
 
 		/**
@@ -1176,10 +1211,13 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		/**
 		 * Alters the search query.
 		 *
-		 * @param array $query      - The current search query.
-		 * @param array $connection - The connection (not in use).
+		 * @param array      $query      - The current search query.
+		 * @param \wpdb|null $connection - The connection (not in use).
+		 *
+		 * @return array $query - Search query conditions.
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.7 - Uses the Free-edition query when Premium search is unavailable.
 		 */
 		public function search( $query, $connection = null ): array {
 			global $wpdb;
@@ -1188,12 +1226,15 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			$search_string = \sanitize_text_field( \wp_unslash( $_GET['s'] ?? '' ) );
 
 			if ( '' !== $search_string ) {
-				// @free:start
-				$column_names = $this->table::get_fields();
-				unset( $column_names['user_roles'] );
-				unset( $column_names['severity'] );
-				unset( $column_names['object'] );
-				// @free:end
+				$column_names                = $this->table::get_fields();
+				$is_premium_search_available = self::is_premium_search_available();
+
+				if ( ! $is_premium_search_available ) {
+					unset( $column_names['user_roles'] );
+					unset( $column_names['severity'] );
+					unset( $column_names['object'] );
+				}
+
 				unset( $column_names['created_on'] );
 				unset( $column_names['site_id'] );
 
@@ -1205,15 +1246,15 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 				$query['OR'] = $search;
 
-				// @free:start
-				$query['OR'][] = array(
-					$this->table::get_table_name( self::$wsal_db ) . '.id IN (
-					SELECT DISTINCT occurrence_id
-						FROM ' . Metadata_Entity::get_table_name( self::$wsal_db ) . '
-						WHERE value LIKE %s
-					)' => '%' . $wpdb->esc_like( $search_string ) . '%',
-				);
-				// @free:end
+				if ( ! $is_premium_search_available ) {
+					$query['OR'][] = array(
+						$this->table::get_table_name( self::$wsal_db ) . '.id IN (
+						SELECT DISTINCT occurrence_id
+							FROM ' . Metadata_Entity::get_table_name( self::$wsal_db ) . '
+							WHERE value LIKE %s
+						)' => '%' . $wpdb->esc_like( $search_string ) . '%',
+					);
+				}
 			}
 
 			return $query;

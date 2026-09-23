@@ -597,31 +597,37 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 		}
 
 		/**
-		 * Covers order actions
+		 * Reports orders opened through the HPOS editor.
 		 *
 		 * @return void
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.7 - Match WooCommerce's action validation without changing case or punctuation.
 		 */
 		public static function orders_actions() {
+			$action   = is_string( $_GET['action'] ?? null ) ? \sanitize_text_field( \wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$order_id = is_scalar( $_GET['id'] ?? null ) ? \absint( \wp_unslash( (string) $_GET['id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-			if ( isset( $_GET['action'] ) ) {
-				if ( 'edit' === \sanitize_text_field( \wp_unslash( $_GET['action'] ) ) && isset( $_GET['id'] ) && 0 < (int) $_GET['id'] ) {
-					// Get post.
-					$post = wc_get_order( \sanitize_text_field( \wp_unslash( $_GET['id'] ) ) );
+			if ( 'edit' !== $action || 0 === $order_id ) {
+				return;
+			}
 
-					// Log event.
-					if ( $post ) {
-						self::order_opened_in_editor( $post );
-					}
-				}
+			// Get order.
+			$order = wc_get_order( $order_id );
+
+			// Log event.
+			if ( $order ) {
+				self::order_opened_in_editor( $order );
 			}
 		}
 
 		/**
-		 * Alert for Editing of Posts and Custom Post Types in Gutenberg.
+		 * Reports orders opened through the legacy WooCommerce editor.
+		 *
+		 * @return void
 		 *
 		 * @since 3.2.4
+		 * @since 5.6.7 - Require permission to edit the order before reporting it opened.
 		 */
 		public static function order_opened_for_editing() {
 			global $pagenow;
@@ -630,71 +636,73 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 				return;
 			}
 
-			$post_id = isset( $_GET['post'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['post'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$post_id = is_scalar( $_GET['post'] ?? null ) ? \absint( \wp_unslash( (string) $_GET['post'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			// Check post id.
 			if ( empty( $post_id ) ) {
 				return;
 			}
 
-			if ( is_user_logged_in() && is_admin() ) {
-				// Get post.
-				$post = wc_get_order( $post_id );
+			// This hook runs before WordPress checks permission to edit the requested order.
+			if ( \is_user_logged_in() && \is_admin() && \current_user_can( 'edit_post', $post_id ) ) {
+				// Get order.
+				$order = wc_get_order( $post_id );
 
 				// Log event.
-				if ( $post ) {
-					self::order_opened_in_editor( $post );
+				if ( $order ) {
+					self::order_opened_in_editor( $order );
 				}
 			}
 		}
 
 		/**
-		 * Order Opened for Editing in WP Editors.
+		 * Reports an order opening while skipping saves and their result pages.
 		 *
-		 * @param WP_Post $post – Post object.
+		 * @param \WC_Order $order - Order object.
+		 *
+		 * @return void
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.7 - Replace same-editor referrer and recent-event checks with update-result detection.
 		 */
-		private static function order_opened_in_editor( $post ) {
-			if ( empty( $post ) ) {
+		private static function order_opened_in_editor( $order ) {
+			if ( empty( $order ) ) {
 				return;
 			}
 
-			$current_path = isset( $_SERVER['SCRIPT_NAME'] ) ? esc_url_raw( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) . '?post=' . $post->get_id() : false;
-			$referrer     = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : false;
+			$request_method = is_string( $_SERVER['REQUEST_METHOD'] ?? null ) ? \sanitize_text_field( \wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+
+			if ( 'GET' !== strtoupper( $request_method ) || Woocommerce_Helper::is_order_update_result_request( $order->get_id() ) ) {
+				return;
+			}
+
+			$referrer = is_string( $_SERVER['HTTP_REFERER'] ?? null ) ? \esc_url_raw( \wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : false;
 
 			// Check referrer URL.
 			if ( ! empty( $referrer ) ) {
 				// Parse the referrer.
-				$parsed_url = wp_parse_url( $referrer );
+				$parsed_url = \wp_parse_url( $referrer );
 
 				// If the referrer is post-new then we can ignore this one.
 				if ( isset( $parsed_url['path'] ) && 'post-new' === basename( $parsed_url['path'], '.php' ) ) {
-					return $post;
+					return;
 				}
 			}
 
-			if ( ! empty( $referrer ) && strpos( $referrer, $current_path ) !== false ) {
-				// Ignore this if we were on the same page so we avoid double audit entries.
-				return $post;
-			}
+			$event       = 9154;
+			$editor_link = WooCommerce_Sensor_Helper_Second::get_editor_link( $order );
 
-			if ( ! Alert_Manager::was_triggered_recently( 9154 ) ) {
-				$event       = 9154;
-				$editor_link = WooCommerce_Sensor_Helper_Second::get_editor_link( $post );
-
-				Alert_Manager::trigger_event(
-					$event,
-					array(
-						'PostID'             => $post->get_id(),
-						'PostTitle'          => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $post->get_id() ),
-						'PostStatus'         => \wc_get_order_status_name( $post->get_status() ),
-						'PostStatusSlug'     => $post->get_status(),
-						'PostUrl'            => get_permalink( $post->get_id() ),
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-			}
+			Alert_Manager::trigger_event(
+				$event,
+				array(
+					'PostID'             => $order->get_id(),
+					'PostTitle'          => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order->get_id() ),
+					'PostStatus'         => wc_get_order_status_name( $order->get_status() ),
+					'PostStatusSlug'     => $order->get_status(),
+					'PostUrl'            => \get_permalink( $order->get_id() ),
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
 		}
 
 		/**

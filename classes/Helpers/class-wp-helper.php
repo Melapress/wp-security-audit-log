@@ -192,6 +192,28 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
+		 * Compares post fields while excluding fields selected by the caller.
+		 *
+		 * @param \WP_Post $oldpost        - Old post.
+		 * @param \WP_Post $newpost        - New post.
+		 * @param string[] $ignored_fields - Post fields to exclude from the comparison.
+		 *
+		 * @return bool - Whether any non-ignored post field changed.
+		 *
+		 * @since 5.6.7
+		 */
+		public static function has_post_changes( $oldpost, $newpost, array $ignored_fields = array() ): bool {
+			$old_post_data = get_object_vars( $oldpost );
+			$new_post_data = get_object_vars( $newpost );
+
+			foreach ( $ignored_fields as $field_name ) {
+				unset( $old_post_data[ $field_name ], $new_post_data[ $field_name ] );
+			}
+
+			return $old_post_data !== $new_post_data;
+		}
+
+		/**
 		 * Returns WP post statuses as array
 		 *
 		 * @return array
@@ -558,17 +580,21 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Method: Get view site id.
+		 * Gets the site scope for the current activity log viewer.
+		 *
+		 * @return int|false - Site ID, -1 for network-wide scope, or false on single-site installs.
 		 *
 		 * @since 4.5.0
-		 *
-		 * @return int
+		 * @since 5.6.7 - Restricts authenticated non-super users to their current site.
 		 */
 		public static function get_view_site_id() {
 			switch ( true ) {
 				// Non-multisite.
 				case ! self::is_multisite():
 					return false;
+					// Multisite + authenticated non-super user view.
+				case 0 < \get_current_user_id() && ! \is_super_admin():
+					return \get_current_blog_id();
 					// Multisite + main site view.
 				case self::is_main_blog() && ! self::is_specific_view():
 					return -1;
@@ -598,14 +624,19 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Method: Get a specific view.
+		 * Gets the site ID selected by the activity log filter.
+		 *
+		 * @return int - Selected site ID, or zero when no scalar filter is provided.
 		 *
 		 * @since 4.5.0
-		 *
-		 * @return int
+		 * @since 5.6.7 - Reads the site ID from the explicit GET request.
 		 */
 		public static function get_specific_view() {
-			return isset( $_REQUEST['wsal-cbid'] ) ? (int) sanitize_text_field( wp_unslash( $_REQUEST['wsal-cbid'] ) ) : 0;
+			if ( ! is_scalar( $_GET['wsal-cbid'] ?? null ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only activity log filter.
+				return 0;
+			}
+
+			return (int) \sanitize_text_field( \wp_unslash( $_GET['wsal-cbid'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only activity log filter.
 		}
 
 		/**
@@ -618,14 +649,15 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Method: Check if it is a specific view.
+		 * Checks whether the activity log filter selects a specific site scope.
+		 *
+		 * @return bool - Whether the selected site ID is nonzero.
 		 *
 		 * @since 4.5.0
-		 *
-		 * @return bool
+		 * @since 5.6.7 - Uses the sanitized GET site filter.
 		 */
 		public static function is_specific_view() {
-			return isset( $_REQUEST['wsal-cbid'] ) && 0 !== (int) $_REQUEST['wsal-cbid'];
+			return 0 !== self::get_specific_view();
 		}
 
 		/**

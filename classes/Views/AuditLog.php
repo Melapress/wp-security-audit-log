@@ -172,6 +172,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @return array $page_args - The audit log view arguments.
 	 *
 	 * @since 4.6.3
+	 * @since 5.6.7 - Preserves current-site scope for non-super users after filtering.
 	 */
 	public static function get_page_arguments(): array {
 		if ( null === self::$page_args ) {
@@ -184,10 +185,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			 * submit form data are nonce-verified in render() and handle_form_submission().
 			 */
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended
-			self::$page_args['page']    = isset( $_GET['page'] ) ? \sanitize_text_field( \wp_unslash( $_GET['page'] ) ) : false;
-			self::$page_args['site_id'] = WP_Helper::get_view_site_id();
+			self::$page_args['page'] = isset( $_GET['page'] ) ? \sanitize_text_field( \wp_unslash( $_GET['page'] ) ) : false;
+			$view_site_id            = WP_Helper::get_view_site_id();
 
-			self::$page_args['site_id'] = apply_filters( 'wsal_main_view_site_id', self::$page_args['site_id'] );
+			self::$page_args['site_id'] = \apply_filters( 'wsal_main_view_site_id', $view_site_id );
+
+			if ( WP_Helper::is_multisite() && 0 < \get_current_user_id() && ! \is_super_admin() ) {
+				self::$page_args['site_id'] = $view_site_id;
+			}
 
 			// Order arguments.
 			self::$page_args['order_by'] = isset( $_GET['orderby'] ) ? \sanitize_text_field( \wp_unslash( $_GET['orderby'] ) ) : false;
@@ -403,7 +408,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Ajax callback to display meta data inspector.
+	 * Displays the metadata inspector for an authorized event.
+	 *
+	 * @return void
+	 *
+	 * @since 1.0.0
+	 * @since 5.6.7 - Checks the event site before loading metadata on multisite.
 	 */
 	public function AjaxInspector() {
 		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
@@ -413,7 +423,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Verify nonce.
 		\check_ajax_referer( 'wsal_auditlog_viewer_nonce', 'nonce' );
 
-		$occurrence_id = (int) \wp_unslash( $_GET['occurrence'] ?? 0 );
+		$occurrence_id = \absint( \wp_unslash( $_GET['occurrence'] ?? 0 ) );
 
 		if ( empty( $occurrence_id ) ) {
 			die( 'Occurrence parameter expected.' );
@@ -422,7 +432,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$wsal_db = Connection::get_connection();
 
 
-		$alert_meta = Occurrences_Entity::get_meta_array( $occurrence_id, array(), $wsal_db );
+		$occurrence = (array) Occurrences_Entity::load( 'id = %d', array( $occurrence_id ), $wsal_db );
+
+		if ( WP_Helper::is_multisite() && ! \is_super_admin() && ( empty( $occurrence ) || \get_current_blog_id() !== (int) $occurrence['site_id'] ) ) {
+			\wp_die( 'Access Denied.' );
+		}
+
+		$alert_meta = Occurrences_Entity::get_meta_array( $occurrence_id, $occurrence, $wsal_db );
 
 		unset( $alert_meta['ReportText'] );
 
@@ -431,22 +447,24 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		foreach ( $alert_meta as $item => $value ) {
 			if ( $value ) {
 				if ( is_array( $value ) || is_object( $value ) ) {
-					$value = var_export( $value, true );
+					$value = var_export( $value, true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export -- The inspector intentionally displays array and object metadata as text.
 				}
+
 				if ( 'severity' === mb_strtolower( $item ) ) {
 					$value .= ' (' . ( Constants::get_severity_by_code( (int) $value ) ['text'] ?? '' ) . ')';
 				}
+
 				echo '<strong>' . \esc_html( $item ) . ':</strong> <span style="opacity: 0.7;"><pre style="display:inline">' . \esc_html( $value ) . '</pre></span></br>';
 			}
 		}
 
-		$occurrence         = (array) Occurrences_Entity::load( 'id = %d', array( $occurrence_id ), $wsal_db );
 		$inspected_alert_id = (int) ( $occurrence['alert_id'] ?? 0 );
 
 		\do_action( 'wsal_inspector_after_meta', $inspected_alert_id );
 
 		echo '</div>';
-		wp_die();
+
+		\wp_die();
 	}
 
 	// @free:start

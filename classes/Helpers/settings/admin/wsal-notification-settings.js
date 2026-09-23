@@ -279,11 +279,14 @@ $doc.ready(function () {
     wsalNotificationEmailValidation('#notification_daily_email_address', '#notification_daily_summary_notification-item');
     wsalNotificationEmailValidation('#notification_weekly_email_address' , '#notification_weekly_summary_notification-item');
 
-    jQuery('#wsal_form').submit(function (evt) {
+    jQuery('#wsal_form').submit(function (event) {
         $wsalBody.addClass('has-overlay');
         $saveAlert.fadeIn();
 
-        var btnClicked = evt.originalEvent.submitter;
+        const submittedControlId = jQuery(event.originalEvent?.submitter).attr('id');
+        const activeElement = document.activeElement;
+        const isSearchSubmission = 'search-submit' === submittedControlId
+            || ('search' === activeElement?.type && event.currentTarget.contains(activeElement));
 
         if (jQuery('#builder-basic').length) {
 
@@ -371,7 +374,7 @@ $doc.ready(function () {
             }
         }
 
-        if (jQuery(btnClicked).attr('id') === 'doaction' || jQuery(btnClicked).attr('id') === 'doaction2' || jQuery(btnClicked).attr('id') === 'search-submit') {
+        if ('doaction' === submittedControlId || 'doaction2' === submittedControlId || isSearchSubmission) {
             $wsalBody.removeClass('has-overlay');
             return;
         }

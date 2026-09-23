@@ -690,41 +690,63 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		}
 
 		/**
-		 * Get main client IP.
+		 * Gets the nearest valid IP address from a comma-separated header value.
 		 *
-		 * @return string|null
+		 * @param string $ip_addresses - Comma-separated IP addresses.
+		 * @param string $fallback_ip - IP address to use when the header contains no valid address.
+		 *
+		 * @return string $ip_address - Nearest valid IP address, fallback IP, or Unknown.
+		 *
+		 * @since 5.6.7
+		 */
+		private static function get_nearest_valid_ip_address( $ip_addresses, $fallback_ip ) {
+			$ip_addresses = array_reverse( explode( ',', $ip_addresses ) );
+
+			foreach ( $ip_addresses as $ip_address ) {
+				$ip_address = self::normalize_ip( $ip_address );
+				if ( Validator::is_ip_address( $ip_address ) ) {
+					return $ip_address;
+				}
+			}
+
+			$fallback_ip = self::normalize_ip( $fallback_ip );
+			if ( Validator::is_ip_address( $fallback_ip ) ) {
+				return $fallback_ip;
+			}
+
+			return 'Unknown';
+		}
+
+		/**
+		 * Gets the main client IP address.
+		 *
+		 * @return string $main_client_ip - Resolved client IP address.
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.7 - Resolves proxy chains safely and falls back to the remote address.
 		 */
 		public static function get_main_client_ip() {
 			if ( '' === self::$main_client_ip ) {
+				// Keep a stable internal fallback value for validation and storage.
+				$remote_address = \sanitize_text_field( \wp_unslash( $_SERVER['REMOTE_ADDR'] ?? 'Unknown' ) );
+
 				if ( 2 === (int) self::get_option_value( 'use-proxy-ip' ) && '' !== trim( self::get_option_value( 'proxy-custom-header', '' ) ) ) {
+					// Resolve the client IP from the administrator-defined proxy header.
 					$inner_server = array_change_key_case( $_SERVER, CASE_UPPER );
-					$key          = \strtoupper( self::get_option_value( 'proxy-custom-header' ) );
-					$ip           = 'Unknown'; // Default to 'Unknown' if no custom header is found or empty.
-					if ( isset( $inner_server[ $key ] ) ) {
-						$ip = \sanitize_text_field( \wp_unslash( $inner_server[ $key ] ) );
-					} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-						$ip = \sanitize_text_field( \wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-					}
-					self::$main_client_ip = self::normalize_ip( $ip );
+					$key          = strtoupper( self::get_option_value( 'proxy-custom-header' ) );
+					$ip           = \sanitize_text_field( \wp_unslash( $inner_server[ $key ] ?? '' ) );
+
+					self::$main_client_ip = self::get_nearest_valid_ip_address( $ip, $remote_address );
 				} elseif ( self::get_boolean_option_value( 'use-proxy-ip' ) ) {
-					// TODO: The algorithm below just gets the first IP in the list...we might want to make this more intelligent somehow.
+					// Resolve the client IP from the selected supported proxy header.
 					$inner_server = array_change_key_case( $_SERVER, CASE_UPPER );
-					$key          = \strtoupper( self::get_option_value( 'custom-header', 'REMOTE_ADDR' ) );
-					$ip           = 'Unknown'; // Default to 'Unknown' if no custom header is found or empty.
-					if ( isset( $inner_server[ $key ] ) ) {
-						$ip = \sanitize_text_field( \wp_unslash( $inner_server[ $key ] ) );
-					} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-						$ip = \sanitize_text_field( \wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-					}
-					self::$main_client_ip = self::normalize_ip( $ip );
-					// $ips                  = self::get_client_ips();
-					// $ips                  = reset( $ips );
-					// self::$main_client_ip = isset( $ips[0] ) ? $ips[0] : '';
+					$key          = strtoupper( self::get_option_value( 'custom-header', 'REMOTE_ADDR' ) );
+					$ip           = \sanitize_text_field( \wp_unslash( $inner_server[ $key ] ?? '' ) );
+
+					self::$main_client_ip = self::get_nearest_valid_ip_address( $ip, $remote_address );
 				} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-					$ip                   = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-					self::$main_client_ip = self::normalize_ip( $ip );
+					// Use the direct remote address when proxy capture is disabled.
+					self::$main_client_ip = self::normalize_ip( $remote_address );
 
 					if ( ! Validator::validate_ip( self::$main_client_ip ) ) {
 						self::$main_client_ip = 'Error ' . self::ERROR_CODE_INVALID_IP . ': Invalid IP Address';
@@ -781,13 +803,14 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		}
 
 		/**
-		 * Normalize IP address, i.e., remove the port number.
+		 * Normalizes an IP address by removing its port number.
 		 *
 		 * @param string $ip - IP address.
 		 *
-		 * @since 4.5.0
+		 * @return string $ip - Normalized IP address or Unknown.
 		 *
-		 * @return string
+		 * @since 4.5.0
+		 * @since 5.6.7 - Uses wp_parse_url() for consistent host parsing.
 		 */
 		public static function normalize_ip( $ip ) {
 			$ip = trim( $ip );
@@ -796,9 +819,9 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 				return $ip;
 			}
 
-			$ip = parse_url( 'http://' . $ip, PHP_URL_HOST );
+			$ip = \wp_parse_url( 'http://' . $ip, PHP_URL_HOST );
 
-			// Prevent fatal error with str replace if $ip is false or null.
+			// Prevent a fatal error when host parsing returns false or null.
 			if ( false === $ip || null === $ip ) {
 				return 'Unknown';
 			}

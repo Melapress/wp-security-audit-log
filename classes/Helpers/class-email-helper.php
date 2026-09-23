@@ -88,15 +88,16 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 		/**
 		 * Send Email.
 		 *
-		 * @param string $email_address - Email Address.
-		 * @param string $subject       - Email subject.
-		 * @param string $content       - Email content.
-		 * @param string $headers       Email headers.
-		 * @param array  $attachments   Email attachments.
+		 * @param string       $email_address - Email address.
+		 * @param string       $subject       - Email subject.
+		 * @param string       $content       - Email content.
+		 * @param string|array $headers       - Email headers.
+		 * @param array        $attachments   - Email attachments.
 		 *
-		 * @return bool
+		 * @return bool $result - Whether WordPress accepted the email for sending.
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.7 - Run the sender filter before PHP_INT_MAX to avoid conflicts with WP Mail SMTP.
 		 */
 		public static function send_email( $email_address, $subject, $content, $headers = '', $attachments = array() ) {
 
@@ -111,8 +112,8 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 				$headers = array( 'Content-Type: ' . self::set_html_content_type() . '; charset=UTF-8' );
 			}
 
-			// @see: http://codex.wordpress.org/Function_Reference/wp_mail
-			\add_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX );
+			// ! Don't use PHP_INT_MAX alone as priority here. It will conflict with the WP Mail SMTP plugin and break delivery.
+			\add_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX - 1 );
 			\add_filter( 'wp_mail_from_name', array( __CLASS__, 'get_wp_mail_from_name' ) );
 
 			$result = \wp_mail( $email_address, $subject, $content, $headers, $attachments );
@@ -122,7 +123,8 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 			 *
 			 * @see http://core.trac.wordpress.org/ticket/23578
 			 */
-			\remove_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX );
+			// ! Don't use PHP_INT_MAX alone as priority here. It will conflict with the WP Mail SMTP plugin and break delivery.
+			\remove_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX - 1 );
 			\remove_filter( 'wp_mail_from_name', array( __CLASS__, 'get_wp_mail_from_name' ) );
 
 			return $result;
