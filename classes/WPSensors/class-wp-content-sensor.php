@@ -194,13 +194,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		}
 
 		/**
-		 * Check all the post changes.
+		 * Checks all post changes after WordPress saves the post.
 		 *
-		 * @param integer  $post_id - Post ID.
+		 * @param int      $post_id - Post ID.
 		 * @param \WP_Post $post    - WP Post object.
-		 * @param boolean  $update  - True if post update, false if post is new.
+		 * @param bool     $update  - True if updating an existing post, false if creating a post.
+		 *
+		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.7 - Read the Classic Editor flag from explicit GET and POST inputs.
 		 */
 		public static function post_changed( $post_id, $post, $update ) {
 			// Ignore if post type is empty, revision or trash.
@@ -238,10 +241,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 			 * @since 3.4
 			 */
 			if ( ! defined( 'REST_REQUEST' ) && ! defined( 'DOING_AJAX' ) ) {
-				// Either Gutenberg's second post request or classic editor's request.
-				if ( ! isset( $_REQUEST['classic-editor'] ) ) {
-					$editor_replace = get_option( 'classic-editor-replace', 'classic' );
-					$allow_users    = get_option( 'classic-editor-allow-users', 'disallow' );
+				/**
+				 * Only the flag's presence identifies a Classic Editor request after WordPress accepts the save.
+				 * This sensor only observes the saved post; it does not perform the update or use the flag's value.
+				 */
+				$is_classic_editor_request = isset( $_GET['classic-editor'] ) || isset( $_POST['classic-editor'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing
+				if ( ! $is_classic_editor_request ) {
+					$editor_replace = \get_option( 'classic-editor-replace', 'classic' );
+					$allow_users    = \get_option( 'classic-editor-allow-users', 'disallow' );
 
 					// If block editor is selected and users are not allowed to switch editors then it is Gutenberg's second request.
 					if ( 'block' === $editor_replace && 'disallow' === $allow_users ) {
@@ -264,13 +271,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 					+ self::check_parent_change( self::$old_post, $post )
 					+ self::check_visibility_change( self::$old_post, $post, self::$old_status, $post->post_status )
 					+ self::check_date_change( self::$old_post, $post )
-					+ self::check_permalink_change( self::$old_link, get_permalink( $post->ID ), $post )
+					+ self::check_permalink_change( self::$old_link, \get_permalink( $post->ID ), $post )
 					+ self::check_comments_pings( self::$old_post, $post );
 
 					// If a status change event has occurred, then don't log event 2002 (post modified).
 					$changes = $status_event ? true : $changes;
 					if ( '1' === $changes ) {
-						remove_action( 'save_post', array( __CLASS__, 'post_changed' ), 10, 3 );
+						\remove_action( 'save_post', array( __CLASS__, 'post_changed' ), 10, 3 );
 					}
 					self::check_modification_change( $post->ID, self::$old_post, $post, $changes );
 				}
@@ -354,6 +361,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 * @param integer $post_id - Post ID.
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.7 - Attributed scheduled and WP-CLI deletions to the system.
 		 */
 		public static function event_post_deleted( $post_id ) {
 			// Exclude CPTs from external plugins.
@@ -366,6 +374,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 			}
 
 			$event_data = self::get_post_event_data( $post ); // Get event data.
+
+			// Check whether WordPress cron or WP-CLI initiated the deletion.
+			if ( \wp_doing_cron() || \doing_action( 'wp_scheduled_delete' ) || ( defined( 'WP_CLI' ) && \WP_CLI ) ) {
+				$server_address = \sanitize_text_field( \wp_unslash( $_SERVER['SERVER_ADDR'] ?? '127.0.0.1' ) );
+
+				$event_data['CurrentUserID'] = 0;
+				$event_data['ClientIP']      = $server_address;
+				$event_data['Username']      = 'System';
+			}
 
 			// Check if this was initiated by a plugin.
 			$request_params = \WSAL\Helpers\PHP_Helper::get_filtered_request_data();
@@ -1678,23 +1695,58 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		}
 
 		/**
-		 * Post modified content.
+		 * Checks whether an update changed a post field without a dedicated event.
 		 *
-		 * @param integer  $post_id – Post ID.
-		 * @param stdClass $oldpost – Old post.
-		 * @param stdClass $newpost – New post.
-		 * @param int      $modified – Set to 0 if no changes done to the post.
+		 * @param \WP_Post $oldpost - Old post.
+		 * @param \WP_Post $newpost - New post.
 		 *
-		 * @return int|void
+		 * @return bool - Whether an unhandled post field changed.
+		 *
+		 * @since 5.6.7
+		 */
+		private static function has_unhandled_post_change( $oldpost, $newpost ): bool {
+			// Replacing an existing password does not change visibility and still needs event 2002.
+			$handled_fields = array(
+				'ID',
+				'post_author',
+				'post_date',
+				'post_date_gmt',
+				'post_content',
+				'post_title',
+				'post_excerpt',
+				'post_status',
+				'comment_status',
+				'ping_status',
+				'post_name',
+				'post_modified',
+				'post_modified_gmt',
+				'post_parent',
+				'filter',
+			);
+
+			return WP_Helper::has_post_changes( $oldpost, $newpost, $handled_fields );
+		}
+
+		/**
+		 * Reports content, excerpt, or otherwise unhandled post changes.
+		 *
+		 * @param int      $post_id  - Post ID.
+		 * @param \WP_Post $oldpost  - Old post.
+		 * @param \WP_Post $newpost  - New post.
+		 * @param int|bool $modified - Whether another specific change was detected.
+		 *
+		 * @return int|void - Zero when a Yoast event suppresses logging; otherwise no value.
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.7 - Skip event 2002 for timestamp-only updates while preserving unhandled changes.
 		 */
 		public static function check_modification_change( $post_id, $oldpost, $newpost, $modified ) {
 			self::check_title_change( $oldpost, $newpost );
 
 			$content_changed = $oldpost->post_content !== $newpost->post_content;
+			$excerpt_changed = $oldpost->post_excerpt !== $newpost->post_excerpt;
 
-			/*
+			/**
 			 * If the content hasn't changed and this looks to be a draft resave
 			 * then we won't track anything for this modification.
 			 */
@@ -1707,7 +1759,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 
 				if ( $content_changed ) { // Check if content changed.
 					$event = 2065;
-				} elseif ( ! $modified ) {
+				} elseif ( ! $modified && ( $excerpt_changed || self::has_unhandled_post_change( $oldpost, $newpost ) ) ) {
 					$event = 2002;
 				}
 
@@ -1732,7 +1784,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 
 					// Check excerpt change.
 					$old_post_excerpt = $oldpost->post_excerpt;
-					$post_excerpt     = get_post_field( 'post_excerpt', $post_id );
+					$post_excerpt     = \get_post_field( 'post_excerpt', $post_id );
 
 					if ( empty( $old_post_excerpt ) && ! empty( $post_excerpt ) ) {
 						$event_data['EventType'] = 'added';
@@ -1750,9 +1802,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 					}
 
 					if ( 2002 === $event ) {
-						// If we reach this point, we no longer need to check if the content has changed as we already have
-						// an event to handle it. So trigger 2002 regardless and "something" has changed in the post, we
-						// just don't detect it elsewhere.
+						/**
+						 * A real change has no dedicated event, so queue event 2002 unless another
+						 * post-related event is recorded in this request.
+						 */
 						Alert_Manager::trigger_event_if( $event, $event_data, array( __CLASS__, 'ignore_other_post_events' ) );
 					} else {
 						Alert_Manager::trigger_event( $event, $event_data );
@@ -1762,11 +1815,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		}
 
 		/**
-		 * Method: Ensure no other post-related events are being fired, or have recently been fired.
+		 * Checks whether event 2002 can be logged without duplicating a specific event.
 		 *
-		 * @return bool
+		 * @return bool - Whether no other post-related events were recorded or queued in this request.
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.7 - Restrict suppression checks to the current request.
 		 */
 		public static function ignore_other_post_events() {
 
@@ -1791,7 +1845,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 			$post_events[] = 9159;
 
 			foreach ( $post_events as $event ) {
-				if ( Alert_Manager::will_or_has_triggered( $event ) || Alert_Manager::was_triggered_recently( $event ) ) {
+				if ( Alert_Manager::will_or_has_triggered( $event ) ) {
 					return false;
 				}
 			}
@@ -1830,18 +1884,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		}
 
 		/**
-		 * Return post revision link.
+		 * Returns the latest post revision link when available.
 		 *
-		 * @param integer $post_id - Post ID.
-		 * @param WP_Post $post    - WP Post object.
+		 * @param int           $post_id - Post ID.
+		 * @param \WP_Post|null $post    - Post object, retained for backward compatibility.
+		 * @param int           $event   - Event ID.
 		 *
-		 * @return string
+		 * @return string|null - Revision link, an empty string when disabled, or null when unavailable.
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.7 - Document the event ID argument and nullable return value.
 		 */
 		public static function get_post_revision( $post_id, $post = null, $event = 0 ) {
 
-			if ( \defined( 'WP_POST_REVISIONS' ) && ! WP_POST_REVISIONS ) {
+			if ( defined( 'WP_POST_REVISIONS' ) && ! WP_POST_REVISIONS ) {
 				if ( 2065 === $event ) {
 					// If the content changed and WP_POST_REVISIONS is set to false, we don't have a revision link.
 					return '';

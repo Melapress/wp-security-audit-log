@@ -82,10 +82,6 @@ if ( ! class_exists( '\WSAL\Helpers\File_Helper' ) ) {
 		/**
 		 * Initializes the WordPress filesystem API and makes sure a usable filesystem object is available.
 		 *
-		 * Relaxed file ownership is requested, so WordPress uses direct disk access whenever the context
-		 * directory is writable, instead of falling back to the FTP or SSH transports. The plugin holds no
-		 * credentials for those transports, and using the resulting object would raise a fatal error.
-		 *
 		 * @param string $context - Optional. Full path to an existing directory used to determine the filesystem method. Defaults to the WordPress context.
 		 *
 		 * @return boolean $initialized - True when the filesystem object is ready to be used.

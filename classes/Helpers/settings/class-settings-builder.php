@@ -2434,12 +2434,14 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 * @return string
 		 *
 		 * @since 5.0.0
+		 * @since 6.0.0 - Prepared the post title search value before appending it to the query.
 		 */
 		public static function search_post_title( $where, $wp_query ) {
 			$search_term = $wp_query->get( 'search_post_title' );
 			if ( $search_term ) {
 				global $wpdb;
-				$where .= ' AND ' . $wpdb->posts . '.post_title LIKE \'%' . $wpdb->esc_like( $search_term ) . '%\'';
+				$search_like = '%' . $wpdb->esc_like( $search_term ) . '%';
+				$where      .= $wpdb->prepare( ' AND ' . $wpdb->posts . '.post_title LIKE %s', $search_like );
 			}
 
 			return $where;

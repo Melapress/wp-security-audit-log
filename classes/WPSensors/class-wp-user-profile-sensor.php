@@ -69,6 +69,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.7 - Capture the first application-password metadata insertion.
 		 */
 		public static function early_init() {
 			add_action( 'profile_update', array( __CLASS__, 'event_user_updated' ), 10, 2 );
@@ -79,7 +80,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 			add_action( 'revoke_super_admin', array( __CLASS__, 'get_super_admins' ) );
 			add_action( 'granted_super_admin', array( __CLASS__, 'event_super_access_granted' ), 10, 1 );
 			add_action( 'revoked_super_admin', array( __CLASS__, 'event_super_access_revoked' ), 10, 1 );
-			add_action( 'update_user_meta', array( __CLASS__, 'event_application_password_added' ), 10, 4 );
+			\add_action( 'added_user_meta', array( __CLASS__, 'event_application_password_added' ), 10, 4 );
+			\add_action( 'update_user_meta', array( __CLASS__, 'event_application_password_added' ), 10, 4 );
 			add_action( 'retrieve_password', array( __CLASS__, 'event_password_reset_link_sent' ), 10, 1 );
 
 			add_action( 'add_user_role', array( __CLASS__, 'record_role_added' ), 10, 2 );
@@ -123,27 +125,34 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		}
 
 		/**
-		 * Captures addition of application passwords.
+		 * Captures application-password additions and revocations.
 		 *
-		 * @param int    $meta_id ID of the metadata entry to update.
-		 * @param int    $user_id ID of the user metadata is for.
-		 * @param string $meta_key Metadata key.
-		 * @param mixed  $_meta_value Metadata value. Serialized if non-scalar.
+		 * @param int    $meta_id     - ID of the inserted or updated metadata entry.
+		 * @param int    $user_id     - ID of the user metadata is for.
+		 * @param string $meta_key    - Metadata key.
+		 * @param mixed  $_meta_value - New metadata value before serialization.
+		 *
+		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.7 - Ignore unrelated user metadata and validate application-password arrays.
 		 */
 		public static function event_application_password_added( $meta_id, $user_id, $meta_key, $_meta_value ) {
+			if ( '_application_passwords' !== $meta_key ) {
+				return;
+			}
 
-			// Filter global arrays for security.
-			$server_array = filter_input_array( INPUT_SERVER );
-			if ( ! isset( $server_array['HTTP_REFERER'] ) || ! isset( $server_array['REQUEST_URI'] ) ) {
+			$http_referer = \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
+			$request_uri  = \sanitize_text_field( \wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+
+			if ( empty( $http_referer ) || empty( $request_uri ) ) {
 				return;
 			}
 
 			// Check the page which is performing this change.
-			$referer_check = pathinfo( \sanitize_text_field( \wp_unslash( $server_array['HTTP_REFERER'] ) ) );
+			$referer_check = pathinfo( $http_referer );
 			$referer_check = $referer_check['filename'];
-			$referer_check = ( strpos( $referer_check, '.' ) !== false ) ? strstr( $referer_check, '.', true ) : $referer_check;
+			$referer_check = ( false !== strpos( $referer_check, '.' ) ) ? strstr( $referer_check, '.', true ) : $referer_check;
 
 			$is_correct_referer_and_action = false;
 
@@ -152,12 +161,21 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 			}
 
 			// Ensure we are dealing with the correct request.
-			if ( $is_correct_referer_and_action && strpos( $server_array['REQUEST_URI'], '/wp/v2/users/' . $user_id . '/application-passwords' ) !== false ) {
+			if ( $is_correct_referer_and_action && false !== strpos( $request_uri, '/wp/v2/users/' . $user_id . '/application-passwords' ) ) {
 
-				$old_value = get_user_meta( $user_id, '_application_passwords', true );
+				if ( ! is_array( $_meta_value ) ) {
+					return;
+				}
 
-				$current_user       = get_user_by( 'id', $user_id );
-				$current_userdata   = get_userdata( $user_id );
+				$old_value = \get_user_meta( $user_id, '_application_passwords', true );
+
+				// Match WordPress's handling of a non-array stored password list.
+				if ( ! is_array( $old_value ) ) {
+					$old_value = array();
+				}
+
+				$current_user       = \get_user_by( 'id', $user_id );
+				$current_userdata   = \get_userdata( $user_id );
 				$current_user_roles = implode(
 					', ',
 					array_map(
@@ -171,7 +189,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 				$event_id           = ( 'user-edit' === $referer_check ) ? 4026 : 4025;
 
 				// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
-				if ( isset( $_POST['name'] ) ) {
+				if ( isset( $_POST['name'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WordPress validates application-password requests before updating metadata.
 					Alert_Manager::trigger_event(
 						$event_id,
 						array(
@@ -180,7 +198,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 							'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
 							'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
 							'CurrentUserID' => $current_user->ID,
-							'friendly_name' => \sanitize_text_field( \wp_unslash( $_POST['name'] ) ),
+							'friendly_name' => \sanitize_text_field( \wp_unslash( $_POST['name'] ) ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WordPress validates application-password requests before updating metadata.
 							'EventType'     => 'added',
 						)
 					);

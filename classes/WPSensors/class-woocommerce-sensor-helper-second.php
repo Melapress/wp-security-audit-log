@@ -898,58 +898,78 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 		}
 
 		/**
+		 * Gets a refund belonging to an order.
+		 *
+		 * @param int $order_id  - Order ID.
+		 * @param int $refund_id - Refund ID.
+		 *
+		 * @return \WC_Order_Refund|null $refund - Valid refund object, or null.
+		 *
+		 * @since 5.6.7
+		 */
+		protected static function get_order_refund( $order_id, $refund_id ) {
+			$refund = wc_get_order( $refund_id );
+
+			if ( ! ( $refund instanceof \WC_Order_Refund ) || $order_id !== $refund->get_parent_id() ) {
+				return null;
+			}
+
+			return $refund;
+		}
+
+		/**
 		 * WooCommerce Order Refunded.
 		 *
-		 * @since 3.3.1
+		 * @param int $order_id  - Order ID.
+		 * @param int $refund_id - Refund ID.
 		 *
-		 * @param integer $order_id  – Order ID.
-		 * @param integer $refund_id – Refund ID.
+		 * @return void
+		 *
+		 * @since 3.3.1
+		 * @since 5.6.7 - Loads the refund directly by ID.
 		 */
 		public static function event_order_refunded( $order_id, $refund_id ) {
-			// Get order post object.
-			$order_obj        = wc_get_order( $order_id );
-			$edit_link        = self::get_editor_link( $order_obj );
-			$order            = wc_get_order( $order_id );
+			$order_id  = \absint( $order_id );
+			$refund_id = \absint( $refund_id );
+			$order     = wc_get_order( $order_id );
+			$refund    = self::get_order_refund( $order_id, $refund_id );
+
+			if ( ! ( $order instanceof \WC_Order ) || null === $refund ) {
+				return;
+			}
+
+			$edit_link        = self::get_editor_link( $order );
 			$customer_user_id = $order->get_user_id();
-			$username         = esc_html__( 'Guest', 'wp-security-audit-log' );
+			$username         = \esc_html__( 'Guest', 'wp-security-audit-log' );
 
 			if ( 0 !== $customer_user_id ) {
-				$user     = get_user_by( 'id', $customer_user_id );
+				$user     = \get_user_by( 'id', $customer_user_id );
 				$username = $user->user_login;
 			}
 
 			$date          = $order->get_date_created();
-			$date_format   = get_option( 'date_format' );
-			$time_format   = get_option( 'time_format' );
+			$date_format   = \get_option( 'date_format' );
+			$time_format   = \get_option( 'time_format' );
 			$created_date  = $date->date( $date_format . ' ' . $time_format );
-			$refund_amount = '';
-			$refund_reason = '';
-			$currency      = get_woocommerce_currency_symbol( $order->get_currency() );
-			$refunds       = $order->get_refunds();
-
-			foreach ( $refunds as $refund_object ) {
-				$id = $refund_object->get_id();
-				if ( $id === $refund_id ) {
-					$amount        = $refund_object->get_amount();
-					$refund_amount = ( $amount ) ? $amount : '0.00';
-					$reason        = $refund_object->get_reason();
-					$refund_reason = ( $reason ) ? $reason : esc_html__( 'None supplied', 'wp-security-audit-log' );
-				}
-			}
+			$amount        = $refund->get_amount();
+			$refund_amount = ( $amount ) ? $amount : '0.00';
+			$reason        = $refund->get_reason();
+			$refund_reason = ( $reason ) ? $reason : \esc_html__( 'None supplied', 'wp-security-audit-log' );
+			$currency      = get_woocommerce_currency_symbol( $refund->get_currency() );
 
 			Alert_Manager::trigger_event(
 				9041,
 				array(
-					'OrderID'          => esc_attr( $order_id ),
-					'RefundID'         => esc_attr( $refund_id ),
+					'OrderID'          => \esc_attr( $order_id ),
+					'RefundID'         => \esc_attr( $refund_id ),
 					'CustomerUser'     => $username,
 					'RefundedAmount'   => $currency . $refund_amount,
 					'Reason'           => $refund_reason,
 					'OrderDate'        => $created_date,
-					'OrderTitle'       => sanitize_text_field( Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order_id ) ),
-					'OrderStatus'      => \wc_get_order_status_name( $order_obj->get_status() ),
-					'OrderStatusSlug'  => $order_obj->get_status(),
-					'PostStatus'       => 'wc-' . $order_obj->get_status(),
+					'OrderTitle'       => \sanitize_text_field( Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order_id ) ),
+					'OrderStatus'      => wc_get_order_status_name( $order->get_status() ),
+					'OrderStatusSlug'  => $order->get_status(),
+					'PostStatus'       => 'wc-' . $order->get_status(),
 					$edit_link['name'] => $edit_link['value'],
 				)
 			);

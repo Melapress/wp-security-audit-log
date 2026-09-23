@@ -230,14 +230,42 @@ if ( ! class_exists( '\WSAL\Entities\Base_Fields' ) ) {
 		}
 
 		/**
-		 * Special class method for searching for users based on different criteria - user first name, user roles, etc...
+		 * Prepares occurrence field values with placeholders matching the database column type.
 		 *
-		 * @param array $search_keys - Keys (from field mapping logic @see prepare_all_fields method) giving the logic of how to search for user based on specific field.
+		 * @param string $field_name - Occurrence field name.
+		 * @param array  $field_values - Values to prepare for an SQL list.
+		 *
+		 * @return string - Prepared comma-separated SQL values.
+		 *
+		 * @since 5.6.7
+		 */
+		private static function prepare_occurrence_field_values( string $field_name, array $field_values ): string {
+			$field_types = Occurrences_Entity::get_fields();
+			$field_type  = $field_types[ $field_name ] ?? '';
+			$placeholder = '%s';
+
+			if ( false !== strpos( $field_type, 'int' ) ) {
+				$placeholder = '%d';
+			} elseif ( false !== strpos( $field_type, 'double' ) || false !== strpos( $field_type, 'float' ) || false !== strpos( $field_type, 'decimal' ) ) {
+				$placeholder = '%f';
+			}
+
+			$placeholders = implode( ', ', array_fill( 0, count( $field_values ), $placeholder ) );
+			$_wpdb        = Occurrences_Entity::get_connection();
+
+			return $_wpdb->prepare( $placeholders, $field_values );
+		}
+
+		/**
+		 * Searches for users by mapped fields or occurrence roles.
+		 *
+		 * @param array $search_keys - Field mapping from prepare_all_fields() describing how to search for users.
 		 * @param array $search_values - Values collected from the search string to search for.
 		 *
-		 * @return string
+		 * @return string|null $users_sql - Prepared user filter SQL, or null for an unsupported mapping.
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.7 - Prepares mapped user and role values with schema-typed placeholders.
 		 */
 		public static function users_search( array $search_keys, array $search_values ) {
 			$exclude = false;
@@ -285,26 +313,28 @@ if ( ! class_exists( '\WSAL\Entities\Base_Fields' ) ) {
 						$search_str   .= ' ' . $search_keys['field_name'] . ' LIKE %s OR ';
 						$search_vals[] = $value;
 					}
-					$search_str  = \rtrim( $search_str, ' OR ' );
-					$users_array = $wpdb->get_results(
-						$wpdb->prepare( 'SELECT * FROM ' . $wpdb->users . ' WHERE ' . $search_str, $search_vals ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-					); // This will return list of users with matching email domain.
+
+					$search_str = \rtrim( $search_str, ' OR ' );
+
+					// This will return list of users with matching email domain.
+					$users_array = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional uncached lookup for email-domain report filters.
+						$wpdb->prepare( 'SELECT * FROM ' . $wpdb->users . ' WHERE ' . $search_str, $search_vals ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The column is fixed to user_email above; dynamic %s placeholders receive values separately.
+					);
 				} else {
 					$users_array = \get_users( $args );
 				}
 
 				if ( MainWP_Addon::check_mainwp_plugin_active() ) {
-
 					$mainwp_users = MainWP_Helper::find_users_by( array( $search_keys['field_name'] ), $search_user_values, false );
-
-					$users_array = array_merge( $users_array, $mainwp_users );
+					$users_array  = array_merge( $users_array, $mainwp_users );
 				}
 
 				foreach ( $users_array as $user ) {
 					if ( isset( $search_keys['in_table'] ) ) {
 						$arr = array();
+
 						foreach ( $search_keys['in_table'] as $field_name => $object_name ) {
-							$arr[ $field_name ] = "'" . $user->$object_name . "'";
+							$arr[ $field_name ] = $user->$object_name;
 						}
 
 						$users[] = $arr;
@@ -318,25 +348,36 @@ if ( ! class_exists( '\WSAL\Entities\Base_Fields' ) ) {
 				if ( ! empty( $users ) ) {
 					foreach ( $users as $user ) {
 						foreach ( $user as $field_name => $field_value ) {
-							if ( ! empty( $field_value ) ) {
+							if ( null !== $field_value && '' !== (string) $field_value ) {
 								$from_string_array[ $field_name ][] = $field_value;
 							}
 						}
 					}
 				}
+
+				// SQL conditions to filter activity-log entries by user.
 				$users_sql = '';
+
 				foreach ( $from_string_array as $field_name => $field_values ) {
-					$users_sql .= ( ( true === $exclude ) ? ' ( ' . $field_name . ' IS NULL OR ' : '' ) . $field_name . ( ( true === $exclude ) ? ' NOT' : '' ) . ' IN ( ' . \implode( ',', $field_values ) . ( ( true === $exclude ) ? ' ) ) AND ' : ' ) OR ' );
+					$prepared_field_values = self::prepare_occurrence_field_values( $field_name, $field_values );
+
+					if ( true === $exclude ) {
+						$users_sql .= ' ( ' . $field_name . ' IS NULL OR ';
+						$users_sql .= $field_name . ' NOT IN ( ' . $prepared_field_values . ' ) ) AND ';
+					} else {
+						$users_sql .= $field_name . ' IN ( ' . $prepared_field_values . ' ) OR ';
+					}
 				}
 
 				if ( true === $exclude ) {
-					$users_sql = ' ( ' . \rtrim( $users_sql, ' AND ' ) . ' ) ';
+					$users_sql = ' ( ' . rtrim( $users_sql, ' AND ' ) . ' ) ';
 				} else {
-					$users_sql = ' ( ' . \rtrim( $users_sql, ' OR ' ) . ' ) ';
+					$users_sql = ' ( ' . rtrim( $users_sql, ' OR ' ) . ' ) ';
 				}
 
 				if ( true === $exclude ) {
 					unset( $search_values['exc'] );
+
 					if ( ! empty( $search_values ) ) {
 						$users_sql .= ' AND ' . self::users_search( $search_keys, $search_values );
 					}
@@ -345,10 +386,11 @@ if ( ! class_exists( '\WSAL\Entities\Base_Fields' ) ) {
 				return $users_sql;
 			} elseif ( isset( $search_keys['extract'] ) ) {
 				if ( 'role' === $search_keys['extract'] ) {
-
 					$users_sql = '';
+
 					foreach ( $search_user_values as $field_value ) {
-						$users_sql .= ( ( true === $exclude ) ? '!' : '' ) . " FIND_IN_SET('" . $field_value . "',`user_roles`) " . ( ( true === $exclude ) ? ' AND ' : ' OR ' );
+						$prepared_field_value = self::prepare_occurrence_field_values( 'user_roles', array( $field_value ) );
+						$users_sql           .= ( ( true === $exclude ) ? '!' : '' ) . ' FIND_IN_SET(' . $prepared_field_value . ',`user_roles`) ' . ( ( true === $exclude ) ? ' AND ' : ' OR ' );
 					}
 
 					if ( true === $exclude ) {
@@ -359,6 +401,7 @@ if ( ! class_exists( '\WSAL\Entities\Base_Fields' ) ) {
 
 					if ( true === $exclude ) {
 						unset( $search_values['exc'] );
+
 						if ( ! empty( $search_values ) ) {
 							$users_sql .= ' AND ' . self::users_search( $search_keys, $search_values );
 						}
@@ -423,14 +466,15 @@ if ( ! class_exists( '\WSAL\Entities\Base_Fields' ) ) {
 		}
 
 		/**
-		 * Falls here if the filed / value pair to search for is directly present in the occurrences table - meaning that there is no need to map, or extract additional data.
+		 * Builds filters for fields present in the occurrences table and date boundaries.
 		 *
 		 * @param string $field_name - The name of the field to search for.
 		 * @param array  $search_values - The search values provided.
 		 *
-		 * @return string
+		 * @return string $field_sql - SQL conditions for the selected occurrence field.
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.7 - Prepares direct field values with schema-typed placeholders.
 		 */
 		public static function direct_field_call( string $field_name, array $search_values ) {
 			$exclude = false;
@@ -455,18 +499,18 @@ if ( ! class_exists( '\WSAL\Entities\Base_Fields' ) ) {
 				} else {
 					$search_field_values = $search_values;
 				}
-				foreach ( $search_field_values as $field_values ) {
-					$field_sql .= ( ( true === $exclude ) ? ' ( ' . $field_name . ' IS NULL OR ' : '' ) . $field_name . ( ( true === $exclude ) ? ' NOT' : '' ) . ' IN ( ' . "'" . \implode( ",'", (array) $field_values ) . "'" . ( ( true === $exclude ) ? ' ) ) AND ' : ' ) OR ' );
-				}
+
+				$prepared_field_values = self::prepare_occurrence_field_values( $field_name, $search_field_values );
 
 				if ( true === $exclude ) {
-					$field_sql = ' ( ' . \rtrim( $field_sql, ' AND ' ) . ' ) ';
+					$field_sql = ' ( ( ' . $field_name . ' IS NULL OR ' . $field_name . ' NOT IN ( ' . $prepared_field_values . ' ) ) ) ';
 				} else {
-					$field_sql = ' ( ' . \rtrim( $field_sql, ' OR ' ) . ' ) ';
+					$field_sql = ' ( ' . $field_name . ' IN ( ' . $prepared_field_values . ' ) ) ';
 				}
 
 				if ( true === $exclude ) {
 					unset( $search_values['exc'] );
+
 					if ( ! empty( $search_values ) ) {
 						$field_sql .= ' AND ' . self::direct_field_call( $field_name, $search_values );
 					}
@@ -475,6 +519,5 @@ if ( ! class_exists( '\WSAL\Entities\Base_Fields' ) ) {
 
 			return $field_sql;
 		}
-
 	}
 }

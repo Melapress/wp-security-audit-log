@@ -449,18 +449,20 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 		/**
 		 * Alters WordPress query to search only by post title.
 		 *
-		 * @param string   $where    SQL WHERE statement.
-		 * @param WP_Query $wp_query WordPress query object.
+		 * @param string    $where    SQL WHERE statement.
+		 * @param \WP_Query $wp_query WordPress query object.
 		 *
 		 * @return string
 		 *
 		 * @since 4.5.1
+		 * @since 6.0.0 - Prepared the post title search value before appending it to the query.
 		 */
 		public static function search_post_title( $where, $wp_query ) {
 			$search_term = $wp_query->get( 'search_post_title' );
 			if ( $search_term ) {
 				global $wpdb;
-				$where .= ' AND ' . $wpdb->posts . '.post_title LIKE \'%' . $wpdb->esc_like( $search_term ) . '%\'';
+				$search_like = '%' . $wpdb->esc_like( $search_term ) . '%';
+				$where      .= $wpdb->prepare( ' AND ' . $wpdb->posts . '.post_title LIKE %s', $search_like );
 			}
 
 			return $where;

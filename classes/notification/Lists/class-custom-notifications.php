@@ -40,7 +40,5 @@ if ( ! class_exists( '\WSAL\Extensions\Notifications\Custom_Notifications' ) ) {
 	 * @since 5.2.1
 	 */
 	class Custom_Notifications extends \WP_List_Table {
-// phpcs:disable
-// phpcs:enable
 	}
 }

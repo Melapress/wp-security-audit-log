@@ -20,6 +20,7 @@ use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Entities\Occurrences_Entity;
 use WSAL\Entities\Generated_Reports_Entity;
+use WSAL\Entities\Custom_Notifications_Entity;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -40,16 +41,18 @@ if ( ! class_exists( '\WSAL\Helpers\Uninstall_Helper' ) ) {
 	class Uninstall_Helper {
 
 		/**
-		 * Runs the uninstall sequence
+		 * Runs the uninstall sequence.
 		 *
 		 * @return void
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.7 - Added custom notifications table removal.
 		 */
 		public static function uninstall() {
 			if ( Settings_Helper::get_boolean_option_value( 'delete-data' ) ) {
 				Occurrences_Entity::drop_table();
 				Metadata_Entity::drop_table();
+
 
 				if ( \class_exists( '\WSAL\Extensions\Views\Reports' ) ) {
 					Reports_Entity::drop_table();

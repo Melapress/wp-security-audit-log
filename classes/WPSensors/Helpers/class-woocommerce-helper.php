@@ -12,9 +12,9 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors\Helpers;
 
-use WSAL\Controllers\Alert_Manager;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -327,6 +327,43 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 		}
 
 		/**
+		 * Checks whether the request URL matches a known order-update result.
+		 *
+		 * @param int $order_id - Order ID.
+		 *
+		 * @return bool - Whether the URL identifies an update result for the same legacy or HPOS order.
+		 *
+		 * @since 5.6.7
+		 */
+		public static function is_order_update_result_request( $order_id ): bool {
+			$script_name = is_string( $_SERVER['SCRIPT_NAME'] ?? null ) ? basename( \sanitize_text_field( \wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) ) : '';
+
+			// WordPress and WooCommerce append message 1 after a successful order update.
+			$action  = is_string( $_GET['action'] ?? null ) ? \sanitize_key( \wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$message = is_scalar( $_GET['message'] ?? null ) ? \absint( \wp_unslash( (string) $_GET['message'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( 'edit' !== $action || 1 !== $message ) {
+				return false;
+			}
+
+			if ( 'post.php' === $script_name ) {
+				$request_order_id = is_scalar( $_GET['post'] ?? null ) ? \absint( \wp_unslash( (string) $_GET['post'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+				return (int) $order_id === $request_order_id;
+			}
+
+			$page = is_string( $_GET['page'] ?? null ) ? \sanitize_key( \wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( 'admin.php' === $script_name && 'wc-orders' === $page ) {
+				$request_order_id = is_scalar( $_GET['id'] ?? null ) ? \absint( \wp_unslash( (string) $_GET['id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+				return (int) $order_id === $request_order_id;
+			}
+
+			return false;
+		}
+
+		/**
 		 * Get order title from order object.
 		 *
 		 * @param int $order_id - WC Order ID.
@@ -425,7 +462,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 				</script>
 				<?php
 			}
-			if ( isset( $_REQUEST['page'] ) && 'wsal-togglealerts' === $_REQUEST['page'] ) {
+			$page = is_string( $_GET['page'] ?? null ) ? \sanitize_text_field( \wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin page detection.
+
+			if ( 'wsal-togglealerts' === $page ) {
 				?>
 				<style type="text/css">
 					#tab-payment-gateways tr:nth-of-type(2), #tab-products tr:nth-of-type(12), #tab-coupons tr:nth-of-type(8) {

@@ -526,18 +526,19 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		}
 
 		/**
-		 * Trigger an event when a form us updated.
+		 * Trigger an event when a form is updated.
 		 *
-		 * @param array  $form_meta - Form metadata.
-		 * @param int    $form_id   - Form id.
-		 * @param string $meta_name - Changes item name.
+		 * @param string|false $form_meta - JSON-encoded form metadata.
+		 * @param int          $form_id   - Form ID.
+		 * @param string       $meta_name - Changed item name.
 		 *
 		 * @return void
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.7 - Prevented fatal errors from mismatched form metadata and missing notification names.
 		 */
-		public static function event_form_meta_updated( $form_meta, $form_id, $meta_name ) {
-			if ( isset( self::$old_form ) ) {
+		public static function event_form_meta_updated( $form_meta, $form_id, $meta_name ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Preserve the documented Gravity Forms hook signature.
+			if ( isset( self::$old_form ) && (int) rgar( self::$old_form, 'id' ) === (int) $form_id ) {
 				$form = (array) \GFAPI::get_form( $form_id );
 				// Compare the 2 arrays and create array of changed.
 				$compare_changed_items = array_diff_assoc(
@@ -620,19 +621,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 							)
 						);
 
-						if ( 'created' === $event_type ) {
+						$notification = array( 'name' => '' );
+						if ( null !== $notification_id && isset( $value[ $notification_id ] ) ) {
 							$notification = $value[ $notification_id ];
-						} else {
-							// If there is no such notification (notificationId is the key) then notification has been deleted,
-							// that event wont be triggered and array with empy name is just to fulfill the logic later on.
-							$notification = ( isset( $value[ $notification_id ] ) ) ? $value[ $notification_id ] : array( 'name' => '' );
 						}
 
-						if ( isset( $_REQUEST['action'] ) && 'duplicate' === $_REQUEST['action'] && count( $value ) > count( $old_fields ) ) {
-							$event_type = 'duplicated';
-						}
-
-						$title = $notification['name'];
+						$title = (string) rgar( $notification, 'name' );
 						if ( '' === trim( $title ) ) {
 							$title = esc_html__( '-- UNTITLED --', 'wsal-gravityforms' );
 						}
@@ -1248,7 +1242,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		 */
 		public static function event_form_entry_trashed( $entry_id, $property_value, $previous_value ) {
 			if ( $previous_value !== $property_value && 'trash' === $property_value ) {
-				$entry      = \GFAPI::get_entry( $entry_id );
+				$entry = \GFAPI::get_entry( $entry_id );
 				if ( ! \is_wp_error( $entry ) ) {
 					$form       = \GFAPI::get_form( $entry['form_id'] );
 					$entry_name = self::determine_entry_name( $entry );
@@ -1277,7 +1271,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 			}
 
 			if ( $previous_value !== $property_value && 'active' === $property_value ) {
-				$entry      = \GFAPI::get_entry( $entry_id );
+				$entry = \GFAPI::get_entry( $entry_id );
 				if ( ! \is_wp_error( $entry ) ) {
 					$form       = \GFAPI::get_form( $entry['form_id'] );
 					$entry_name = self::determine_entry_name( $entry );
@@ -1322,7 +1316,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		 */
 		public static function event_form_entry_note_added( $insert_id, $entry_id, $user_id, $user_name, $note, $note_type ) {
 			if ( 'user' === $note_type ) {
-				$entry      = \GFAPI::get_entry( $entry_id );
+				$entry = \GFAPI::get_entry( $entry_id );
 				if ( ! \is_wp_error( $entry ) ) {
 					$form       = \GFAPI::get_form( $entry['form_id'] );
 					$entry_name = self::determine_entry_name( $entry );
@@ -1360,7 +1354,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function event_form_entry_note_deleted( $note_id, $lead_id ) {
-			$entry      = \GFAPI::get_entry( $lead_id );
+			$entry = \GFAPI::get_entry( $lead_id );
 			if ( ! \is_wp_error( $entry ) ) {
 				$form       = \GFAPI::get_form( $entry['form_id'] );
 				$note       = \GFAPI::get_note( $note_id );

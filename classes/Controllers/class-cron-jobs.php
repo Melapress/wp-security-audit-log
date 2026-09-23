@@ -49,17 +49,24 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 				'args'     => array(),
 				'next_run' => '00:00 next monday',
 			),
+			/**
+			 * Set monthly reports as single scheduled wp cron, because we can't use WSAL 30.5 days interval for all months.
+			 * With a single schedule, regardless of the month length, the cron will be scheduled for the first day of the next month.
+			 */
 			'wsal_periodic_reports_monthly'   => array(
 				'time'     => 'monthly',
 				'hook'     => array( __CLASS__, 'generate_monthly_reports' ),
 				'args'     => array(),
 				'next_run' => '00:00 first day of next month',
+				'single'   => true,
 			),
 			'wsal_periodic_reports_quarterly' => array(
 				'time'     => 'quarterly',
 				'hook'     => array( __CLASS__, 'generate_quarterly_reports' ),
 				'args'     => array(),
-				'next_run' => '00:00 first day of +4 months',
+				// Keep empty, "first day of +3 months or similar" will fail to calculate the correct quarter, since months have different lengths.
+				'next_run' => '',
+				'single'   => true,
 			),
 			'wsal_reports_pruning_cron'       => array(
 				'time' => 'daily',
@@ -176,8 +183,11 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 * @return void
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.7 - Changed to schedule the next monthly calendar event.
 		 */
 		public static function generate_monthly_reports() {
+			self::schedule_calendar_report_event( 'wsal_periodic_reports_monthly' );
+
 			\do_action( 'wsal_generate_reports_monthly', array() );
 		}
 
@@ -187,8 +197,11 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 * @return void
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.7 - Changed to schedule the next quarterly calendar event.
 		 */
 		public static function generate_quarterly_reports() {
+			self::schedule_calendar_report_event( 'wsal_periodic_reports_quarterly' );
+
 			\do_action( 'wsal_generate_reports_quarterly', array() );
 		}
 
@@ -412,6 +425,100 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		}
 
 		/**
+		 * Returns the first day of the next calendar quarter in the WordPress timezone.
+		 *
+		 * @return string - Next quarter start in a date-time format accepted by DateTimeImmutable.
+		 *
+		 * @since 5.6.7
+		 */
+		private static function get_next_quarter_start(): string {
+			$current_datetime          = \current_datetime();
+			$current_month             = (int) $current_datetime->format( 'n' );
+			$months_until_next_quarter = 3 - ( ( $current_month - 1 ) % 3 );
+
+			return $current_datetime
+				->modify( 'first day of this month' )
+				->setTime( 0, 0 )
+				->modify( "+{$months_until_next_quarter} months" )
+				->format( 'Y-m-d H:i:s' );
+		}
+
+		/**
+		 * Converts a cron start description to a UTC timestamp using the WordPress timezone.
+		 *
+		 * @param array $parameters - Cron job parameters.
+		 *
+		 * @return int - UTC timestamp for the next run.
+		 *
+		 * @since 5.6.7
+		 */
+		private static function get_cron_start_timestamp( array $parameters ): int {
+			if ( empty( $parameters['next_run'] ) ) {
+				return time();
+			}
+
+			$next_run = new \DateTimeImmutable( $parameters['next_run'], \wp_timezone() );
+
+			return $next_run->getTimestamp();
+		}
+
+		/**
+		 * Schedules a cron event and converts obsolete recurring calendar events to single events.
+		 *
+		 * @param string $name       - Cron hook name.
+		 * @param array  $parameters - Cron job parameters.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.7
+		 */
+		private static function schedule_cron_event( string $name, array $parameters ) {
+			$args            = $parameters['args'] ?? array();
+			$is_single_event = (bool) ( $parameters['single'] ?? false );
+
+			if ( $is_single_event && false !== \wp_get_schedule( $name, $args ) ) {
+				\wp_clear_scheduled_hook( $name, $args );
+			}
+
+			if ( \wp_next_scheduled( $name, $args ) ) {
+				return;
+			}
+
+			$time = self::get_cron_start_timestamp( $parameters );
+
+			if ( $is_single_event ) {
+				\wp_schedule_single_event( $time, $name, $args );
+
+				return;
+			}
+
+			\wp_schedule_event( $time, $parameters['time'] ?? 'daily', $name, $args );
+		}
+
+		/**
+		 * Schedules the next single calendar report event after the current event runs.
+		 *
+		 * @param string $name - Calendar report cron hook name.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.7
+		 */
+		private static function schedule_calendar_report_event( string $name ) {
+			if ( ! isset( self::CRON_JOBS_NAMES[ $name ] ) ) {
+				return;
+			}
+
+			$parameters = self::CRON_JOBS_NAMES[ $name ];
+
+			if ( 'wsal_periodic_reports_quarterly' === $name ) {
+				$parameters['next_run'] = self::get_next_quarter_start();
+			}
+
+			self::schedule_cron_event( $name, $parameters );
+		}
+
+		/**
 		 * Unschedules weekly cron jobs so they get recreated with the new start-of-week day.
 		 *
 		 * @return void
@@ -430,12 +537,14 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 *
 		 * @since 5.0.0
 		 * @since 5.6.2 Weekly cron jobs respect the WP start_of_week setting.
+		 * @since 5.6.7 - Changed monthly and quarterly jobs to single calendar events.
 		 */
 		public static function initialize_hooks() {
 			$hooks_array = self::CRON_JOBS_NAMES;
 
-			$hooks_array['wsal_periodic_reports_weekly']['next_run'] = self::get_next_week_start( '00:00' );
-			$hooks_array['wsal_summary_weekly_report']['next_run']   = self::get_next_week_start( '03:00' );
+			$hooks_array['wsal_periodic_reports_weekly']['next_run']    = self::get_next_week_start( '00:00' );
+			$hooks_array['wsal_periodic_reports_quarterly']['next_run'] = self::get_next_quarter_start();
+			$hooks_array['wsal_summary_weekly_report']['next_run']      = self::get_next_week_start( '03:00' );
 
 			if ( WP_Helper::is_multisite() || 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
 				/*
@@ -499,17 +608,7 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			$hooks_array = \apply_filters( 'wsal_cron_hooks', $hooks_array );
 
 			foreach ( $hooks_array as $name => $parameters ) {
-				if ( ! \wp_next_scheduled( $name, ( isset( $parameters['args'] ) ) ? $parameters['args'] : array() ) ) {
-					$time = time();
-
-					if ( isset( $parameters['next_run'] ) ) {
-						$ve = get_option( 'gmt_offset' ) > 0 ? ' -' : ' +';
-
-						$time = strtotime( $parameters['next_run'] . $ve . get_option( 'gmt_offset' ) . ' HOURS' );
-					}
-
-					\wp_schedule_event( $time, ( isset( $parameters['time'] ) ) ? $parameters['time'] : 'daily', $name );
-				}
+				self::schedule_cron_event( $name, $parameters );
 
 				\add_action( $name, $parameters['hook'] );
 			}
