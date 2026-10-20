@@ -21,6 +21,7 @@ use WSAL\Entities\Options_Entity;
 use WSAL\Entities\Reports_Entity;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\Entities\Occurrences_Entity;
 use WSAL\Controllers\Plugin_Extensions;
 use WSAL\Loggers\WSAL_Ext_MirrorLogger;
@@ -82,6 +83,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 * @return void
 		 *
 		 * @since 4.4.0
+		 * @since 5.6.8 - Stopped loading Freemius and the External DB extension during the migration.
 		 */
 		protected static function migrate_up_to_4420() {
 
@@ -98,7 +100,6 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			global $wsal_class;
 
 			$wsal = $wsal_class;
-			$wsal::load_freemius();
 			$wsal::load_defaults();
 
 			$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
@@ -185,12 +186,8 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			// Delete dev options from the settings.
 			WP_Helper::delete_global_option( 'dev-options' );
 
-			// phpcs:disable
-			// phpcs:enable
 
 			if ( \class_exists( '\WSAL_Extension_Manager' ) ) {
-				\WSAL_Extension_Manager::include_extension( 'external-db' );
-
 				// Delete cron jobs related to mirror scheduling.
 
 				// This was previously a constant in WSAL_Ext_Plugin, but we removed it in version 4.3.
@@ -641,8 +638,6 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 */
 		protected static function migrate_up_to_4430() {
 
-			// phpcs:disable
-			// phpcs:enable
 
 			if ( \class_exists( '\WSAL\Loggers\WSAL_Ext_MirrorLogger' ) && method_exists( '\WSAL\Helpers\Settings_Helper', 'get_working_dir_path_static' ) ) {
 
@@ -1330,6 +1325,28 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		protected static function migrate_up_to_5610() {
 			// Remove old survey option so the banner shows again under the new scheme, issue 5546.
 			Settings_Helper::delete_option_value( 'melapress-survey-2025' );
+		}
+
+		/**
+		 * Migration for version 5.6.8
+		 *
+		 * Stores Freemius as the licensing provider of sites that already used it. Sites without a
+		 * stored provider show the license form, so existing Freemius customers would otherwise be
+		 * asked for a license key again.
+		 *
+		 * @return void
+		 *
+		 * @since 5.6.8
+		 */
+		protected static function migrate_up_to_5680() {
+			if ( '' !== Licensing_Factory::get_stored_provider_name() ) {
+				return;
+			}
+
+			// Only sites still connected to Freemius: a disconnected site shows the license form instead.
+			if ( Licensing_Factory::has_freemius_license_data() && Licensing_Factory::is_freemius_connected() ) {
+				\update_site_option( Licensing_Factory::PROVIDER_OPTION, Licensing_Factory::FREEMIUS_PROVIDER_NAME );
+			}
 		}
 
 		/**

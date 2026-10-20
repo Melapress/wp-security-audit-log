@@ -757,37 +757,60 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		/**
 		 * Cleans up the database, based on pruning date selected and enabled.
 		 *
-		 * @return void
+		 * @return int|false - Deleted occurrence count, or false if any cleanup query failed.
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.8 - Reports cleanup results and logs successful deletions.
 		 */
 		public static function prune_records() {
 
 			$prune_enabled = Settings_Helper::get_boolean_option_value( 'pruning-date-e', false );
 
 			if ( ! $prune_enabled ) {
-				return;
+				return 0;
 			}
 
-			$now       = time();
-			$max_sdate = Plugin_Settings_Helper::get_pruning_date(); // Pruning date.
-			$archiving = Settings_Helper::is_archiving_set_and_enabled();
+			$now         = time();
+			$max_sdate   = Plugin_Settings_Helper::get_pruning_date(); // Pruning date.
+			$connections = array();
 
+
+			$connections[] = self::get_connection();
 
 			// Calculate limit timestamp.
 			$max_stamp = $now - ( strtotime( $max_sdate ) - $now );
 
-			$items = array();
+			$count   = 0;
+			$failed  = false;
+			$queries = array();
 
-			if ( $archiving ) {
-				$connection_name = Settings_Helper::get_option_value( 'archive-connection' );
+			foreach ( $connections as $connection ) {
+				$result = Delete_Records::delete( array(), 0, array( 'created_on <= %s' => intval( $max_stamp ) ), $connection );
 
-				$wsal_db = Connection::get_connection( $connection_name );
+				if ( null === $result ) {
+					continue;
+				}
 
-				$items = Delete_Records::delete( array(), 0, array( 'created_on <= %s' => intval( $max_stamp ) ), $wsal_db );
+				if ( false === $result || ! is_int( $result[0] ) ) {
+					$failed = true;
+
+					continue;
+				}
+
+				if ( 0 < $result[0] ) {
+					// Index 0: number of occurrences deleted from this connection.
+					$count += $result[0];
+
+					// Index 1: prepared DELETE query, stored in event 6000 as PruneQuery.
+					$queries[] = $result[1];
+				}
 			}
 
-			$main_items = Delete_Records::delete( array(), 0, array( 'created_on <= %s' => intval( $max_stamp ) ) );
+			if ( 0 < $count ) {
+				\do_action( 'wsal_prune', $count, implode( '; ', $queries ) );
+			}
+
+			return $failed ? false : $count;
 		}
 
 		/**

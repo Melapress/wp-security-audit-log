@@ -2566,33 +2566,47 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 		/**
 		 * Trigger 9106 (stock level change by 3rd party).
 		 *
-		 * @since 3.3.1
-		 *
 		 * @param int    $meta_id    - ID of the metadata entry to update.
 		 * @param int    $object_id  - Post ID.
 		 * @param string $meta_key   - Meta key.
 		 * @param mixed  $meta_value - Meta value. This will be a PHP-serialized string representation of the value if the value is an array, an object, or itself a PHP-serialized string.
+		 *
+		 * @return void
+		 *
+		 * @since 3.3.1
+		 * @since 5.6.8 - Skips the event when the stock quantity is unchanged.
 		 */
 		public static function detect_stock_level_change( $meta_id, $object_id, $meta_key, $meta_value ) {
 			if ( '_stock' === $meta_key ) {
-				$post = get_post( $object_id );
+				$old_stock = \get_post_meta( $object_id, '_stock', true );
+				$new_stock = $meta_value;
+
+				if ( empty( $old_stock ) ) {
+					$old_stock = 0;
+				}
+
+				if ( empty( $new_stock ) ) {
+					$new_stock = 0;
+				}
+
+				if ( (string) $old_stock === (string) $new_stock ) {
+					return;
+				}
+
+				$post = \get_post( $object_id );
 
 				if ( ! $post || ! isset( $post->ID ) ) {
 					return;
 				}
 
 				$editor_link    = self::get_editor_link( $post );
-				$old_stock      = get_post_meta( $object_id, '_stock', true );
-				$product_status = get_post_meta( $object_id, '_stock_status', true );
-
-				$new_stock = ( empty( $meta_value ) ) ? 0 : $meta_value;
-				$old_stock = ( ! empty( $old_stock ) ) ? $old_stock : 0;
+				$product_status = \get_post_meta( $object_id, '_stock_status', true );
 
 				Alert_Manager::trigger_event_if(
 					9106,
 					array(
 						'PostID'             => $post->ID,
-						'SKU'                => esc_attr( WooCommerce_Sensor::get_product_sku( $post->ID ) ),
+						'SKU'                => \esc_attr( WooCommerce_Sensor::get_product_sku( $post->ID ) ),
 						'ProductTitle'       => $post->post_title ?? \esc_html__( 'No product title found', 'wp-security-audit-log' ),
 						'ProductStatus'      => ! $product_status ? $post->post_status : $product_status,
 						'PostStatus'         => ! $product_status ? $post->post_status : $product_status,

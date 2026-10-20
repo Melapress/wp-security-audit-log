@@ -13,13 +13,13 @@ use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Email_Helper;
 use WSAL\Controllers\Constants;
-use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Licensing\Licensing_Helper;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\Controllers\Database_Manager;
 use WSAL\Helpers\Plugin_Settings_Helper;
-use WSAL\Entities\Archive\Delete_Records;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,6 +37,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @subpackage views
  */
 class WSAL_Views_Settings extends WSAL_AbstractView {
+
+	/**
+	 * Premium settings tabs that show the read-only license notice in place of their content.
+	 *
+	 * @var string[]
+	 *
+	 * @since 5.6.8
+	 */
+	public const PREMIUM_TABS = array(
+		'settings-export-import',
+		'logs-management',
+	);
 
 	/**
 	 * Adapter Message.
@@ -86,12 +98,17 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_ajax_get_all_event_types', array( $this, 'ajax_get_all_event_types' ) );
 		add_action( 'wp_ajax_wsal_ajax_get_all_object_types', array( $this, 'ajax_get_all_object_types' ) );
 		add_action( 'wp_ajax_wsal_ajax_get_all_event_ids', array( $this, 'ajax_get_all_event_ids' ) );
+
+		\add_filter( 'removable_query_args', array( __CLASS__, 'add_removable_pruning_query_arg' ) );
 	}
 
 	/**
 	 * Setup WSAL Settings Page Tabs.
 	 *
+	 * @return void
+	 *
 	 * @since 3.4
+	 * @since 5.6.8 - Premium tabs show the read-only license notice and save nothing while premium settings are read-only.
 	 */
 	public function setup_settings_tabs() {
 
@@ -160,7 +177,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$wsal_setting_tabs = apply_filters( 'wsal_setting_tabs', $wsal_setting_tabs );
 
 		// Sort by priority.
-		array_multisort( array_column( $wsal_setting_tabs, 'priority' ), SORT_ASC, $wsal_setting_tabs );
+		$tab_priorities = array_column( $wsal_setting_tabs, 'priority' );
+
+		array_multisort( $tab_priorities, SORT_ASC, $wsal_setting_tabs );
+
+		// While premium settings are read-only, premium tabs show the license notice and save nothing.
+		if ( Licensing_Factory::is_premium_frozen() ) {
+			$wsal_setting_tabs = Licensing_Helper::make_tabs_read_only( $wsal_setting_tabs, self::PREMIUM_TABS, array( Licensing_Factory::class, 'maybe_render_frozen_notice' ) );
+		}
 
 		$this->wsal_setting_tabs = $wsal_setting_tabs;
 
@@ -272,61 +296,67 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	/**
+	 * Removes the retention cleanup result from the browser URL after the notice is displayed.
+	 *
+	 * @param string[] $args - Query arguments WordPress removes from admin URLs.
+	 *
+	 * @return string[] - Query arguments including the retention cleanup result.
+	 *
+	 * @since 5.6.8
+	 */
+	public static function add_removable_pruning_query_arg( $args ) {
+		$args[] = 'pruning';
+
+		return $args;
+	}
+
+	/**
 	 * Method: Run cleanup.
+	 *
+	 * @return void
+	 *
+	 * @since 2.6.9.1
+	 * @since 5.6.8 - Shares retention cleanup and reports its result on both settings pages.
 	 */
 	public function ajax_run_cleanup() {
 		// Verify nonce.
-		if ( ! isset( $_REQUEST['nonce'] ) || false === wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_REQUEST['nonce'] ) ), 'wsal-run-cleanup' ) ) {
-			wp_send_json_error( esc_html__( 'Insecure request.', 'wp-security-audit-log' ) );
+		$nonce = \sanitize_text_field( \wp_unslash( $_GET['nonce'] ?? '' ) );
+
+		if ( ! \wp_verify_nonce( $nonce, 'wsal-run-cleanup' ) ) {
+			\wp_send_json_error( \esc_html__( 'Insecure request.', 'wp-security-audit-log' ), 403 );
 		}
 
 		if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
-			die( 'Access Denied.' );
+			\wp_send_json_error( \esc_html__( 'Access Denied.', 'wp-security-audit-log' ), 403 );
 		}
 
-		$now       = time();
-		$max_sdate = Plugin_Settings_Helper::get_pruning_date(); // Pruning date.
+		$result    = Occurrences_Entity::prune_records();
 		$archiving = Settings_Helper::is_archiving_set_and_enabled();
+		$pruning   = '0';
 
-		// phpcs:disable
-		// phpcs:enable
-
-		// Calculate limit timestamp.
-		$max_stamp = $now - ( strtotime( $max_sdate ) - $now );
-
-		$items = array();
-
-		if ( $archiving ) {
-			$connection_name = Settings_Helper::get_option_value( 'archive-connection' );
-
-			$wsal_db = Connection::get_connection( $connection_name );
-
-			$items = Delete_Records::delete( array(), 0, array( 'created_on <= %s' => intval( $max_stamp ) ), $wsal_db );
+		if ( false === $result ) {
+			$pruning = 'error';
+		} elseif ( 0 < $result ) {
+			$pruning = '1';
 		}
 
-		$main_items = Delete_Records::delete( array(), 0, array( 'created_on <= %s' => intval( $max_stamp ) ) );
-
 		if ( $archiving ) {
-			$archiving_args = array(
-				'page' => 'wsal-ext-settings',
-				'tab'  => 'archiving',
+			$redirect_args = array(
+				'page'    => 'wsal-ext-settings',
+				'tab'     => 'archiving',
+				'pruning' => $pruning,
 			);
-			$archiving_url  = add_query_arg( $archiving_args, \network_admin_url( 'admin.php' ) );
-			wp_safe_redirect( $archiving_url );
+			$redirect_url  = \network_admin_url( 'admin.php' );
 		} else {
-			if ( ( is_array( $items ) && count( $items ) ) || ( is_array( $main_items ) && count( $main_items ) ) ) {
-				$redirect_args = array(
-					'tab'     => 'audit-log',
-					'pruning' => 1,
-				);
-			} else {
-				$redirect_args = array(
-					'tab'     => 'audit-log',
-					'pruning' => 0,
-				);
-			}
-			wp_safe_redirect( add_query_arg( $redirect_args, $this->get_url() ) );
+			$redirect_args = array(
+				'tab'     => 'audit-log',
+				'pruning' => $pruning,
+			);
+			$redirect_url  = $this->get_url();
 		}
+
+		\wp_safe_redirect( \add_query_arg( $redirect_args, $redirect_url ) );
+
 		exit;
 	}
 
@@ -376,19 +406,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			call_user_func( $this->wsal_setting_tabs[ $this->current_tab ]['save'] );
 		}
 
-		if ( isset( $_GET['pruning'] ) && '1' === $_GET['pruning'] ) {
-			?>
-			<div class="updated">
-				<p><?php esc_html_e( 'Old data successfully purged.', 'wp-security-audit-log' ); ?></p>
-			</div>
-			<?php
-		} elseif ( isset( $_GET['pruning'] ) && '0' === $_GET['pruning'] ) {
-			?>
-			<div class="error">
-				<p><?php esc_html_e( 'No data is old enough to be purged.', 'wp-security-audit-log' ); ?></p>
-			</div>
-			<?php
-		}
 		?>
 		<nav id="wsal-tabs" class="nav-tab-wrapper">
 			<?php foreach ( $this->wsal_setting_tabs as $tab_id => $tab ) : ?>
@@ -415,7 +432,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			<?php
 			if ( 'sms-provider' === $this->current_tab && $section && 'test' === $section ) {
 				\submit_button( esc_html__( 'Send Message', 'wp-security-audit-log' ) );
-			} elseif ( 'settings-export-import' !== $this->current_tab ) {
+			} elseif ( 'settings-export-import' !== $this->current_tab && empty( $this->wsal_setting_tabs[ $this->current_tab ]['is_frozen'] ) ) {
 					\submit_button();
 			}
 			?>
@@ -516,7 +533,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<?php
 				$disabled = '';
 				$label    = esc_html__( 'Admin bar notification', 'wp-security-audit-log' );
-				if ( ! wsal_freemius()->is_free_plan() ) {
+				if ( ! Licensing_Factory::is_free_plan() ) {
 					?>
 					<th><label for="admin_bar_notif_on"><?php echo esc_html( $label ); ?></label></th>
 					<td>
@@ -543,7 +560,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<?php
 				$disabled = '';
 				$label    = esc_html__( 'Admin bar notification updates', 'wp-security-audit-log' );
-				if ( ! wsal_freemius()->is_free_plan() ) {
+				if ( ! Licensing_Factory::is_free_plan() ) {
 					?>
 				<th><label for="admin_bar_notif_refresh"><?php echo esc_html( $label ); ?></label></th>
 				<td>
@@ -984,7 +1001,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		Settings_Helper::set_option_value( 'display-name', trim( \sanitize_text_field( $post_array['DisplayName'] ) ) );
 		Settings_Helper::set_boolean_option_value( 'disable-widgets', ! \sanitize_text_field( $post_array['EnableDashboardWidgets'] ) );
 
-		if ( ! wsal_freemius()->is_free_plan() ) {
+		if ( ! Licensing_Factory::is_free_plan() ) {
 			Settings_Helper::set_boolean_option_value( 'disable-admin-bar-notif', ! \sanitize_text_field( $post_array['admin_bar_notif'] ), true );
 			Settings_Helper::set_option_value( 'admin-bar-notif-updates', \sanitize_text_field( $post_array['admin_bar_notif_updates'] ), true );
 		}
@@ -1028,23 +1045,17 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			esc_html_e( 'The plugin uses an efficient way to store the activity log data in the WordPress database, though the more data you keep the more disk space will be required. ', 'wp-security-audit-log' );
 			$retention_help_text = __( '<a href="https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=settings-retention-upgrade" target="_blank">Upgrade to Premium</a> to store the activity log data in an external database.', 'wp-security-audit-log' );
 
-			// phpcs:disable
-			// phpcs:enable
 			echo wp_kses( $retention_help_text, Plugin_Settings_Helper::get_allowed_html_tags() );
 			?>
 		</p>
 
 		<?php
-		// phpcs:disable
-		/* @free:start */
-		// phpcs:enable
+		// @free:start
 		// Ensure it doesn't load a 2nd time for premium users.
-		if ( ! wsal_freemius()->can_use_premium_code() ) {
+		if ( ! Licensing_Factory::can_use_premium_code() ) {
 			$this->render_retention_settings_table();
 		}
-		// phpcs:disable
-		/* @free:end */
-		// phpcs:enable
+		// @free:end
 		?>
 
 		<h3><?php esc_html_e( 'What timestamp you would like to see in the WordPress activity log?', 'wp-security-audit-log' ); ?></h3>
@@ -1938,8 +1949,39 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 	/**
 	 * Renders table with retention related settings.
+	 *
+	 * @return void
+	 *
+	 * @since 4.1.5
+	 * @since 5.6.8 - Displays retention cleanup feedback in both settings locations.
 	 */
 	public function render_retention_settings_table() {
+		if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
+			\wp_die( \esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
+		}
+
+		$pruning = \sanitize_text_field( \wp_unslash( $_GET['pruning'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Displays a fixed notice only.
+
+		if ( '1' === $pruning ) {
+			?>
+			<div class="updated">
+				<p><?php \esc_html_e( 'Old data successfully purged.', 'wp-security-audit-log' ); ?></p>
+			</div>
+			<?php
+		} elseif ( '0' === $pruning ) {
+			?>
+			<div class="error">
+				<p><?php \esc_html_e( 'No data is old enough to be purged.', 'wp-security-audit-log' ); ?></p>
+			</div>
+			<?php
+		} elseif ( 'error' === $pruning ) {
+			?>
+			<div class="error">
+				<p><?php \esc_html_e( 'Old data could not be purged.', 'wp-security-audit-log' ); ?></p>
+			</div>
+			<?php
+		}
+
 		// Check if the retention settings are enforced from the MainWP master site.
 		$enforced_settings                     = Plugin_Settings_Helper::get_mainwp_enforced_settings();
 		$retention_settings_enforced_by_mainwp = array_key_exists( 'pruning_enabled', $enforced_settings );
@@ -2032,7 +2074,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								)
 							);
 							?>
-							" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-run-cleanup' ) ); ?>" ><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
+							"><?php \esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
 						</p>
 					<?php endif; ?>
 				</td>

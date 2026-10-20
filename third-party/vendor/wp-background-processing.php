@@ -17,9 +17,9 @@ namespace WSAL_Vendor;
  * GitHub Plugin URI: https://github.com/deliciousbrains/wp-background-processing
  * GitHub Branch: master
  */
-if (!\class_exists('WSAL_Vendor\\WP_Async_Request')) {
+if (!\class_exists('WSAL_Vendor\WP_Async_Request')) {
     require_once plugin_dir_path(__FILE__) . 'classes/wp-async-request.php';
 }
-if (!\class_exists('WSAL_Vendor\\WP_Background_Process')) {
+if (!\class_exists('WSAL_Vendor\WP_Background_Process')) {
     require_once plugin_dir_path(__FILE__) . 'classes/wp-background-process.php';
 }

@@ -17,6 +17,7 @@ use WSAL\Views\Setup_Wizard;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\ListAdminEvents\List_Events;
+use WSAL\Licensing\Licensing_Factory;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -53,6 +54,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		 * Method: Constructor.
 		 *
 		 * @since  1.0.0
+		 * @since 5.6.8 - Uses Licensing_Factory for plan checks and moved the Freemius hooks to Freemius_Provider.
 		 */
 		public static function init() {
 
@@ -93,15 +95,6 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				}
 			}
 
-			// Stop Freemius from hiding the menu on sub sites under certain circumstances.
-			add_filter(
-				'fs_should_hide_site_admin_settings_on_network_activation_mode_wp-security-audit-log',
-				array(
-					__CLASS__,
-					'bypass_freemius_menu_hiding',
-				)
-			);
-
 			// Add menus.
 			add_action( 'admin_menu', array( __CLASS__, 'add_admin_menus' ) );
 			add_action( 'network_admin_menu', array( __CLASS__, 'add_admin_menus' ) );
@@ -125,8 +118,6 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				Setup_Wizard::init();
 			}
 
-
-			add_action( 'admin_head', array( __CLASS__, 'hide_freemius_sites_section' ) );
 
 			// Check if WFCM is running by seeing if we have the version defined.
 			if ( defined( 'WFCM_VERSION' ) && ( version_compare( \WFCM_VERSION, '1.6.0', '<' ) ) ) {
@@ -220,7 +211,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 						$main_view_menu_slug,
 						array( __CLASS__, 'render_view_body' ),
 						self::$views[0]->get_icon(),
-						'2.5' // Right after dashboard.
+						'2.5' // Right after dashboard. A string, because WordPress before 6.0 turns a float 2.5 into 2, the Dashboard position.
 					)
 				);
 
@@ -288,6 +279,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		 * @param array $old_links - Array of old links.
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.8 - Uses Licensing_Factory for the Premium build check.
 		 */
 		public static function add_plugin_shortcuts( $old_links ) {
 			self::reorder_views();
@@ -298,7 +290,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				if ( \call_user_func( array( $view, 'has_plugin_shortcut_link' ) ) ) {
 					$new_links[] = '<a href="' . add_query_arg( 'page', \call_user_func( array( $view, 'get_safe_view_name' ) ), \network_admin_url( 'admin.php' ) ) . '">' . \call_user_func( array( $view, 'get_name' ) ) . '</a>';
 
-					if ( 1 === count( $new_links ) && ! wsal_freemius()->is__premium_only() ) {
+					if ( 1 === count( $new_links ) && ! Licensing_Factory::is_premium_build() ) {
 						// Trial link.
 						$trial_link  = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=plugins-page-get-premium';
 						$new_links[] = '<a style="font-weight:bold; color:#049443 !important" href="' . $trial_link . '" target="_blank">' . __( 'Get Premium!', 'wp-security-audit-log' ) . '</a>';
@@ -468,51 +460,6 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 			return $not_show;
 		}
 
-
-		/**
-		 * Hide Freemius sites section on the account page
-		 * of a multisite WordPress network.
-		 *
-		 * @since 5.0.0
-		 */
-		public static function hide_freemius_sites_section() {
-			global $pagenow;
-
-			// Return if not multisite.
-			if ( ! is_multisite() ) {
-				return;
-			}
-
-			// Return if multisite but not on the network admin.
-			if ( ! is_network_admin() ) {
-				return;
-			}
-
-			// Return if the pagenow is not on admin.php page.
-			if ( 'admin.php' !== $pagenow ) {
-				return;
-			}
-
-			// No nonce needed, this only reads the standard WP admin routing parameter for a strict string comparison.
-			$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-			if ( 'wsal-auditlog-account' === $page ) {
-				echo '<style type="text/css">#fs_sites {display:none;}</style>';
-			}
-		}
-
-		/**
-		 * Bypasses Freemius hiding menu items.
-		 *
-		 * @param bool $should_hide Should allow Freemium to hide menu items.
-		 *
-		 * @return bool
-		 *
-		 * @since 5.0.0
-		 */
-		public static function bypass_freemius_menu_hiding( $should_hide ) {
-			return false;
-		}
 
 		/**
 		 * Builds a relative asset path that takes SCRIPT_DEBUG constant into account.

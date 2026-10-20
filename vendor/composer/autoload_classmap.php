@@ -62,6 +62,8 @@ return array(
     'WSAL\\Helpers\\View_Manager' => $baseDir . '/classes/Helpers/class-view-manager.php',
     'WSAL\\Helpers\\WP_Helper' => $baseDir . '/classes/Helpers/class-wp-helper.php',
     'WSAL\\Helpers\\Widget_Manager' => $baseDir . '/classes/Helpers/class-widget-manager.php',
+    'WSAL\\Licensing\\Licensing_Factory' => $baseDir . '/classes/Licensing/class-licensing-factory.php',
+    'WSAL\\Licensing\\Licensing_Helper' => $baseDir . '/classes/Licensing/class-licensing-helper.php',
     'WSAL\\ListAdminEvents\\List_Events' => $baseDir . '/classes/ListAdminEvents/class-list-events.php',
     'WSAL\\Loggers\\Database_Logger' => $baseDir . '/classes/Loggers/class-database-logger.php',
     'WSAL\\Loggers\\Notification_Logger' => $baseDir . '/classes/notification/class-notification-logger.php',

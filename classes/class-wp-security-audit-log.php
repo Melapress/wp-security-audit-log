@@ -28,6 +28,7 @@ use WSAL\Actions\Plugin_Installer;
 use WSAL\Helpers\Uninstall_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\FeedbackForm\Feedback_Form;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\ListAdminEvents\List_Events;
 use WSAL\CopyEventData\Copy_Event_Data;
 use WSAL\Controllers\Plugin_Extensions;
@@ -66,15 +67,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * @since 5.1.0
 		 */
 		const PREMIUM_VERSION_WHOLE_PLUGIN_NAME = 'wp-security-audit-log-premium/wp-security-audit-log.php';
-
-		/**
-		 * NOFS version constant
-		 *
-		 * @var string
-		 *
-		 * @since 5.1.0
-		 */
-		const NOFS_VERSION_WHOLE_PLUGIN_NAME = 'wp-security-audit-log-nofs/wp-security-audit-log.php';
 
 		/**
 		 * Free version constant
@@ -151,6 +143,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * Initialize plugin.
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.8 - Initializes licensing through Licensing_Factory.
 		 */
 		public function __construct() {
 
@@ -184,7 +177,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				function () {
 					Migration::migrate();
 
-					self::init_freemius();
+					self::init_licensing();
 					self::init();
 
 					Alert_Manager::init();
@@ -195,8 +188,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			);
 
 			\add_action( 'admin_init', array( __CLASS__, 'wsal_plugin_redirect' ) );
-
-			\add_action( 'admin_init', array( __CLASS__, 'maybe_sync_premium_freemius' ) );
 		}
 
 		/**
@@ -383,6 +374,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * Initialize Plugin Hooks.
 		 *
 		 * @since 3.3
+		 * @since 5.6.8 - Moved the Freemius strings hook to Freemius_Provider.
 		 */
 		private static function init_hooks() {
 
@@ -410,8 +402,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			\add_filter( 'mainwp_child_extra_execution', array( '\WSAL\MainWP\MainWP_API', 'retrieve_info_call_back' ), 10, 2 );
 
-			\add_action( 'wsal_freemius_loaded', array( __CLASS__, 'adjust_freemius_strings' ) );
-
 			add_filter( 'plugins_api_result', array( __CLASS__, 'filter_default_no_plugin_error' ), 10, 3 );
 
 			Cron_Jobs::init();
@@ -432,17 +422,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 		}
 
-
-		/**
-		 * Load Freemius SDK.
-		 *
-		 * @since 5.0.0
-		 */
-		public static function load_freemius() {
-			if ( file_exists( WSAL_BASE_DIR . '/sdk/wsal-freemius.php' ) ) {
-				require_once WSAL_BASE_DIR . '/sdk/wsal-freemius.php';
-			}
-		}
 
 		/**
 		 * Check if MainWP plugin is active or not.
@@ -467,70 +446,31 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		}
 
 		/**
-		 * Initializes Freemius and its hooks, conditionally.
+		 * Initializes the active licensing provider conditionally.
 		 *
 		 * @return void
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.8 - Routes licensing through Licensing_Factory.
 		 */
-		private static function init_freemius() {
-
+		private static function init_licensing() {
 			$is_admin_blocking_plugins_support_enabled = self::is_admin_blocking_plugins_support_enabled();
-			if ( self::is_frontend() && self::is_premium_freemius() && file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
 
-				if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
-					\WSAL_Extension_Manager::include_extension( 'reports' );
-					\WSAL_Extension_Manager::include_extension( 'usersessions' );
-					\WSAL_Extension_Manager::include_extension( 'external-db' );
-				} elseif ( self::should_load() ) {
-					\WSAL_Extension_Manager::include_extension( 'notifications' );
-					\WSAL_Extension_Manager::include_extension( 'external-db' );
+			// Subsites can be created on the front end too, so their license activation is hooked before the front-end exit below.
+			Licensing_Factory::init_network_site_hooks();
+
+			// Front-end requests only need External DB; is_frontend() is false for cron and admin-blocking plugin requests.
+			if ( self::is_frontend() && Licensing_Factory::has_cached_valid_license() && file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
+				if ( self::should_load() ) {
+					\WSAL_Extension_Manager::load_external_db();
 				}
 
-				if ( ! $is_admin_blocking_plugins_support_enabled ) {
-					// We only stop here if the support for admin blocking plugins is enabled.
-					return;
-				}
+				return;
 			}
 
-			if ( $is_admin_blocking_plugins_support_enabled || is_admin() || WP_Helper::is_login_screen() || self::is_rest_api() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && \WP_CLI ) ) {
+			if ( $is_admin_blocking_plugins_support_enabled || \is_admin() || WP_Helper::is_login_screen() || self::is_rest_api() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && \WP_CLI ) ) {
+				Licensing_Factory::init();
 
-				self::load_freemius();
-
-				if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
-					// Add filters to customize freemius welcome message.
-					wsal_freemius()->add_filter( 'connect_message', array( __CLASS__, 'wsal_freemius_connect_message' ), 10, 6 );
-					wsal_freemius()->add_filter( 'connect_message_on_update', array( __CLASS__, 'wsal_freemius_update_connect_message' ), 10, 6 );
-					wsal_freemius()->add_filter( 'show_admin_notice', array( __CLASS__, 'freemius_show_admin_notice' ), 10, 2 );
-					wsal_freemius()->add_filter( 'show_delegation_option', '__return_false' );
-					wsal_freemius()->add_filter( 'enable_per_site_activation', '__return_false' );
-					wsal_freemius()->add_filter( 'show_trial', '__return_false' );
-					wsal_freemius()->add_filter( 'opt_in_error_message', array( __CLASS__, 'limited_license_activation_error' ), 10, 1 );
-					wsal_freemius()->add_action( 'after_account_plan_sync', array( __CLASS__, 'sync_premium_freemius' ), 10, 1 );
-					wsal_freemius()->add_action( 'after_premium_version_activation', array( __CLASS__, 'sync_premium_freemius' ) );
-					wsal_freemius()->add_filter(
-						'plugin_icon',
-						function ( $plugin_icon ) {
-							return WSAL_BASE_DIR . 'img/wsal-logo@2x.png';
-						}
-					);
-					wsal_freemius()->add_action( 'is_submenu_visible', array( __CLASS__, 'hide_freemius_submenu_items' ), 10, 2 );
-					wsal_freemius()->add_filter(
-						'freemius_pricing_js_path',
-						function ( $default_pricing_js_path ) {
-							return WSAL_BASE_DIR . 'js/freemius-pricing/freemius-pricing.js';
-						}
-					);
-					wsal_freemius()->add_filter( 'default_to_anonymous_feedback', '__return_true' );
-					wsal_freemius()->add_filter( 'show_deactivation_feedback_form', '__return_false' );
-
-					wsal_freemius()->add_filter(
-						'pricing_url',
-						function ( $url ) {
-							return 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=freemius-pricing-menu';
-						}
-					);
-				}
 			}
 		}
 
@@ -578,144 +518,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		private static function include_extensions__premium_only() {
 			// Initiate the extensions' manager.
 			\WSAL_Extension_Manager::init();
-		}
-
-		/**
-		 * Customize Freemius connect message for new users.
-		 *
-		 * @param string $message - Connect message.
-		 * @param string $user_first_name - User first name.
-		 * @param string $plugin_title - Plugin title.
-		 * @param string $user_login - Username.
-		 * @param string $site_link - Site link.
-		 * @param string $_freemius_link - Freemius link.
-		 *
-		 * @return string
-		 *
-		 * @since 5.0.0
-		 */
-		public static function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
-			$result = sprintf(
-			/* translators: User's first name */
-				esc_html__( 'Hey %s', 'wp-security-audit-log' ),
-				$user_first_name
-			);
-			$result .= ',<br>';
-			$result .= esc_html__( 'Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com.', 'wp-security-audit-log' ) .
-			$result .= '<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>';
-			$result .= esc_html__( 'NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' );
-
-			return $result;
-		}
-
-		/**
-		 * Customize Freemius connect message on update.
-		 *
-		 * @param string $message - Connect message.
-		 * @param string $user_first_name - User first name.
-		 * @param string $plugin_title - Plugin title.
-		 * @param string $user_login - Username.
-		 * @param string $site_link - Site link.
-		 * @param string $_freemius_link - Freemius link.
-		 *
-		 * @return string
-		 *
-		 * @since 4.3.4
-		 */
-		public static function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
-			$result = sprintf(
-			/* tranxslators: User's first name */
-				esc_html__( 'Hey %s', 'wp-security-audit-log' ),
-				$user_first_name
-			);
-			$result .= ',<br>';
-			$result .= sprintf(
-			/* translators: 1: Plugin name. 2: Plugin name. 2: Freemius link. 4: Plugin name. */
-				esc_html__( 'Please help us improve %1$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %3$s, a diagnostic tracking service we use. If you skip this, that\'s okay! %2$s will still work just fine.', 'wp-security-audit-log' ) .
-				'<strong>' . $plugin_title . '</strong>',
-				'<strong>' . $plugin_title . '</strong>',
-				'<a href="https://melapress.com/support/kb/non-sensitive-diagnostic-data/?utm_source=plugin&utm_medium=wsal&utm_campaign=optin-diagnostic-data-kb" target="_blank" tabindex="1">freemius.com</a>',
-				'<strong>' . $plugin_title . '</strong>'
-			);
-			$result .= '<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>';
-			$result .= esc_html__( 'NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' );
-
-			return $result;
-		}
-
-		/**
-		 * Freemius Admin Notice View Permission.
-		 *
-		 * Check to see if the user has permission to view Freemius admin notices or not.
-		 *
-		 * @param bool  $show – If show then set to true, otherwise false.
-		 * @param array $msg  Message related data.
-		 *
-		 * @return bool
-		 *
-		 * @since 3.3
-		 */
-		public static function freemius_show_admin_notice( $show, $msg ) {
-			if ( Settings_Helper::current_user_can( 'edit' ) ) {
-				return $show;
-			}
-			return false;
-		}
-
-		/**
-		 * Changes some of the strings that Freemius outputs with our own.
-		 *
-		 * @method adjust_freemius_strings
-		 *
-		 * @since  4.0.0
-		 */
-		public static function adjust_freemius_strings() {
-			// only update these messages if using premium plugin.
-			if ( ( ! wsal_freemius()->is_premium() ) || ( ! method_exists( wsal_freemius(), 'override_il8n' ) ) ) {
-				return;
-			}
-
-			wsal_freemius()->override_i18n(
-				array(
-					'few-plugin-tweaks' =>
-					// translators: The license key.
-					esc_html__(
-						'You need to activate the license key to use WP Activity Log Premium. %s',
-						'wp-security-audit-log'
-					),
-					'optin-x-now'       => esc_html__( 'Activate the license key now', 'wp-security-audit-log' ),
-				)
-			);
-		}
-
-		/**
-		 * Limited License Activation Error.
-		 *
-		 * @param string $error - Error Message.
-		 *
-		 * @return string
-		 *
-		 * @since 5.0.0
-		 */
-		public static function limited_license_activation_error( $error ) {
-			// We only process error if it's some sort of string message.
-			if ( ! is_string( $error ) ) {
-				return $error;
-			}
-
-			$site_count = null;
-			preg_match( '!\d+!', $error, $site_count );
-
-			// Check if this is an expired error.
-			if ( strpos( $error, 'expired' ) !== false ) {
-				/* Translators: Expired message and time */
-				$error = sprintf( esc_html__( '%s You need to renew your license to continue using premium features.', 'wp-security-audit-log' ), preg_replace( '/\([^)]+\)/', '', $error ) );
-			} elseif ( ! empty( $site_count[0] ) ) {
-				/* Translators: Number of sites */
-				$error = sprintf( esc_html__( 'The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network.', 'wp-security-audit-log' ), $site_count[0] );
-			}
-
-			return $error;
 		}
 
 		/**
@@ -940,6 +742,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * @internal
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.8 - Uses Licensing_Factory for the premium code check.
 		 */
 		public static function render_footer() {
 			// File is not there / deleted during upgrade ? either way stop the execution.
@@ -1011,6 +814,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * Installs all assets required for a usable system.
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.8 - Synchronizes the license through Licensing_Factory.
 		 */
 		public static function install() {
 			$installation_errors = false;
@@ -1034,7 +838,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			}
 
 			// Update licensing info in case we're swapping from free to premium or vice-versa.
-			self::sync_premium_freemius();
+			Licensing_Factory::sync_license();
 
 			// Disable database sensor during the creation of tables.
 			WP_Database_Sensor::set_enabled( false );
@@ -1148,67 +952,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		}
 
 		/**
-		 * Function runs Freemius license check only if our Freemius licensing transient has already expired. This is
-		 * intended to run on admin_init action.
-		 *
-		 * @since 4.3.0
-		 */
-		public static function maybe_sync_premium_freemius() {
-			// We don't want to slow down any AJAX requests.
-			if ( \wp_doing_ajax() ) {
-				return;
-			}
-
-			$freemius_transient = WP_Helper::get_transient( 'fs_wsalp' );
-			if ( false === $freemius_transient || ! in_array( $freemius_transient, array( 'yes', 'no' ), true ) ) {
-				// Transient expired or invalid.
-				self::sync_premium_freemius();
-			}
-		}
-
-		/**
-		 * Runs Freemius license check, updates our db option if necessary and creates/extends a transient we use to
-		 * optimize the check. Should run only on couple of Freemius actions related to account sync and plugin activation.
-		 *
-		 * It might be also called by WpSecurityAuditLog::maybe_sync_premium_freemius() if the transient is not set or valid.
-		 *
-		 * @see WpSecurityAuditLog::maybe_sync_premium_freemius()
-		 *
-		 * @since 5.0.0
-		 */
-		public static function sync_premium_freemius() {
-			$option_name = 'fs_wsalp';
-			$old_value   = \get_site_option( $option_name );
-
-			// Determine new value via Freemius SDK.
-			$new_value = wsal_freemius()->has_active_valid_license() ? 'yes' : 'no';
-
-			// Update the db option only if the value changed.
-			if ( $new_value !== $old_value ) {
-				\update_site_option( $option_name, $new_value );
-			}
-
-			// Always update the transient to extend the expiration window.
-			WP_Helper::set_transient( $option_name, $new_value, DAY_IN_SECONDS );
-		}
-
-		/**
-		 * Resource cautious function to check if the premium license is active and valid. It only checks if WordPress
-		 * option "fs_wsalp" is present and set to true.
-		 *
-		 * Function is intended for quick check during initial stages of plugin bootstrap, especially on front-end.
-		 *
-		 * @see WpSecurityAuditLog::sync_premium_freemius()
-		 *
-		 * @return boolean
-		 *
-		 * @since 5.0.0
-		 */
-		public static function is_premium_freemius() {
-			return 'yes' === \get_site_option( 'fs_wsalp' );
-		}
-
-		/**
 		 * Hide WSAL plugin from plugin list
 		 *
 		 * @param  array $plugins All plugins.
@@ -1231,7 +974,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			$main_plugins = array(
 				'premium' => self::PREMIUM_VERSION_WHOLE_PLUGIN_NAME,
-				'nofs'    => self::NOFS_VERSION_WHOLE_PLUGIN_NAME,
 				'free'    => self::FREE_VERSION_WHOLE_PLUGIN_NAME,
 			);
 
@@ -1284,26 +1026,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			}
 
 			return $plugins;
-		}
-
-		/**
-		 * Use filter to hide freemius submenu items.
-		 *
-		 * @param  boolean $is_visible Default visibility.
-		 * @param  string  $submenu_id Menu slug.
-		 *
-		 * @return boolean             New visibility.
-		 *
-		 * @since 5.0.0
-		 */
-		public static function hide_freemius_submenu_items( $is_visible, $submenu_id ) {
-			if ( 'contact' === $submenu_id ) {
-				$is_visible = false;
-			}
-			if ( 'pricing' === $submenu_id ) {
-				$is_visible = false;
-			}
-			return $is_visible;
 		}
 
 		/**
@@ -1380,7 +1102,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				require_once plugin_dir_path( __FILE__ ) . 'third-party/vendor/autoload.php';
 			}
 
-
 			// Load action scheduler for event mirroring.
 			$action_scheduler_file_path = WSAL_BASE_DIR . implode(
 				DIRECTORY_SEPARATOR,
@@ -1424,12 +1145,10 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * @return string
 		 *
 		 * @since 5.1.1
+		 * @since 5.6.8 - Uses Licensing_Factory for the license check.
 		 */
 		public static function get_plugin_version(): string {
-			if ( defined( 'WSAL_NOFS_TOOL_PATH' ) ) {
-				return 'NOFS';
-			}
-			if ( function_exists( 'wsal_freemius' ) && wsal_freemius()->has_active_valid_license() ) {
+			if ( Licensing_Factory::has_active_valid_license() ) {
 				return 'premium';
 			}
 
@@ -1465,8 +1184,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				'wp-activity-log_page_wsal-reports-new-network',
 				'wp-activity-log_page_wsal-ext-settings',
 				'wp-activity-log_page_wsal-ext-settings-network',
-				'wp-activity-log_page_wsal-nofs-license',
-				'wp-activity-log_page_wsal-nofs-license-network',
 				'wp-activity-log_page_wsal-notifications',
 				'wp-activity-log_page_wsal-notifications-network',
 			);

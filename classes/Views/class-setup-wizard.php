@@ -16,6 +16,7 @@ namespace WSAL\Views;
 use WSAL\Helpers\Email_Helper;
 use WSAL\Helpers\View_Manager;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\Helpers\Plugin_Settings_Helper;
 
 // Exit if accessed directly.
@@ -662,6 +663,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 		 * Step View: `Log Retention`
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.8 - Uses Licensing_Factory for the Premium build check.
 		 */
 		private static function wsal_step_log_retention() {
 			?>

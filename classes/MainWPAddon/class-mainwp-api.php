@@ -18,6 +18,7 @@ use WSAL\Helpers\User_Utils;
 use WSAL\Entities\Base_Fields;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\Licensing\Licensing_Factory;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
@@ -73,6 +74,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_API' ) ) {
 		 * @return array
 		 *
 		 * @since 5.0.0
+		 * @since 5.6.8 - Uses Licensing_Factory for the Premium build check.
 		 */
 		protected static function handle_wsal_info_check(): array {
 			$info                   = array();

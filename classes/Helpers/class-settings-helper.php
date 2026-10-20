@@ -14,6 +14,7 @@ namespace WSAL\Helpers;
 use WSAL\Utils\Migration;
 use WSAL\Controllers\Connection;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\Helpers\Plugin_Settings_Helper;
 
 // Exit if accessed directly.
@@ -1884,6 +1885,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @return void
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.8 - Deletes local license data through Licensing_Factory.
 		 */
 		public static function delete_all_settings() {
 			global $wpdb;
@@ -1896,8 +1898,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 
 			\wp_cache_flush();
 
-			// Remove wsal specific Freemius entry.
-			\delete_site_option( 'fs_wsalp' );
+			Licensing_Factory::delete_local_license_data();
 
 			// Ensue entry is fully cleared.
 			\delete_site_option( 'wsal_networkwide_tracker_cpts' );

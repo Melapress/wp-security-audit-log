@@ -47,7 +47,6 @@ if ( ! class_exists( '\WSAL\Helpers\Upgrade_Notice' ) ) {
 			if ( 'plugins' === $current_screen->id ) {
 				\add_action( 'in_plugin_update_message-' . \WpSecurityAuditLog::PREMIUM_VERSION_WHOLE_PLUGIN_NAME, array( __CLASS__, 'prefix_plugin_update_message' ), 10, 2 );
 				\add_action( 'in_plugin_update_message-' . \WpSecurityAuditLog::FREE_VERSION_WHOLE_PLUGIN_NAME, array( __CLASS__, 'prefix_plugin_update_message' ), 10, 2 );
-				\add_action( 'in_plugin_update_message-' . \WpSecurityAuditLog::NOFS_VERSION_WHOLE_PLUGIN_NAME, array( __CLASS__, 'prefix_plugin_update_message' ), 10, 2 );
 			}
 		}
 

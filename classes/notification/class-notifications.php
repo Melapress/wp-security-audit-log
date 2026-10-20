@@ -22,6 +22,7 @@ use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Controllers\Twilio\Twilio;
 use WSAL\Helpers\Encryption_Helper;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\Helpers\Settings\Settings_Builder;
 use WSAL\Helpers\Credential_Settings_Helper;
 use WSAL\Entities\Custom_Notifications_Entity;
@@ -47,6 +48,15 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		public const BUILT_IN_NOTIFICATIONS_SETTINGS_NAME = 'built-in-notifications';
 		public const CUSTOM_NOTIFICATIONS_SETTINGS_NAME   = 'custom-notifications';
 		public const BUILT_IN_SEND_NOW_NONCE_NAME         = WSAL_PREFIX . 'send_daily_summary_now';
+
+		/**
+		 * The settings tab available without a premium license. Every other tab is premium.
+		 *
+		 * @var string
+		 *
+		 * @since 5.6.8
+		 */
+		public const FREE_SETTINGS_TAB = 'notifications-highlights';
 
 		/**
 		 * Pointer to the hook suffix
@@ -466,8 +476,6 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				'all'
 			);
 
-			// phpcs:disable
-			// phpcs:enable
 		}
 
 		/**
@@ -513,6 +521,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		 * @return void
 		 *
 		 * @since 5.1.1
+		 * @since 5.6.8 - Uses Licensing_Factory for the free plan check.
 		 */
 		public static function content_show() {
 
@@ -524,8 +533,6 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 					'title' => \esc_html__( 'Activity log highlights', 'wp-security-audit-log' ),
 				),
 			);
-			// phpcs:disable
-			// phpcs:enable
 
 			if ( ! WP_Helper::is_multisite() ) {
 				unset( $settings_tabs['multisite-notifications'] );
@@ -599,15 +606,27 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 					<form method="post" name="wsal_form" id="wsal_form" enctype="multipart/form-data">
 
 			<?php
+			$is_frozen = Licensing_Factory::is_premium_frozen();
+
 			foreach ( $settings_tabs as $tab => $settings ) {
+				/**
+				 * While premium settings are read-only, premium tabs show the license notice. Their fields stay
+				 * in the form, hidden and unchanged, so saving the free tab keeps the premium settings as they are.
+				 */
+				$is_frozen_tab = $is_frozen && self::FREE_SETTINGS_TAB !== $tab;
 
 				?>
 						<!-- <?php echo \esc_attr( $tab ); ?> Settings -->
 						<div id="wsal-options-tab-<?php echo \esc_attr( $tab ); ?>" class="tabs-wrap">
 
 					<?php
-					include_once __DIR__ . '/options/' . $tab . '.php';
+					if ( $is_frozen_tab ) {
+						Licensing_Factory::maybe_render_frozen_notice();
+					}
 					?>
+					<div<?php echo $is_frozen_tab ? ' hidden' : ''; ?>>
+						<?php include_once __DIR__ . '/options/' . $tab . '.php'; ?>
+					</div>
 
 						</div>
 					<?php
