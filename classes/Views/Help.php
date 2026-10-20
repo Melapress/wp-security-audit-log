@@ -14,6 +14,7 @@ use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\Helpers\Plugin_Settings_Helper;
 
 // Exit if accessed directly.
@@ -205,7 +206,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		</div>
 		<div class="wsal-help-section">
 			<h2 class="wsal-tab__heading"><?php \esc_html_e( 'Do you need help or want to report an issue?', 'wp-security-audit-log' ); ?></h2>
-			<?php if ( wsal_freemius()->is_premium() ) : ?>
+			<?php if ( Licensing_Factory::is_premium_build() ) : ?>
 				<p>
 					<?php \esc_html_e( "If you've encountered a problem or would like to report an issue while using WP Activity Log, click the button below to open a support ticket. As a Premium user, you receive dedicated 1-to-1 email support.", 'wp-security-audit-log' ); ?>
 				</p>
@@ -271,11 +272,16 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			.fs-full-size-wrapper {
 				margin: 10px 20px 0 2px !important;
 			}
+			/* The Freemius contact form frame has no scrollbar and Freemius can size it shorter than the form, so its last topics end up hidden under the cookie notice. */
+			#fs_frame iframe {
+				min-height: 996px;
+			}
 		</style>
 		<?php
-		if ( $freemius_id = wsal_freemius()->get_id() ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
-			$vars = array( 'id' => $freemius_id );
-			echo fs_get_template( 'contact.php', $vars ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$contact_form = Licensing_Factory::get_support_contact_form();
+
+		if ( '' !== $contact_form ) {
+			echo $contact_form; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		} else {
 			echo '<p>';
 			printf(
@@ -354,6 +360,8 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * Method: Get system information.
 	 *
 	 * @return string - System information.
+	 *
+	 * @since 5.6.8 - Leaves out the license options, so the license key is never shown in the system information.
 	 */
 	public function get_sysinfo() {
 		// System info.
@@ -429,15 +437,15 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		// WordPress active plugins.
 		$sysinfo .= "\n" . '-- WordPress Active Plugins --' . "\n\n";
 
-		$plugins                       = get_plugins();
-		$active_plugins                = get_option( 'active_plugins', array() );
-		$can_use_freemius_premium_code = wsal_freemius()->can_use_premium_code();
+		$plugins              = \get_plugins();
+		$active_plugins       = \get_option( 'active_plugins', array() );
+		$can_use_premium_code = Licensing_Factory::can_use_premium_code();
 		foreach ( $plugins as $plugin_path => $plugin ) {
 			if ( ! in_array( $plugin_path, $active_plugins ) ) { // phpcs:ignore
 				continue;
 			}
 
-			if ( 'WP Activity Log' === $plugin['Name'] && $can_use_freemius_premium_code ) {
+			if ( 'WP Activity Log' === $plugin['Name'] && $can_use_premium_code ) {
 				$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
 				$sysinfo .= $plugin['Name'] . ' Premium: ' . $plugin['Version'] . $update . "\n";
 			} else {
@@ -472,7 +480,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 					continue;
 				}
 
-				if ( 'WP Activity Log' === $plugin['Name'] && $can_use_freemius_premium_code ) {
+				if ( 'WP Activity Log' === $plugin['Name'] && $can_use_premium_code ) {
 					$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
 					$plugin   = get_plugin_data( $plugin_path );
 					$sysinfo .= $plugin['Name'] . ' Premium: ' . $plugin['Version'] . $update . "\n";
@@ -512,6 +520,11 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 
 		if ( ! empty( $options ) && is_array( $options ) ) {
 			foreach ( $options as $option ) {
+				// If the option is a license option, skip it, we don't want to show it in this page.
+				if ( Licensing_Factory::is_license_option( (string) $option->option_name ) ) {
+					continue;
+				}
+
 				$sysinfo .= 'Option: ' . $option->option_name . "\n";
 				$sysinfo .= 'Value: ' . $option->option_value . "\n\n";
 			}

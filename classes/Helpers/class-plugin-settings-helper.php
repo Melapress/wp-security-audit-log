@@ -15,6 +15,7 @@ namespace WSAL\Helpers;
 
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Licensing\Licensing_Factory;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -543,7 +544,7 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		public static function get_plugin_settings() {
 			global $wpdb;
 
-			return $wpdb->get_results("SELECT * FROM $wpdb->options WHERE option_name LIKE 'wsal_%'"); // phpcs:ignore
+			return $wpdb->get_results( "SELECT * FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- No WordPress function lists options by name prefix, and only the system information reads them.
 		}
 
 		/**
@@ -684,43 +685,22 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		 * Set the plugin in stealth mode for MainWP child sites.
 		 *
 		 * Following steps are taken in stealth mode:
-		 *   1. Freemius connection is skipped.
-		 *   2. Freemius notices are removed.
+		 *   1. The licensing provider connection is skipped when supported.
+		 *   2. Licensing provider notices are removed when supported.
 		 *   3. WSAL's incognito mode is set.
 		 *   4. Other site admins are restricted.
 		 *   5. The current user is set as the sole editor of WSAL.
 		 *   6. Stealth mode option is saved.
 		 *
 		 * @since 3.2.3.3
+		 * @since 5.6.8 - Skips the licensing provider connection through Licensing_Factory.
 		 */
 		public static function set_mainwp_child_stealth_mode() {
 			if (
 			! Settings_Helper::get_boolean_option_value( 'mwp-child-stealth-mode', false ) // MainWP Child Stealth Mode is not already active.
 			&& \WpSecurityAuditLog::is_mainwp_active() // And if MainWP Child plugin is installed & active.
 			) {
-				// Check if freemius state is anonymous.
-				if ( ! wsal_freemius()->is_premium() && 'anonymous' === Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) ) {
-					// Update Freemius state to skipped.
-					Settings_Helper::set_option_value( 'wsal_freemius_state', 'skipped', true );
-
-					if ( ! WP_Helper::is_multisite() ) {
-						wsal_freemius()->skip_connection(); // Opt out.
-					} else {
-						wsal_freemius()->skip_connection( null, true ); // Opt out for all websites.
-					}
-
-					// Connect account notice.
-					if ( \class_exists( 'FS_Admin_Notices' ) ) {
-						\FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
-					}
-				}
-
-				if ( ! wsal_freemius()->is_premium() ) {
-					// Remove Freemius trial promotion notice.
-					if ( \class_exists( 'FS_Admin_Notices' ) ) {
-						\FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' );
-					}
-				}
+				Licensing_Factory::prepare_mainwp_stealth_mode();
 
 				self::set_incognito( true ); // Incognito mode to hide WSAL on plugins page.
 				self::set_restrict_log_viewer( 'only_me' );

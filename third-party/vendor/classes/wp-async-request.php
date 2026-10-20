@@ -181,5 +181,5 @@ abstract class WP_Async_Request
      * Override this method to perform any actions required
      * during the async request.
      */
-    protected abstract function handle();
+    abstract protected function handle();
 }

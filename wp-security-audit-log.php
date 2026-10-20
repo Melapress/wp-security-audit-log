@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     5.6.7
+ * Version:     5.6.8
  * Plugin URI:  https://melapress.com/wordpress-activity-log/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      Melapress
@@ -38,6 +38,8 @@
  */
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\Uninstall_Helper;
+use WSAL\Licensing\Licensing_Factory;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -52,7 +54,7 @@ if ( file_exists( plugin_dir_path( __FILE__ ) . 'third-party/vendor/autoload.php
 }
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '5.6.7' );
+	define( 'WSAL_VERSION', '5.6.8' );
 	define( 'WSAL_PREFIX', 'wsal_' );
 	define( 'WSAL_PREFIX_PAGE', 'wsal-' );
 }
@@ -109,15 +111,6 @@ if ( ! defined( 'PREMIUM_VERSION_WHOLE_PLUGIN_NAME' ) ) {
 	define( 'PREMIUM_VERSION_WHOLE_PLUGIN_NAME', 'wp-security-audit-log-premium/wp-security-audit-log.php' );
 
 	/**
-	 * NOFS version constant
-	 *
-	 * @var string
-	 *
-	 * @since 5.1.0
-	 */
-	define( 'NOFS_VERSION_WHOLE_PLUGIN_NAME', 'wp-security-audit-log-nofs/wp-security-audit-log.php' );
-
-	/**
 	 * Free version constant
 	 *
 	 * @var string
@@ -137,27 +130,10 @@ if ( ! defined( 'WSAL_MIRROR_PREFIX' ) ) {
 	define( 'WSAL_MIRROR_PREFIX', 'mirror-' );
 }
 
-// @free:start
-if ( ! function_exists( 'wsal_disable_freemius_on_free' ) ) {
-	/**
-	 * Disables the freemius
-	 *
-	 * @return WSAL_Freemius
-	 *
-	 * @since 4.5.0
-	 */
-	function wsal_disable_freemius_on_free() {
-		require_once __DIR__ . '/nofs/lib/class-wsal-freemius.php';
+// Bootstrap once, even when another WSAL edition is loaded in this request.
+global $wsal_class;
 
-		return WSAL_Freemius::get_instance();
-	}
-}
-\add_filter( 'wsal_freemius_sdk_object', 'wsal_disable_freemius_on_free' );
-\add_filter( 'wsal_disable_freemius_sdk', '__return_true' );
-// @free:end
-
-if ( ! function_exists( 'wsal_freemius' ) ) {
-
+if ( null === $wsal_class ) {
 
 	// Load action scheduler for event mirroring.
 	$action_scheduler_file_path = WSAL_BASE_DIR . implode(
@@ -175,24 +151,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	}
 
 	// Main Plugin Class.
-	global $wsal_class;
-	if ( null === $wsal_class ) {
-		$wsal_class = WpSecurityAuditLog::get_instance();
-	}
+	$wsal_class = WpSecurityAuditLog::get_instance();
 
 	if ( ! WP_Helper::is_plugin_active( WSAL_BASE_NAME ) ) {
-		WpSecurityAuditLog::load_freemius();
-
-		if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
-			wsal_freemius()->add_action( 'after_uninstall', array( '\WSAL\Helpers\Uninstall_Helper', 'uninstall' ) );
-		}
+		Licensing_Factory::register_uninstall_handler( array( Uninstall_Helper::class, 'uninstall' ) );
 	}
-} elseif ( ! method_exists( 'WSAL_Freemius', 'set_basename' ) ) {
-	global $wsal_freemius;
-	$wsal_freemius = null;
-	unset( $wsal_freemius );
-} else {
-	wsal_freemius()->set_basename( true, __FILE__ );
 }
 // @free:start
 if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
@@ -208,44 +171,11 @@ if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
 		if ( WP_Helper::is_plugin_active( PREMIUM_VERSION_WHOLE_PLUGIN_NAME ) ) {
 			\deactivate_plugins( PREMIUM_VERSION_WHOLE_PLUGIN_NAME, true );
 		}
-		if ( WP_Helper::is_plugin_active( NOFS_VERSION_WHOLE_PLUGIN_NAME ) ) {
-			\deactivate_plugins( NOFS_VERSION_WHOLE_PLUGIN_NAME, true );
-		}
 	}
 
 	\register_activation_hook( __FILE__, 'wsal_free_on_plugin_activation' );
 }
 // @free:end
-
-\add_filter(
-	'fs_templates/connect.php_wp-security-audit-log',
-	'freemius_template_modification'
-);
-
-if ( ! function_exists( 'freemius_template_modification' ) ) {
-	/**
-	 * Modifies template of the Freemius licensing
-	 *
-	 * @param string $template_value - The HTML of the template.
-	 *
-	 * @return string
-	 *
-	 * @since 5.2.2
-	 */
-	function freemius_template_modification( $template_value ) {
-		$require_license_key = wsal_freemius()->is_only_premium() ||
-								(
-									wsal_freemius()->is_freemium() &&
-									( wsal_freemius()->is_premium() || ! wsal_freemius()->has_release_on_freemius() ) &&
-									fs_request_get_bool( 'require_license', ( wsal_freemius()->is_premium() || wsal_freemius()->has_release_on_freemius() ) )
-								);
-		if ( $require_license_key ) {
-			$template_value .= '<style>.fs-freemium-licensing{ display:none !important;}</style>';
-		}
-
-		return $template_value;
-	}
-}
 
 
 if ( ! function_exists( 'str_ends_with' ) ) {

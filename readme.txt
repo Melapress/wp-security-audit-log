@@ -5,8 +5,8 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, event log, user tracking, logger, history 
 Requires at least: 5.5
-Tested up to: 7.1.1
-Stable tag: 5.6.7
+Tested up to: 7.1.3
+Stable tag: 5.6.8
 Requires PHP: 7.4
 
 The #1 user-rated activity log plugin for event logging, activity monitoring and change tracking.
@@ -239,33 +239,19 @@ These capabilities make WP Activity Log a **comprehensive solution for site secu
 
 == Changelog ==
 
-= 5.6.7 (2026-09-22) =
-
- * **Security fix**
-
-	 *  Fixed an Administrator SQL Injection responsibly reported by Ananda Dhakal.
+= 5.6.8 (2026-10-19) =
 
  * **Functionality & plugin improvements**
 
-	 *  Updated the External DB mirroring screen to use the plugin’s existing Select2 4.0.13 library instead of the legacy version.
-	 *  Improved multisite access checks for event details, the activity log viewer, and the Latest Events widget to respect site-level viewing permissions.
-	 *  Improved search input handling in post-title and post-ID searches in plugin settings and Select2 fields.
-	 *  Event `2008` (permanent post deletion) now identifies **System** as the actor and displays the server’s IP address for deletions triggered by WordPress cron, scheduled trash cleanup, or WP-CLI.
+	 *  Improved the license activation flow after upgrading. Opening WP Activity Log now shows the license prompt when activation is required.
+	 *  Refined the plugin's licensing structure to support separate Freemius and EDD integrations.
+	 *  Updated the Freemius SDK to version 2.13.5.
 
  * **Bug fixes**
 
-	 *  Fixed user session policies for individual roles requiring the global session policies setting to be enabled.
-	 *  Fixed a banner styling conflict with Ultimate WordPress Auction Plugin that affected the activity log layout.
-	 *  Fixed missing refund amounts in WooCommerce order refund event `9041`.
-	 *  Fixed the custom notifications database table being left behind when uninstalling the plugin with **Delete all data on uninstall** enabled.
-	 *  Fixed event `2002` (modified post) being logged when a more specific event, such as `2065` (modified content), already covers the change.
-	 *  Fixed a fatal PHP error that prevented application password revocation when BuddyBoss or another plugin updated unrelated user metadata during the request.
-	 *  Fixed monthly reports missing activity from the last day of the month.
-	 *  Fixed event `9154` (opened a WooCommerce order) being logged again when the order page reloaded after saving changes.
-	 *  Fixed the basic search option disappearing after disconnecting a license.
-	 *  Fixed a fatal PHP error and missing event `5704` when duplicating a Gravity Forms form without notifications.
-	 *  Fixed auto-refresh on the User Sessions page and made the refresh notice available for translation.
-	 *  Fixed an issue with WP Mail SMTP’s **Force From Email** setting, which could cause email delivery failures.
-	 *  Fixed client IP detection when the selected proxy header contains multiple addresses, rather than recording the full address list or `Unknown`.
+	 *  Fixed the `ActionScheduler_Lock` fatal error that caused a false “Deletion failed” message when deleting the plugin. Also fixed related missing-file warnings and recurring cron errors after deletion.
+	 *  Restored event `6000` when activity log entries are purged automatically or manually.
+	 *  Restored confirmation and error messages when running manual log cleanup.
+	 *  Fixed WooCommerce event `9106` being recorded when the stock quantity had not changed, preventing unnecessary log entries.
 
 Refer to the complete [plugin changelog](https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) for more detailed information about what was new, improved and fixed in previous version updates of WP Activity Log.

@@ -433,7 +433,7 @@ abstract class WP_Background_Process extends WP_Async_Request
         $batches = array();
         if (!empty($items)) {
             $allowed_classes = $this->allowed_batch_data_classes;
-            $batches = \array_map(static function ($item) use($column, $value_column, $allowed_classes) {
+            $batches = \array_map(static function ($item) use ($column, $value_column, $allowed_classes) {
                 $batch = new \stdClass();
                 $batch->key = $item->{$column};
                 $batch->data = static::maybe_unserialize($item->{$value_column}, $allowed_classes);
@@ -666,7 +666,7 @@ abstract class WP_Background_Process extends WP_Async_Request
      *
      * @return mixed
      */
-    protected abstract function task($item);
+    abstract protected function task($item);
     /**
      * Maybe unserialize data, but not if an object.
      *

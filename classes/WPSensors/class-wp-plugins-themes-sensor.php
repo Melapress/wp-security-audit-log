@@ -434,7 +434,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 			}
 
 			// Check for premium version being installed / updated.
-			if ( in_array( $plugin, array( \WpSecurityAuditLog::PREMIUM_VERSION_WHOLE_PLUGIN_NAME, \WpSecurityAuditLog::FREE_VERSION_WHOLE_PLUGIN_NAME, \WpSecurityAuditLog::NOFS_VERSION_WHOLE_PLUGIN_NAME ), true ) ) {
+			if ( in_array( $plugin, array( \WpSecurityAuditLog::PREMIUM_VERSION_WHOLE_PLUGIN_NAME, \WpSecurityAuditLog::FREE_VERSION_WHOLE_PLUGIN_NAME ), true ) ) {
 				return;
 			}
 

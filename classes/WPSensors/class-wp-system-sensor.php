@@ -802,19 +802,26 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		/**
 		 * Method: Prune events function.
 		 *
-		 * @param int    $count The number of deleted events.
-		 * @param string $query Query that selected events for deletion.
+		 * @param int    $count - The number of deleted events.
+		 * @param string $query - Query that selected events for deletion.
+		 *
+		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.6.8 - Logs scheduled purges as System instead of Unknown User.
 		 */
 		public static function event_prune_events( $count, $query ) {
-			Alert_Manager::trigger_event(
-				6000,
-				array(
-					'EventCount' => $count,
-					'PruneQuery' => $query,
-				)
+			$event_data = array(
+				'EventCount' => $count,
+				'PruneQuery' => $query,
 			);
+
+			// Scheduled purges run in WP-Cron, without a logged-in user.
+			if ( ! \is_user_logged_in() ) {
+				$event_data['Username'] = 'System';
+			}
+
+			Alert_Manager::trigger_event( 6000, $event_data );
 		}
 
 		/**

@@ -18,6 +18,7 @@ use WSAL\Adapter\User_Sessions;
 use WSAL\Entities\Reports_Entity;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\Entities\Occurrences_Entity;
 use WSAL\Entities\Generated_Reports_Entity;
 use WSAL\Entities\Custom_Notifications_Entity;
@@ -47,8 +48,28 @@ if ( ! class_exists( '\WSAL\Helpers\Uninstall_Helper' ) ) {
 		 *
 		 * @since 4.6.0
 		 * @since 5.6.7 - Added custom notifications table removal.
+		 * @since 5.6.8 - Frees the EDD license activations and removes the license data, whatever the "delete data" setting.
 		 */
 		public static function uninstall() {
+			$is_uninstalling = defined( 'WP_UNINSTALL_PLUGIN' ) || \doing_action( 'uninstall_' . WSAL_BASE_NAME );
+
+			// The license is removed whatever the "delete data" setting is, but only when the plugin is really deleted.
+			if ( $is_uninstalling ) {
+				Licensing_Factory::remove_license_on_uninstall();
+			}
+
+			/**
+			 * During uninstall, WordPress loads the main plugin file, which starts Action Scheduler,
+			 * and then deletes the plugin files before the request ends. Its shutdown callback and recurring
+			 * cron event are removed so they don't try to load files that no longer exist, which would
+			 * cause a fatal error.
+			 */
+			if ( $is_uninstalling && class_exists( '\ActionScheduler_QueueRunner', false ) ) {
+				\ActionScheduler_QueueRunner::instance()->unhook_dispatch_async_request();
+
+				\wp_clear_scheduled_hook( \ActionScheduler_QueueRunner::WP_CRON_HOOK, array( 'WP Cron' ) );
+			}
+
 			if ( Settings_Helper::get_boolean_option_value( 'delete-data' ) ) {
 				Occurrences_Entity::drop_table();
 				Metadata_Entity::drop_table();

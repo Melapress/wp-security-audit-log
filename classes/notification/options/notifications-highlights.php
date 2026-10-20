@@ -10,6 +10,7 @@
 use WSAL\Helpers\WP_Helper;
 use WSAL\Views\Notifications;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\Helpers\Settings\Settings_Builder;
 use WSAL\Extensions\Helpers\Notification_Helper;
 
@@ -192,7 +193,7 @@ if ( isset( $notifications['notification_weekly_email_address'] ) && ! empty( $n
 }
 
 // @free:start
-if ( \wsal_freemius()->is_free_plan() ) {
+if ( Licensing_Factory::is_free_plan() ) {
 	$custom_notifications_lock = '<span class="wsal-custom-notifications-lock" aria-hidden="true"></span>';
 
 	$custom_notifications_unlock_url = \esc_url( 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=notifications-custom-activity-log-notifications' );

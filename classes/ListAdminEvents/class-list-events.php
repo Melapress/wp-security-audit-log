@@ -26,6 +26,7 @@ use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\Licensing\Licensing_Factory;
 use WSAL\CopyEventData\Copy_Event_Data;
 use WSAL\Helpers\DateTime_Formatter_Helper;
 
@@ -159,6 +160,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 * @return bool $is_premium_search_available - True when Premium search is available.
 		 *
 		 * @since 5.6.7
+		 * @since 5.6.8 - Uses Licensing_Factory for the plan check.
 		 */
 		private static function is_premium_search_available(): bool {
 			$is_premium_search_available = false;
@@ -855,6 +857,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 * Returns an associative array containing the bulk actions.
 		 *
 		 * @since 4.6.0
+		 * @since 5.6.8 - Uses Licensing_Factory for the free plan check.
 		 *
 		 * @return array
 		 */
