@@ -220,9 +220,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 		/**
 		 * Log theme updated event.
 		 *
-		 * @param string $theme_name Theme name.
+		 * @param string $theme_name - Theme name.
+		 *
+		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Logs the theme URI.
 		 */
 		public static function log_theme_updated_event( $theme_name ) {
 			$theme = WP_Plugins_Themes_Sensor::get_theme_by_name( $theme_name );
@@ -235,7 +238,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 				array(
 					'Theme'       => (object) array(
 						'Name'                   => $theme->Name, // phpcs:ignore
-						'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore
+						'ThemeURI'               => $theme->get( 'ThemeURI' ),
 						'Description'            => $theme->Description, // phpcs:ignore
 						'Author'                 => $theme->Author, // phpcs:ignore
 						'Version'                => $theme->Version, // phpcs:ignore

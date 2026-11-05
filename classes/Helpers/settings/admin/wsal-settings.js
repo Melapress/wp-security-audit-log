@@ -193,10 +193,11 @@ function attachAllDynamicUsersSelects() {
             url: ajaxurl, // AJAX URL is predefined in WordPress admin
             dataType: 'json',
             delay: 250, // delay in ms while typing when to perform a AJAX search
-            data: function (params) {
+            data: (params) => {
                 return {
                     q: params.term, // search query
-                    action: 'wsal_settings_get_users' // AJAX action for admin-ajax.php
+                    action: 'wsal_settings_get_users', // AJAX action for admin-ajax.php
+                    nonce: wsalSettingsData.settingsLookupNonce
                 };
             },
             processResults: function (data) {
@@ -375,10 +376,11 @@ function attachAllDynamicIPsSelects() {
             url: ajaxurl, // AJAX URL is predefined in WordPress admin
             dataType: 'json',
             delay: 250, // delay in ms while typing when to perform a AJAX search
-            data: function (params) {
+            data: (params) => {
                 return {
                     q: params.term, // search query
-                    action: 'wsal_settings_get_ips' // AJAX action for admin-ajax.php
+                    action: 'wsal_settings_get_ips', // AJAX action for admin-ajax.php
+                    nonce: wsalSettingsData.settingsLookupNonce
                 };
             },
             processResults: function (data) {

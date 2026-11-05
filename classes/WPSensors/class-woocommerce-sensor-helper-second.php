@@ -97,15 +97,24 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor_Helper_Second' ) )
 		 * @return array Product data as array. Empty if the argument is not a valid WooCommerce product.
 		 *
 		 * @since 4.6.0
+		 * @since 5.7.0 - Read missing variation catalog visibility from the parent product.
 		 */
 		public static function get_product_data( $product ) {
 			if ( ! is_a( $product, 'WC_Product' ) ) {
 				return array();
 			}
 
+			if ( $product instanceof \WC_Product_Variation && ! isset( $product->get_parent_data()['catalog_visibility'] ) ) {
+				// Newly created variations have not loaded their parent data yet.
+				$parent_product     = wc_get_product( $product->get_parent_id() );
+				$catalog_visibility = $parent_product instanceof WC_Product ? $parent_product->get_catalog_visibility() : '';
+			} else {
+				$catalog_visibility = $product->get_catalog_visibility();
+			}
+
 			$product_data = array(
 				'type'               => $product->get_type(),
-				'catalog_visibility' => $product->get_catalog_visibility(),
+				'catalog_visibility' => $catalog_visibility,
 				'featured'           => $product->get_featured(),
 				'regular_price'      => $product->get_regular_price(),
 				'sale_price'         => $product->get_sale_price(),

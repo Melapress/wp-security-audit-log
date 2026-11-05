@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit3590044e1851fc54918c7af238d511d6
+class ComposerStaticInit4a7a9db45216940abec384d566eb83fa
 {
     public static $prefixLengthsPsr4 = array (
         'W' =>
@@ -29,6 +29,7 @@ class ComposerStaticInit3590044e1851fc54918c7af238d511d6
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Tools\\Select2_WPWS' => __DIR__ . '/../..' . '/classes/Select2/class-select2-wpws.php',
         'WSAL\\Actions\\Plugin_Installer' => __DIR__ . '/../..' . '/classes/Actions/class-plugin-installer.php',
+        'WSAL\\Atarim\\Atarim_Addon' => __DIR__ . '/../..' . '/classes/AtarimAddon/class-atarim-addon.php',
         'WSAL\\Controllers\\Alert' => __DIR__ . '/../..' . '/classes/Controllers/class-alert.php',
         'WSAL\\Controllers\\Alert_Manager' => __DIR__ . '/../..' . '/classes/Controllers/class-alert-manager.php',
         'WSAL\\Controllers\\Connection' => __DIR__ . '/../..' . '/classes/Controllers/class-connection.php',
@@ -188,9 +189,9 @@ class ComposerStaticInit3590044e1851fc54918c7af238d511d6
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit3590044e1851fc54918c7af238d511d6::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit3590044e1851fc54918c7af238d511d6::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit3590044e1851fc54918c7af238d511d6::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit4a7a9db45216940abec384d566eb83fa::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit4a7a9db45216940abec384d566eb83fa::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit4a7a9db45216940abec384d566eb83fa::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -54,14 +54,14 @@ if ( ! class_exists( '\WSAL\Entities\Archive\Delete_Records' ) ) {
 			$sql = 'SELECT max(id) FROM ' . Occurrences_Entity::get_table_name( $_wpdb ) . ' WHERE 1 ';
 
 			if ( ! empty( $condition ) ) {
-				$sql .= ' AND ' . array_key_first( $condition );
+				$sql .= ' AND ' . \array_key_first( $condition );
 			}
 
 			/**
 			 * Multi order is not supported currently.
 			 */
 			if ( ! empty( $order ) ) {
-				$sql .= ' ORDER BY ' . array_key_first( $order ) . ' ' . reset( $order );
+				$sql .= ' ORDER BY ' . \array_key_first( $order ) . ' ' . reset( $order );
 			}
 
 			if ( ! empty( $limit ) ) {
@@ -92,7 +92,7 @@ if ( ! class_exists( '\WSAL\Entities\Archive\Delete_Records' ) ) {
 				$matching_occurrences_query = 'SELECT id FROM ' . Occurrences_Entity::get_table_name( $_wpdb ) . ' WHERE 1 ';
 
 				if ( ! empty( $condition ) ) {
-					$matching_occurrences_query .= ' AND ' . array_key_first( $condition );
+					$matching_occurrences_query .= ' AND ' . \array_key_first( $condition );
 				}
 
 				// The ID range keeps the metadata index usable; the subquery limits deletion to matching occurrences.
@@ -105,14 +105,14 @@ if ( ! class_exists( '\WSAL\Entities\Archive\Delete_Records' ) ) {
 				$delete_occurrence = 'DELETE FROM ' . Occurrences_Entity::get_table_name( $_wpdb ) . ' WHERE 1 ';
 
 				if ( ! empty( $condition ) ) {
-					$delete_occurrence .= ' AND ' . array_key_first( $condition );
+					$delete_occurrence .= ' AND ' . \array_key_first( $condition );
 				}
 
 				/**
 				 * Multi order is not supported currently.
 				 */
 				if ( ! empty( $order ) ) {
-					$delete_occurrence .= ' ORDER BY ' . array_key_first( $order ) . ' ' . reset( $order );
+					$delete_occurrence .= ' ORDER BY ' . \array_key_first( $order ) . ' ' . reset( $order );
 				}
 
 				if ( ! empty( $limit ) ) {

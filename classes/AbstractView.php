@@ -79,6 +79,7 @@ abstract class WSAL_AbstractView {
 	 * @return void
 	 *
 	 * @since 4.4.1
+	 * @since 5.7.0 - Read and sanitize the notice name directly from POST data.
 	 */
 	public function ajax_dismiss_notice() {
 		\check_ajax_referer( 'wsal-dismiss-notice', 'nonce' );
@@ -87,14 +88,13 @@ abstract class WSAL_AbstractView {
 			die( 'Access Denied.' );
 		}
 
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
+		$notice = \sanitize_text_field( \wp_unslash( $_POST['notice'] ?? '' ) );
 
-		if ( ! isset( $post_array['notice'] ) ) {
+		if ( empty( $notice ) ) {
 			die( 'Notice name expected as "notice" parameter.' );
 		}
 
-		$this->dismiss_notice( \sanitize_text_field( \wp_unslash( $post_array['notice'] ) ) );
+		$this->dismiss_notice( $notice );
 	}
 
 	/**
@@ -337,6 +337,7 @@ abstract class WSAL_AbstractView {
 	 * @return  string
 	 *
 	 * @since 5.1.1
+	 * @since 5.7.0 - Uses the shared Premium plugin name.
 	 */
 	public static function admin_footer_text( $text ) {
 
@@ -350,7 +351,7 @@ abstract class WSAL_AbstractView {
 
 			return $our_footer . \sprintf(
 			/* translators: This text is prepended by a link to Melapress's website, and appended by a link to Melapress's website. */
-				'<a href="%1$s" target="_blank">' . ( 'free' === WpSecurityAuditLog::get_plugin_version() ? 'WP Activity Log' : 'WP Activity Log Premium' ) . '</a> ' . __( 'is developed and maintained by', 'wp-security-audit-log' ) . ' <a href="%2$s" target="_blank">Melapress</a>.',
+				'<a href="%1$s" target="_blank">' . ( 'free' === WpSecurityAuditLog::get_plugin_version() ? 'WP Activity Log' : WpSecurityAuditLog::PREMIUM_VERSION_DISPLAY_NAME ) . '</a> ' . \__( 'is developed and maintained by', 'wp-security-audit-log' ) . ' <a href="%2$s" target="_blank">Melapress</a>.',
 				$wsal_link,
 				$wsal_footer_link
 			);

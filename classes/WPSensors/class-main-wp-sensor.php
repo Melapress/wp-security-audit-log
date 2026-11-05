@@ -56,10 +56,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Stopped loading the themes list on every admin request.
 		 */
 		public static function init() {
-			\add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
-
 			// Check if MainWP Child Plugin exists.
 			if ( \WpSecurityAuditLog::is_mainwp_active() ) {
 				self::mainwp_child_init();
@@ -100,15 +99,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 			if ( Settings_Helper::get_boolean_option_value( 'mwp-child-stealth-mode', false ) ) {
 				Plugin_Settings_Helper::deactivate_mainwp_child_stealth_mode();
 			}
-		}
-
-		/**
-		 * Triggered when a user accesses the admin area.
-		 *
-		 * @since 4.5.0
-		 */
-		public static function event_admin_init() {
-			self::$old_themes = \wp_get_themes();
 		}
 
 		/**
@@ -155,12 +145,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 		}
 
 		/**
-		 * Method: Handle plugin/theme install event
-		 * from MainWP dashboard on child site.
+		 * Logs plugin and theme installs made from the MainWP dashboard.
 		 *
 		 * @param array $args - Array of arguments related to asset installed.
 		 *
+		 * @return void
+		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Logs the theme URI.
 		 */
 		public static function mainwp_child_install_assets( $args ) {
 			if ( empty( $args ) || ! is_array( $args ) ) {
@@ -184,7 +176,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 							array(
 								'Theme' => (object) array(
 									'Name'        => $theme_obj->Name, // phpcs:ignore
-									'ThemeURI'    => $theme_obj->ThemeURI, // phpcs:ignore
+									'ThemeURI'    => $theme_obj->get( 'ThemeURI' ),
 									'Description' => $theme_obj->Description, // phpcs:ignore
 									'Author'      => $theme_obj->Author, // phpcs:ignore
 									'Version'     => $theme_obj->Version, // phpcs:ignore
@@ -270,12 +262,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 		}
 
 		/**
-		 * Method: Handle theme uninstall event
-		 * from MainWP dashboard on child site.
+		 * Logs theme deletions made from the MainWP dashboard.
 		 *
 		 * @param array $args - Array of arguments related to asset uninstalled.
 		 *
+		 * @return void
+		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Logs the theme URI.
 		 */
 		public static function mainwp_child_uninstall_theme( $args ) {
 			if ( empty( $args ) || ! is_array( $args ) ) {
@@ -307,7 +301,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 								array(
 									'Theme' => (object) array(
 										'Name'        => $theme->Name, // phpcs:ignore
-										'ThemeURI'    => $theme->ThemeURI, // phpcs:ignore
+										'ThemeURI'    => $theme->get( 'ThemeURI' ),
 										'Description' => $theme->Description, // phpcs:ignore
 										'Author'      => $theme->Author, // phpcs:ignore
 										'Version'     => $theme->Version, // phpcs:ignore

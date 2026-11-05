@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace WSAL\Entities;
 
 use WSAL\Controllers\Alert;
+use WSAL\Helpers\User_Helper;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Helpers\Plugin_Settings_Helper;
@@ -210,6 +211,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Fills in missing user fields of login events with User_Helper::fill_missing_user_of_login_event().
 		 */
 		public static function store_record( $data, $type, $date, $site_id ) {
 			$data_to_store = array();
@@ -240,33 +242,9 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 				$data_to_store['alert_id']   = $type;
 				$data_to_store['site_id']    = ! is_null( $site_id ) ? $site_id : ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
 
-				if ( in_array( $type, array( 1000, 1001, 1002, 1003 ) ) ) {
-					if ( empty( $data_to_store['user_id'] ) && empty( $data_to_store['username'] ) ) {
-						$data_to_store['user_id']  = 0;
-						$data_to_store['username'] = 'Unknown user';
-					} elseif ( empty( $data_to_store['username'] ) ) {
-						if ( 0 === (int) $data_to_store['user_id'] ) {
-							$data_to_store['username'] = 'Unknown User';
-						} else {
-							$user = \get_user_by( 'ID', $data_to_store['user_id'] );
-							if ( $user ) {
-								$data_to_store['username'] = $user->user_login;
-							} else {
-								$data_to_store['username'] = 'Deleted';
-							}
-						}
-					} elseif ( empty( (int) $data_to_store['user_id'] ) ) {
-						if ( 0 === (int) $data_to_store['user_id'] ) {
-							$data_to_store['username'] = 'Unknown User';
-						} else {
-							$user = \get_user_by( 'login', $data_to_store['username'] );
-							if ( $user ) {
-								$data_to_store['user_id'] = $user->ID;
-							} else {
-								$data_to_store['user_id'] = 0;
-							}
-						}
-					}
+				// An older User_Helper loaded before an in-place update may not have this method, let's check to prevent a possible fatal error during upgrade.
+				if ( method_exists( User_Helper::class, 'fill_missing_user_of_login_event' ) ) {
+					$data_to_store = User_Helper::fill_missing_user_of_login_event( $data_to_store );
 				}
 
 				$occurrences_id = self::save( $data_to_store );
@@ -390,12 +368,14 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		 * Gets alert meta.
 		 *
 		 * @param array $item    - Occurrence meta array.
+		 * @param bool  $escape - Whether to escape meta names and values for HTML output.
 		 *
-		 * @return string Raw meta stored.
+		 * @return string - Meta names and values separated by line breaks.
 		 *
 		 * @since 5.1.0
+		 * @since 5.7.0 - Added the $escape parameter.
 		 */
-		public static function get_alert_meta( $item = \null ) {
+		public static function get_alert_meta( $item = \null, $escape = false ) {
 
 			if ( ! isset( $item['meta_values'] ) ) {
 				return '';
@@ -409,6 +389,12 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 				if ( \is_array( $value ) || is_object( $value ) ) {
 					$value = \print_r( (array) $value, \true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 				}
+
+				if ( true === $escape ) {
+					$name  = \esc_html( (string) $name );
+					$value = \esc_html( (string) $value );
+				}
+
 				$cached_message .= $name . ' : ' . $value . '<br>';
 			}
 
@@ -688,9 +674,10 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		 *
 		 * @param array $results - Array with all the data with events collected.
 		 *
-		 * @return array
+		 * @return array - Events keyed by occurrence ID, with their metadata in 'meta_values'.
 		 *
 		 * @since 4.6.0
+		 * @since 5.7.0 - Skips null metadata names from unmatched joins.
 		 */
 		public static function prepare_with_meta_data( array &$results ): array {
 			$prepared_array = array();
@@ -699,20 +686,34 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			$meta_table_name = Metadata_Entity::get_table_name();
 
 			if ( is_array( reset( $results[0] ) ) || ( is_array( $results[0] ) && ! empty( $results[0] ) && ! isset( $results[0][0] ) ) ) {
+				// Each row holds one event with one of its metadata entries, so an event can span several rows.
 				foreach ( $results as $result_row ) {
-					if ( ! isset( $prepared_array[ $result_row[ $table_name . 'id' ] ] ) ) {
-						foreach ( array_keys( self::$fields ) as $field ) {
-							$prepared_array[ $result_row[ $table_name . 'id' ] ][ $field ] = $result_row[ $table_name . $field ];
+					$occurrence_id = $result_row[ $table_name . 'id' ];
 
-							$prepared_array[ $result_row[ $table_name . 'id' ] ][ $field ] = self::cast_to_correct_type( $field, $prepared_array[ $result_row[ $table_name . 'id' ] ][ $field ] );
+					// Add the event fields only the first time the event appears.
+					if ( ! isset( $prepared_array[ $occurrence_id ] ) ) {
+						foreach ( array_keys( self::$fields ) as $field ) {
+							$value = $result_row[ $table_name . $field ];
+
+							$prepared_array[ $occurrence_id ][ $field ] = self::cast_to_correct_type( $field, $value );
 						}
 
-						foreach ( self::$migrated_meta as $name => $new_name ) {
-							$prepared_array[ $result_row[ $table_name . 'id' ] ]['meta_values'][ $name ] = $result_row[ $table_name . $new_name ];
+						// Metadata stored as event columns, such as ClientIP and UserAgent.
+						foreach ( self::$migrated_meta as $name => $column ) {
+							$prepared_array[ $occurrence_id ]['meta_values'][ $name ] = $result_row[ $table_name . $column ];
 						}
 					}
 
-					$prepared_array[ $result_row[ $table_name . 'id' ] ]['meta_values'][ $result_row[ $meta_table_name . 'name' ] ] = \maybe_unserialize( $result_row[ $meta_table_name . 'value' ] );
+					$meta_name = $result_row[ $meta_table_name . 'name' ] ?? null;
+
+					// Events without metadata rows come back with a null metadata name.
+					if ( null === $meta_name ) {
+						continue;
+					}
+
+					$meta_value = \maybe_unserialize( $result_row[ $meta_table_name . 'value' ] );
+
+					$prepared_array[ $occurrence_id ]['meta_values'][ $meta_name ] = $meta_value;
 				}
 			}
 

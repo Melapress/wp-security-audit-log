@@ -726,13 +726,13 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		}
 
 		/**
-		 * Collects all the submitted reports data and saves them or generates a new report.
+		 * Collects all the submitted notification settings and saves them.
 		 *
 		 * @return void
 		 *
 		 * @since 5.1.1
-		 *
-		 * @since 5.6.0 Added check for required email addresses when enabling notifications.
+		 * @since 5.6.0 - Added check for required email addresses when enabling notifications.
+		 * @since 5.7.0 - Saves only the built-in notifications while premium settings are read-only.
 		 */
 		public static function save_settings_ajax() {
 			if ( \check_ajax_referer( 'notifications-data', 'wsal-security' ) ) {
@@ -741,19 +741,23 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 					\wp_die( \esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
 				}
 
+				// The free tab shares the built-in notifications with the premium tabs, which keep their premium values on their own, so only the other premium settings are skipped while read-only.
+				$is_frozen = Licensing_Factory::is_premium_frozen();
+
 				if ( isset( $_POST[ self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) ) {
 
 					$data_data_built_in = array_map( 'sanitize_text_field', \stripslashes_deep( $_POST[ self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) );
 					self::build_in_check_and_save( $data_data_built_in );
 				}
 
-				if ( isset( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ) ) {
+				if ( ! $is_frozen && isset( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ) ) {
 
 					$data = \stripslashes_deep( $_POST[ self::NOTIFICATIONS_SETTINGS_NAME ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					self::settings_check_and_save( $data );
 				}
 
-				$default_email_address_is_set = false;
+				// While read-only, the Notification Settings tab isn't saved, so the stored default address applies.
+				$default_email_address_is_set = $is_frozen && self::is_default_mail_set();
 
 				if ( isset( $data['notification_default_email_address'] ) ) {
 					$default_email_address_is_set = $data['notification_default_email_address'] ? true : false;
@@ -769,7 +773,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 					);
 				}
 
-				if ( isset( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ) ) {
+				if ( ! $is_frozen && isset( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ) ) {
 
 					$data         = \stripslashes_deep( $_POST[ self::CUSTOM_NOTIFICATIONS_SETTINGS_NAME ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					$return_value = self::custom_notifications_check_and_save( $data );
@@ -1204,6 +1208,8 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		 * @since 5.1.1
 		 *
 		 * @since 5.6.0 - Added suppression of event triggers during first-time initialization.
+		 *
+		 * @since 5.7.0 - Keeps the premium notifications unchanged while premium settings are read-only.
 		 */
 		private static function build_in_check_and_save( array $post_array, bool $first_time = false ) {
 			if ( ! \current_user_can( 'manage_options' ) ) {
@@ -1291,6 +1297,14 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			$report_options['weekly_send_empty_summary_emails'] = ( ( isset( $post_array['notification_weekly_send_empty_summary_emails'] ) ) ? filter_var( $post_array['notification_weekly_send_empty_summary_emails'], FILTER_VALIDATE_BOOLEAN ) : false );
 
 			// Weekly Settings end.
+
+			// While premium settings are read-only, only the summary settings above change and the premium notifications keep their stored values.
+			if ( Licensing_Factory::is_premium_frozen() ) {
+				Settings_Helper::set_option_value( self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array_merge( (array) $current_settings, $report_options ) );
+
+				return;
+			}
+
 			foreach ( self::$events_to_collect as $event_id ) {
 				$report_options[ 'event_' . $event_id . '_notification' ] = ( ( isset( $post_array[ 'notification_event_' . $event_id . '_notification' ] ) ) ? filter_var( $post_array[ 'notification_event_' . $event_id . '_notification' ], FILTER_VALIDATE_BOOLEAN ) : false );
 

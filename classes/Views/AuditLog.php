@@ -414,6 +414,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 *
 	 * @since 1.0.0
 	 * @since 5.6.7 - Checks the event site before loading metadata on multisite.
+	 * @since 5.7.0 - Uses the shared selected database connection.
 	 */
 	public function AjaxInspector() {
 		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
@@ -429,9 +430,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die( 'Occurrence parameter expected.' );
 		}
 
-		$wsal_db = Connection::get_connection();
-
-
+		$wsal_db    = Connection::get_selected_db_connection();
 		$occurrence = (array) Occurrences_Entity::load( 'id = %d', array( $occurrence_id ), $wsal_db );
 
 		if ( WP_Helper::is_multisite() && ! \is_super_admin() && ( empty( $occurrence ) || \get_current_blog_id() !== (int) $occurrence['site_id'] ) ) {
@@ -588,10 +587,20 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	// @free:end
 
 	/**
-	 * Ajax callback to search.
+	 * Returns sites matching the requested search term.
+	 *
+	 * @return void
+	 *
+	 * @since 1.2.0
+	 * @since 5.7.0 - Limit network site search to super administrators and encode results with wp_json_encode().
 	 */
 	public function ajax_search_site() {
 		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
+			die( 'Access Denied.' );
+		}
+
+		// Only super administrators can list the sites of the whole network.
+		if ( WP_Helper::is_multisite() && ! \is_super_admin() ) {
 			die( 'Access Denied.' );
 		}
 
@@ -603,17 +612,19 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		if ( empty( $search ) ) {
 			die( 'Search parameter expected.' );
 		}
+
 		$grp1 = array();
 		$grp2 = array();
 
 		foreach ( WP_Helper::get_sites() as $site ) {
-			if ( stripos( $site->blogname, $search ) !== false ) {
+			if ( false !== stripos( $site->blogname, $search ) ) {
 				$grp1[] = $site;
-			} elseif ( stripos( $site->domain, $search ) !== false ) {
+			} elseif ( false !== stripos( $site->domain, $search ) ) {
 				$grp2[] = $site;
 			}
 		}
-		die( json_encode( array_slice( $grp1 + $grp2, 0, 7 ) ) ); // phpcs:ignore
+
+		die( \wp_json_encode( array_slice( $grp1 + $grp2, 0, 7 ) ) );
 	}
 
 

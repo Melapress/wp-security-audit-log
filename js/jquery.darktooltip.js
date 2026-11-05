@@ -79,6 +79,39 @@
 			}
 		},
 
+		/**
+		 * Rebuild tooltip content with text, bold labels and line breaks only.
+		 * Parse in an inert template, then copy safe nodes without any attributes.
+		 * Never serialize the result back to HTML or decode text a second time.
+		 */
+		createSafeContent: function( content ) {
+			const template = document.createElement( 'template' );
+			const fragment = document.createDocumentFragment();
+
+			template.innerHTML = String( content ?? '' );
+
+			const copyNodes = ( source, target ) => {
+				source.childNodes.forEach( ( node ) => {
+					if ( node.nodeType === Node.TEXT_NODE ) {
+						target.appendChild( document.createTextNode( node.textContent ) );
+					} else if ( node.nodeType === Node.ELEMENT_NODE ) {
+						if ( node.nodeName === 'STRONG' || node.nodeName === 'BR' ) {
+							const element = document.createElement( node.nodeName.toLowerCase() );
+
+							copyNodes( node, element );
+							target.appendChild( element );
+						} else {
+							target.appendChild( document.createTextNode( node.textContent ) );
+						}
+					}
+				} );
+			};
+
+			copyNodes( template.content, fragment );
+
+			return fragment;
+		},
+
 		setContent: function(){
 			$(this.bearer).css('cursor', 'pointer');
 			//Get tooltip content
@@ -92,10 +125,9 @@
 			}
 			if(this.content.charAt(0) == '#'){
 				if (this.options.delete_content){
-					var content = $(this.content).html();
-					$(this.content).html('');
+					const content = $(this.content).html();
+					$(this.content).empty();
 					this.content = content;
-					delete content;
 				}
 				else{
 					$(this.content).hide();
@@ -105,16 +137,18 @@
 			}else{
 				this.contentType='text';
 			}
-			tooltipId = "";
-			if(this.bearer.attr("id") != ""){
-				tooltipId = "id='darktooltip-" + this.bearer.attr("id") + "'";
+			// Create containers without interpolating content, IDs or options into HTML.
+			this.modalLayer = $( '<ins>' ).addClass( 'darktooltip-modal-layer' );
+			this.tooltip = $( '<ins>' ).addClass( `dark-tooltip ${this.options.theme} ${this.options.size} ${this.options.gravity}` );
+
+			const bearerId = this.bearer.attr( 'id' );
+
+			if ( bearerId ) {
+				this.tooltip.attr( 'id', `darktooltip-${bearerId}` );
 			}
-			//Create modal layer
-			this.modalLayer = $("<ins class='darktooltip-modal-layer'></ins>");
-			//Create tooltip container
-			this.tooltip = $("<ins " + tooltipId + " class = 'dark-tooltip " + this.options.theme + " " + this.options.size + " "
-				+ this.options.gravity + "'><div>" + this.content + "</div><div class = 'tip'></div></ins>");
-			this.tip = this.tooltip.find(".tip");
+
+			this.tip = $( '<div>' ).addClass( 'tip' );
+			this.tooltip.append( $( '<div>' ).append( this.createSafeContent( this.content ) ), this.tip );
 
 			$("body").append(this.modalLayer);
 			$("body").append(this.tooltip);
@@ -213,8 +247,12 @@
 		},
 
 		addConfirm: function(){
-			this.tooltip.append("<ul class = 'confirm'><li class = 'darktooltip-yes'>"
-				+ this.options.yes +"</li><li class = 'darktooltip-no'>"+ this.options.no +"</li></ul>");
+			this.tooltip.append(
+				$( '<ul>' ).addClass( 'confirm' ).append(
+					$( '<li>' ).addClass( 'darktooltip-yes' ).text( this.options.yes ),
+					$( '<li>' ).addClass( 'darktooltip-no' ).text( this.options.no )
+				)
+			);
 			this.setConfirmEvents();
 		},
 
@@ -232,14 +270,14 @@
 
 		finalMessage: function(){
 			if(this.options.finalMessage){
-				var dt = this;
-				dt.tooltip.find('div:first').html(this.options.finalMessage);
-				dt.tooltip.find('ul').remove();
-				dt.setPositions();
-				setTimeout( function(){
-					dt.hide();
-					dt.setContent();
-				}, dt.options.finalMessageDuration);
+				this.tooltip.find( 'div:first' ).empty().append( this.createSafeContent( this.options.finalMessage ) );
+				this.tooltip.find( 'ul' ).remove();
+				this.setPositions();
+
+				setTimeout( () => {
+					this.hide();
+					this.setContent();
+				}, this.options.finalMessageDuration );
 			}else{
 				this.hide();
 			}

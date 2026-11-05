@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 namespace WSAL\Controllers;
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Classes_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
@@ -229,6 +230,20 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		}
 
 		/**
+		 * Returns the connection of the database the current user selected in the activity log: live or archive.
+		 *
+		 * @return \wpdb $wsal_db - The live or archive connection.
+		 *
+		 * @since 5.7.0
+		 */
+		public static function get_selected_db_connection() {
+			$wsal_db = self::get_connection();
+
+
+			return $wsal_db;
+		}
+
+		/**
 		 * Test the connection.
 		 *
 		 * @param array    $connection_config - Connection configuration to test.
@@ -239,6 +254,7 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		 *
 		 * @since 4.6.0
 		 * @since 5.6.5 Added the connection timeout.
+		 * @since 5.7.0 - Makes the missing-database error translatable.
 		 */
 		public static function test_connection( ?array $connection_config = null, $connect_timeout = null ) {
 			error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING | E_DEPRECATED ) );
@@ -294,7 +310,14 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 					throw new \Exception( \__( 'Error establishing a database connection.', 'wp-security-audit-log' ), $error_code ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are escaped by the caller when rendered.
 				}
 			} elseif ( isset( $new_wpdb->db_select_error ) ) {
-				throw new \Exception( 'Error: Database ' . $connection_config['db_name'] . ' is unknown.', 1046 ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				throw new \Exception(
+					sprintf(
+						/* translators: %s: database name. */
+						\__( 'Error: Database %s is unknown.', 'wp-security-audit-log' ), // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are escaped by the caller when rendered.
+						$connection_config['db_name'] // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are escaped by the caller when rendered.
+					),
+					1046
+				);
 			} elseif ( ! $new_wpdb->has_connected ) {
 				throw new \Exception( 'Error establishing a database connection.' );
 			} else {
@@ -515,16 +538,21 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		 * @param string $connection_name External connection name.
 		 * @param int    $limit           - Limit.
 		 *
-		 * @return int
+		 * @return int|\WP_Error - Transferred occurrence count or transfer error.
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Propagates transfer failures without reporting migration completion.
 		 */
 		public static function migrate_occurrence( $connection_name, $limit ) {
 			$args['limit']      = $limit;
 			$args['archive_db'] = self::get_connection( $connection_name );
 			$count              = 0;
 
-			Archive_Records::archive( $args, $count );
+			$result = Archive_Records::archive( $args, $count );
+
+			if ( \is_wp_error( $result ) ) {
+				return $result;
+			}
 
 			return $count;
 		}
@@ -534,9 +562,10 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		 *
 		 * @param int $limit - Limit.
 		 *
-		 * @return int
+		 * @return int|\WP_Error - Transferred occurrence count or transfer error.
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Propagates transfer failures without reporting migration completion.
 		 */
 		public static function migrate_back_occurrence( $limit ) {
 			global $wpdb;
@@ -545,7 +574,11 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 			$args['archive_db'] = $wpdb;
 			$count              = 0;
 
-			Archive_Records::archive( $args, $count );
+			$result = Archive_Records::archive( $args, $count );
+
+			if ( \is_wp_error( $result ) ) {
+				return $result;
+			}
 
 			return $count;
 		}
@@ -695,23 +728,6 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 					);
 				}
 
-				// $file_filter = $this->get_base_dir() . 'classes' . DIRECTORY_SEPARATOR . 'mirrors' . DIRECTORY_SEPARATOR . '*Connection.php';
-				// foreach ( glob( $file_filter ) as $file ) {
-				// $base_filename = basename( $file );
-				// $class_name    = 'WSAL_Ext_Mirrors_' . substr( $base_filename, 0, strlen( $base_filename ) - 4 );
-				// try {
-				// require_once $file;
-				// $result [ $class_name::get_type() ] = array(
-				// 'name'   => $class_name::get_name(),
-				// 'config' => $class_name::get_config_definition(),
-				// 'class'  => $class_name,
-				// );
-				// } catch ( Exception $exception ) {  // phpcs:ignore
-				// Skip unsuitable class.
-				// TODO log to debug log.
-				// }
-				// }
-
 				self::$mirror_types = $result;
 			}
 
@@ -858,18 +874,16 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		 *
 		 * @param array $args - Arguments array.
 		 *
-		 * @return array|false|null
+		 * @return bool|\WP_Error - Transfer result or database error.
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Reports an unavailable archive connection as an error and no longer reads the unused archiving cursor.
 		 */
 		public static function archive( $args ) {
 			$args['archive_db'] = self::get_archive_database_connection();
+
 			if ( empty( $args['archive_db'] ) ) {
-				return false;
-			}
-			$last_created_on = Settings_Helper::get_option_value( 'archiving-last-created' );
-			if ( ! empty( $last_created_on ) ) {
-				$args['last_created_on'] = $last_created_on;
+				return new \WP_Error( 'wsal_archive_unavailable', \__( 'Could not connect to the archive database.', 'wp-security-audit-log' ) );
 			}
 
 			return Archive_Records::archive( $args );
@@ -878,27 +892,34 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		/**
 		 * Archiving alerts.
 		 *
+		 * @return bool|\WP_Error - Transfer result or database error.
+		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Returns the transfer result and always clears the running flag.
 		 */
 		public static function archiving_alerts() {
 			if ( ! Settings_Helper::is_archiving_cron_started() ) {
 				set_time_limit( 0 );
+
 				// Start archiving.
 				self::set_archiving_cron_started( true );
 
-				$args          = array();
-				$args['limit'] = 500;
-				$args_result   = false;
+				try {
+					$num  = Settings_Helper::get_archiving_date();
+					$type = Settings_Helper::get_archiving_date_type();
+					$now  = time();
+					$args = array(
+						'limit'   => 500,
+						'by_date' => strtotime( '-' . $num . ' ' . $type, $now ),
+					);
 
-				$num             = Settings_Helper::get_archiving_date();
-				$type            = Settings_Helper::get_archiving_date_type();
-				$now             = current_time( 'timestamp' );
-				$args['by_date'] = strtotime( '-' . $num . ' ' . $type, $now );
-				$args_result     = self::archive( $args );
-
-				// End archiving.
-				self::set_archiving_cron_started( false );
+					return self::archive( $args );
+				} finally {
+					self::set_archiving_cron_started( false );
+				}
 			}
+
+			return new \WP_Error( 'wsal_external_db_transfer_running', \__( 'An activity log transfer is already running. Please try again later.', 'wp-security-audit-log' ) );
 		}
 
 		/**

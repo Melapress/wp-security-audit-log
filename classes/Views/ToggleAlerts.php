@@ -10,6 +10,7 @@
  */
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\PHP_Helper;
 use WSAL\Controllers\Constants;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
@@ -132,6 +133,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 	/**
 	 * Method: Get View.
+	 *
+	 * @since 5.7.0 - Encodes existing entities in the disabled event tooltip attribute.
 	 */
 	public function render() {
 		// Die if user does not have permission to view.
@@ -355,7 +358,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												}
 
 												$disable_inputs_needed = ( ! empty( $disable_inputs ) ) ? esc_attr( $disable_inputs ) : '';
-												$disabled_tooltip      = ( $disabled_message ) ? 'data-darktooltip="' . $disabled_message . '"' : '';
+												$disabled_tooltip      = ( $disabled_message ) ? 'data-darktooltip="' . PHP_Helper::escape_tooltip_attribute( $disabled_message ) . '"' : '';
 												$checkbox_markup       = '<input name="alert[]" type="checkbox" class="alert"' . checked( Alert_Manager::is_enabled( $alert['code'] ), true, false ) . ' value="' . esc_attr( (int) $alert['code'] ) . '" ' . $disable_inputs_needed . ' />';
 												$severity              = '';
 

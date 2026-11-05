@@ -208,16 +208,17 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 */
 		public static function on_destroy_user_session() {
 
-			if ( ! isset( $_POST['user_id'] ) ) {
+			if ( ! isset( $_POST['user_id'], $_POST['nonce'] ) || ! is_string( $_POST['nonce'] ) ) {
 				return;
 			}
 
-			$user = \get_userdata( (int) $_POST['user_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$nonce = \sanitize_text_field( \wp_unslash( $_POST['nonce'] ) );
+			$user  = \get_userdata( (int) $_POST['user_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The nonce action includes the user ID, so the nonce is verified below once the user is known.
 
 			if ( $user ) {
 				if ( ! \current_user_can( 'edit_user', $user->ID ) ) {
 					$user = false;
-				} elseif ( isset( $_POST['nonce'] ) && ! \wp_verify_nonce( $_POST['nonce'], 'update-user_' . $user->ID ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				} elseif ( ! \wp_verify_nonce( $nonce, 'update-user_' . $user->ID ) ) {
 					$user = false;
 				}
 			}
@@ -809,6 +810,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 * @since 5.6.8 - Logs scheduled purges as System instead of Unknown User.
+		 * @since 5.7.0 - Records the server IP for WP-Cron and WP-CLI purges.
 		 */
 		public static function event_prune_events( $count, $query ) {
 			$event_data = array(
@@ -816,10 +818,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				'PruneQuery' => $query,
 			);
 
-			// Scheduled purges run in WP-Cron, without a logged-in user.
-			if ( ! \is_user_logged_in() ) {
-				$event_data['Username'] = 'System';
-			}
+			// Attribute WP-Cron, WP-CLI and purges without a logged-in user to the system.
+			$event_data = array_merge( $event_data, User_Helper::get_system_actor_data() );
 
 			Alert_Manager::trigger_event( 6000, $event_data );
 		}
@@ -1487,13 +1487,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		}
 
 		/**
-		 * Notify when a theme update is available.
+		 * Notify when a WordPress core update is available.
 		 *
 		 * @param string $transient - The name of the site transient.
 		 * @param mixed  $value - Site transient value.
 		 * @param int    $expiration - Time until expiration in seconds.
 		 *
+		 * @return void
+		 *
 		 * @since 5.6.0
+		 * @since 5.7.0 - Reads the validated server IP from Settings_Helper.
 		 */
 		public static function on_available_wp_core_update( $transient, $value, $expiration ) {
 
@@ -1524,13 +1527,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 
 				$update_admin_screen = \esc_url( \network_admin_url( 'update-core.php' ) );
 
-				$server_address = isset( $_SERVER['SERVER_ADDR'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['SERVER_ADDR'] ) ) : '127.0.0.1';
-
 				Alert_Manager::trigger_event(
 					6079,
 					array(
 						'CurrentUserID'    => 0,
-						'ClientIP'         => $server_address,
+						'ClientIP'         => Settings_Helper::get_server_ip(),
 						'CurrentWPVersion' => $current_version,
 						'NewWPVersion'     => $new_available_version,
 						'UpdateAdminUrl'   => $update_admin_screen,

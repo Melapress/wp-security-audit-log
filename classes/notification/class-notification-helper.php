@@ -12,18 +12,18 @@
 
 namespace WSAL\Extensions\Helpers;
 
-use WSAL\Controllers\Alert_Manager;
-use WSAL\Controllers\Slack\Slack;
-use WSAL\Controllers\Slack\Slack_API;
-use WSAL\Controllers\Twilio\Twilio;
-use WSAL\Controllers\Twilio\Twilio_API;
-use WSAL\Entities\Metadata_Entity;
-use WSAL\Entities\Occurrences_Entity;
-use WSAL\Helpers\DateTime_Formatter_Helper;
-use WSAL\Helpers\Email_Helper;
-use WSAL\Helpers\Settings_Helper;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Views\Notifications;
+use WSAL\Helpers\Email_Helper;
+use WSAL\Controllers\Slack\Slack;
+use WSAL\Helpers\Settings_Helper;
+use WSAL\Entities\Metadata_Entity;
+use WSAL\Controllers\Alert_Manager;
+use WSAL\Controllers\Twilio\Twilio;
+use WSAL\Controllers\Slack\Slack_API;
+use WSAL\Entities\Occurrences_Entity;
+use WSAL\Controllers\Twilio\Twilio_API;
+use WSAL\Helpers\DateTime_Formatter_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {

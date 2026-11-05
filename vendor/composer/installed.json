@@ -57,10 +57,16 @@
             "name": "freemius/wordpress-sdk",
             "version": "2.13.5",
             "version_normalized": "2.13.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Freemius/wordpress-sdk.git",
+                "reference": "0875c4ee3c941572f44d60cb2a687c54295db3d7"
+            },
             "dist": {
-                "type": "path",
-                "url": "bin/freemius-wordpress-sdk-2.13.5",
-                "reference": "59ef9f3fc15399a151a8d090c6cae9f14010bb50"
+                "type": "zip",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/0875c4ee3c941572f44d60cb2a687c54295db3d7",
+                "reference": "0875c4ee3c941572f44d60cb2a687c54295db3d7",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.6"
@@ -74,6 +80,7 @@
                 "szepeviktor/phpstan-wordpress": "^1.3",
                 "wp-coding-standards/wpcs": "^3.4.1"
             },
+            "time": "2026-10-22T12:00:44+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -81,22 +88,7 @@
                     "start.php"
                 ]
             },
-            "scripts": {
-                "phpcs": [
-                    "Composer\\Config::disableProcessTimeout",
-                    "phpcs -p -s --colors"
-                ],
-                "phpcs:ci": [
-                    "Composer\\Config::disableProcessTimeout",
-                    "phpcs --standard=phpcompat.xml -p -s --colors"
-                ],
-                "phpstan": [
-                    "./vendor/bin/phpstan analyse phpstan.neon --memory-limit 2G"
-                ],
-                "phpstan:log": [
-                    "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit 2G > error-phpstan.xml"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0-only"
             ],
@@ -111,9 +103,9 @@
                 "wordpress-plugin",
                 "wordpress-theme"
             ],
-            "transport-options": {
-                "symlink": false,
-                "relative": true
+            "support": {
+                "issues": "https://github.com/Freemius/wordpress-sdk/issues",
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.13.5"
             },
             "install-path": "../freemius/wordpress-sdk"
         },

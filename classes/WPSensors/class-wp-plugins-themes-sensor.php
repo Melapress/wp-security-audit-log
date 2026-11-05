@@ -46,15 +46,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 	class WP_Plugins_Themes_Sensor {
 
 		/**
-		 * List of Themes.
-		 *
-		 * @var array
-		 *
-		 * @since 4.5.0
-		 */
-		private static $old_themes = null;
-
-		/**
 		 * List of Plugins.
 		 *
 		 * @var array
@@ -82,6 +73,24 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		private static $plugins_data = array();
 
 		/**
+		 * Stores the data of themes about to be deleted, keyed by stylesheet.
+		 *
+		 * @var \WP_Theme[]
+		 *
+		 * @since 5.7.0
+		 */
+		private static $themes_data = array();
+
+		/**
+		 * Stores the versions of the installed themes before an installation changes them, keyed by stylesheet.
+		 *
+		 * @var array|null
+		 *
+		 * @since 5.7.0
+		 */
+		private static $old_theme_versions = null;
+
+		/**
 		 * Stores the plugins data for the currently processed plugin
 		 *
 		 * @var array
@@ -90,6 +99,36 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 */
 		private static $reported_plugins = array();
 
+		/**
+		 * Captures installed plugin and theme metadata before an installation or update changes it.
+		 *
+		 * @param bool|\WP_Error $response - Installation response.
+		 * @param array          $hook_extra - Upgrader operation arguments.
+		 *
+		 * @return bool|\WP_Error $response - Unchanged installation response.
+		 *
+		 * @since 5.7.0
+		 */
+		public static function on_upgrader_pre_install( $response, $hook_extra ) {
+			if ( \is_wp_error( $response ) ) {
+				return $response;
+			}
+
+			// Bulk plugin updates provide a plugin filename without a type.
+			if ( 'plugin' === ( $hook_extra['type'] ?? '' ) || ! empty( $hook_extra['plugin'] ) ) {
+				self::get_old_plugins();
+			}
+
+			if ( 'theme' === ( $hook_extra['type'] ?? '' ) && null === self::$old_theme_versions ) {
+				self::$old_theme_versions = array();
+
+				foreach ( \wp_get_themes() as $stylesheet => $theme ) {
+					self::$old_theme_versions[ $stylesheet ] = $theme->get( 'Version' );
+				}
+			}
+
+			return $response;
+		}
 
 		/**
 		 * Inits the main hooks
@@ -97,14 +136,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Captures plugin and theme data only when an operation needs it.
 		 */
 		public static function init() {
-			$has_permission = ( current_user_can( 'install_plugins' ) || current_user_can( 'activate_plugins' ) ||
-				\current_user_can( 'delete_plugins' ) || current_user_can( 'update_plugins' ) || current_user_can( 'install_themes' ) );
-
-			self::event_init();
-
 			\add_action( 'switch_theme', array( __CLASS__, 'event_theme_activated' ) );
+
+			\add_action( 'delete_theme', array( __CLASS__, 'on_action_delete_theme' ), 10, 1 );
 
 			\add_action( 'deleted_theme', array( __CLASS__, 'on_deleted_theme' ), 10, 2 );
 
@@ -116,11 +153,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 			\add_action( 'delete_plugin', array( __CLASS__, 'on_action_delete_plugin' ), 10, 1 );
 			\add_action( 'deleted_plugin', array( __CLASS__, 'on_action_deleted_plugin' ), 10, 2 );
 
-			/**
-			 * At least the plugin bulk upgrades fires this action before upgrade
-			 * We use it to fetch the current version of all plugins, before they are upgraded
-			 */
-			// \add_filter( 'upgrader_pre_install', array( __CLASS__, 'save_versions_before_update' ), 10, 2 );
+			\add_filter( 'upgrader_pre_install', array( __CLASS__, 'on_upgrader_pre_install' ), 10, 2 );
 
 			// Fires after the upgrades has done it's thing.
 			// Check hook extra for upgrader initiator.
@@ -282,20 +315,24 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		}
 
 		/**
-		 * Capture event when single plugin is installed
+		 * Logs the installed theme metadata.
 		 *
-		 * @param \Plugin_Upgrader $upgrader_instance Plugin_Upgrader instance. In other contexts, $this, might
-		 *                                                  be a Theme_Upgrader or Core_Upgrade instance.
-		 * @param array            $arr_data                 Array of bulk item update data.
+		 * @param \Theme_Upgrader $upgrader_instance - Theme upgrader instance.
+		 * @param array           $arr_data - Theme installation data.
 		 *
 		 * @return void
 		 *
 		 * @since 5.3.4.1
+		 * @since 5.7.0 - Logs the theme URI and skips themes already logged as updated.
 		 */
 		public static function theme_install( $upgrader_instance, $arr_data ): void {
 
 			// Must be type 'theme' and action 'install'.
 			if ( 'theme' !== $arr_data['type'] || 'install' !== $arr_data['action'] ) {
+				return;
+			}
+
+			if ( Alert_Manager::has_triggered( 5031 ) ) {
 				return;
 			}
 
@@ -323,7 +360,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				array(
 					'Theme' => (object) array(
 						'Name'                   => $new_theme_data['Name'],
-						'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+						'ThemeURI'               => $theme->get( 'ThemeURI' ),
 						'Description'            => $theme->get( 'Description' ),
 						'Author'                 => $new_theme_data['Author'],
 						'Version'                => $new_theme_data['Version'],
@@ -334,15 +371,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		}
 
 		/**
-		 * Capture event when single plugin is installed
+		 * Logs the installed theme metadata after an update.
 		 *
-		 * @param \Plugin_Upgrader $upgrader_instance Plugin_Upgrader instance. In other contexts, $this, might
-		 *                                                  be a Theme_Upgrader or Core_Upgrade instance.
-		 * @param array            $arr_data                 Array of bulk item update data.
+		 * @param \Theme_Upgrader $upgrader_instance - Theme upgrader instance.
+		 * @param array           $arr_data - Single or bulk theme update data.
 		 *
 		 * @return void
 		 *
 		 * @since 5.3.4.1
+		 * @since 5.7.0 - Refreshes cached headers after successful theme updates.
 		 */
 		public static function theme_upgrade( $upgrader_instance, $arr_data ): void {
 
@@ -367,6 +404,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					continue;
 				}
 
+				// Automatic updates defer WordPress's theme cache refresh until after this hook.
+				if ( is_array( $upgrader_instance->skin->result ?? null ) ) {
+					$theme->cache_delete();
+				}
+
 				$theme_name    = $theme->get( 'Name' );
 				$theme_version = $theme->get( 'Version' );
 
@@ -379,7 +421,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					array(
 						'Theme'       => (object) array(
 							'Name'                   => $theme_name,
-							'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+							'ThemeURI'               => $theme->get( 'ThemeURI' ),
 							'Description'            => $theme->Description, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 							'Author'                 => $theme->Author, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 							'Version'                => $theme_version,
@@ -650,9 +692,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 * @param string $package_type     The package type (plugin or theme).
 		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Skips the update already logged when the package was installed.
 		 */
 		public static function on_package_overwrite( $package, $plugin_data, $package_type ) {
 			if ( 'plugin' !== $package_type ) {
+				return;
+			}
+
+			if ( Alert_Manager::has_triggered( 5004 ) ) {
 				return;
 			}
 
@@ -777,29 +824,50 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		}
 
 		/**
+		 * Stores the data of a theme before it gets deleted.
+		 *
+		 * @param string $stylesheet - Stylesheet of the theme to delete.
+		 *
+		 * @return void
+		 *
+		 * @since 5.7.0
+		 */
+		public static function on_action_delete_theme( $stylesheet ) {
+			$theme = \wp_get_theme( $stylesheet );
+
+			if ( $theme->exists() ) {
+				self::$themes_data[ $stylesheet ] = $theme;
+			}
+		}
+
+		/**
 		 * Handles a theme deletion attempt.
 		 *
-		 * @param string $stylesheet Stylesheet of the theme to delete.
-		 * @param bool   $deleted    Whether the theme deletion was successful.
+		 * @param string $stylesheet - Stylesheet of the theme to delete.
+		 * @param bool   $deleted - Whether the theme deletion was successful.
+		 *
+		 * @return void
 		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Logs the theme URI, and uses the theme data stored right before the deletion.
 		 */
 		public static function on_deleted_theme( $stylesheet, $deleted ) {
 			if ( ! $deleted ) {
 				return;
 			}
 
-			if ( ! array_key_exists( $stylesheet, self::get_old_themes() ) ) {
+			if ( empty( self::$themes_data[ $stylesheet ] ) ) {
 				return;
 			}
 
-			$theme = self::get_old_themes()[ $stylesheet ];
+			$theme = self::$themes_data[ $stylesheet ];
+
 			Alert_Manager::trigger_event(
 				5007,
 				array(
 					'Theme' => (object) array(
 						'Name'                   => $theme->Name, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-						'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+						'ThemeURI'               => $theme->get( 'ThemeURI' ),
 						'Description'            => $theme->Description, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						'Author'                 => $theme->Author, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						'Version'                => $theme->Version, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -810,21 +878,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		}
 
 		/**
-		 * Triggered when a user accesses the admin area.
-		 *
-		 * @since 4.5.0
-		 */
-		public static function event_init() {
-			self::get_old_themes();
-			self::get_old_plugins();
-		}
-
-		/**
 		 * Activated a theme.
 		 *
 		 * @param string $theme_name - Theme name.
 		 *
+		 * @return void
+		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Logs the theme URI.
 		 */
 		public static function event_theme_activated( $theme_name ) {
 			$theme = null;
@@ -849,7 +910,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				array(
 					'Theme' => (object) array(
 						'Name'                   => $theme->Name, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-						'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+						'ThemeURI'               => $theme->get( 'ThemeURI' ),
 						'Description'            => $theme->Description, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						'Author'                 => $theme->Author, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						'Version'                => $theme->Version, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -1089,21 +1150,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		}
 
 		/**
-		 * Get old themes - That must be done BEFORE themes changes apply globally. It stores "image" the themes before changes.
-		 *
-		 * @return array
-		 *
-		 * @since 5.3.4.1
-		 */
-		private static function get_old_themes(): array {
-			if ( null === self::$old_themes ) {
-				self::$old_themes = \wp_get_themes();
-			}
-
-			return self::$old_themes;
-		}
-
-		/**
 		 * Get old plugins. That must apply before plugins changes apply globally. It stores "image" the plugins before changes.
 		 *
 		 * @return array
@@ -1255,6 +1301,41 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		}
 
 		/**
+		 * Logs a plugin update when an installation replaced a plugin that was already installed.
+		 *
+		 * @param string $plugin_file - Plugin file path relative to the plugins directory.
+		 * @param array  $plugin_data - Plugin data read from the installed plugin file.
+		 * @param string $old_version - Plugin version before the installation.
+		 *
+		 * @return void
+		 *
+		 * @since 5.7.0
+		 */
+		private static function trigger_overwritten_plugin_update( string $plugin_file, array $plugin_data, string $old_version ): void {
+			$plugin_slug = dirname( $plugin_file );
+
+			Alert_Manager::trigger_event(
+				5004,
+				array(
+					'PluginFile'   => $plugin_file,
+					'PluginData'   => (object) array(
+						'Name'            => $plugin_data['Name'],
+						'PluginURI'       => $plugin_data['PluginURI'],
+						'PluginRepoUrl'   => self::get_plugin_wp_repo_url( $plugin_slug ),
+						'Version'         => $plugin_data['Version'],
+						'Author'          => $plugin_data['Author'],
+						'Network'         => $plugin_data['Network'] ? \esc_html__( 'True', 'wp-security-audit-log' ) : \esc_html__( 'False', 'wp-security-audit-log' ),
+						'Slug'            => $plugin_slug,
+						'Title'           => $plugin_data['Title'],
+						'plugin_dir_path' => \WP_PLUGIN_DIR . \DIRECTORY_SEPARATOR . $plugin_file,
+					),
+					'OldVersion'   => $old_version,
+					'PluginStatus' => WP_Plugins_Themes_Helper::get_plugin_status_label( $plugin_file ),
+				)
+			);
+		}
+
+		/**
 		 * Fallback method in case events 5000 and 5005 were not triggered.
 		 *
 		 * This method has been added to handle the case when a plugin or theme is installed via ManageWP,
@@ -1267,6 +1348,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 * @return bool $response - The installation response after the installation has finished
 		 *
 		 * @since 5.5.0
+		 * @since 5.7.0 - Logs a plugin or theme update instead of an installation when it was already installed.
 		 */
 		public static function on_upgrader_post_install( $response, $hook_extra, $result ) {
 
@@ -1287,26 +1369,62 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					$event_plugin_data = WP_Plugins_Themes_Helper::get_plugin_event_info_from_folder( $folder_name );
 
 					if ( is_array( $event_plugin_data ) ) {
-						Alert_Manager::trigger_event(
-							5000,
-							array(
-								'PluginData' => (object) $event_plugin_data,
-							)
-						);
+						$plugin_file = $folder_name . '/' . $event_plugin_data['Slug'];
+
+						// Only the list captured before the installation can tell if the plugin was already installed.
+						$old_plugins     = self::$old_plugins ?? array();
+						$old_version     = $old_plugins[ $plugin_file ]['Version'] ?? null;
+						$new_plugin_data = array();
+
+						if ( null !== $old_version ) {
+							// The plugins cache can still hold the replaced plugin, so the new data is read from the plugin file.
+							$new_plugin_data = \get_plugin_data( \WP_PLUGIN_DIR . '/' . $plugin_file, true, false );
+						}
+
+						// A reinstall of the same version is still logged as an installation, so a changed package never goes unlogged.
+						if ( null !== $old_version && $old_version !== $new_plugin_data['Version'] ) {
+							self::trigger_overwritten_plugin_update( $plugin_file, $new_plugin_data, $old_version );
+						} else {
+							Alert_Manager::trigger_event(
+								5000,
+								array(
+									'PluginData' => (object) $event_plugin_data,
+								)
+							);
+						}
 					}
 				}
 
 				$is_theme = WP_Plugins_Themes_Helper::does_dir_or_file_exist( $folder_name, 'theme' );
 				if ( $is_theme ) {
+					// Only the list captured before the installation can tell if the theme was already installed.
+					$old_theme_version = self::$old_theme_versions[ $folder_name ] ?? null;
+
+					if ( null !== $old_theme_version ) {
+						// The themes cache can still hold the replaced theme, so it is cleared before the new data is read.
+						\wp_get_theme( $folder_name )->cache_delete();
+					}
+
 					$theme_event_data = WP_Plugins_Themes_Helper::get_theme_event_info_from_folder( $folder_name );
 
 					if ( is_array( $theme_event_data ) ) {
-						Alert_Manager::trigger_event(
-							5005,
-							array(
-								'Theme' => (object) $theme_event_data,
-							)
-						);
+						// A reinstall of the same version is still logged as an installation, so a changed package never goes unlogged.
+						if ( null !== $old_theme_version && $old_theme_version !== $theme_event_data['Version'] ) {
+							Alert_Manager::trigger_event(
+								5031,
+								array(
+									'Theme'       => (object) $theme_event_data,
+									'ThemeStatus' => WP_Plugins_Themes_Helper::get_theme_status_label( $folder_name ),
+								)
+							);
+						} else {
+							Alert_Manager::trigger_event(
+								5005,
+								array(
+									'Theme' => (object) $theme_event_data,
+								)
+							);
+						}
 					}
 				}
 			}
@@ -1321,7 +1439,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 * @param mixed  $value - Site transient value.
 		 * @param int    $expiration - Time until expiration in seconds.
 		 *
+		 * @return void
+		 *
 		 * @since 5.6.0
+		 * @since 5.7.0 - Reads the validated server IP from Settings_Helper.
 		 */
 		public static function on_available_plugin_update( $transient, $value, $expiration ) {
 
@@ -1362,13 +1483,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					$plugin_current_version = $event_plugin_data['Version'];
 					$update_admin_screen    = \esc_url( \network_admin_url( 'update-core.php' ) );
 
-					$server_address = isset( $_SERVER['SERVER_ADDR'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['SERVER_ADDR'] ) ) : '127.0.0.1';
-
 					Alert_Manager::trigger_event(
 						5032,
 						array(
 							'CurrentUserID'        => 0,
-							'ClientIP'             => $server_address,
+							'ClientIP'             => Settings_Helper::get_server_ip(),
 							'PluginName'           => $plugin_name,
 							'CurrentPluginVersion' => $plugin_current_version,
 							'NewPluginVersion'     => $new_available_version,
@@ -1392,7 +1511,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 * @param mixed  $value - Site transient value.
 		 * @param int    $expiration - Time until expiration in seconds.
 		 *
+		 * @return void
+		 *
 		 * @since 5.6.0
+		 * @since 5.7.0 - Reads the validated server IP from Settings_Helper.
 		 */
 		public static function on_available_theme_update( $transient, $value, $expiration ) {
 
@@ -1424,13 +1546,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					$theme_current_version = $theme_event_data['Version'];
 					$update_admin_screen   = \esc_url( \network_admin_url( 'update-core.php' ) );
 
-					$server_address = isset( $_SERVER['SERVER_ADDR'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['SERVER_ADDR'] ) ) : '127.0.0.1';
-
 					Alert_Manager::trigger_event(
 						5033,
 						array(
 							'CurrentUserID'       => 0,
-							'ClientIP'            => $server_address,
+							'ClientIP'            => Settings_Helper::get_server_ip(),
 							'ThemeName'           => $theme_name,
 							'CurrentThemeVersion' => $theme_current_version,
 							'NewThemeVersion'     => $new_available_version,

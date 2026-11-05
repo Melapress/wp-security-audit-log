@@ -15,6 +15,8 @@ declare(strict_types=1);
 namespace WSAL\Helpers;
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\Settings_Helper;
+use WSAL\WP_Sensors\WP_Log_In_Out_Sensor;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
@@ -342,6 +344,83 @@ if ( ! class_exists( '\WSAL\Helpers\User_Helper' ) ) {
 			self::set_proper_user( $user );
 
 			return (string) self::$user->user_email;
+		}
+
+		/**
+		 * Fills in the missing username or user ID of a login, logout or failed login event.
+		 *
+		 * @param array $occurrence - Occurrence columns, including alert_id and any known username and user_id.
+		 *
+		 * @return array - Occurrence columns with the user fields filled in.
+		 *
+		 * @since 5.7.0
+		 */
+		public static function fill_missing_user_of_login_event( array $occurrence ): array {
+			if ( ! in_array( (int) $occurrence['alert_id'], WP_Log_In_Out_Sensor::LOGIN_LOGOUT_AND_FAILED_LOGIN_EVENT_IDS, true ) ) {
+				return $occurrence;
+			}
+
+			if ( empty( $occurrence['user_id'] ) && empty( $occurrence['username'] ) ) {
+				$occurrence['user_id']  = 0;
+				$occurrence['username'] = 'Unknown user';
+			} elseif ( empty( $occurrence['username'] ) ) {
+				if ( 0 === (int) $occurrence['user_id'] ) {
+					$occurrence['username'] = 'Unknown User';
+				} else {
+					$user = \get_user_by( 'ID', $occurrence['user_id'] );
+
+					$occurrence['username'] = $user ? $user->user_login : 'Deleted';
+				}
+			} elseif ( empty( $occurrence['user_id'] ) ) {
+				$user = null;
+
+				/**
+				 * If the username is not "Unknown user" or "Deleted" (in any letter case).
+				 *
+				 * Those two names are placeholders this method stores when a login event has no real user.
+				 * When such an event is processed again, for example while it is archived or migrated, its
+				 * placeholder must not be looked up as a username. Otherwise a real user who registered with
+				 * the name "Unknown user" or "Deleted" would be recorded as the user of that event.
+				 */
+				if ( ! in_array( strtolower( (string) $occurrence['username'] ), array( 'unknown user', 'deleted' ), true ) ) {
+					$user = \get_user_by( 'login', $occurrence['username'] );
+				}
+
+				$occurrence['user_id'] = $user ? $user->ID : 0;
+			}
+
+			return $occurrence;
+		}
+
+		/**
+		 * Gets the System actor data for events that no logged-in user started.
+		 *
+		 * @param bool $is_scheduled_task - Whether the caller knows that a scheduled task triggered the event.
+		 *
+		 * @return array - System actor event data, or an empty array when a logged-in user started the event.
+		 *
+		 * @since 5.7.0
+		 */
+		public static function get_system_actor_data( bool $is_scheduled_task = false ): array {
+			// Scheduled tasks, WP-Cron and WP-CLI run on the server, even when a user is set.
+			if ( $is_scheduled_task || \wp_doing_cron() || ( defined( 'WP_CLI' ) && \WP_CLI ) ) {
+				return array(
+					'CurrentUserID' => 0,
+					'ClientIP'      => Settings_Helper::get_server_ip(),
+					'Username'      => 'System',
+				);
+			}
+
+			// Keep the client IP of requests without a logged-in user, so the source of the request stays visible.
+			if ( 0 === \get_current_user_id() ) {
+				return array(
+					'CurrentUserID' => 0,
+					'ClientIP'      => Settings_Helper::get_main_client_ip(),
+					'Username'      => 'System',
+				);
+			}
+
+			return array();
 		}
 
 		/**
