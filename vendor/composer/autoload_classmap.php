@@ -9,6 +9,7 @@ return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Tools\\Select2_WPWS' => $baseDir . '/classes/Select2/class-select2-wpws.php',
     'WSAL\\Actions\\Plugin_Installer' => $baseDir . '/classes/Actions/class-plugin-installer.php',
+    'WSAL\\Atarim\\Atarim_Addon' => $baseDir . '/classes/AtarimAddon/class-atarim-addon.php',
     'WSAL\\Controllers\\Alert' => $baseDir . '/classes/Controllers/class-alert.php',
     'WSAL\\Controllers\\Alert_Manager' => $baseDir . '/classes/Controllers/class-alert-manager.php',
     'WSAL\\Controllers\\Connection' => $baseDir . '/classes/Controllers/class-connection.php',

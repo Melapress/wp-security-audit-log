@@ -17,6 +17,8 @@ namespace WSAL\Writers;
 use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Extensions\Views\Reports;
+use WSAL\Entities\Occurrences_Entity;
+use WSAL\Helpers\Plugin_Settings_Helper;
 use WSAL\Helpers\DateTime_Formatter_Helper;
 
 // Exit if accessed directly.
@@ -51,6 +53,41 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 		private static $columns_header = array();
 
 		/**
+		 * Builds the safe HTML content of a report cell, preserving severity icons, formatted messages and metadata separators.
+		 *
+		 * @param string $column - The column name.
+		 * @param mixed  $value - The normalized column value.
+		 * @param array  $row - The occurrence with its original metadata.
+		 *
+		 * @return string - Safe HTML for the report cell.
+		 *
+		 * @since 5.7.0
+		 */
+		private static function format_cell_value( string $column, $value, array $row ): string {
+			if ( 'severity' === $column ) {
+				return '<span title=""><svg class="icon"><use xlink:href="#' . \esc_attr( \strtolower( (string) $value ) ) . '-ico"></use></svg></span>';
+			}
+
+			if ( 'message' === $column ) {
+				$allowed_tags = Plugin_Settings_Helper::get_allowed_html_tags();
+
+				// Preserve the emphasis and link attributes produced by the alert formatter.
+				$allowed_tags['i']          = array();
+				$allowed_tags['span']       = array( 'class' => true );
+				$allowed_tags['a']['class'] = true;
+				$allowed_tags['a']['rel']   = true;
+
+				return \wp_kses( (string) $value, $allowed_tags );
+			}
+
+			if ( 'meta' === $column ) {
+				return Occurrences_Entity::get_alert_meta( $row, true );
+			}
+
+			return \esc_html( (string) $value );
+		}
+
+		/**
 		 * Writes the HTML file to the specified location.
 		 *
 		 * @param int   $step - Current step.
@@ -60,6 +97,7 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 		 * @return void
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Escape report cells according to their HTML context.
 		 */
 		public static function write_html( int $step, array &$data = array(), array $report_filters = array() ) {
 
@@ -69,17 +107,17 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 				$output = fopen( self::get_file(), 'a+' );
 			}
 			if ( 1 === $step ) {
-				self::prepare_header( '', $output, $report_filters );
+				self::prepare_header( $output, $report_filters );
 			}
 
 			if ( ! empty( $data ) ) {
 
-				foreach ( $data as $i => $alert ) {
+				foreach ( $data as $alert ) {
 					$date = ( isset( $alert['created_on'] ) ) ? $alert['created_on'] : '';
 					$r    = '<tr>';
 
 					$processed_row_data = array();
-					foreach ( self::$columns_header as $key => $label ) {
+					foreach ( array_keys( self::$columns_header ) as $key ) {
 						$value = array_key_exists( $key, $alert ) ? $alert[ $key ] : '';
 						if ( 'timestamp' === $key ) {
 							$value = $date;
@@ -88,19 +126,20 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 					}
 
 					foreach ( $processed_row_data as $key => $label ) {
-						$cell_styling = 'padding: 16px 7px;';
+						$cell_styling    = 'padding: 16px 7px;';
+						$cell_attributes = '';
+						$cell_content    = self::format_cell_value( $key, $label, $alert );
+
 						if ( 'alert_id' === $key ) {
 							$cell_styling .= ' text-align: center; font-weight: 700;';
 						} elseif ( 'severity' === $key ) {
-							$cell_styling = '" class="tooltip" title="' . $label;
-							$label        = '<span title=""><svg class="icon"><use xlink:href="#' . \strtolower( $label ) . '-ico"></use></svg></span>';
-						} elseif ( 'user_displayname' === $key ) {
-							$cell_styling .= ' min-width: 100px;';
+							$cell_styling    = '';
+							$cell_attributes = ' class="tooltip" title="' . \esc_attr( (string) $label ) . '"';
 						} elseif ( 'message' === $key ) {
 							$cell_styling .= ' min-width: 400px; word-break: break-all; line-height: 1.5;';
 						}
 
-						$r .= '<td style="' . $cell_styling . '">' . $label . '</td>';
+						$r .= '<td style="' . \esc_attr( $cell_styling ) . '"' . $cell_attributes . '>' . $cell_content . '</td>';
 					}
 
 					$r .= '</tr>';
@@ -166,23 +205,22 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 		/**
 		 * Prepares the header columns for the HTML file
 		 *
-		 * @param string   $title - The title of the report.
 		 * @param resource $stream - The file stream to write to.
 		 * @param array    $report_filters - The report filters criteria.
-
+		 *
 		 * @return void
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Escape column headings and remove the empty title heading.
 		 */
-		private static function prepare_header( string $title, $stream, array $report_filters = array() ) {
+		private static function prepare_header( $stream, array $report_filters = array() ) {
 			fwrite( $stream, self::build_report_header( $report_filters ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
-			fwrite( $stream, '<h3 style="font-size: 20px; margin: 25px 0;">' . $title . '</h3>' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
 			fwrite( $stream, '<table>' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
 
 			$header  = '<thead>';
 			$header .= '<tr>';
 			foreach ( self::$columns_header as $item ) {
-				$header .= '<th>' . $item . '</th>';
+				$header .= '<th>' . \esc_html( (string) $item ) . '</th>';
 			}
 			$header .= '</tr>';
 			$header .= '</thead>';
@@ -199,6 +237,7 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 		 * @return string
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Escape report details, criteria and custom logo URLs, and space the events table with CSS.
 		 */
 		private static function build_report_header( $report_data ): string {
 			$str = '<html lang="en">
@@ -279,6 +318,9 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 					#section-1 {
 						width: 361px;
 						margin: 16px auto;
+					}
+					#section-3 {
+						margin-top: 24px;
 					}
 					@media (min-width: 540px) {
 						#section-1 {
@@ -383,7 +425,7 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 				if ( 0 === strlen( $logo_link ) ) {
 					$logo_link = 'https://melapress.com/?utm_source=plugin&utm_medium=wsal&utm_campaign=html-report-logo';
 				}
-				if ( ! isset( $logo_src ) || empty( $logo_src ) ) {
+				if ( empty( $logo_src ) ) {
 					$logo_src = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 200 68">
 						<g clip-path="url(#a)">
 							<path fill="#384A2F" d="M16.647 61.2h-.124l-2.657-10.106H9.977L7.32 61.172h-.138L4.954 51.094H0L4.83 67.47h4.248l2.781-9.15h.125l2.781 9.15h4.248l4.83-16.376h-4.954l-2.242 10.105ZM34.968 51.814c-.913-.485-1.978-.72-3.182-.72h-7.058V67.47h4.442v-4.859h2.463c1.246 0 2.34-.235 3.266-.692a5.14 5.14 0 0 0 2.187-1.98c.526-.858.775-1.868.775-3.045 0-1.177-.25-2.173-.761-3.045a5.174 5.174 0 0 0-2.132-2.022v-.013Zm-2.048 6.27c-.193.346-.484.61-.858.79-.373.18-.816.276-1.342.276h-1.563v-4.512h1.563c.526 0 .969.083 1.343.263.373.18.65.429.857.775.194.332.305.733.305 1.204 0 .47-.097.858-.305 1.204ZM47.686 51.094 42.289 67.47h4.788l.94-3.129h5.397l.941 3.129h4.789l-5.397-16.376h-6.075.014Zm1.342 9.911 1.633-5.398h.124l1.633 5.398h-3.39ZM65.467 55.275c.512-.36 1.149-.54 1.882-.54.43 0 .803.056 1.135.18.332.125.623.291.858.513.235.221.429.484.554.789.138.304.221.636.249 1.01h4.51c-.082-1.024-.331-1.924-.719-2.713a6.22 6.22 0 0 0-1.577-1.994 6.729 6.729 0 0 0-2.283-1.232 9.392 9.392 0 0 0-2.851-.429c-1.467 0-2.795.319-4 .97-1.19.636-2.144 1.591-2.85 2.837-.706 1.246-1.052 2.783-1.052 4.61 0 1.827.346 3.35 1.038 4.596.692 1.246 1.633 2.2 2.823 2.852 1.19.636 2.532.968 4.04.968 1.205 0 2.256-.18 3.156-.553a6.948 6.948 0 0 0 2.283-1.454 6.65 6.65 0 0 0 1.425-1.98c.333-.72.526-1.425.582-2.117l-4.511-.028a2.79 2.79 0 0 1-.305.941 2.467 2.467 0 0 1-.581.72 2.747 2.747 0 0 1-.844.457c-.319.11-.692.152-1.107.152-.72 0-1.329-.166-1.855-.512-.512-.332-.899-.844-1.176-1.523-.277-.678-.401-1.509-.401-2.52 0-.94.138-1.757.387-2.435.263-.679.65-1.19 1.163-1.55h.027v-.015ZM75.68 54.68h4.912v12.79h4.387V54.68h4.926v-3.586H75.68v3.585ZM95.44 51.094h-4.442V67.47h4.442V51.094ZM104.947 62.639h-.138l-3.349-11.545h-5.023l5.41 16.376h6.075l5.397-16.376h-5.023l-3.349 11.545ZM118.757 51.094h-4.442V67.47h4.442V51.094ZM119.864 54.68h4.927v12.79h4.372V54.68h4.913v-3.586h-14.212v3.585ZM142.78 57.738h-.125l-3.182-6.644h-4.968l6.019 11.226v5.15h4.401v-5.15l6.019-11.226h-4.954l-3.21 6.644ZM160.174 51.094h-4.455V67.47h11.056v-3.585h-6.601V51.094ZM179.285 51.842c-1.204-.637-2.547-.969-4.027-.969-1.481 0-2.837.318-4.041.97-1.204.65-2.159 1.591-2.864 2.837-.706 1.246-1.052 2.782-1.052 4.61 0 1.827.36 3.35 1.052 4.596.705 1.245 1.66 2.2 2.864 2.851 1.204.65 2.546.97 4.041.97 1.494 0 2.823-.32 4.027-.97 1.203-.637 2.158-1.592 2.864-2.838s1.066-2.782 1.066-4.61c0-1.827-.36-3.363-1.066-4.61-.706-1.245-1.661-2.2-2.864-2.837Zm-1.024 9.925c-.263.679-.637 1.191-1.135 1.537-.498.346-1.121.526-1.854.526-.734 0-1.357-.18-1.855-.526-.498-.346-.885-.858-1.134-1.537-.263-.678-.388-1.495-.388-2.477 0-.983.125-1.8.388-2.478.262-.679.636-1.19 1.134-1.537.498-.346 1.121-.526 1.855-.526.733 0 1.356.166 1.854.526.498.346.885.858 1.135 1.537.249.678.387 1.495.387 2.478 0 .983-.125 1.813-.387 2.477ZM192.763 58.32v3.17h2.961c0 .457-.125.859-.332 1.205-.222.36-.554.637-1.01.844-.443.194-1.01.305-1.689.305-.774 0-1.411-.18-1.923-.54-.512-.36-.913-.886-1.162-1.564-.263-.678-.388-1.51-.388-2.464 0-.955.139-1.758.415-2.437.277-.664.678-1.19 1.204-1.55.526-.36 1.163-.54 1.91-.54.346 0 .664.042.955.11.29.084.553.195.775.347.221.152.401.332.553.554.152.221.263.47.332.747h4.484a5.819 5.819 0 0 0-.72-2.27 5.96 5.96 0 0 0-1.55-1.786 7.334 7.334 0 0 0-2.214-1.163c-.83-.276-1.73-.415-2.712-.415-1.107 0-2.131.18-3.1.554a7.38 7.38 0 0 0-2.546 1.633 7.35 7.35 0 0 0-1.716 2.658c-.415 1.052-.623 2.243-.623 3.6 0 1.73.333 3.21 1.011 4.47.678 1.26 1.605 2.216 2.823 2.894 1.204.678 2.601 1.01 4.192 1.01 1.426 0 2.699-.277 3.792-.844 1.107-.568 1.979-1.37 2.602-2.436.636-1.053.941-2.326.941-3.821v-2.27H192.763Z" />
@@ -398,22 +440,21 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 						</defs>
 					</svg>';
 				} else {
-					$logo_src = '<img src="' . $logo_src . '" alt="Report_logo" style="max-height: 150px; max-width: 800px;" />';
+					$logo_src = '<img src="' . \esc_url( $logo_src ) . '" alt="Report_logo" style="max-height: 150px; max-width: 800px;" />';
 				}
 
 				$str .= '<div id="section-1">';
-				$str .= '<a href="' . esc_url( $logo_link ) . '" rel="noopener noreferrer" target="_blank">';
-				// Don't use esc_url here. Logo source can be something other than a URL.
+				$str .= '<a href="' . \esc_url( $logo_link ) . '" rel="noopener noreferrer" target="_blank">';
 				$str .= $logo_src;
 				$str .= '</a>';
 
 				$str .= '<h1 style="color: #059348;">';
 				if ( array_key_exists( 'custom_title', $report_data ) ) {
-					$str .= $report_data['custom_title'];
+					$str .= \esc_html( (string) $report_data['custom_title'] );
 
 					unset( $report_data['custom_title'] );
 				}
-				
+
 				$str .= '</h1>';
 
 				$str .= '</div>';
@@ -467,8 +508,8 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 				$tbody .= '<tbody>';
 				foreach ( $report_attributes as $label => $value ) {
 					$tbody .= '<tr>';
-					$tbody .= '<th><strong>' . $label . ':</strong></th>';
-					$tbody .= '<td>' . $value . '</td>';
+					$tbody .= '<th><strong>' . \esc_html( (string) $label ) . ':</strong></th>';
+					$tbody .= '<td>' . \esc_html( (string) $value ) . '</td>';
 					$tbody .= '</tr>';
 				}
 
@@ -477,7 +518,7 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 					$tbody .= '<td colspan="2"><strong>' . esc_html__( 'Comment', 'wp-security-audit-log' ) . ':</strong></td>';
 					$tbody .= '</tr>';
 					$tbody .= '<tr>';
-					$tbody .= '<td colspan="2">' . $report_data['comment'] . '</td>';
+					$tbody .= '<td colspan="2">' . \esc_html( (string) $report_data['comment'] ) . '</td>';
 					$tbody .= '</tr>';
 				}
 
@@ -490,11 +531,10 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 
 					unset( $report_data['no_meta'] );
 
-					// $criteria = $this->get_criteria_list();
 					foreach ( $report_data as $criteria_label => $criteria_values ) {
 						$tbody .= '<tr>';
-						$tbody .= '<td><em>' . $criteria_label . ':</em></td>';
-						$tbody .= '<td>' . \implode( '<br>', (array) $criteria_values ) . '</td>';
+						$tbody .= '<td><em>' . \esc_html( (string) $criteria_label ) . ':</em></td>';
+						$tbody .= '<td>' . \implode( '<br>', array_map( '\esc_html', (array) $criteria_values ) ) . '</td>';
 						$tbody .= '</tr>';
 					}
 				}

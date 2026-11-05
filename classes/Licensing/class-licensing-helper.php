@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace WSAL\Licensing;
 
+use WSAL\Licensing\Providers\EDD\EDD_Multisite_Licensing;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -192,24 +194,39 @@ if ( ! class_exists( '\WSAL\Licensing\Licensing_Helper' ) ) {
 		 * @param bool|\WP_Error $result   - Result of EDD_Provider::try_activate_license().
 		 * @param string         $batch_id - ID of the batch that tried the site, empty outside a batch.
 		 *
-		 * @return array $entry - Activation entry with 'status', 'batch', and 'activated_at', or 'code' and 'error'.
+		 * @throws \LogicException - When the entry status is not one of EDD_Multisite_Licensing::NETWORK_ACTIVATION_STATUSES.
+		 *
+		 * @return array $entry - Activation entry with 'status', 'batch', 'activated_at' (null when not active), and 'error' holding 'code' and 'message' (empty when active).
 		 *
 		 * @since 5.6.8
 		 */
 		public static function get_activation_entry_multisite( $result, string $batch_id = '' ): array {
-			if ( true === $result ) {
-				return array(
-					'status'       => 'active',
-					'batch'        => $batch_id,
-					'activated_at' => time(),
-				);
+			$is_active = true === $result;
+			$status    = $is_active ? 'active' : 'failed';
+
+			// Check if status has a legit network activation status value.
+			if ( ! in_array( $status, EDD_Multisite_Licensing::NETWORK_ACTIVATION_STATUSES, true ) ) {
+				throw new \LogicException( sprintf( 'Invalid network activation status "%s".', \esc_html( $status ) ) );
+			}
+
+			$error_code    = '';
+			$error_message = '';
+
+			if ( \is_wp_error( $result ) ) {
+				$error_code    = (string) $result->get_error_code();
+				$error_message = $result->get_error_message();
+			} elseif ( ! $is_active ) {
+				$error_message = \__( 'Unknown error', 'wp-security-audit-log' );
 			}
 
 			return array(
-				'status' => 'failed',
-				'batch'  => $batch_id,
-				'code'   => \is_wp_error( $result ) ? $result->get_error_code() : '',
-				'error'  => \is_wp_error( $result ) ? $result->get_error_message() : \__( 'Unknown error', 'wp-security-audit-log' ),
+				'status'       => $status,
+				'batch'        => $batch_id,
+				'activated_at' => $is_active ? time() : null,
+				'error'        => array(
+					'code'    => $error_code,
+					'message' => $error_message,
+				),
 			);
 		}
 
@@ -229,7 +246,9 @@ if ( ! class_exists( '\WSAL\Licensing\Licensing_Helper' ) ) {
 			$site_urls = array();
 
 			foreach ( $activations as $site_url => $activation ) {
-				if ( 'failed' === ( $activation['status'] ?? '' ) && in_array( $activation['code'] ?? '', self::UNANSWERED_ERROR_CODES, true ) ) {
+				$error_code = $activation['error']['code'] ?? '';
+
+				if ( 'failed' === ( $activation['status'] ?? '' ) && in_array( $error_code, self::UNANSWERED_ERROR_CODES, true ) ) {
 					$site_urls[] = (string) $site_url;
 				}
 			}

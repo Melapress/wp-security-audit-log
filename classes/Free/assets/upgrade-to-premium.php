@@ -10,13 +10,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-/**
- * Vars to calculate display of Black Friday campaign
- */
-$now                = strtotime( 'now' );
-$black_friday_start = strtotime( '2025-11-21' );
-$black_friday_end   = strtotime( '2025-12-01 23:59:59' );
 ?>
 
 <div id="wsal-persistant-cta" style="position: absolute; top: 2.4rem; left: 0; right: 0;">
@@ -142,9 +135,9 @@ $black_friday_end   = strtotime( '2025-12-01 23:59:59' );
 <!-- Copy START -->	
 <div class="wsal-persistent-cta">
 	<?php
-	if ( $now >= $black_friday_start && $now <= $black_friday_end ) {
+	if ( \WSAL\Helpers\Notices::is_bf_notice_period() ) {
 		?>
-		<img style="position: absolute; z-index: 2;	top: 0;	right: 0;" class="wsal-black-friday-offer" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>img/bf-corner-notice.svg" alt="Black Friday Sale" />
+		<img style="position: absolute; z-index: 2;	top: 0;	right: 0;" class="wsal-bf-offer" src="<?php echo \esc_url( WSAL_BASE_URL ); ?>img/bf-corner-notice.svg" alt="<?php \esc_attr_e( 'Black Friday Sale', 'wp-security-audit-log' ); ?>" />
 		<?php
 	}
 	?>

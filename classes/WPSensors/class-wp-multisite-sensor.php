@@ -173,7 +173,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 		/**
 		 * Activated/Deactivated theme on network.
 		 *
+		 * @return void
+		 *
 		 * @since 4.5.0
+		 * @since 5.7.0 - Logs the theme URI.
 		 */
 		public static function event_admin_shutdown() {
 			if ( is_null( self::$old_allowedthemes ) ) {
@@ -190,7 +193,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 						array(
 							'Theme' => (object) array(
 								'Name'                   => $theme->Name, // phpcs:ignore
-								'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore
+								'ThemeURI'               => $theme->get( 'ThemeURI' ),
 								'Description'            => $theme->Description, // phpcs:ignore
 								'Author'                 => $theme->Author, // phpcs:ignore
 								'Version'                => $theme->Version, // phpcs:ignore
@@ -210,7 +213,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 						array(
 							'Theme' => (object) array(
 								'Name'                   => $theme->Name, // phpcs:ignore
-								'ThemeURI'               => $theme->ThemeURI, // phpcs:ignore
+								'ThemeURI'               => $theme->get( 'ThemeURI' ),
 								'Description'            => $theme->Description, // phpcs:ignore
 								'Author'                 => $theme->Author, // phpcs:ignore
 								'Version'                => $theme->Version, // phpcs:ignore

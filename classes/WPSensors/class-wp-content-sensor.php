@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 
@@ -360,14 +361,18 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 *
 		 * @param integer $post_id - Post ID.
 		 *
+		 * @return void
+		 *
 		 * @since 4.5.0
 		 * @since 5.6.7 - Attributed scheduled and WP-CLI deletions to the system.
+		 * @since 5.7.0 - Attributed deletions without a logged-in user to the system, keeping their client IP.
 		 */
 		public static function event_post_deleted( $post_id ) {
 			// Exclude CPTs from external plugins.
-			$post = get_post( $post_id );
+			$post = \get_post( $post_id );
 
 			$event = 2008;
+
 			// Check WordPress backend operations.
 			if ( self::check_auto_draft( $event, $post->post_title ) ) {
 				return;
@@ -375,17 +380,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 
 			$event_data = self::get_post_event_data( $post ); // Get event data.
 
-			// Check whether WordPress cron or WP-CLI initiated the deletion.
-			if ( \wp_doing_cron() || \doing_action( 'wp_scheduled_delete' ) || ( defined( 'WP_CLI' ) && \WP_CLI ) ) {
-				$server_address = \sanitize_text_field( \wp_unslash( $_SERVER['SERVER_ADDR'] ?? '127.0.0.1' ) );
-
-				$event_data['CurrentUserID'] = 0;
-				$event_data['ClientIP']      = $server_address;
-				$event_data['Username']      = 'System';
-			}
+			// Attribute scheduled trash cleanup, WP-Cron, WP-CLI and requests without a logged-in user to the system.
+			$is_trash_cleanup = \doing_action( 'wp_scheduled_delete' );
+			$event_data       = array_merge( $event_data, User_Helper::get_system_actor_data( $is_trash_cleanup ) );
 
 			// Check if this was initiated by a plugin.
 			$request_params = \WSAL\Helpers\PHP_Helper::get_filtered_request_data();
+
 			if ( empty( $request_params['action'] ) && isset( $request_params['page'] ) ) {
 				$event      = 5025;
 				$event_data = array(

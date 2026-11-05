@@ -668,6 +668,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 *
 		 * @since 4.6.0
 		 * @since 5.6.0 - Updated to save options to the correct multisite db table for settings, sitemeta.
+		 * @since 5.7.0 - Adds the network option when it does not exist yet, so a false value is saved too.
 		 */
 		private static function set_option_value_internal( $option_name = '', $value = null, $autoload = false ) {
 			// bail early if no option name or value w\as passed.
@@ -676,8 +677,15 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			}
 
 			if ( WP_Helper::is_multisite() ) {
-				$result = \update_network_option( null, $option_name, $value );
-
+				/**
+				 * The update_network_option() function treats a missing option as false, so it skips saving false
+				 * when the option does not exist yet. A missing option is added with add_network_option() instead.
+				 */
+				if ( null === \get_network_option( null, $option_name, null ) ) {
+					$result = \add_network_option( null, $option_name, $value );
+				} else {
+					$result = \update_network_option( null, $option_name, $value );
+				}
 			} elseif ( false === $autoload ) {
 					\delete_option( $option_name );
 
@@ -725,24 +733,25 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 *
 		 * @since 4.5.0
 		 * @since 5.6.7 - Resolves proxy chains safely and falls back to the remote address.
+		 * @since 5.7.0 - Casts unslashed server values to strings before sanitizing them.
 		 */
 		public static function get_main_client_ip() {
 			if ( '' === self::$main_client_ip ) {
 				// Keep a stable internal fallback value for validation and storage.
-				$remote_address = \sanitize_text_field( \wp_unslash( $_SERVER['REMOTE_ADDR'] ?? 'Unknown' ) );
+				$remote_address = \sanitize_text_field( (string) \wp_unslash( $_SERVER['REMOTE_ADDR'] ?? 'Unknown' ) );
 
 				if ( 2 === (int) self::get_option_value( 'use-proxy-ip' ) && '' !== trim( self::get_option_value( 'proxy-custom-header', '' ) ) ) {
 					// Resolve the client IP from the administrator-defined proxy header.
 					$inner_server = array_change_key_case( $_SERVER, CASE_UPPER );
 					$key          = strtoupper( self::get_option_value( 'proxy-custom-header' ) );
-					$ip           = \sanitize_text_field( \wp_unslash( $inner_server[ $key ] ?? '' ) );
+					$ip           = \sanitize_text_field( (string) \wp_unslash( $inner_server[ $key ] ?? '' ) );
 
 					self::$main_client_ip = self::get_nearest_valid_ip_address( $ip, $remote_address );
 				} elseif ( self::get_boolean_option_value( 'use-proxy-ip' ) ) {
 					// Resolve the client IP from the selected supported proxy header.
 					$inner_server = array_change_key_case( $_SERVER, CASE_UPPER );
 					$key          = strtoupper( self::get_option_value( 'custom-header', 'REMOTE_ADDR' ) );
-					$ip           = \sanitize_text_field( \wp_unslash( $inner_server[ $key ] ?? '' ) );
+					$ip           = \sanitize_text_field( (string) \wp_unslash( $inner_server[ $key ] ?? '' ) );
 
 					self::$main_client_ip = self::get_nearest_valid_ip_address( $ip, $remote_address );
 				} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
@@ -830,6 +839,24 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			$ip = str_replace( array( '[', ']' ), '', $ip );
 
 			return $ip;
+		}
+
+		/**
+		 * Gets the IP address of the server running WordPress.
+		 *
+		 * @return string $server_ip - Server IP address, the loopback address when the server does not provide one, or an error message when the address is invalid.
+		 *
+		 * @since 5.7.0
+		 */
+		public static function get_server_ip(): string {
+			$server_address = \sanitize_text_field( (string) \wp_unslash( $_SERVER['SERVER_ADDR'] ?? '127.0.0.1' ) );
+			$server_ip      = self::normalize_ip( $server_address );
+
+			if ( ! Validator::validate_ip( $server_ip ) ) {
+				return 'Error ' . self::ERROR_CODE_INVALID_IP . ': Invalid IP Address';
+			}
+
+			return $server_ip;
 		}
 
 		/**

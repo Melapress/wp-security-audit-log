@@ -46,8 +46,6 @@ if ( ! class_exists( '\WSAL\Loggers\Notification_Logger' ) ) {
 	 * @since 5.1.1
 	 */
 	class Notification_Logger {
-// phpcs:disable
-// phpcs:enable
 		/**
 		 * Notifies if conditions match.
 		 *
@@ -57,6 +55,7 @@ if ( ! class_exists( '\WSAL\Loggers\Notification_Logger' ) ) {
 		 * @param integer $site_id - (Optional) site_id.
 		 *
 		 * @since 5.2.1
+		 * @since 5.7.0 - Substitute event metadata once, outside quoted rule values only.
 		 */
 		public static function log( $type, $data = array(), $date = null, $site_id = null ) {
 
@@ -73,10 +72,6 @@ if ( ! class_exists( '\WSAL\Loggers\Notification_Logger' ) ) {
 				return;
 			}
 
-			// phpcs:disable
-			// phpcs:enable
 		}
-		// phpcs:disable
-// phpcs:enable
 	}
 }

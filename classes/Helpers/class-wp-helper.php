@@ -285,6 +285,22 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
+		 * Returns the URL scheme the network is set up with, taken from the main site's saved home URL.
+		 *
+		 * WordPress builds URLs with "https" during HTTPS requests, but with the saved scheme in WP-CLI or in WP-Cron called
+		 * over http. Passing this scheme to URL functions gives the same URL for a site in every request.
+		 *
+		 * @return string $scheme - "https" or "http".
+		 *
+		 * @since 5.7.0
+		 */
+		public static function get_network_scheme(): string {
+			$main_site_home = (string) \get_blog_option( \get_main_site_id(), 'home' );
+
+			return 'https' === \wp_parse_url( $main_site_home, PHP_URL_SCHEME ) ? 'https' : 'http';
+		}
+
+		/**
 		 * Deletes a plugin option from the WP options table.
 		 *
 		 * Handled option name with and without the prefix for backwards compatibility.

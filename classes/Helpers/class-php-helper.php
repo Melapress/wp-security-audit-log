@@ -93,5 +93,23 @@ if ( ! class_exists( '\WSAL\Helpers\PHP_Helper' ) ) {
 		public static function json_decode( $data ) {
 			return @json_decode( $data ); // phpcs:ignore
 		}
+
+		/**
+		 * Encodes tooltips that contain HTML.
+		 *
+		 * ! Why: esc_attr() isn't enough for tooltips from darktooltip, and maybe, even from other tooltip libraries. esc_attr() fails when the tooltip library renders HTML in them. We need to double encode the inner string to ensure it is safely rendered as an attribute value.
+		 *
+		 * ! esc_attr() leaves text like &lt;img&gt; unchanged, and the browser turns it back into a real <img> tag before the script reads it.
+		 * ! This method also converts the & in &lt; to &amp;, so the script receives exactly the tooltip HTML we built.
+		 *
+		 * @param string $tooltip - The tooltip HTML, with every dynamic value already escaped.
+		 *
+		 * @return string - The tooltip HTML, encoded for the attribute.
+		 *
+		 * @since 5.7.0
+		 */
+		public static function escape_tooltip_attribute( string $tooltip ): string {
+			return htmlspecialchars( $tooltip, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', true );
+		}
 	}
 }

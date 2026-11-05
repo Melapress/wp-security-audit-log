@@ -101,6 +101,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 			// Add plugin shortcut links.
 			add_filter( 'plugin_action_links_' . WSAL_BASE_NAME, array( __CLASS__, 'add_plugin_shortcuts' ) );
+			add_filter( 'network_admin_plugin_action_links_' . WSAL_BASE_NAME, array( __CLASS__, 'add_plugin_shortcuts' ) );
 
 			// Register shared scripts early so extension callbacks at priority 10 can use them as dependencies.
 			add_action( 'admin_enqueue_scripts', array( 'WSAL_Views_AuditLog', 'register_scripts' ), 9 );
@@ -385,6 +386,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		 * Render content of the current view.
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Displays the in-plugin banners above the page title.
 		 */
 		public static function render_view_body() {
 			$view = self::get_active_view();
@@ -393,6 +395,8 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				?>
 				<div class="wrap">
 					<?php
+						Notices::display_in_plugin_banners();
+
 						$view->render_icon();
 						$view->render_title();
 						$view->render_content();
@@ -403,6 +407,8 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				?>
 				<div class="wrap">
 					<?php
+						Notices::display_in_plugin_banners();
+
 						$view::render_icon();
 						$view::render_title();
 						$view::render_content();

@@ -791,7 +791,9 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			$alert_obj = self::get_alerts()[ $event_id ];
 
 			if ( ! isset( $event_data['ClientIP'] ) ) {
+
 				$client_ip = Settings_Helper::get_main_client_ip();
+
 				if ( ! empty( $client_ip ) ) {
 					$event_data['ClientIP'] = $client_ip;
 				}

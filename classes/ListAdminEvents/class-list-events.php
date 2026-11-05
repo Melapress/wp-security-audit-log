@@ -19,6 +19,7 @@ namespace WSAL\ListAdminEvents;
 
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Utils;
+use WSAL\Helpers\PHP_Helper;
 use WSAL\Controllers\Constants;
 use WSAL\Controllers\Connection;
 use WSAL\EventNotes\Event_Notes;
@@ -610,6 +611,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 * @return mixed
 		 *
 		 * @since 4.6.1
+		 * @since 5.7.0 - Encodes existing entities in the tooltip attributes.
 		 */
 		public static function format_column_value( $item, $column_name ) {
 			switch ( $column_name ) {
@@ -629,12 +631,16 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					$id = ' id="alert_' . $item['alert_id'] . '"';
 
+					$tooltip = (int) $item['alert_id'] . ' - ' . \esc_html( $desc );
+
 					if ( isset( $disabled_event ) && ! empty( $disabled_event ) ) {
-						return '<span' . $id . ' class="log-disable" data-disabled="disabled" data-disable-alert-nonce="' . \wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="<strong>' . __( 'This event is disabled.', 'wp-security-audit-log' ) . '</strong><br>' . $item['alert_id'] . ' - ' . esc_html( $desc ) . '" data-alert-id="' . $item['alert_id'] . '">'
+						$tooltip = '<strong>' . \esc_html__( 'This event is disabled.', 'wp-security-audit-log' ) . '</strong><br>' . $tooltip;
+
+						return '<span' . $id . ' class="log-disable" data-disabled="disabled" data-disable-alert-nonce="' . \wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="' . PHP_Helper::escape_tooltip_attribute( $tooltip ) . '" data-alert-id="' . $item['alert_id'] . '">'
 						. str_pad( (string) $item['alert_id'], 4, '0', STR_PAD_LEFT ) . ' </span>';
 					}
 
-					return '<span' . $id . ' class="log-disable" data-disable-alert-nonce="' . \wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="' . $item['alert_id'] . ' - ' . esc_html( $desc ) . '" data-alert-id="' . $item['alert_id'] . '">'
+					return '<span' . $id . ' class="log-disable" data-disable-alert-nonce="' . \wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="' . PHP_Helper::escape_tooltip_attribute( $tooltip ) . '" data-alert-id="' . $item['alert_id'] . '">'
 				. str_pad( (string) $item['alert_id'], 4, '0', STR_PAD_LEFT ) . ' </span>';
 				case 'code':
 					$code = 0;
@@ -646,7 +652,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					$css_classes = array( 'log-type', 'log-type-' . $const['value'] );
 					array_push( $css_classes, 'log-type-' . $const['css'] );
 
-					return '<a class="tooltip" href="#" data-darktooltip="' . esc_html( $const['text'] ) . '"><span style="display:none; visibility:hidden">' . $const['text'] . '</span><span class="' . implode( ' ', $css_classes ) . '"></span></a>';
+					return '<a class="tooltip" href="#" data-darktooltip="' . PHP_Helper::escape_tooltip_attribute( \esc_html( $const['text'] ) ) . '"><span style="display:none; visibility:hidden">' . $const['text'] . '</span><span class="' . implode( ' ', $css_classes ) . '"></span></a>';
 				case 'crtd':
 					return $item['created_on']
 						? DateTime_Formatter_Helper::get_formatted_date_time( $item['created_on'], 'datetime', true, true )
@@ -669,7 +675,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						// Additional user info tooltip.
 						$tooltip = User_Utils::get_tooltip_user_content( $user );
 
-						$uhtml = '<a class="tooltip" data-darktooltip="' . \esc_attr( $tooltip ) . '" data-user="' . \esc_attr( $user->user_login ) . '" href="' . \esc_url( $user_edit_link ) . '" target="_blank">' . \esc_html( $display_name ) . '</a>';
+						$uhtml = '<a class="tooltip" data-darktooltip="' . PHP_Helper::escape_tooltip_attribute( $tooltip ) . '" data-user="' . \esc_attr( $user->user_login ) . '" href="' . \esc_url( $user_edit_link ) . '" target="_blank">' . \esc_html( $display_name ) . '</a>';
 
 
 						$roles = User_Utils::get_roles_label( $item['user_roles'] );
@@ -680,7 +686,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					} elseif ( 'Website Visitor' === $username || 'Unregistered user' === $username ) {
 						$uhtml = '<i style="display: inline-block;width: 65%;">' . __( 'Unregistered user', 'wp-security-audit-log' ) . '</i>';
 					} elseif ( isset( $username ) && ! empty( $username ) ) {
-						$uhtml = '<i style="display: inline-block;width: 65%;">' . $username . '</i>';
+						$uhtml = '<i style="display: inline-block;width: 65%;">' . \esc_html( $username ) . '</i>';
 						if ( isset( $item['user_id'] ) && $item['user_id'] ) {
 							$uhtml .= '<div>' . __( 'Deleted user', 'wp-security-audit-log' ) . '</div>';
 						}
@@ -734,10 +740,10 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					$link = \esc_url( 'https://whatismyipaddress.com/ip/' . $scip . '?utm_source=plugin&utm_medium=referral&utm_campaign=wsal' );
 
 					if ( \class_exists( 'WSAL_SearchExtension' ) ) {
-						$tooltip = \esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
+						$tooltip = \esc_html__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
 
 						if ( count( $oips ) < 2 ) {
-							return "<a class='search-ip' data-darktooltip='$tooltip' data-ip='" . \esc_attr( $scip ) . "' target='_blank' href='" . \esc_url( $link ) . "'>" . \esc_html( $scip ) . '</a>';
+							return "<a class='search-ip' data-darktooltip='" . PHP_Helper::escape_tooltip_attribute( $tooltip ) . "' data-ip='" . \esc_attr( $scip ) . "' target='_blank' href='" . \esc_url( $link ) . "'>" . \esc_html( $scip ) . '</a>';
 						}
 					} elseif ( count( $oips ) < 2 ) {
 						return "<a target='_blank' href='" . \esc_url( $link ) . "'>" . \esc_html( $scip ) . '</a>';
@@ -745,9 +751,9 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					// If there are many IPs...
 					if ( \class_exists( 'WSAL_SearchExtension' ) ) {
-						$tooltip = \esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
+						$tooltip = \esc_html__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
 
-						$html = "<a class='search-ip' data-darktooltip='$tooltip' data-ip='" . \esc_attr( $scip ) . "' target='_blank' href='" . \esc_url( 'https://whatismyipaddress.com/ip/' . $scip ) . "'>" . \esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
+						$html = "<a class='search-ip' data-darktooltip='" . PHP_Helper::escape_tooltip_attribute( $tooltip ) . "' data-ip='" . \esc_attr( $scip ) . "' target='_blank' href='" . \esc_url( 'https://whatismyipaddress.com/ip/' . $scip ) . "'>" . \esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
 
 						foreach ( $oips as $ip ) {
 							if ( $scip !== $ip ) {
@@ -797,9 +803,9 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						\admin_url( 'admin-ajax.php' )
 					);
 
-					$tooltip = \esc_attr__( 'View all details of this change', 'wp-security-audit-log' );
+					$tooltip = \esc_html__( 'View all details of this change', 'wp-security-audit-log' );
 
-					$btns = '<a class="more-info button button-secondary data-event-inspector-link" data-darktooltip="' . $tooltip . '" data-inspector-active-text="' . \esc_attr__( 'Close inspector.', 'wp-security-audit-log' ) . '" title="' . \esc_attr__( 'Event data inspector', 'wp-security-audit-log' ) . '" href="' . \esc_url( $url ) . '">' . \esc_html__( 'More details...', 'wp-security-audit-log' ) . '</a>';
+					$btns = '<a class="more-info button button-secondary data-event-inspector-link" data-darktooltip="' . PHP_Helper::escape_tooltip_attribute( $tooltip ) . '" data-inspector-active-text="' . \esc_attr__( 'Close inspector.', 'wp-security-audit-log' ) . '" title="' . \esc_attr__( 'Event data inspector', 'wp-security-audit-log' ) . '" href="' . \esc_url( $url ) . '">' . \esc_html__( 'More details...', 'wp-security-audit-log' ) . '</a>';
 
 
 					// @free:start

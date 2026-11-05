@@ -50,6 +50,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		const TRANSIENT_FAILEDLOGINS_UNKNOWN      = 'wsal-failedlogins-unknown';
 
 		/**
+		 * Login, logout and failed login events, which can be logged before the user is known or for a user who does not exist.
+		 *
+		 * @var int[]
+		 *
+		 * @since 5.7.0
+		 */
+		const LOGIN_LOGOUT_AND_FAILED_LOGIN_EVENT_IDS = array( 1000, 1001, 1002, 1003 );
+
+		/**
 		 * Current user object
 		 *
 		 * @var \WP_User

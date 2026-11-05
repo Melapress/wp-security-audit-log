@@ -990,47 +990,75 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Save: `General`
+	 * Saves the general settings tab.
+	 *
+	 * @return void
+	 *
+	 * @since 3.2.3
+	 * @since 5.7.0 - Unslash and sanitize general settings from POST data.
 	 */
 	private function tab_general_save() {
-		// Get $_POST global array.
-		$post_array = filter_input_array( INPUT_POST );
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+		$use_email               = \sanitize_text_field( \wp_unslash( $_POST['use-email'] ?? '' ) );
+		$from_email              = \sanitize_text_field( \wp_unslash( $_POST['FromEmail'] ?? '' ) );
+		$display_name            = \sanitize_text_field( \wp_unslash( $_POST['DisplayName'] ?? '' ) );
+		$enable_dashboard_widget = \sanitize_text_field( \wp_unslash( $_POST['EnableDashboardWidgets'] ?? '' ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		Settings_Helper::set_option_value( 'use-email', \sanitize_text_field( $post_array['use-email'] ) );
-		Settings_Helper::set_option_value( 'from-email', trim( \sanitize_email( $post_array['FromEmail'] ) ) );
-		Settings_Helper::set_option_value( 'display-name', trim( \sanitize_text_field( $post_array['DisplayName'] ) ) );
-		Settings_Helper::set_boolean_option_value( 'disable-widgets', ! \sanitize_text_field( $post_array['EnableDashboardWidgets'] ) );
+		Settings_Helper::set_option_value( 'use-email', $use_email );
+		Settings_Helper::set_option_value( 'from-email', \sanitize_email( $from_email ) );
+		Settings_Helper::set_option_value( 'display-name', $display_name );
+		Settings_Helper::set_boolean_option_value( 'disable-widgets', ! $enable_dashboard_widget );
 
 		if ( ! Licensing_Factory::is_free_plan() ) {
-			Settings_Helper::set_boolean_option_value( 'disable-admin-bar-notif', ! \sanitize_text_field( $post_array['admin_bar_notif'] ), true );
-			Settings_Helper::set_option_value( 'admin-bar-notif-updates', \sanitize_text_field( $post_array['admin_bar_notif_updates'] ), true );
+			// phpcs:disable WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+			$admin_bar_notification = \sanitize_text_field( \wp_unslash( $_POST['admin_bar_notif'] ?? '' ) );
+			$admin_bar_updates      = \sanitize_text_field( \wp_unslash( $_POST['admin_bar_notif_updates'] ?? '' ) );
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+			Settings_Helper::set_boolean_option_value( 'disable-admin-bar-notif', ! $admin_bar_notification, true );
+			Settings_Helper::set_option_value( 'admin-bar-notif-updates', $admin_bar_updates, true );
 		}
 
 		// Handle log viewer settings in multisite context.
 		if ( WP_Helper::is_multisite() ) {
-			$log_viewer_restrictions = isset( $post_array['restrict-log-viewer'] ) ? \sanitize_text_field( $post_array['restrict-log-viewer'] ) : '';
+			$log_viewer_restrictions = \sanitize_text_field( \wp_unslash( $_POST['restrict-log-viewer'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+
 			Plugin_Settings_Helper::set_restrict_log_viewer( $log_viewer_restrictions );
+
 			if ( 'only_me' === $log_viewer_restrictions ) {
 				Plugin_Settings_Helper::set_only_me_user_id( \get_current_user_id() );
 			}
 		}
 
 		// Get plugin viewers.
-		$viewers = isset( $post_array['Viewers'] ) ? array_map( 'sanitize_text_field', $post_array['Viewers'] ) : array();
+		$viewers = is_array( $_POST['Viewers'] ?? null ) ? array_map( 'sanitize_text_field', \wp_unslash( $_POST['Viewers'] ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+
 		Plugin_Settings_Helper::set_allowed_plugin_viewers( $viewers );
 
 		// Handle plugin settings permissions.
-		$restrict_settings = isset( $post_array['restrict-plugin-settings'] ) ? \sanitize_text_field( $post_array['restrict-plugin-settings'] ) : false;
+		$restrict_settings = \sanitize_text_field( \wp_unslash( $_POST['restrict-plugin-settings'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+
 		Plugin_Settings_Helper::set_restrict_plugin_setting( $restrict_settings );
+
 		if ( 'only_me' === $restrict_settings ) {
-			Plugin_Settings_Helper::set_only_me_user_id( get_current_user_id() );
+			Plugin_Settings_Helper::set_only_me_user_id( \get_current_user_id() );
 		}
 
-		Plugin_Settings_Helper::set_login_page_notification( isset( $post_array['login_page_notification'] ) ? \sanitize_text_field( $post_array['login_page_notification'] ) : false );
-		Plugin_Settings_Helper::set_login_page_notification_text( isset( $post_array['login_page_notification_text'] ) ? $post_array['login_page_notification_text'] : false );
-		Plugin_Settings_Helper::set_main_ip_from_proxy( isset( $post_array['EnableProxyIpCapture'] ) ? \sanitize_text_field( $post_array['EnableProxyIpCapture'] ) : false, ( isset( $post_array['header-to-use'] ) ? \sanitize_text_field( $post_array['header-to-use'] ) : 'REMOTE_ADDR' ), \sanitize_text_field( \wp_unslash( $post_array['CustomProxyIpHeader'] ) ) );
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+		$login_page_notification      = \sanitize_text_field( \wp_unslash( $_POST['login_page_notification'] ?? '' ) );
+		$login_page_notification_text = is_string( $_POST['login_page_notification_text'] ?? null ) ? \wp_kses( \wp_unslash( $_POST['login_page_notification_text'] ), Plugin_Settings_Helper::get_allowed_html_tags() ) : false;
+		$proxy_ip_capture             = \sanitize_text_field( \wp_unslash( $_POST['EnableProxyIpCapture'] ?? '' ) );
+		$proxy_header                 = \sanitize_text_field( \wp_unslash( $_POST['header-to-use'] ?? 'REMOTE_ADDR' ) );
+		$custom_proxy_header          = \sanitize_text_field( \wp_unslash( $_POST['CustomProxyIpHeader'] ?? '' ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		$is_incognito = isset( $post_array['Incognito'] ) ? Settings_Helper::string_to_bool( \sanitize_text_field( $post_array['Incognito'] ) ) : false;
+		Plugin_Settings_Helper::set_login_page_notification( $login_page_notification );
+		Plugin_Settings_Helper::set_login_page_notification_text( $login_page_notification_text );
+		Plugin_Settings_Helper::set_main_ip_from_proxy( $proxy_ip_capture, $proxy_header, $custom_proxy_header );
+
+		$is_incognito = Settings_Helper::string_to_bool( \sanitize_text_field( \wp_unslash( $_POST['Incognito'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+
 		Plugin_Settings_Helper::set_incognito( $is_incognito );
 	}
 
@@ -1196,27 +1224,36 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Save: `Audit Log`
+	 * Saves the activity log viewer settings tab.
+	 *
+	 * @return void
+	 *
+	 * @since 3.2.3
+	 * @since 5.7.0 - Unslash and sanitize activity log settings from POST data.
 	 */
 	private function tab_audit_log_save() {
-		// Get $_POST global array.
-		$post_array = filter_input_array( INPUT_POST );
-
 		// Get pruning date.
-		$pruning_date = isset( $post_array['PruningDate'] ) ? (int) \sanitize_text_field( $post_array['PruningDate'] ) : false;
-		$pruning_unit = isset( $post_array['pruning-unit'] ) ? \sanitize_text_field( $post_array['pruning-unit'] ) : false;
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+		$pruning_date = (int) \sanitize_text_field( \wp_unslash( $_POST['PruningDate'] ?? '' ) );
+		$pruning_unit = \sanitize_text_field( \wp_unslash( $_POST['pruning-unit'] ?? '' ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 		$pruning_date = ( ! empty( $pruning_date ) && ! empty( $pruning_unit ) ) ? $pruning_date . ' ' . $pruning_unit : false;
 
-		$pruning_enabled = isset( $post_array['PruneBy'] ) ? 'date' === $post_array['PruneBy'] : '';
-		Settings_Helper::set_pruning_date_settings( $pruning_enabled, $pruning_date, $pruning_unit );
-		Plugin_Settings_Helper::set_timezone( $post_array['Timezone'] );
-		Plugin_Settings_Helper::set_type_username( $post_array['type_username'] );
-		Settings_Helper::set_boolean_option_value( 'wp-backend', isset( $post_array['WPBackend'] ) ? \sanitize_text_field( $post_array['WPBackend'] ) : false );
+		$pruning_enabled = 'date' === \sanitize_text_field( \wp_unslash( $_POST['PruneBy'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
 
-		$show_milliseconds = isset( $post_array['show_milliseconds'] ) && 'yes' === $post_array['show_milliseconds'];
+		Settings_Helper::set_pruning_date_settings( $pruning_enabled, $pruning_date, $pruning_unit );
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+		Plugin_Settings_Helper::set_timezone( \sanitize_text_field( \wp_unslash( $_POST['Timezone'] ?? '' ) ) );
+		Plugin_Settings_Helper::set_type_username( \sanitize_text_field( \wp_unslash( $_POST['type_username'] ?? '' ) ) );
+		Settings_Helper::set_boolean_option_value( 'wp-backend', \sanitize_text_field( \wp_unslash( $_POST['WPBackend'] ?? '' ) ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		$show_milliseconds = 'yes' === \sanitize_text_field( \wp_unslash( $_POST['show_milliseconds'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+
 		Plugin_Settings_Helper::set_show_milliseconds( $show_milliseconds );
 
-		$url_parameters = isset( $post_array['url_parameters'] ) && 'yes' === $post_array['url_parameters'];
+		$url_parameters = 'yes' === \sanitize_text_field( \wp_unslash( $_POST['url_parameters'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+
 		Plugin_Settings_Helper::set_url_parameters( $url_parameters );
 	}
 
@@ -1433,19 +1470,31 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Save: `Exclude Objects`
+	 * Saves the objects excluded from monitoring.
+	 *
+	 * @return void
+	 *
+	 * @since 3.2.3
+	 * @since 5.7.0 - Validate and sanitize exclusion arrays from POST data.
 	 */
 	private function tab_exclude_objects_save() {
-		// Get $_POST global array.
-		$post_array = filter_input_array( INPUT_POST );
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+		$excluded_users        = is_array( $_POST['ExUsers'] ?? null ) ? array_map( 'sanitize_text_field', \wp_unslash( $_POST['ExUsers'] ) ) : array();
+		$excluded_roles        = is_array( $_POST['ExRoles'] ?? null ) ? array_map( 'sanitize_text_field', \wp_unslash( $_POST['ExRoles'] ) ) : array();
+		$excluded_post_meta    = is_array( $_POST['PostMetas'] ?? null ) ? array_map( 'sanitize_text_field', \wp_unslash( $_POST['PostMetas'] ) ) : array();
+		$excluded_user_meta    = is_array( $_POST['UserMetas'] ?? null ) ? array_map( 'sanitize_text_field', \wp_unslash( $_POST['UserMetas'] ) ) : array();
+		$excluded_ip_addresses = is_array( $_POST['IpAddrs'] ?? null ) ? array_map( 'sanitize_text_field', \wp_unslash( $_POST['IpAddrs'] ) ) : array();
+		$excluded_post_types   = is_array( $_POST['ExCPTss'] ?? null ) ? array_map( 'sanitize_text_field', \wp_unslash( $_POST['ExCPTss'] ) ) : array();
+		$excluded_statuses     = is_array( $_POST['Statuss'] ?? null ) ? array_map( 'sanitize_text_field', \wp_unslash( $_POST['Statuss'] ) ) : array();
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		Settings_Helper::set_excluded_monitoring_users( isset( $post_array['ExUsers'] ) ? $post_array['ExUsers'] : array() );
-		Settings_Helper::set_excluded_monitoring_roles( isset( $post_array['ExRoles'] ) ? $post_array['ExRoles'] : array() );
-		Settings_Helper::set_excluded_post_meta_fields( isset( $post_array['PostMetas'] ) ? $post_array['PostMetas'] : array() );
-		Settings_Helper::set_excluded_user_meta_fields( isset( $post_array['UserMetas'] ) ? $post_array['UserMetas'] : array() );
-		Plugin_Settings_Helper::set_excluded_monitoring_ip( isset( $post_array['IpAddrs'] ) ? $post_array['IpAddrs'] : array() );
-		Plugin_Settings_Helper::set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
-		Plugin_Settings_Helper::set_excluded_post_statuses( isset( $post_array['Statuss'] ) ? $post_array['Statuss'] : array() );
+		Settings_Helper::set_excluded_monitoring_users( $excluded_users );
+		Settings_Helper::set_excluded_monitoring_roles( $excluded_roles );
+		Settings_Helper::set_excluded_post_meta_fields( $excluded_post_meta );
+		Settings_Helper::set_excluded_user_meta_fields( $excluded_user_meta );
+		Plugin_Settings_Helper::set_excluded_monitoring_ip( $excluded_ip_addresses );
+		Plugin_Settings_Helper::set_excluded_post_types( $excluded_post_types );
+		Plugin_Settings_Helper::set_excluded_post_statuses( $excluded_statuses );
 	}
 
 	/**
@@ -1565,23 +1614,28 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Save: `Advanced Settings`
+	 * Saves the advanced settings tab.
 	 *
-	 * @throws Exception - MainWP Child plugin not active exception.
+	 * @throws Exception - MainWP Child plugin is not active.
+	 *
+	 * @return void
+	 *
+	 * @since 3.2.3
+	 * @since 5.7.0 - Unslash and sanitize advanced settings from POST data.
 	 */
 	private function tab_advanced_settings_save() {
-		// Get $_POST global array.
-		$post_array = filter_input_array( INPUT_POST );
+		$delete_data = \sanitize_text_field( \wp_unslash( $_POST['DeleteData'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
 
-		Plugin_Settings_Helper::set_delete_data( isset( $post_array['DeleteData'] ) ? \sanitize_text_field( $post_array['DeleteData'] ) : false );
+		Plugin_Settings_Helper::set_delete_data( $delete_data );
 
-		$stealth_mode = isset( $post_array['mwp_stealth_mode'] ) ? $post_array['mwp_stealth_mode'] : false;
+		$stealth_mode = \sanitize_text_field( \wp_unslash( $_POST['mwp_stealth_mode'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings form nonce is verified in render().
+
 		if ( 'yes' === $stealth_mode ) {
 			if ( ! WpSecurityAuditLog::is_mainwp_active() ) {
-				throw new Exception( __( 'MainWP Child plugin is not active on this website.', 'wp-security-audit-log' ) );
+				throw new Exception( \esc_html__( 'MainWP Child plugin is not active on this website.', 'wp-security-audit-log' ) );
 			}
-			Plugin_Settings_Helper::set_mainwp_child_stealth_mode();
 
+			Plugin_Settings_Helper::set_mainwp_child_stealth_mode();
 		} else {
 			Plugin_Settings_Helper::deactivate_mainwp_child_stealth_mode();
 		}
@@ -1684,53 +1738,75 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Method: Ajax Request handler for AjaxGetAllUsers.
+	 * Returns usernames matching the requested search term.
+	 *
+	 * @return void
+	 *
+	 * @since 1.5.0
+	 * @since 5.7.0 - Read and sanitize search parameters directly from GET data.
 	 */
 	public function ajax_get_all_users() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
+		$get_array = array( 'wsal_nonce' => \sanitize_text_field( \wp_unslash( $_GET['wsal_nonce'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is read here to be verified.
+
 		$this->check_ajax_request_is_valid( $get_array );
+
+		$term = \sanitize_text_field( \wp_unslash( $_GET['term'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified by check_ajax_request_is_valid() above.
 
 		// Fetch users.
 		$users = array();
-		foreach ( get_users() as $user ) {
-			if ( strpos( $user->user_login, \sanitize_text_field( \wp_unslash( $get_array['term'] ) ) ) !== false ) {
+
+		foreach ( \get_users() as $user ) {
+			if ( false !== strpos( $user->user_login, $term ) ) {
 				array_push( $users, $user->user_login );
 			}
 		}
-		echo wp_json_encode( $users );
+
+		echo \wp_json_encode( $users );
 		exit;
 	}
 
 	/**
-	 * Method: Ajax Request handler for AjaxGetAllRoles.
+	 * Returns user roles matching the requested search term.
+	 *
+	 * @return void
+	 *
+	 * @since 1.5.0
+	 * @since 5.7.0 - Read and sanitize search parameters directly from GET data.
 	 */
 	public function ajax_get_all_roles() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
+		$get_array = array( 'wsal_nonce' => \sanitize_text_field( \wp_unslash( $_GET['wsal_nonce'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is read here to be verified.
+
 		$this->check_ajax_request_is_valid( $get_array );
+
+		$term = \sanitize_text_field( \wp_unslash( $_GET['term'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified by check_ajax_request_is_valid() above.
 
 		// Get roles.
 		$roles = array();
-		foreach ( get_editable_roles() as $role_name => $role_info ) {
-			if ( strpos( $role_name, \sanitize_text_field( \wp_unslash( $get_array['term'] ) ) ) !== false ) {
+
+		foreach ( \get_editable_roles() as $role_name => $role_info ) {
+			if ( false !== strpos( $role_name, $term ) ) {
 				array_push( $roles, $role_name );
 			}
 		}
-		echo wp_json_encode( $roles );
+
+		echo \wp_json_encode( $roles );
 		exit;
 	}
 
 	/**
-	 * Create json array of all possible severities.
+	 * Returns severity names matching the requested search term.
 	 *
 	 * @return void
-	 * @since  4.3.3
+	 *
+	 * @since 4.3.3
+	 * @since 5.7.0 - Read and sanitize search parameters directly from GET data.
 	 */
 	public function ajax_get_all_severities() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
+		$get_array = array( 'wsal_nonce' => \sanitize_text_field( \wp_unslash( $_GET['wsal_nonce'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is read here to be verified.
+
 		$this->check_ajax_request_is_valid( $get_array );
+
+		$term = \sanitize_text_field( \wp_unslash( $_GET['term'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified by check_ajax_request_is_valid() above.
 
 		$result = array_map(
 			function ( $item ) {
@@ -1739,10 +1815,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			array_keys( Constants::get_severities() )
 		);
 
-		echo $this->filter_values_for_searched_term( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			$result,
-			\sanitize_text_field( \wp_unslash( $get_array['term'] ) )
-		);
+		echo $this->filter_values_for_searched_term( $result, $term ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON of registered event data only; the search term is not echoed.
 		exit;
 	}
 
@@ -1769,117 +1842,141 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Create json array of all possible event types.
+	 * Returns event types matching the requested search term.
 	 *
 	 * @return void
-	 * @since  4.3.3
+	 *
+	 * @since 4.3.3
+	 * @since 5.7.0 - Read and sanitize search parameters directly from GET data.
 	 */
 	public function ajax_get_all_event_types() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
+		$get_array = array( 'wsal_nonce' => \sanitize_text_field( \wp_unslash( $_GET['wsal_nonce'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is read here to be verified.
+
 		$this->check_ajax_request_is_valid( $get_array );
+
+		$term = \sanitize_text_field( \wp_unslash( $_GET['term'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified by check_ajax_request_is_valid() above.
 
 		$event_types = Alert_Manager::get_event_type_data();
 
-		echo $this->filter_values_for_searched_term( array_values( $event_types ), \sanitize_text_field( \wp_unslash( $get_array['term'] ) ) );
+		echo $this->filter_values_for_searched_term( array_values( $event_types ), $term ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON of registered event data only; the search term is not echoed.
 		exit;
 	}
 
 	/**
-	 * Create json array of all possible object types.
+	 * Returns object types matching the requested search term.
 	 *
 	 * @return void
-	 * @since  4.3.3
+	 *
+	 * @since 4.3.3
+	 * @since 5.7.0 - Read and sanitize search parameters directly from GET data.
 	 */
 	public function ajax_get_all_object_types() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
+		$get_array = array( 'wsal_nonce' => \sanitize_text_field( \wp_unslash( $_GET['wsal_nonce'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is read here to be verified.
+
 		$this->check_ajax_request_is_valid( $get_array );
+
+		$term = \sanitize_text_field( \wp_unslash( $_GET['term'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified by check_ajax_request_is_valid() above.
 
 		$event_objects = Alert_Manager::get_event_objects_data();
 
-		echo $this->filter_values_for_searched_term( array_values( $event_objects ), \sanitize_text_field( \wp_unslash( $get_array['term'] ) ) ); // phpcs:ignore
+		echo $this->filter_values_for_searched_term( array_values( $event_objects ), $term ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON of registered event data only; the search term is not echoed.
 		exit;
 	}
 
 	/**
-	 * Create json array of all possible event IDs.
+	 * Returns event IDs matching the requested search term.
 	 *
 	 * @return void
-	 * @since  4.3.3
+	 *
+	 * @since 4.3.3
+	 * @since 5.7.0 - Read and sanitize search parameters directly from GET data.
 	 */
 	public function ajax_get_all_event_ids() {
+		$get_array = array( 'wsal_nonce' => \sanitize_text_field( \wp_unslash( $_GET['wsal_nonce'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is read here to be verified.
 
-		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
+
+		$term = \sanitize_text_field( \wp_unslash( $_GET['term'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified by check_ajax_request_is_valid() above.
 
 		$registered_alerts = Alert_Manager::get_alerts();
 
-		// $alerts = array();
-		// foreach ( $registered_alerts as $alert => $details ) {
-		// $alerts[] = (string) $details->code;
-		// }
-
-		echo $this->filter_values_for_searched_term( array_keys( $registered_alerts ), \sanitize_text_field( \wp_unslash( $get_array['term'] ) ) );
+		echo $this->filter_values_for_searched_term( array_keys( $registered_alerts ), $term ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON of registered event data only; the search term is not echoed.
 		exit;
 	}
 
 	/**
-	 * Method: Get CPTs ajax handle.
+	 * Returns custom post types matching the requested search term.
+	 *
+	 * @return void
 	 *
 	 * @since 2.6.7
+	 * @since 5.7.0 - Read and sanitize search parameters directly from GET data.
 	 */
 	public function ajax_get_all_cpts() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
+		$get_array = array( 'wsal_nonce' => \sanitize_text_field( \wp_unslash( $_GET['wsal_nonce'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is read here to be verified.
+
 		$this->check_ajax_request_is_valid( $get_array );
+
+		$term = \sanitize_text_field( \wp_unslash( $_GET['term'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified by check_ajax_request_is_valid() above.
 
 		// Get custom post types.
 		$custom_post_types = array();
-		$post_types        = get_post_types(
+		$post_types        = \get_post_types(
 			array(
 				'public' => false,
 			),
 			'names'
 		);
-		// if we are running multisite and have networkwide cpt tracker get the
-		// list from and merge to the post_types array.
+
+		// On multisite, merge post types collected by the network-wide tracker.
 		if ( WP_Helper::is_multisite() ) {
 			$network_cpts = WP_Helper::get_network_data_list();
+
 			foreach ( $network_cpts as $cpt ) {
 				$post_types[ $cpt ] = $cpt;
 			}
 		}
 
 		$post_types = array_diff( $post_types, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) );
+
 		foreach ( $post_types as $post_type ) {
-			if ( strpos( $post_type, \sanitize_text_field( \wp_unslash( $get_array['term'] ) ) ) !== false ) {
+			if ( false !== strpos( $post_type, $term ) ) {
 				array_push( $custom_post_types, $post_type );
 			}
 		}
-		echo wp_json_encode( $custom_post_types );
+
+		echo \wp_json_encode( $custom_post_types );
 		exit;
 	}
 
 	/**
-	 * Method: Get statuses ajax handle.
+	 * Returns registered post statuses for the settings controls.
+	 *
+	 * @return void
 	 *
 	 * @since 5.0.0
+	 * @since 5.7.0 - Read and sanitize the settings nonce directly from GET data.
 	 */
 	public function ajax_get_all_stati() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
-		$this->check_ajax_request_is_valid( $get_array );
-		$post_stati = get_post_stati();
+		$get_array = array( 'wsal_nonce' => \sanitize_text_field( \wp_unslash( $_GET['wsal_nonce'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is read here to be verified.
 
-		echo wp_json_encode( $post_stati );
+		$this->check_ajax_request_is_valid( $get_array );
+
+		$post_stati = \get_post_stati();
+
+		echo \wp_json_encode( $post_stati );
 		exit;
 	}
 
 	/**
-	 * Checks if provided GET array is valid and bails if not.
+	 * Verifies settings-editing permissions and the supplied AJAX nonce.
 	 *
-	 * @param array $get_array Get data.
+	 * @param array $get_array - Request data containing the settings nonce.
+	 *
+	 * @return void
+	 *
+	 * @since 4.3.3
+	 * @since 5.7.0 - Handle a missing nonce and sanitize it before verification.
 	 */
 	public function check_ajax_request_is_valid( $get_array ) {
 		// Die if user does not have permission to edit.
@@ -1888,8 +1985,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 
 		// Die if nonce verification failed.
-		if ( ! wp_verify_nonce( $get_array['wsal_nonce'], 'wsal-exclude-nonce' ) ) {
-			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
+		$nonce = \sanitize_text_field( \wp_unslash( $get_array['wsal_nonce'] ?? '' ) );
+
+		if ( ! \wp_verify_nonce( $nonce, 'wsal-exclude-nonce' ) ) {
+			die( \esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
 		}
 	}
 

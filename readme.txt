@@ -5,8 +5,8 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, event log, user tracking, logger, history 
 Requires at least: 5.5
-Tested up to: 7.1.3
-Stable tag: 5.6.8
+Tested up to: 7.1.4
+Stable tag: 5.7
 Requires PHP: 7.4
 
 The #1 user-rated activity log plugin for event logging, activity monitoring and change tracking.
@@ -239,19 +239,39 @@ These capabilities make WP Activity Log a **comprehensive solution for site secu
 
 == Changelog ==
 
-= 5.6.8 (2026-10-19) =
+= 5.7 (2026-11-05) =
+
+ * **New feature & functionality**
+
+	 *  Added support for Atarim AI agent; plugin reports “AI Agent” in the activity log when changes are done by Atarim's AI agent.
+
+ * **Security fix**
+
+	 *  Fixed a cross-site scripting (XSS) issue in activity log. Thanks to Mateusz Będziński for responsibly reporting this issue.
 
  * **Functionality & plugin improvements**
 
-	 *  Improved the license activation flow after upgrading. Opening WP Activity Log now shows the license prompt when activation is required.
-	 *  Refined the plugin's licensing structure to support separate Freemius and EDD integrations.
-	 *  Updated the Freemius SDK to version 2.13.5.
+	 *  Improved MySQL connection errors when testing or saving a connection. Messages now explain the reason for failure and clarify that the database must already exist. Also improved message translation support and handling of user-entered values.
+	 *  Prevented the connection wizard from closing when clicking outside it, so entered details are not lost.
+	 *  Added a dismissible Black Friday banner, scheduled to appear from November 17 through December 1.
+	 *  Clarified the reports email-domain filter instructions: use `@example.com` to match the exact domain.
+	 *  Removed references to unsupported JSON and PDF report formats. Reports remain available in CSV and HTML.
+	 *  Improved text handling in generated HTML reports while preserving report content and formats.
+	 *  Updated user and IP address lookups in settings to respect WP Activity Log access restrictions and site boundaries on multisite.
+	 *  Reduced unnecessary plugin inventory scans on unrelated admin pages, including User Sessions.
+	 *  Improved custom notifications sent to the user carrying out an activity. These now work with default recipients and are sent separately to keep other recipient addresses private. Users already included in the recipients receive only one email.
 
  * **Bug fixes**
 
-	 *  Fixed the `ActionScheduler_Lock` fatal error that caused a false “Deletion failed” message when deleting the plugin. Also fixed related missing-file warnings and recurring cron errors after deletion.
-	 *  Restored event `6000` when activity log entries are purged automatically or manually.
-	 *  Restored confirmation and error messages when running manual log cleanup.
-	 *  Fixed WooCommerce event `9106` being recorded when the stock quantity had not changed, preventing unnecessary log entries.
+	 *  Fixed archiving deleting source events and metadata when writes to the archive database fail. Failed writes now report an error instead of indicating success.
+	 *  Fixed archiving and storage migration overwriting existing destination events and metadata when database row IDs overlap.
+	 *  Fixed multisite settings saved as `false` being ignored when the network option had not previously been saved, including the **Cleanup expired session data** setting.
+	 *  Fixed the fatal error `Call to undefined function wsal_freemius()` during plugin initialization.
+	 *  Fixed post deletion event `2008` showing “Unknown User” instead of “System” when no user is logged in, including deletions through Action Scheduler and direct scheduled-cleanup calls.
+	 *  Fixed activity log searches applying only the last wildcard username filter and discarding exact usernames entered alongside wildcard patterns.
+	 *  Fixed theme update event `5031` showing the previous version as the new version after a WordPress automatic theme update.
+	 *  Fixed the PHP 8.5 deprecation notice `Using null as an array offset is deprecated` when displaying recent events in the dashboard widget.
+	 *  Fixed the PHP warning `Undefined array key "catalog_visibility"` when WooCommerce product variations are created through the REST API.
+	 *  Fixed plugin and theme updates performed by WP Engine Smart Plugin Manager being logged as installations. They now use update events `5004` and `5031`, with the previous plugin version included in event `5004`.
 
 Refer to the complete [plugin changelog](https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) for more detailed information about what was new, improved and fixed in previous version updates of WP Activity Log.

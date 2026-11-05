@@ -92,6 +92,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\WP_Plugins_Themes_Helper' ) ) {
 		 * @return array|bool - array with theme information or false if not found.
 		 *
 		 * @since 5.5.0
+		 * @since 5.7.0 - Includes the plugin folder in the plugin path.
 		 */
 		public static function get_plugin_event_info_from_folder( $folder ) {
 
@@ -104,8 +105,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\WP_Plugins_Themes_Helper' ) ) {
 			$plugins = \get_plugins( DIRECTORY_SEPARATOR . $folder );
 
 			if ( ! empty( $plugins ) ) {
-				$first_slug = array_key_first( $plugins );
-				$first      = $plugins[ $first_slug ];
+				$first_slug  = array_key_first( $plugins );
+				$first       = $plugins[ $first_slug ];
+				$plugin_file = $folder . '/' . $first_slug;
 
 				$plugin_event_data = array(
 					'Name'            => $first['Name'] ?? false,
@@ -115,7 +117,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\WP_Plugins_Themes_Helper' ) ) {
 					'Network'         => $first['Network'] ?? false,
 					'Slug'            => $first_slug,
 					'Title'           => $first['Title'] ?? ( $first['Name'] ?? false ),
-					'plugin_dir_path' => WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $first_slug,
+					'plugin_dir_path' => WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $plugin_file,
 				);
 
 				$required_keys   = array( 'Name', 'Version', 'plugin_dir_path' );

@@ -13,13 +13,14 @@
 
 namespace WSAL\MainWP;
 
-use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Logger;
+use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\PHP_Helper;
 use WSAL\MainWP\MainWP_Addon;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
-use WSAL\Entities\Archive\Delete_Records;
 use WSAL\Entities\MainWP_Server_Users;
+use WSAL\Entities\Archive\Delete_Records;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
@@ -254,6 +255,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 		 * @return void|\WP_Error
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Reads the server IP from Settings_Helper.
 		 */
 		public static function sync_site( int $site_id ) {
 			// Get MainWP child sites.
@@ -264,7 +266,6 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 			if ( false !== $key && isset( $mwp_sites[ $key ] ) ) {
 				// $trigger_retrieving = true; // Event 7711.
 				// $trigger_ready      = true; // Event 7712.
-				$server_ip = MainWP_Settings::get_server_ip(); // Get server IP.
 
 				$site_data = array();
 
@@ -287,7 +288,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 						array(
 							'mainwp_dash' => true,
 							'Username'    => 'System',
-							'ClientIP'    => ! empty( $server_ip ) ? $server_ip : false,
+							'ClientIP'    => Settings_Helper::get_server_ip(),
 						)
 					);
 
@@ -367,21 +368,19 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 		/**
 		 * Fetch Events from Child Sites.
 		 *
-		 * @since 5.0.0
-		 *
 		 * @param integer $site_id            - Child site id.
 		 * @param bool    $trigger_retrieving - True if trigger retrieve events alert.
 		 * @param array   $post_data          - MainWP post data.
 		 *
 		 * @return array
+		 *
+		 * @since 5.0.0
+		 * @since 5.7.0 - Reads the server IP from Settings_Helper.
 		 */
 		public static function fetch_site_events( $site_id = 0, $trigger_retrieving = true, $post_data = array() ) {
 			$sites_data = array();
 
 			if ( $site_id ) {
-
-				// Get server IP.
-				$server_ip = MainWP_Settings::get_server_ip();
 
 				if ( $trigger_retrieving ) {
 					// Extension has started retrieving.
@@ -390,7 +389,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 						array(
 							'mainwp_dash' => true,
 							'Username'    => 'System',
-							'ClientIP'    => ! empty( $server_ip ) ? $server_ip : false,
+							'ClientIP'    => Settings_Helper::get_server_ip(),
 						)
 					);
 				}
@@ -469,17 +468,17 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 		/**
 		 * Save Events from Child Sites.
 		 *
-		 * @since 5.0.0
-		 *
 		 * @param array $sites_data - Sites data.
+		 *
+		 * @return void
+		 *
+		 * @since 5.0.0
+		 * @since 5.7.0 - Reads the server IP from Settings_Helper.
 		 */
 		public static function set_site_events( $sites_data = array() ) {
 			if ( ! empty( $sites_data ) && is_array( $sites_data ) ) {
 				// Get MainWP child sites.
 				$mwp_sites = MainWP_Addon::get_wsal_child_sites();
-
-				// Get server IP.
-				$server_ip = MainWP_Settings::get_server_ip();
 
 				foreach ( $sites_data as $site_id => $site_data ) {
 					// If $site_data doesn't have the keys we expected then it failed to retrieve logs.
@@ -497,7 +496,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 									'site_id'       => $mwp_sites[ $key ]['id'],
 									'mainwp_dash'   => true,
 									'Username'      => 'System',
-									'ClientIP'      => ! empty( $server_ip ) ? $server_ip : false,
+									'ClientIP'      => Settings_Helper::get_server_ip(),
 								)
 							);
 						} else {
@@ -592,6 +591,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 		 * @return string
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Encodes existing entities in the user tooltip attribute.
 		 */
 		public static function get_user_html( $uhtml, $item_data ) {
 			if ( 0 < ( (int) $item_data['site_id'] - self::SET_SITE_ID_NUMBER ) ) {
@@ -608,7 +608,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 
 							$tooltip = self::get_tooltip_user_content( $item_data['meta_values']['UserData'] );
 
-							$uhtml = '<a class="tooltip" data-darktooltip="' . \esc_attr( $tooltip ) . '" data-user="' . \esc_attr( $item_data['meta_values']['UserData']['display_name'] ) . '" href="' . \esc_url( $user_url ) . '" target="_blank">' . \esc_html( self::get_display_label( $item_data['meta_values']['UserData'] ) ) . '</a>';
+							$uhtml = '<a class="tooltip" data-darktooltip="' . PHP_Helper::escape_tooltip_attribute( $tooltip ) . '" data-user="' . \esc_attr( $item_data['meta_values']['UserData']['display_name'] ) . '" href="' . \esc_url( $user_url ) . '" target="_blank">' . \esc_html( self::get_display_label( $item_data['meta_values']['UserData'] ) ) . '</a>';
 						}
 					}
 				}

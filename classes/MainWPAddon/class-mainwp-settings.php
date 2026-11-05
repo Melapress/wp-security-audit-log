@@ -13,7 +13,6 @@
 
 namespace WSAL\MainWP;
 
-use WSAL\Helpers\Validator;
 use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
 
@@ -113,47 +112,6 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Settings' ) ) {
 				$base_roles[] = 'superadmin';
 			}
 			return $base_roles;
-		}
-
-		/**
-		 * Get Server IP.
-		 *
-		 * @return string
-		 *
-		 * @since 5.0.0
-		 */
-		public static function get_server_ip() {
-			return self::retrieve_ip_address_for( 'SERVER_ADDR' );
-		}
-
-		/**
-		 * Get Client IP.
-		 *
-		 * @return string
-		 */
-		public static function get_main_client_ip() {
-			return self::retrieve_ip_address_for( 'REMOTE_ADDR' );
-		}
-
-		/**
-		 * Retrieves ip address from global server array based on string value.
-		 *
-		 * @param string $which - String value to retrieve from server array.
-		 *
-		 * @return null|string
-		 *
-		 * @since 5.0.0
-		 */
-		private static function retrieve_ip_address_for( string $which ) {
-			$result = null;
-			if ( isset( $_SERVER[ $which ] ) ) {
-				$result = Settings_Helper::normalize_ip( sanitize_text_field( wp_unslash( $_SERVER[ $which ] ) ) );
-				if ( ! Validator::validate_ip( $result ) ) {
-					$result = 'Error : Invalid IP Address';
-				}
-			}
-
-			return $result;
 		}
 
 		/**

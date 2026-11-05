@@ -20,6 +20,7 @@ use WSAL\MainWP\MainWP_Addon;
 use WSAL\Views\Notifications;
 use WSAL\MainWP\MainWP_Helper;
 use WSAL\Controllers\Constants;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Entities\Occurrences_Entity;
 use WSAL\Helpers\Credential_Settings_Helper;
@@ -345,54 +346,9 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 						wp_die();
 					}
 				);
-				\add_action(
-					'wp_ajax_wsal_settings_get_users',
-					function () {
 
-						if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+				\add_action( 'wp_ajax_wsal_settings_get_users', array( __CLASS__, 'ajax_get_users' ) );
 
-							$result       = array();
-							$query_params = array();
-							if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
-								$query_params['search']         = '*' . \sanitize_text_field( \wp_unslash( $_GET['q'] ) ) . '*';
-								$query_params['search_columns'] = array( 'user_login', 'user_email' );
-							}
-
-							if ( WP_Helper::is_multisite() ) {
-								$query_params['blog_id'] = 0;
-							}
-
-							$users = \get_users( $query_params );
-
-							if ( MainWP_Addon::check_mainwp_plugin_active() ) {
-
-								$mainwp_users = MainWP_Helper::find_users_by( $query_params['search_columns'], array( str_replace( '*', '%', $query_params['search'] ) ) );
-
-								$users = array_merge( $users, $mainwp_users );
-							}
-
-							if ( empty( $users ) ) {
-								return $result;
-							} else {
-								foreach ( $users as $user ) {
-
-									$return[] = array(
-										'id'    => $user->ID,
-										'label' => $user->user_login . ' (' . $user->user_email . ')',
-									);
-
-								}
-							}
-
-							echo json_encode( $return );
-						} else {
-							$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
-
-							wp_send_json_error( $error );
-						}
-						wp_die();
-					}
-				);
 				\add_action(
 					'wp_ajax_wsal_settings_get_roles',
 					function () {
@@ -446,42 +402,9 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 						wp_die();
 					}
 				);
-				\add_action(
-					'wp_ajax_wsal_settings_get_ips',
-					function () {
 
-						if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+				\add_action( 'wp_ajax_wsal_settings_get_ips', array( __CLASS__, 'ajax_get_ips' ) );
 
-							$result = array();
-							$search = '';
-							if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
-								$search = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
-							}
-
-							$ips = Occurrences_Entity::get_ips_logged_search( $search );
-
-							if ( empty( $ips ) ) {
-								return $result;
-							} else {
-								foreach ( $ips as $ip ) {
-
-									$return[] = array(
-										'id'    => $ip,
-										'label' => $ip,
-									);
-
-								}
-							}
-
-							echo json_encode( $return );
-						} else {
-							$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
-
-							wp_send_json_error( $error );
-						}
-						wp_die();
-					}
-				);
 				\add_action(
 					'wp_ajax_wsal_settings_get_sites',
 					function () {
@@ -538,6 +461,83 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 				);
 				self::$initiated = true;
 			}
+		}
+
+		/**
+		 * Returns users matching the search term for the users lookup in the reports settings.
+		 *
+		 * @return void
+		 *
+		 * @since 5.7.0
+		 */
+		public static function ajax_get_users() {
+			if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
+				\wp_send_json_error( new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' ) );
+			}
+
+			\check_ajax_referer( 'wsal-settings-lookups', 'nonce' );
+
+			$search       = \sanitize_text_field( \wp_unslash( $_GET['q'] ?? '' ) );
+			$query_params = array(
+				'search_columns' => array( 'user_login', 'user_email' ),
+			);
+
+			if ( '' !== $search ) {
+				$query_params['search'] = '*' . $search . '*';
+			}
+
+			if ( WP_Helper::is_multisite() ) {
+				$query_params['blog_id'] = 0;
+			}
+
+			$users = \get_users( $query_params );
+
+			if ( MainWP_Addon::check_mainwp_plugin_active() ) {
+				$mainwp_search = str_replace( '*', '%', $query_params['search'] ?? '%' );
+				$mainwp_users  = MainWP_Helper::find_users_by( $query_params['search_columns'], array( $mainwp_search ) );
+
+				$users = array_merge( $users, $mainwp_users );
+			}
+
+			$results = array();
+
+			foreach ( $users as $user ) {
+				$results[] = array(
+					'id'    => $user->ID,
+					'label' => $user->user_login . ' (' . $user->user_email . ')',
+				);
+			}
+
+			\wp_send_json( $results );
+		}
+
+		/**
+		 * Returns logged IP addresses matching the search term for the IPs lookup in the reports settings.
+		 *
+		 * @return void
+		 *
+		 * @since 5.7.0
+		 */
+		public static function ajax_get_ips() {
+			if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
+				\wp_send_json_error( new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' ) );
+			}
+
+			\check_ajax_referer( 'wsal-settings-lookups', 'nonce' );
+
+			$search = \sanitize_text_field( \wp_unslash( $_GET['q'] ?? '' ) );
+			$ips    = Occurrences_Entity::get_ips_logged_search( $search );
+
+			$results = array();
+
+			foreach ( $ips as $ip ) {
+				$results[] = array(
+					'id'    => $ip,
+					'label' => $ip,
+				);
+			}
+
+			\wp_send_json( $results );
 		}
 
 		/**
@@ -1008,6 +1008,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 * Radio
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Uses an empty string as the toggle key when no value is saved.
 		 */
 		private static function radio() {
 
@@ -1045,10 +1046,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 							jQuery(document).ready(function() {
 								jQuery('.<?php echo esc_js( self::$item_id ); ?>-options').hide();
 					<?php
-					if ( isset( self::$settings['toggle'][ self::$current_value ] ) ) { // For the option that doesn't have sub option such as the Logo > Title option.
-						if ( ! empty( self::$settings['toggle'][ self::$current_value ] ) ) {
+					if ( isset( self::$settings['toggle'][ self::$current_value ?? '' ] ) ) { // For the option that doesn't have sub option such as the Logo > Title option.
+						if ( ! empty( self::$settings['toggle'][ self::$current_value ?? '' ] ) ) {
 							?>
-								jQuery('<?php echo esc_js( self::$settings['toggle'][ self::$current_value ] ); ?>').show();
+								jQuery('<?php echo esc_js( self::$settings['toggle'][ self::$current_value ?? '' ] ); ?>').show();
 								<?php
 						}
 					} elseif ( is_array( self::$settings['toggle'] ) ) {
@@ -1694,6 +1695,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 * Visual
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Uses an empty string as the toggle key when no value is saved.
 		 */
 		private static function visual() {
 			?>
@@ -1775,9 +1777,9 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			jQuery(document).ready(function() {
 				jQuery('.<?php echo esc_js( self::$item_id ); ?>-options').hide();
 				<?php
-				if ( ! empty( self::$settings['toggle'][ self::$current_value ] ) ) {
+				if ( ! empty( self::$settings['toggle'][ self::$current_value ?? '' ] ) ) {
 					?>
-				jQuery('<?php echo esc_js( self::$settings['toggle'][ self::$current_value ] ); ?>').show();
+				jQuery('<?php echo esc_js( self::$settings['toggle'][ self::$current_value ?? '' ] ); ?>').show();
 					<?php
 				} elseif ( is_array( self::$settings['toggle'] ) ) {
 					$first_elem = reset( self::$settings['toggle'] )
@@ -1934,6 +1936,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 * Select
 		 *
 		 * @since 5.0.0
+		 * @since 5.7.0 - Uses an empty string as the toggle key when no value is saved.
 		 */
 		private static function select() {
 			?>
@@ -1969,9 +1972,9 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 				jQuery('.<?php echo esc_js( self::$item_id ); ?>-options').hide();
 
 					<?php
-					if ( ! empty( self::$settings['toggle'][ self::$current_value ] ) ) {
+					if ( ! empty( self::$settings['toggle'][ self::$current_value ?? '' ] ) ) {
 						?>
-				jQuery('<?php echo esc_js( self::$settings['toggle'][ self::$current_value ] ); ?>').show();
+				jQuery('<?php echo esc_js( self::$settings['toggle'][ self::$current_value ?? '' ] ); ?>').show();
 						<?php
 					} elseif ( is_array( self::$settings['toggle'] ) ) {
 						$first_elem = reset( self::$settings['toggle'] )
@@ -2339,15 +2342,16 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		}
 
 		/**
-		 * Shows the save button in the settings
+		 * Shows the save button in the settings.
 		 *
 		 * @return void
 		 *
 		 * @since 2.0.0
+		 * @since 5.7.0 - Read the notification page name explicitly from GET data.
 		 */
 		public static function save_button() {
 			$query_args_view_data = array(
-				'page'     => ( isset( $_REQUEST['page'] ) ) ? \sanitize_text_field( \wp_unslash( $_REQUEST['page'] ) ) : Notifications::get_safe_view_name(),
+				'page'     => \sanitize_text_field( \wp_unslash( $_GET['page'] ?? Notifications::get_safe_view_name() ) ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page name used to build a URL.
 				'action'   => 'edit',
 				'_wpnonce' => \wp_create_nonce( 'bulk-custom-notifications' ),
 				Custom_Notifications_Entity::get_table_name() . '[]' => 0,
@@ -2359,9 +2363,9 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			?>
 			<div class="wsal-panel-submit">
 				<button name="save" class="wsal-save-button wsal-primary-button button button-primary button-hero"
-						type="submit"><?php esc_html_e( 'Save changes', 'wp-security-audit-log' ); ?></button>
+						type="submit"><?php \esc_html_e( 'Save changes', 'wp-security-audit-log' ); ?></button>
 				
-				<a style="display:none" class="wsal-primary-button button button-primary button-hero create_custom_notification" href="<?php echo $view_data_link; ?>"><?php esc_html_e( 'Create custom notification', 'wp-security-audit-log' ); ?></a>
+				<a style="display:none" class="wsal-primary-button button button-primary button-hero create_custom_notification" href="<?php echo $view_data_link; ?>"><?php \esc_html_e( 'Create custom notification', 'wp-security-audit-log' ); ?></a>
 			</div>
 			<?php
 		}

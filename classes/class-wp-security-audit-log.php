@@ -12,6 +12,7 @@
 use WSAL\Helpers\Notices;
 use WSAL\Utils\Migration;
 use WSAL\Helpers\WP_Helper;
+use WSAL\Atarim\Atarim_Addon;
 use WSAL\MainWP\MainWP_Addon;
 use WSAL\Views\Notifications;
 use WSAL\Helpers\Email_Helper;
@@ -76,6 +77,15 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * @since 5.1.0
 		 */
 		const FREE_VERSION_WHOLE_PLUGIN_NAME = 'wp-security-audit-log/wp-security-audit-log.php';
+
+		/**
+		 * Premium version name shown to users.
+		 *
+		 * @var string
+		 *
+		 * @since 5.7.0
+		 */
+		const PREMIUM_VERSION_DISPLAY_NAME = 'WP Activity Log Premium';
 
 		/**
 		 * Contains a list of cleanup callbacks.
@@ -144,6 +154,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 *
 		 * @since 5.0.0
 		 * @since 5.6.8 - Initializes licensing through Licensing_Factory.
+		 * @since 5.7.0 - Initializes the Atarim integration.
 		 */
 		public function __construct() {
 
@@ -165,6 +176,8 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 
 			MainWP_Addon::init();
+
+			Atarim_Addon::init();
 
 			// Register hooks for plugin active cache invalidation (for multisite performance).
 			WP_Helper::register_is_plugin_active_cache_hooks();

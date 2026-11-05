@@ -22,7 +22,7 @@
         'freemius/wordpress-sdk' => array(
             'pretty_version' => '2.13.5',
             'version' => '2.13.5.0',
-            'reference' => '59ef9f3fc15399a151a8d090c6cae9f14010bb50',
+            'reference' => '0875c4ee3c941572f44d60cb2a687c54295db3d7',
             'type' => 'library',
             'install_path' => __DIR__ . '/../freemius/wordpress-sdk',
             'aliases' => array(),

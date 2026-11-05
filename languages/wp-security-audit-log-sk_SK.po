@@ -59,15 +59,15 @@ msgstr "CHYBA:"
 msgid "Contact us"
 msgstr "Kontaktujte nás"
 
-#: classes/Controllers/class-alert-manager.php:1404
+#: classes/Controllers/class-alert-manager.php:1406
 #: classes/Helpers/class-widget-manager.php:87
-#: classes/ListAdminEvents/class-list-events.php:315
+#: classes/ListAdminEvents/class-list-events.php:316
 #: defaults.php:1812
 msgid "User"
 msgstr "Používateľ"
 
-#: classes/Controllers/class-alert-manager.php:1405
-#: classes/ListAdminEvents/class-list-events.php:688
+#: classes/Controllers/class-alert-manager.php:1407
+#: classes/ListAdminEvents/class-list-events.php:694
 #: classes/Migration/class-migration.php:831
 #: classes/Migration/class-migration.php:836
 #: classes/notification/class-notification-template.php:1960
@@ -78,54 +78,54 @@ msgstr "Používateľ"
 msgid "System"
 msgstr "Systém"
 
-#: classes/Controllers/class-alert-manager.php:1406
-#: classes/ListAdminEvents/class-list-events.php:677
+#: classes/Controllers/class-alert-manager.php:1408
+#: classes/ListAdminEvents/class-list-events.php:683
 #: defaults.php:2295
 #: defaults.php:2310
 msgid "Plugin"
 msgstr "Plugin"
 
-#: classes/Controllers/class-alert-manager.php:1407
+#: classes/Controllers/class-alert-manager.php:1409
 msgid "Database"
 msgstr "Databáza"
 
-#: classes/Controllers/class-alert-manager.php:1408
+#: classes/Controllers/class-alert-manager.php:1410
 #: defaults.php:985
 msgid "Post"
 msgstr "Článok"
 
-#: classes/Controllers/class-alert-manager.php:1409
+#: classes/Controllers/class-alert-manager.php:1411
 msgid "File"
 msgstr "Súbor"
 
-#: classes/Controllers/class-alert-manager.php:1410
+#: classes/Controllers/class-alert-manager.php:1412
 msgid "Tag"
 msgstr "Tag (značka)"
 
-#: classes/Controllers/class-alert-manager.php:1411
-#: classes/Writers/class-html-writer.php:477
+#: classes/Controllers/class-alert-manager.php:1413
+#: classes/Writers/class-html-writer.php:518
 #: defaults.php:79
 msgid "Comment"
 msgstr "Komentár"
 
-#: classes/Controllers/class-alert-manager.php:1412
+#: classes/Controllers/class-alert-manager.php:1414
 msgid "Setting"
 msgstr "Nastavenie"
 
-#: classes/Controllers/class-alert-manager.php:1413
+#: classes/Controllers/class-alert-manager.php:1415
 msgid "System Setting"
 msgstr "Systémové nastavenie"
 
-#: classes/Controllers/class-alert-manager.php:1415
+#: classes/Controllers/class-alert-manager.php:1417
 msgid "MainWP Network"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1416
+#: classes/Controllers/class-alert-manager.php:1418
 #: classes/WPSensors/Helpers/class-mainwp-server-helper.php:49
 msgid "MainWP"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1417
+#: classes/Controllers/class-alert-manager.php:1419
 #: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:232
 #: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:248
 #: classes/WPSensors/Alerts/class-learndash-custom-alerts.php:265
@@ -145,110 +145,110 @@ msgstr ""
 msgid "Category"
 msgstr "Kategória"
 
-#: classes/Controllers/class-alert-manager.php:1418
+#: classes/Controllers/class-alert-manager.php:1420
 msgid "Custom Field"
 msgstr "Vlastné pole"
 
-#: classes/Controllers/class-alert-manager.php:1419
+#: classes/Controllers/class-alert-manager.php:1421
 msgid "Widget"
 msgstr "Widget"
 
-#: classes/Controllers/class-alert-manager.php:1420
+#: classes/Controllers/class-alert-manager.php:1422
 msgid "Menu"
 msgstr "Menu"
 
-#: classes/Controllers/class-alert-manager.php:1421
+#: classes/Controllers/class-alert-manager.php:1423
 msgid "Theme"
 msgstr "Téma"
 
-#: classes/Controllers/class-alert-manager.php:1422
+#: classes/Controllers/class-alert-manager.php:1424
 msgid "Activity log"
 msgstr ""
 
 #. Plugin Name of the plugin
 #: wp-security-audit-log.php
-#: classes/Controllers/class-alert-manager.php:1423
+#: classes/Controllers/class-alert-manager.php:1425
 #: classes/FeedbackForm/class-feedback-form.php:180
 #: classes/MainWPAddon/class-mainwp-addon.php:146
 msgid "WP Activity Log"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1424
+#: classes/Controllers/class-alert-manager.php:1426
 msgid "Multisite Network"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1425
+#: classes/Controllers/class-alert-manager.php:1427
 msgid "IP Address"
 msgstr "IP adresa"
 
-#: classes/Controllers/class-alert-manager.php:1443
+#: classes/Controllers/class-alert-manager.php:1445
 msgid "unknown object"
 msgstr "neznámy objekt"
 
-#: classes/Controllers/class-alert-manager.php:1328
+#: classes/Controllers/class-alert-manager.php:1330
 msgid "Login"
 msgstr "Prihlásenie"
 
-#: classes/Controllers/class-alert-manager.php:1329
+#: classes/Controllers/class-alert-manager.php:1331
 msgid "Logout"
 msgstr "Odhlásenie"
 
-#: classes/Controllers/class-alert-manager.php:1330
-#: classes/Views/AuditLog.php:745
+#: classes/Controllers/class-alert-manager.php:1332
+#: classes/Views/AuditLog.php:756
 msgid "Installed"
 msgstr "Nenainštalované"
 
-#: classes/Controllers/class-alert-manager.php:1331
+#: classes/Controllers/class-alert-manager.php:1333
 #: classes/WPSensors/class-redirection-sensor.php:327
 #: classes/WPSensors/class-redirection-sensor.php:397
 msgid "Activated"
 msgstr "Aktivované"
 
-#: classes/Controllers/class-alert-manager.php:1332
+#: classes/Controllers/class-alert-manager.php:1334
 #: classes/WPSensors/class-redirection-sensor.php:327
 #: classes/WPSensors/class-redirection-sensor.php:397
 msgid "Deactivated"
 msgstr "Deaktivované"
 
-#: classes/Controllers/class-alert-manager.php:1333
+#: classes/Controllers/class-alert-manager.php:1335
 msgid "Uninstalled"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1334
+#: classes/Controllers/class-alert-manager.php:1336
 msgid "Updated"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1335
+#: classes/Controllers/class-alert-manager.php:1337
 msgid "Created"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1336
+#: classes/Controllers/class-alert-manager.php:1338
 msgid "Modified"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1337
+#: classes/Controllers/class-alert-manager.php:1339
 msgid "Deleted"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1339
+#: classes/Controllers/class-alert-manager.php:1341
 msgid "Published"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1340
+#: classes/Controllers/class-alert-manager.php:1342
 msgid "Approved"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1341
+#: classes/Controllers/class-alert-manager.php:1343
 msgid "Unapproved"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1342
+#: classes/Controllers/class-alert-manager.php:1344
 #: classes/WPSensors/class-woocommerce-sensor-helper.php:1145
 #: classes/WPSensors/class-woocommerce-sensor-helper.php:1146
 msgid "Enabled"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1343
+#: classes/Controllers/class-alert-manager.php:1345
 #: classes/Helpers/class-plugin-settings-helper.php:312
 #: classes/WPSensors/class-woocommerce-sensor-helper.php:1145
 #: classes/WPSensors/class-woocommerce-sensor-helper.php:1146
@@ -256,77 +256,77 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1344
+#: classes/Controllers/class-alert-manager.php:1346
 msgid "Added"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1345
+#: classes/Controllers/class-alert-manager.php:1347
 msgid "Failed Login"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1346
+#: classes/Controllers/class-alert-manager.php:1348
 msgid "Blocked"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1347
+#: classes/Controllers/class-alert-manager.php:1349
 msgid "Uploaded"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1348
+#: classes/Controllers/class-alert-manager.php:1350
 msgid "Restored"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1349
+#: classes/Controllers/class-alert-manager.php:1351
 msgid "Opened"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1350
+#: classes/Controllers/class-alert-manager.php:1352
 msgid "Viewed"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1351
+#: classes/Controllers/class-alert-manager.php:1353
 msgid "Started"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1352
+#: classes/Controllers/class-alert-manager.php:1354
 msgid "Stopped"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1353
+#: classes/Controllers/class-alert-manager.php:1355
 msgid "Removed"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1354
+#: classes/Controllers/class-alert-manager.php:1356
 msgid "Unblocked"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1355
+#: classes/Controllers/class-alert-manager.php:1357
 msgid "Renamed"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1356
+#: classes/Controllers/class-alert-manager.php:1358
 msgid "Duplicated"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1357
+#: classes/Controllers/class-alert-manager.php:1359
 #: classes/WPSensors/Helpers/class-gravityforms-helper.php:146
 msgid "Submitted"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1358
+#: classes/Controllers/class-alert-manager.php:1360
 msgid "Revoked"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1384
+#: classes/Controllers/class-alert-manager.php:1386
 msgid "unknown type"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:295
+#: classes/Views/ToggleAlerts.php:298
 #: defaults.php:1594
 msgid "Pages"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:295
+#: classes/Views/ToggleAlerts.php:298
 #: defaults.php:1385
 msgid "Custom Post Types"
 msgstr ""
@@ -336,28 +336,28 @@ msgstr ""
 msgid "Unknown error code."
 msgstr ""
 
-#: classes/Helpers/class-wp-helper.php:823
-#: classes/Helpers/class-wp-helper.php:835
+#: classes/Helpers/class-wp-helper.php:839
+#: classes/Helpers/class-wp-helper.php:851
 msgid "Unknown Site"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:1189
-#: classes/ListAdminEvents/class-list-events.php:1193
-#: classes/MainWPAddon/class-mainwp-helper.php:131
+#: classes/ListAdminEvents/class-list-events.php:1195
+#: classes/ListAdminEvents/class-list-events.php:1199
+#: classes/MainWPAddon/class-mainwp-helper.php:132
 msgid "All Sites"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:312
+#: classes/ListAdminEvents/class-list-events.php:313
 #: defaults.php:763
 #: defaults.php:778
 msgid "ID"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:313
+#: classes/ListAdminEvents/class-list-events.php:314
 #: classes/notification/class-notification-helper.php:86
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:141
-#: classes/Views/ToggleAlerts.php:244
-#: classes/Views/ToggleAlerts.php:269
+#: classes/Views/ToggleAlerts.php:247
+#: classes/Views/ToggleAlerts.php:272
 msgid "Severity"
 msgstr ""
 
@@ -365,13 +365,13 @@ msgstr ""
 msgid "Info"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:323
-#: classes/ListAdminEvents/class-list-events.php:330
+#: classes/ListAdminEvents/class-list-events.php:324
+#: classes/ListAdminEvents/class-list-events.php:331
 #: classes/notification/class-notification-helper.php:182
 msgid "Site"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:334
+#: classes/ListAdminEvents/class-list-events.php:335
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:145
 msgid "Message"
 msgstr ""
@@ -379,34 +379,34 @@ msgstr ""
 #: classes/Controllers/class-constants.php:142
 #: classes/Controllers/class-constants.php:365
 #: classes/Helpers/class-user-utils.php:255
-#: classes/ListAdminEvents/class-list-events.php:653
-#: classes/WPSensors/class-wp-system-sensor.php:488
+#: classes/ListAdminEvents/class-list-events.php:659
 #: classes/WPSensors/class-wp-system-sensor.php:489
+#: classes/WPSensors/class-wp-system-sensor.php:490
 #: classes/WPSensors/Helpers/class-learndash-helper.php:747
 #: classes/WPSensors/Helpers/class-wp-ai-connectors-helper.php:224
 #: classes/WPSensors/Helpers/class-wp-ai-connectors-helper.php:228
 msgid "Unknown"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:679
+#: classes/ListAdminEvents/class-list-events.php:685
 #: defaults.php:2218
 msgid "Plugins"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:681
+#: classes/ListAdminEvents/class-list-events.php:687
 msgid "Unregistered user"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:737
-#: classes/ListAdminEvents/class-list-events.php:748
+#: classes/ListAdminEvents/class-list-events.php:743
+#: classes/ListAdminEvents/class-list-events.php:754
 msgid "Show me all activity originating from this IP Address"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:800
+#: classes/ListAdminEvents/class-list-events.php:806
 msgid "View all details of this change"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:314
+#: classes/ListAdminEvents/class-list-events.php:315
 #: classes/notification/class-notification-helper.php:170
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:142
 #: classes/WPSensors/class-yoast-seo-sensor.php:1573
@@ -414,19 +414,19 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:316
+#: classes/ListAdminEvents/class-list-events.php:317
 msgid "IP"
 msgstr ""
 
 #: classes/Helpers/class-widget-manager.php:88
-#: classes/ListAdminEvents/class-list-events.php:317
+#: classes/ListAdminEvents/class-list-events.php:318
 #: classes/notification/class-notification-helper.php:104
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:143
 msgid "Object"
 msgstr ""
 
 #: classes/Helpers/class-widget-manager.php:89
-#: classes/ListAdminEvents/class-list-events.php:318
+#: classes/ListAdminEvents/class-list-events.php:319
 #: classes/PMPAddon/class-pmp-addon-member-edit-panel.php:144
 msgid "Event Type"
 msgstr ""
@@ -435,12 +435,12 @@ msgstr ""
 msgid "Alert message not found."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:623
+#: classes/ListAdminEvents/class-list-events.php:625
 msgid "Alert description not found."
 msgstr ""
 
 #. translators: 1 - mysqli error code, 2 - mysqli error message
-#: classes/Controllers/class-connection.php:286
+#: classes/Controllers/class-connection.php:302
 #, php-format
 msgid "Code %1$d: %2$s"
 msgstr ""
@@ -476,20 +476,20 @@ msgid "Informational"
 msgstr ""
 
 #. Translators: 1: html that opens a link, 2: html that closes a link.
-#: classes/Entities/class-occurrences-entity.php:380
+#: classes/Entities/class-occurrences-entity.php:358
 #, php-format
 msgid "This type of activity / change is no longer monitored. You can create your own custom event IDs to keep a log of such change. Read more about custom events %1$shere%2$s."
 msgstr ""
 
-#: classes/WPSensors/class-wp-content-sensor.php:981
+#: classes/WPSensors/class-wp-content-sensor.php:982
 msgid "Default template"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2174
-#: classes/Helpers/settings/class-settings-builder.php:2188
-#: classes/Helpers/settings/class-settings-builder.php:2207
-#: classes/Helpers/settings/class-settings-builder.php:2235
-#: classes/WPSensors/class-wp-content-sensor.php:982
+#: classes/Helpers/settings/class-settings-builder.php:2177
+#: classes/Helpers/settings/class-settings-builder.php:2191
+#: classes/Helpers/settings/class-settings-builder.php:2210
+#: classes/Helpers/settings/class-settings-builder.php:2238
+#: classes/WPSensors/class-wp-content-sensor.php:983
 #: classes/WPSensors/class-yoast-seo-sensor.php:679
 #: classes/WPSensors/class-yoast-seo-sensor.php:680
 #: classes/WPSensors/class-yoast-seo-sensor.php:1444
@@ -500,18 +500,18 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#: classes/WPSensors/class-wp-content-sensor.php:1090
+#: classes/WPSensors/class-wp-content-sensor.php:1091
 msgid "No previous image"
 msgstr ""
 
-#: classes/WPSensors/class-wp-content-sensor.php:1091
+#: classes/WPSensors/class-wp-content-sensor.php:1092
 msgid "No image"
 msgstr ""
 
 #: classes/WPSensors/class-woocommerce-sensor-helper.php:290
 #: classes/WPSensors/class-woocommerce-sensor-helper.php:298
-#: classes/WPSensors/class-wp-content-sensor.php:1473
-#: classes/WPSensors/class-wp-content-sensor.php:1481
+#: classes/WPSensors/class-wp-content-sensor.php:1474
+#: classes/WPSensors/class-wp-content-sensor.php:1482
 msgid "Password Protected"
 msgstr ""
 
@@ -519,19 +519,19 @@ msgstr ""
 #: classes/WPSensors/class-woocommerce-sensor-helper.php:302
 #: classes/WPSensors/class-woocommerce-sensor.php:483
 #: classes/WPSensors/class-woocommerce-sensor.php:547
-#: classes/WPSensors/class-wp-content-sensor.php:1475
-#: classes/WPSensors/class-wp-content-sensor.php:1483
+#: classes/WPSensors/class-wp-content-sensor.php:1476
+#: classes/WPSensors/class-wp-content-sensor.php:1484
 msgid "Private"
 msgstr ""
 
 #: classes/WPSensors/class-woocommerce-sensor-helper.php:292
 #: classes/WPSensors/class-woocommerce-sensor-helper.php:300
-#: classes/WPSensors/class-wp-content-sensor.php:1477
-#: classes/WPSensors/class-wp-content-sensor.php:1485
+#: classes/WPSensors/class-wp-content-sensor.php:1478
+#: classes/WPSensors/class-wp-content-sensor.php:1486
 msgid "Public"
 msgstr ""
 
-#: classes/WPSensors/class-wp-content-sensor.php:1658
+#: classes/WPSensors/class-wp-content-sensor.php:1659
 msgid "no tags"
 msgstr ""
 
@@ -615,21 +615,21 @@ msgstr ""
 msgid "Tried to install a zip or slug that was not in the allowed list"
 msgstr ""
 
-#: classes/Helpers/class-view-manager.php:138
+#: classes/Helpers/class-view-manager.php:139
 msgid "WP Activity Log requires Website File Changes Monitor 1.6.0. Please upgrade that plugin."
 msgstr ""
 
 #: classes/Views/class-setup-wizard.php:101
 #: classes/Views/Settings.php:257
 #: classes/Views/Settings.php:330
-#: classes/Views/Settings.php:1902
-#: classes/Views/Settings.php:1924
+#: classes/Views/Settings.php:2001
+#: classes/Views/Settings.php:2023
 msgid "Access Denied."
 msgstr ""
 
 #: classes/Views/class-setup-wizard.php:114
 #: classes/Views/Settings.php:270
-#: classes/Views/Settings.php:1892
+#: classes/Views/Settings.php:1991
 msgid "Nonce verification failed."
 msgstr ""
 
@@ -638,14 +638,14 @@ msgid "Activity Log Viewer"
 msgstr ""
 
 #: classes/notification/class-notifications.php:741
-#: classes/notification/class-notifications.php:795
-#: classes/notification/class-notifications.php:1212
-#: classes/notification/class-notifications.php:1459
-#: classes/notification/class-notifications.php:1670
+#: classes/notification/class-notifications.php:799
+#: classes/notification/class-notifications.php:1218
+#: classes/notification/class-notifications.php:1473
+#: classes/notification/class-notifications.php:1684
 #: classes/Views/AuditLog.php:306
 #: classes/Views/Settings.php:376
-#: classes/Views/Settings.php:1960
-#: classes/Views/ToggleAlerts.php:139
+#: classes/Views/Settings.php:2059
+#: classes/Views/ToggleAlerts.php:142
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
@@ -654,10 +654,10 @@ msgstr ""
 #: classes/Views/Settings.php:520
 #: classes/Views/Settings.php:544
 #: classes/Views/Settings.php:611
-#: classes/Views/Settings.php:1181
-#: classes/Views/Settings.php:1499
-#: classes/Views/Settings.php:1529
-#: classes/Views/Settings.php:1560
+#: classes/Views/Settings.php:1209
+#: classes/Views/Settings.php:1548
+#: classes/Views/Settings.php:1578
+#: classes/Views/Settings.php:1609
 msgid "Yes"
 msgstr ""
 
@@ -667,30 +667,30 @@ msgstr ""
 #: classes/Views/Settings.php:549
 #: classes/Views/Settings.php:643
 #: classes/Views/Settings.php:770
-#: classes/Views/Settings.php:1186
-#: classes/Views/Settings.php:1506
-#: classes/Views/Settings.php:1536
-#: classes/Views/Settings.php:1561
+#: classes/Views/Settings.php:1214
+#: classes/Views/Settings.php:1555
+#: classes/Views/Settings.php:1585
+#: classes/Views/Settings.php:1610
 msgid "No"
 msgstr ""
 
-#: classes/Views/AuditLog.php:643
+#: classes/Views/AuditLog.php:654
 msgid "No users found."
 msgstr ""
 
-#: classes/Views/AuditLog.php:844
+#: classes/Views/AuditLog.php:855
 msgid "WordPress Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:845
+#: classes/Views/AuditLog.php:856
 msgid "When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install."
 msgstr ""
 
-#: classes/Views/AuditLog.php:846
+#: classes/Views/AuditLog.php:857
 msgid "Thank you for using WP Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:903
+#: classes/Views/AuditLog.php:914
 msgid "You do not have sufficient permissions to dismiss this notice."
 msgstr ""
 
@@ -811,20 +811,20 @@ msgid "Message sent successfully."
 msgstr ""
 
 #: classes/Views/Settings.php:392
-#: classes/Views/ToggleAlerts.php:151
+#: classes/Views/ToggleAlerts.php:154
 msgid "Settings have been saved."
 msgstr ""
 
 #: classes/Views/Settings.php:399
-#: classes/Views/ToggleAlerts.php:157
+#: classes/Views/ToggleAlerts.php:160
 msgid "Error: "
 msgstr ""
 
-#: classes/Views/Settings.php:1968
+#: classes/Views/Settings.php:2067
 msgid "Old data successfully purged."
 msgstr ""
 
-#: classes/Views/Settings.php:1974
+#: classes/Views/Settings.php:2073
 msgid "No data is old enough to be purged."
 msgstr ""
 
@@ -964,47 +964,47 @@ msgstr ""
 msgid "No, do not hide the plugin"
 msgstr ""
 
-#: classes/Views/Settings.php:1045
+#: classes/Views/Settings.php:1073
 msgid "The plugin uses an efficient way to store the activity log data in the WordPress database, though the more data you keep the more disk space will be required. "
 msgstr ""
 
-#: classes/Views/Settings.php:1061
+#: classes/Views/Settings.php:1089
 msgid "What timestamp you would like to see in the WordPress activity log?"
 msgstr ""
 
-#: classes/Views/Settings.php:1062
+#: classes/Views/Settings.php:1090
 msgid "Note that the WordPress' timezone might be different from that configured on the server so when you switch from UTC to WordPress timezone or vice versa you might notice a big difference."
 msgstr ""
 
-#: classes/Views/Settings.php:1086
+#: classes/Views/Settings.php:1114
 msgid "UTC"
 msgstr ""
 
-#: classes/Views/Settings.php:1092
+#: classes/Views/Settings.php:1120
 msgid "Timezone configured on this WordPress website"
 msgstr ""
 
-#: classes/Views/Settings.php:1106
+#: classes/Views/Settings.php:1134
 msgid "Show Milliseconds in list view"
 msgstr ""
 
-#: classes/Views/Settings.php:1137
+#: classes/Views/Settings.php:1165
 msgid "What user information should be displayed in the WordPress activity log?"
 msgstr ""
 
-#: classes/Views/Settings.php:1138
+#: classes/Views/Settings.php:1166
 msgid "Usernames might not be the same as a user's first and last name so it can be difficult to recognize whose user was that did a change. When there is no first & last name or public display name configured the plugin will revert back to the WordPress username."
 msgstr ""
 
-#: classes/Views/Settings.php:1148
+#: classes/Views/Settings.php:1176
 msgid "WordPress username"
 msgstr ""
 
-#: classes/Views/Settings.php:1153
+#: classes/Views/Settings.php:1181
 msgid "First name & last name"
 msgstr ""
 
-#: classes/Views/Settings.php:1158
+#: classes/Views/Settings.php:1186
 msgid "Configured public display name"
 msgstr ""
 
@@ -1012,179 +1012,179 @@ msgstr ""
 msgid "Event ID"
 msgstr ""
 
-#: classes/Views/Settings.php:1169
+#: classes/Views/Settings.php:1197
 msgid "Do you want to keep a log of WordPress background activity?"
 msgstr ""
 
-#: classes/Views/Settings.php:1171
+#: classes/Views/Settings.php:1199
 msgid "WordPress does a lot of things in the background that you do not necessarily need to know about, such as; deletion of post revisions, deletion of auto saved drafts etc. By default the plugin does not report them since there might be a lot and are irrelevant to the user."
 msgstr ""
 
-#: classes/Views/Settings.php:1237
+#: classes/Views/Settings.php:1274
 msgid "Install plugin now"
 msgstr ""
 
-#: classes/Views/Settings.php:1237
+#: classes/Views/Settings.php:1274
 msgid "Learn More"
 msgstr ""
 
-#: classes/Views/Settings.php:1247
+#: classes/Views/Settings.php:1284
 msgid "Configure how often file changes scan run and other settings from the"
 msgstr ""
 
-#: classes/Views/Settings.php:1266
+#: classes/Views/Settings.php:1303
 msgid "By default the plugin keeps a log of all user changes done on your WordPress website. Use the setting below to exclude any objects from the activity log. When an object is excluded from the activity log, any event in which that object is referred will not be logged in the activity log."
 msgstr ""
 
-#: classes/Views/Settings.php:1328
+#: classes/Views/Settings.php:1365
 msgid "You can exclude an individual IP address or a range of IP addresses. To exclude a range use the following format: [first IP]-[last octet of the last IP]. Example: 172.16.180.6-127."
 msgstr ""
 
-#: classes/Views/Settings.php:1350
+#: classes/Views/Settings.php:1387
 msgid "WordPress has the post and page post types by default though your website might use more post types (custom post types). You can exclude all post types, including the default WordPress ones."
 msgstr ""
 
-#: classes/Views/Settings.php:1429
+#: classes/Views/Settings.php:1466
 msgid "You can use the * wildcard to exclude multiple matching custom fields. For example to exclude all custom fields starting with wp123 enter wp123*"
 msgstr ""
 
-#: classes/Views/Settings.php:1457
+#: classes/Views/Settings.php:1506
 msgid "These settings are for advanced users."
 msgstr ""
 
-#: classes/Views/Settings.php:1461
+#: classes/Views/Settings.php:1510
 msgid "Reset plugin settings to default"
 msgstr ""
 
-#: classes/Views/Settings.php:1462
+#: classes/Views/Settings.php:1511
 msgid "Use this button to <em>factory reset</em> the plugin. This means that all the configured settings will be reset to default and all email notifications, scheduled reports, external database / third party services connections, archiving and mirroring rule will be deleted. NOTE: the activity log data will not be purged. Use the setting below to purge the activity log."
 msgstr ""
 
-#: classes/Views/Settings.php:1466
+#: classes/Views/Settings.php:1515
 msgid "Reset Settings"
 msgstr ""
 
-#: classes/Views/Settings.php:1468
+#: classes/Views/Settings.php:1517
 msgid "RESET"
 msgstr ""
 
-#: classes/Views/Settings.php:1474
+#: classes/Views/Settings.php:1523
 msgid "Purge the WordPress activity log"
 msgstr ""
 
-#: classes/Views/Settings.php:1475
+#: classes/Views/Settings.php:1524
 msgid "Click the Purge button below to delete all the data from the WordPress activity log and start afresh."
 msgstr ""
 
-#: classes/Views/Settings.php:1479
+#: classes/Views/Settings.php:1528
 msgid "Purge Activity Log"
 msgstr ""
 
-#: classes/Views/Settings.php:1481
+#: classes/Views/Settings.php:1530
 msgid "PURGE"
 msgstr ""
 
-#: classes/Views/Settings.php:1490
+#: classes/Views/Settings.php:1539
 msgid "This option is enabled automatically when the plugin detects the MainWP Child plugin on the site. When this setting is enabled plugin access is restricted to the administrator who installs the plugin, the plugin is not shown in the list of installed plugins and no admin notifications are shown. Disable this option to change the plugin to the default setup."
 msgstr ""
 
-#: classes/Views/Settings.php:1517
+#: classes/Views/Settings.php:1566
 msgid "Do you want to delete the plugin data from the database upon uninstall?"
 msgstr ""
 
-#: classes/Views/Settings.php:1518
+#: classes/Views/Settings.php:1567
 msgid "The plugin saves the activity log data and settings in the WordPress database. By default upon uninstalling the plugin the data is kept in the database so if it is installed again, you can still access the data. If the data is deleted it is not possible to recover it so you won't be able to access it again even when you reinstall the plugin."
 msgstr ""
 
-#: classes/Views/Settings.php:1547
+#: classes/Views/Settings.php:1596
 msgid "Are you sure you want to reset all the plugin settings to default? This action cannot be undone."
 msgstr ""
 
-#: classes/Views/Settings.php:1557
+#: classes/Views/Settings.php:1606
 msgid "Are you sure you want to purge all the activity log data?"
 msgstr ""
 
-#: classes/Views/Settings.php:1581
+#: classes/Views/Settings.php:1635
 msgid "MainWP Child plugin is not active on this website."
 msgstr ""
 
-#: classes/Views/Settings.php:1651
+#: classes/Views/Settings.php:1705
 msgid "The specified value is not a valid URL!"
 msgstr ""
 
-#: classes/Views/Settings.php:1652
+#: classes/Views/Settings.php:1706
 msgid "The specified value is not a valid post type!"
 msgstr ""
 
-#: classes/Views/Settings.php:1654
+#: classes/Views/Settings.php:1708
 msgid "The specified value is not a valid IP address!"
 msgstr ""
 
-#: classes/Views/Settings.php:1655
+#: classes/Views/Settings.php:1709
 msgid "The specified value is not a user nor a role!"
 msgstr ""
 
-#: classes/Views/Settings.php:1656
+#: classes/Views/Settings.php:1710
 msgid "Filename cannot be added because it contains invalid characters."
 msgstr ""
 
-#: classes/Views/Settings.php:1657
+#: classes/Views/Settings.php:1711
 msgid "File extension cannot be added because it contains invalid characters."
 msgstr ""
 
-#: classes/Views/Settings.php:1658
+#: classes/Views/Settings.php:1712
 msgid "Directory cannot be added because it contains invalid characters."
 msgstr ""
 
-#: classes/Views/Settings.php:1660
+#: classes/Views/Settings.php:1714
 msgid "Please save any changes before switching tabs."
 msgstr ""
 
-#: classes/Views/Settings.php:1907
-#: classes/Views/Settings.php:1929
+#: classes/Views/Settings.php:2006
+#: classes/Views/Settings.php:2028
 msgid "Nonce Verification Failed."
 msgstr ""
 
-#: classes/Views/Settings.php:1915
+#: classes/Views/Settings.php:2014
 msgid "Plugin settings have been reset."
 msgstr ""
 
-#: classes/Views/Settings.php:1944
+#: classes/Views/Settings.php:2043
 msgid "Tables has been reset."
 msgstr ""
 
-#: classes/Views/Settings.php:1946
+#: classes/Views/Settings.php:2045
 msgid "Reset query failed."
 msgstr ""
 
-#: classes/Views/Settings.php:1992
+#: classes/Views/Settings.php:2091
 msgid "Activity log retention"
 msgstr ""
 
-#: classes/Helpers/class-settings-helper.php:1946
-#: classes/Helpers/class-settings-helper.php:1962
+#: classes/Helpers/class-settings-helper.php:1973
+#: classes/Helpers/class-settings-helper.php:1989
 #: classes/Views/class-setup-wizard.php:693
-#: classes/Views/Settings.php:1999
+#: classes/Views/Settings.php:2098
 msgid "Keep all data"
 msgstr ""
 
-#: classes/Views/Settings.php:2032
+#: classes/Views/Settings.php:2131
 msgid "Delete events older than"
 msgstr ""
 
-#: classes/Views/Settings.php:2016
+#: classes/Views/Settings.php:2115
 msgid "Months"
 msgstr ""
 
-#: classes/Views/Settings.php:2017
+#: classes/Views/Settings.php:2116
 msgid "Years"
 msgstr ""
 
-#: classes/Views/Settings.php:2061
+#: classes/Views/Settings.php:2160
 msgid "You can run the purging process now by clicking the button below."
 msgstr ""
 
-#: classes/Views/Settings.php:2077
+#: classes/Views/Settings.php:2176
 msgid "Purge Old Data"
 msgstr ""
 
@@ -1276,38 +1276,38 @@ msgid "Next"
 msgstr "Ďalej"
 
 #: classes/Free/assets/nav-bar.php:310
-#: classes/Views/ToggleAlerts.php:37
-#: classes/Views/ToggleAlerts.php:51
+#: classes/Views/ToggleAlerts.php:38
+#: classes/Views/ToggleAlerts.php:52
 msgid "Enable/Disable Events"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:189
+#: classes/Views/ToggleAlerts.php:192
 msgid "Basic"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:190
+#: classes/Views/ToggleAlerts.php:193
 msgid "Geek"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:191
+#: classes/Views/ToggleAlerts.php:194
 msgid "Custom"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:221
+#: classes/Views/ToggleAlerts.php:224
 msgid "Log Level: "
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:210
+#: classes/Views/ToggleAlerts.php:213
 msgid "Third party plugins"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:268
+#: classes/Views/ToggleAlerts.php:271
 msgid "Code"
 msgstr ""
 
 #: classes/Helpers/class-widget-manager.php:90
-#: classes/Views/ToggleAlerts.php:245
-#: classes/Views/ToggleAlerts.php:270
+#: classes/Views/ToggleAlerts.php:248
+#: classes/Views/ToggleAlerts.php:273
 msgid "Description"
 msgstr ""
 
@@ -1327,47 +1327,47 @@ msgstr ""
 msgid "MultiSite"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:335
+#: classes/Views/ToggleAlerts.php:338
 msgid "Your website is a single site so the multisite events have been disabled."
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1659
-#: classes/Views/ToggleAlerts.php:380
+#: classes/Controllers/class-alert-manager.php:1661
+#: classes/Views/ToggleAlerts.php:383
 msgid "Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress."
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1660
-#: classes/Views/ToggleAlerts.php:422
+#: classes/Controllers/class-alert-manager.php:1662
+#: classes/Views/ToggleAlerts.php:425
 msgid "Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:447
+#: classes/Views/ToggleAlerts.php:450
 msgid "Log Level Updated"
 msgstr ""
 
 #. translators: Alerts log level.
-#: classes/Views/ToggleAlerts.php:451
+#: classes/Views/ToggleAlerts.php:454
 #, php-format
 msgid "The %s log level has been successfully loaded and applied."
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:455
+#: classes/Views/ToggleAlerts.php:458
 msgid "OK"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:470
+#: classes/Views/ToggleAlerts.php:473
 msgid "Enable File Integrity Scanner"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:472
+#: classes/Views/ToggleAlerts.php:475
 msgid "The file integrity scanner is switched off. To enable this event it has to be switched on."
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:476
+#: classes/Views/ToggleAlerts.php:479
 msgid "SWITCH ON"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:477
+#: classes/Views/ToggleAlerts.php:480
 msgid "DISABLE EVENT"
 msgstr ""
 
@@ -3678,7 +3678,7 @@ msgstr ""
 msgid "Added user %TargetUsername% to the site %SiteName%."
 msgstr ""
 
-#: classes/notification/class-notifications.php:1176
+#: classes/notification/class-notifications.php:1180
 #: defaults.php:2163
 msgid "User removed from site"
 msgstr ""
@@ -3922,7 +3922,7 @@ msgstr ""
 msgid "Themes on Multisite"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1178
+#: classes/notification/class-notifications.php:1182
 #: defaults.php:2498
 msgid "Activated theme on network"
 msgstr ""
@@ -3931,7 +3931,7 @@ msgstr ""
 msgid "Network activated the theme %Theme->Name%."
 msgstr ""
 
-#: classes/notification/class-notifications.php:1179
+#: classes/notification/class-notifications.php:1183
 #: defaults.php:2511
 msgid "Deactivated theme from network"
 msgstr ""
@@ -3999,7 +3999,7 @@ msgstr ""
 msgid "WordPress & System"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1144
+#: classes/notification/class-notifications.php:1148
 #: defaults.php:3044
 msgid "WordPress was updated"
 msgstr ""
@@ -4497,27 +4497,27 @@ msgstr[2] ""
 msgid "Notifications"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1177
+#: classes/notification/class-notifications.php:1181
 msgid "Site changes"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1181
+#: classes/notification/class-notifications.php:1185
 msgid "Any product change"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1182
+#: classes/notification/class-notifications.php:1186
 msgid "Any store settings change"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1183
+#: classes/notification/class-notifications.php:1187
 msgid "Any coupon code changes"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1184
+#: classes/notification/class-notifications.php:1188
 msgid "Any orders changes"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:1882
+#: classes/Helpers/settings/class-settings-builder.php:1884
 msgid "Select"
 msgstr ""
 
@@ -4529,11 +4529,11 @@ msgstr ""
 msgid "+16175551212"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1365
+#: classes/Controllers/class-alert-manager.php:1367
 msgid "Connected"
 msgstr ""
 
-#: classes/Controllers/class-connection.php:647
+#: classes/Controllers/class-connection.php:680
 msgid "External Storage"
 msgstr ""
 
@@ -4549,22 +4549,22 @@ msgstr ""
 msgid "Post Type"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:577
-#: classes/Helpers/class-notices.php:600
-#: classes/Helpers/class-notices.php:626
-#: classes/Helpers/class-notices.php:797
+#: classes/Helpers/class-notices.php:625
+#: classes/Helpers/class-notices.php:648
+#: classes/Helpers/class-notices.php:674
+#: classes/Helpers/class-notices.php:838
 msgid "Dismiss this notice."
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2143
+#: classes/Helpers/settings/class-settings-builder.php:2146
 #: classes/Views/Settings.php:903
-#: classes/Views/Settings.php:1281
-#: classes/Views/Settings.php:1302
-#: classes/Views/Settings.php:1323
-#: classes/Views/Settings.php:1345
-#: classes/Views/Settings.php:1367
-#: classes/Views/Settings.php:1424
-#: classes/Views/Settings.php:1659
+#: classes/Views/Settings.php:1318
+#: classes/Views/Settings.php:1339
+#: classes/Views/Settings.php:1360
+#: classes/Views/Settings.php:1382
+#: classes/Views/Settings.php:1404
+#: classes/Views/Settings.php:1461
+#: classes/Views/Settings.php:1713
 msgid "Remove"
 msgstr ""
 
@@ -4578,7 +4578,7 @@ msgstr ""
 msgid "Last Name"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:295
+#: classes/ListAdminEvents/class-list-events.php:296
 msgid "Search"
 msgstr ""
 
@@ -4622,36 +4622,36 @@ msgstr ""
 msgid "https://melapress.com/"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1338
+#: classes/Controllers/class-alert-manager.php:1340
 msgid "Assigned"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1359
+#: classes/Controllers/class-alert-manager.php:1361
 msgid "Sent"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1360
+#: classes/Controllers/class-alert-manager.php:1362
 msgid "Executed"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1361
+#: classes/Controllers/class-alert-manager.php:1363
 #: classes/WPSensors/Helpers/class-mainwp-server-helper.php:70
 msgid "Failed"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1362
+#: classes/Controllers/class-alert-manager.php:1364
 msgid "Denied"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1363
+#: classes/Controllers/class-alert-manager.php:1365
 msgid "Available"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1414
+#: classes/Controllers/class-alert-manager.php:1416
 msgid "Cron Jobs"
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1661
+#: classes/Controllers/class-alert-manager.php:1663
 #: classes/WPSensors/Helpers/class-woocommerce-helper.php:115
 msgid "Keep a log of visitor orders, stock changes and other public events?"
 msgstr ""
@@ -4664,7 +4664,7 @@ msgstr ""
 msgid "Revisions are not enabled. Enable revisions to view the content changes. Read more."
 msgstr ""
 
-#: classes/Controllers/class-connection.php:318
+#: classes/Controllers/class-connection.php:341
 msgid "There are connectivity issues with the database where the WordPress activity log is stored."
 msgstr ""
 
@@ -4708,13 +4708,13 @@ msgstr ""
 
 #: classes/Controllers/slack/class-slack.php:103
 #: classes/Controllers/twilio/class-twilio.php:121
-#: classes/notification/class-notifications.php:805
+#: classes/notification/class-notifications.php:809
 msgid "Nonce checking failed"
 msgstr ""
 
 #: classes/Controllers/slack/class-slack.php:106
 #: classes/Controllers/twilio/class-twilio.php:124
-#: classes/notification/class-notifications.php:808
+#: classes/notification/class-notifications.php:812
 msgid "Nonce is not provided"
 msgstr ""
 
@@ -4768,47 +4768,47 @@ msgstr ""
 msgid "Unlock extra features with WP Activity Log Premium"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:161
+#: classes/Free/assets/upgrade-to-premium.php:154
 msgid "Upgrade to Premium and benefit:"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:165
+#: classes/Free/assets/upgrade-to-premium.php:158
 msgid "Quickly find what you need"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:165
+#: classes/Free/assets/upgrade-to-premium.php:158
 msgid " with advanced search filters"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:166
+#: classes/Free/assets/upgrade-to-premium.php:159
 msgid "Stay informed"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:166
+#: classes/Free/assets/upgrade-to-premium.php:159
 msgid " with real-time email and SMS notifications"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:167
+#: classes/Free/assets/upgrade-to-premium.php:160
 msgid "Monitor and manage user sessions"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:167
+#: classes/Free/assets/upgrade-to-premium.php:160
 msgid " in real-time"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:168
+#: classes/Free/assets/upgrade-to-premium.php:161
 msgid "Automate reporting"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:168
+#: classes/Free/assets/upgrade-to-premium.php:161
 msgid " by creating and scheduling activity log reports"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:169
+#: classes/Free/assets/upgrade-to-premium.php:162
 msgid "Seamlessly integrate"
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:169
+#: classes/Free/assets/upgrade-to-premium.php:162
 msgid " with Loggly, AWS CloudWatch, and other logging solutions"
 msgstr ""
 
@@ -4832,29 +4832,29 @@ msgstr ""
 msgid "Current memory usage: "
 msgstr ""
 
-#: classes/Helpers/class-notices.php:391
-#: classes/Helpers/class-notices.php:412
-#: classes/Helpers/class-notices.php:431
-#: classes/Helpers/class-notices.php:464
-#: classes/Helpers/class-notices.php:746
+#: classes/Helpers/class-notices.php:439
+#: classes/Helpers/class-notices.php:460
+#: classes/Helpers/class-notices.php:479
+#: classes/Helpers/class-notices.php:512
+#: classes/Helpers/class-notices.php:789
 #: classes/Writers/class-csv-writer.php:411
 msgid "nonce is not provided or incorrect"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:470
-#: classes/Helpers/class-notices.php:494
+#: classes/Helpers/class-notices.php:518
+#: classes/Helpers/class-notices.php:542
 msgid "Failed to dismiss the survey. Please try again."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:572
+#: classes/Helpers/class-notices.php:620
 msgid "Want to know what the state of WordPress security is in 2025?"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:574
+#: classes/Helpers/class-notices.php:622
 msgid "Discover the latest insights in our 2025 WordPress Security Survey Report."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:576
+#: classes/Helpers/class-notices.php:624
 msgid "Read the survey"
 msgstr ""
 
@@ -4872,7 +4872,7 @@ msgstr ""
 msgid "Selected Proxy IP Header"
 msgstr ""
 
-#: classes/Helpers/class-settings-helper.php:1205
+#: classes/Helpers/class-settings-helper.php:1232
 #: classes/WPSensors/class-wp-2fa-sensor.php:90
 #: classes/WPSensors/class-wp-2fa-sensor.php:91
 #: classes/WPSensors/class-wp-2fa-sensor.php:100
@@ -4884,10 +4884,10 @@ msgstr ""
 msgid "None provided"
 msgstr ""
 
-#: classes/Helpers/class-settings-helper.php:1945
-#: classes/Helpers/class-settings-helper.php:1963
-#: classes/Helpers/class-settings-helper.php:1979
-#: classes/Helpers/class-settings-helper.php:1980
+#: classes/Helpers/class-settings-helper.php:1972
+#: classes/Helpers/class-settings-helper.php:1990
+#: classes/Helpers/class-settings-helper.php:2006
+#: classes/Helpers/class-settings-helper.php:2007
 msgid "Delete events older than "
 msgstr ""
 
@@ -4916,7 +4916,7 @@ msgstr ""
 msgid "Nickname: "
 msgstr ""
 
-#: classes/Helpers/class-view-manager.php:296
+#: classes/Helpers/class-view-manager.php:297
 msgid "Get Premium!"
 msgstr ""
 
@@ -4930,175 +4930,175 @@ msgstr ""
 
 #: classes/Helpers/settings/class-settings-builder.php:828
 #: classes/Helpers/settings/class-settings-builder.php:857
-#: classes/Helpers/settings/class-settings-builder.php:2025
+#: classes/Helpers/settings/class-settings-builder.php:2028
 msgid "Upload"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:1827
-#: classes/Helpers/settings/class-settings-builder.php:1877
+#: classes/Helpers/settings/class-settings-builder.php:1829
+#: classes/Helpers/settings/class-settings-builder.php:1879
 msgid "Add Image"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2037
+#: classes/Helpers/settings/class-settings-builder.php:2040
 msgid "no-repeat"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2043
+#: classes/Helpers/settings/class-settings-builder.php:2046
 msgid "Tile"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2049
+#: classes/Helpers/settings/class-settings-builder.php:2052
 msgid "Tile Horizontally"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2055
+#: classes/Helpers/settings/class-settings-builder.php:2058
 msgid "Tile Vertically"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2066
+#: classes/Helpers/settings/class-settings-builder.php:2069
 msgid "Fixed"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2072
+#: classes/Helpers/settings/class-settings-builder.php:2075
 msgid "Scroll"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2078
+#: classes/Helpers/settings/class-settings-builder.php:2081
 msgid "Cover"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2089
+#: classes/Helpers/settings/class-settings-builder.php:2092
 msgid "Left"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2095
+#: classes/Helpers/settings/class-settings-builder.php:2098
 msgid "Right"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2101
-#: classes/Helpers/settings/class-settings-builder.php:2124
+#: classes/Helpers/settings/class-settings-builder.php:2104
+#: classes/Helpers/settings/class-settings-builder.php:2127
 msgid "Center"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2112
+#: classes/Helpers/settings/class-settings-builder.php:2115
 msgid "Top"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2118
+#: classes/Helpers/settings/class-settings-builder.php:2121
 msgid "Bottom"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2173
+#: classes/Helpers/settings/class-settings-builder.php:2176
 msgid "Font Size in Pixels"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2187
+#: classes/Helpers/settings/class-settings-builder.php:2190
 msgid "Line Height"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2206
+#: classes/Helpers/settings/class-settings-builder.php:2209
 msgid "Font Weight"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2209
+#: classes/Helpers/settings/class-settings-builder.php:2212
 msgid "Thin 100"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2211
+#: classes/Helpers/settings/class-settings-builder.php:2214
 msgid "Extra 200 Light"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2213
+#: classes/Helpers/settings/class-settings-builder.php:2216
 msgid "Light 300"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2215
+#: classes/Helpers/settings/class-settings-builder.php:2218
 msgid "Regular 400"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2217
+#: classes/Helpers/settings/class-settings-builder.php:2220
 msgid "Medium 500"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2219
+#: classes/Helpers/settings/class-settings-builder.php:2222
 msgid "Semi 600 Bold"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2221
+#: classes/Helpers/settings/class-settings-builder.php:2224
 msgid "Bold 700"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2223
+#: classes/Helpers/settings/class-settings-builder.php:2226
 msgid "Extra 800 Bold"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2225
+#: classes/Helpers/settings/class-settings-builder.php:2228
 msgid "Black 900"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2234
+#: classes/Helpers/settings/class-settings-builder.php:2237
 msgid "Capitalization"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2237
+#: classes/Helpers/settings/class-settings-builder.php:2240
 msgid "UPPERCASE"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2239
+#: classes/Helpers/settings/class-settings-builder.php:2242
 msgid "Capitalize"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2241
+#: classes/Helpers/settings/class-settings-builder.php:2244
 msgid "lowercase"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2362
-#: classes/Views/ToggleAlerts.php:257
-#: classes/Views/ToggleAlerts.php:437
+#: classes/Helpers/settings/class-settings-builder.php:2366
+#: classes/Views/ToggleAlerts.php:260
+#: classes/Views/ToggleAlerts.php:440
 msgid "Save changes"
 msgstr ""
 
-#: classes/Helpers/settings/class-settings-builder.php:2364
+#: classes/Helpers/settings/class-settings-builder.php:2368
 msgid "Create custom notification"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:472
+#: classes/ListAdminEvents/class-list-events.php:473
 msgid "No logs found"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:633
+#: classes/ListAdminEvents/class-list-events.php:637
 msgid "This event is disabled."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:685
+#: classes/ListAdminEvents/class-list-events.php:691
 msgid "Deleted user"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:802
+#: classes/ListAdminEvents/class-list-events.php:808
 msgid "Close inspector."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:802
+#: classes/ListAdminEvents/class-list-events.php:808
 msgid "Event data inspector"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:802
+#: classes/ListAdminEvents/class-list-events.php:808
 msgid "More details..."
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:876
+#: classes/ListAdminEvents/class-list-events.php:882
 msgid "Disable this type of event IDs"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:877
+#: classes/ListAdminEvents/class-list-events.php:883
 msgid "Do not keep a log of this user(s)' actions"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:878
+#: classes/ListAdminEvents/class-list-events.php:884
 msgid "Do not keep a log of these IP addresses"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:1121
+#: classes/ListAdminEvents/class-list-events.php:1127
 msgid "Records per page"
 msgstr ""
 
@@ -5115,22 +5115,22 @@ msgstr ""
 msgid "Extension Settings"
 msgstr ""
 
-#: classes/MainWPAddon/class-mainwp-helper.php:132
+#: classes/MainWPAddon/class-mainwp-helper.php:133
 #: classes/MainWPAddon/class-mainwp-helper.php:722
 #: classes/MainWPAddon/class-mainwp-helper.php:725
 #: classes/WPSensors/Alerts/class-mainwp-server-custom-alerts.php:45
 msgid "MainWP Dashboard"
 msgstr ""
 
-#: classes/MainWPAddon/class-mainwp-helper.php:136
+#: classes/MainWPAddon/class-mainwp-helper.php:137
 msgid " (Current site)"
 msgstr ""
 
-#: classes/MainWPAddon/class-mainwp-helper.php:157
+#: classes/MainWPAddon/class-mainwp-helper.php:158
 msgid "Retrieve Activity Logs Now"
 msgstr ""
 
-#: classes/MainWPAddon/class-mainwp-helper.php:299
+#: classes/MainWPAddon/class-mainwp-helper.php:300
 msgid "Client site is using older version of the plugin - please update all client sites"
 msgstr ""
 
@@ -5633,131 +5633,131 @@ msgstr ""
 msgid "Activity log highlights"
 msgstr ""
 
-#: classes/notification/class-notifications.php:814
+#: classes/notification/class-notifications.php:818
 msgid "Daily report is empty"
 msgstr ""
 
-#: classes/notification/class-notifications.php:841
+#: classes/notification/class-notifications.php:845
 msgid "The plugin failed to send the email. Is your email set up correctly? Please consult with your website administrator or contact us to assist you with the troubleshooting."
 msgstr ""
 
-#: classes/notification/class-notifications.php:1141
+#: classes/notification/class-notifications.php:1145
 msgid "Failed login for WordPress users"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1142
+#: classes/notification/class-notifications.php:1146
 msgid "Failed login for non existing WordPress users"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1146
+#: classes/notification/class-notifications.php:1150
 msgid "New plugin is installed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1147
+#: classes/notification/class-notifications.php:1151
 msgid "Installed plugin is activated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1148
+#: classes/notification/class-notifications.php:1152
 msgid "Plugin file is modified"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1149
+#: classes/notification/class-notifications.php:1153
 msgid "Installed plugin is deactivated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1150
+#: classes/notification/class-notifications.php:1154
 msgid "A plugin is uninstalled"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1151
+#: classes/notification/class-notifications.php:1155
 msgid "Installed plugin is upgraded"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1153
+#: classes/notification/class-notifications.php:1157
 msgid "New theme is installed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1154
+#: classes/notification/class-notifications.php:1158
 msgid "Installed theme is activated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1155
+#: classes/notification/class-notifications.php:1159
 msgid "Theme file is modified"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1156
+#: classes/notification/class-notifications.php:1160
 msgid "A theme is uninstalled"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1157
+#: classes/notification/class-notifications.php:1161
 msgid "Installed theme is updated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1159
+#: classes/notification/class-notifications.php:1163
 msgid "User logs in"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1160
+#: classes/notification/class-notifications.php:1164
 msgid "User changed password"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1162
+#: classes/notification/class-notifications.php:1166
 msgid "User changed email address"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1163
+#: classes/notification/class-notifications.php:1167
 msgid "User's role has changed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1164
+#: classes/notification/class-notifications.php:1168
 msgid "User changed the password of another user"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1165
+#: classes/notification/class-notifications.php:1169
 msgid "New user is created"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1167
+#: classes/notification/class-notifications.php:1171
 msgid "New content is published"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1168
+#: classes/notification/class-notifications.php:1172
 msgid "Content in a post, page or custom post type is changed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1169
+#: classes/notification/class-notifications.php:1173
 msgid "Post is permanently deleted from the trash"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1170
+#: classes/notification/class-notifications.php:1174
 msgid "Post is moved to the trash"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1171
+#: classes/notification/class-notifications.php:1175
 msgid "Anything but content in a post is changed"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1173
+#: classes/notification/class-notifications.php:1177
 msgid "User granted super admin"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1174
+#: classes/notification/class-notifications.php:1178
 msgid "User revoked super admin"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1175
+#: classes/notification/class-notifications.php:1179
 msgid "User added to site"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1186
+#: classes/notification/class-notifications.php:1190
 msgid "Critical event is generated"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1421
+#: classes/notification/class-notifications.php:1435
 msgid "Use default"
 msgstr ""
 
-#: classes/notification/class-notifications.php:1700
+#: classes/notification/class-notifications.php:1714
 msgid "Custom notification - no name"
 msgstr ""
 
@@ -5820,13 +5820,13 @@ msgstr ""
 msgid "View WP Activity Logs"
 msgstr ""
 
-#: classes/MainWPAddon/class-mainwp-helper.php:206
+#: classes/MainWPAddon/class-mainwp-helper.php:207
 #: classes/Select2/class-select2-wpws.php:111
 #: classes/Views/Settings.php:326
 msgid "Insecure request."
 msgstr ""
 
-#: classes/Free/assets/upgrade-to-premium.php:173
+#: classes/Free/assets/upgrade-to-premium.php:166
 #: classes/Views/addons/html-view.php:89
 #: classes/Views/addons/html-view.php:114
 #: classes/Views/class-premium-features.php:303
@@ -5845,27 +5845,27 @@ msgstr ""
 msgid "Note: You can adjust all the settings configured in the wizard later from the plugin's settings page."
 msgstr ""
 
-#: classes/Views/AuditLog.php:739
+#: classes/Views/AuditLog.php:750
 msgid "Close inspector"
 msgstr ""
 
-#: classes/Views/AuditLog.php:742
+#: classes/Views/AuditLog.php:753
 msgid "Install and activate extension"
 msgstr ""
 
-#: classes/Views/AuditLog.php:743
+#: classes/Views/AuditLog.php:754
 msgid "Installing extension"
 msgstr ""
 
-#: classes/Views/AuditLog.php:744
+#: classes/Views/AuditLog.php:755
 msgid "Other extension installing"
 msgstr ""
 
-#: classes/Views/AuditLog.php:746
+#: classes/Views/AuditLog.php:757
 msgid "Installed... reloading page"
 msgstr ""
 
-#: classes/Views/AuditLog.php:747
+#: classes/Views/AuditLog.php:758
 msgid "Problem enabling"
 msgstr ""
 
@@ -6058,12 +6058,12 @@ msgid "You can specify the username of the user that you want to allow. If you w
 msgstr ""
 
 #: classes/Views/Settings.php:886
-#: classes/Views/Settings.php:1274
-#: classes/Views/Settings.php:1295
-#: classes/Views/Settings.php:1316
-#: classes/Views/Settings.php:1338
-#: classes/Views/Settings.php:1360
-#: classes/Views/Settings.php:1416
+#: classes/Views/Settings.php:1311
+#: classes/Views/Settings.php:1332
+#: classes/Views/Settings.php:1353
+#: classes/Views/Settings.php:1375
+#: classes/Views/Settings.php:1397
+#: classes/Views/Settings.php:1453
 msgid "Add"
 msgstr ""
 
@@ -6097,139 +6097,139 @@ msgstr ""
 msgid "Hide plugin in plugins page"
 msgstr ""
 
-#: classes/Views/Settings.php:1042
+#: classes/Views/Settings.php:1070
 msgid "For how long do you want to keep the activity log events (Retention settings)?"
 msgstr ""
 
-#: classes/Views/Settings.php:1066
+#: classes/Views/Settings.php:1094
 msgid "Events timestamp"
 msgstr ""
 
-#: classes/Views/Settings.php:1099
+#: classes/Views/Settings.php:1127
 msgid "Show milliseconds"
 msgstr ""
 
-#: classes/Views/Settings.php:1116
+#: classes/Views/Settings.php:1144
 msgid "Show the Query string from URLs (URL parameters) in the event metadata?"
 msgstr ""
 
-#: classes/Views/Settings.php:1117
+#: classes/Views/Settings.php:1145
 msgid "Some URLs contain a Query string with URL parameters, such as the UTM parameters. Use the below setting to configure the plugin to show these parameters are event metadata."
 msgstr ""
 
-#: classes/Views/Settings.php:1121
+#: classes/Views/Settings.php:1149
 msgid "Show Query string details in event metadata"
 msgstr ""
 
-#: classes/Views/Settings.php:1142
+#: classes/Views/Settings.php:1170
 msgid "User information in activity log"
 msgstr ""
 
-#: classes/Views/Settings.php:1176
+#: classes/Views/Settings.php:1204
 msgid "Enable events for WordPress background activity"
 msgstr ""
 
-#: classes/Views/Settings.php:1235
+#: classes/Views/Settings.php:1272
 msgid "Melapress File Monitor"
 msgstr ""
 
-#: classes/Views/Settings.php:1236
+#: classes/Views/Settings.php:1273
 msgid "To keep a log of file changes please install Melapress File Monitor, a plugin which is also developed by us."
 msgstr ""
 
-#: classes/Views/Settings.php:1247
+#: classes/Views/Settings.php:1284
 msgid "Melapress File Monitor plugin settings"
 msgstr ""
 
-#: classes/Views/Settings.php:1270
+#: classes/Views/Settings.php:1307
 msgid "Exclude users:"
 msgstr ""
 
-#: classes/Views/Settings.php:1291
+#: classes/Views/Settings.php:1328
 msgid "Exclude roles:"
 msgstr ""
 
-#: classes/Views/Settings.php:1312
+#: classes/Views/Settings.php:1349
 msgid "Exclude IP address(es):"
 msgstr ""
 
-#: classes/Views/Settings.php:1334
+#: classes/Views/Settings.php:1371
 msgid "Exclude post type:"
 msgstr ""
 
-#: classes/Views/Settings.php:1356
+#: classes/Views/Settings.php:1393
 msgid "Exclude post status:"
 msgstr ""
 
-#: classes/Views/Settings.php:1372
+#: classes/Views/Settings.php:1409
 msgid "You can exclude posts which have a specific Post Status from the activity logs by specifying the Post Status in this setting."
 msgstr ""
 
-#: classes/Views/Settings.php:1379
+#: classes/Views/Settings.php:1416
 msgid "Exclude custom post fields:"
 msgstr ""
 
-#: classes/Views/Settings.php:1388
+#: classes/Views/Settings.php:1425
 msgid "Exclude custom user fields:"
 msgstr ""
 
-#: classes/Views/Settings.php:1482
+#: classes/Views/Settings.php:1531
 msgid "Activity log successfully purged"
 msgstr ""
 
-#: classes/Views/Settings.php:1489
+#: classes/Views/Settings.php:1538
 msgid "MainWP child site stealth mode"
 msgstr ""
 
-#: classes/Views/Settings.php:1494
+#: classes/Views/Settings.php:1543
 msgid "Enable MainWP child site stealth mode"
 msgstr ""
 
-#: classes/Views/Settings.php:1522
+#: classes/Views/Settings.php:1571
 msgid "Remove data on uninstall"
 msgstr ""
 
-#: classes/Views/Settings.php:1653
+#: classes/Views/Settings.php:1707
 msgid "The specified value is not a valid post status!"
 msgstr ""
 
-#: classes/Views/Settings.php:1673
+#: classes/Views/Settings.php:1727
 msgid "You have to select at least one column!"
 msgstr ""
 
-#: classes/Views/Settings.php:2015
+#: classes/Views/Settings.php:2114
 msgid "Days"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:208
+#: classes/Views/ToggleAlerts.php:211
 msgid "Enable/Disable alerts"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:241
+#: classes/Views/ToggleAlerts.php:244
 msgid "Choose your query and enter your search term"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:243
+#: classes/Views/ToggleAlerts.php:246
 msgid "Event code"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:249
+#: classes/Views/ToggleAlerts.php:252
 msgid "OR"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:251
+#: classes/Views/ToggleAlerts.php:254
 msgid "Choose a category"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:253
+#: classes/Views/ToggleAlerts.php:256
 msgid "All categories"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:319
+#: classes/Views/ToggleAlerts.php:322
 msgid "Please activate WooCommerce to enable this alert"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:327
+#: classes/Views/ToggleAlerts.php:330
 msgid "Please activate the Yoast SEO Plugin"
 msgstr ""
 
@@ -11488,7 +11488,7 @@ msgstr ""
 msgid "restored"
 msgstr ""
 
-#: classes/Helpers/class-wp-helper.php:1243
+#: classes/Helpers/class-wp-helper.php:1259
 #: classes/WPSensors/class-gravity-forms-sensor.php:1598
 msgid "Not found"
 msgstr ""
@@ -11498,8 +11498,8 @@ msgid "not set"
 msgstr ""
 
 #: classes/WPSensors/class-mainwp-server-sensor.php:840
-#: classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php:218
-#: classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php:233
+#: classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php:220
+#: classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php:235
 msgid "Active"
 msgstr ""
 
@@ -12125,8 +12125,8 @@ msgid "Emails"
 msgstr ""
 
 #: classes/WPSensors/class-paid-memberships-pro-sensor.php:132
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1639
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1647
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1648
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1656
 #: classes/WPSensors/Helpers/class-paid-memberships-pro-helper.php:225
 msgid "Never"
 msgstr ""
@@ -12234,12 +12234,12 @@ msgstr ""
 msgid "On backorder"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:943
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:992
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:952
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1001
 msgid "Guest"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:957
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:966
 #: classes/WPSensors/class-yoast-seo-sensor.php:1744
 #: classes/WPSensors/class-yoast-seo-sensor.php:1745
 #: classes/WPSensors/class-yoast-seo-sensor.php:1746
@@ -12249,43 +12249,43 @@ msgstr ""
 msgid "None supplied"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1505
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1506
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1514
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1515
 msgid "Visible"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1505
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1506
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1514
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1515
 msgid "Non-Visible"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1567
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1568
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1575
 #: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1576
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1577
 #: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1584
 #: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1585
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1586
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1587
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1593
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1594
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1595
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1596
 msgid "File is missing"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1635
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1643
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1644
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1652
 msgid "Unlimited"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1766
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:1775
 msgid "Store Default"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2266
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2267
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2275
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2276
 msgid "Does not expire"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2463
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2520
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2472
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2529
 msgid "Not supplied"
 msgstr ""
 
@@ -12387,7 +12387,7 @@ msgstr ""
 msgid "Excluded users"
 msgstr ""
 
-#: classes/WPSensors/class-wp-system-sensor.php:326
+#: classes/WPSensors/class-wp-system-sensor.php:327
 msgid "Unknown or Invalid (non-existing)"
 msgstr ""
 
@@ -12927,39 +12927,39 @@ msgstr ""
 msgid "records is not provided or incorrect"
 msgstr ""
 
-#: classes/Writers/class-html-writer.php:430
+#: classes/Writers/class-html-writer.php:471
 msgid "Report Date"
 msgstr ""
 
-#: classes/Writers/class-html-writer.php:431
+#: classes/Writers/class-html-writer.php:472
 msgid "Report Time"
 msgstr ""
 
-#: classes/Writers/class-html-writer.php:450
+#: classes/Writers/class-html-writer.php:491
 msgid "Timezone"
 msgstr ""
 
-#: classes/Writers/class-html-writer.php:451
+#: classes/Writers/class-html-writer.php:492
 msgid "Generated by"
 msgstr ""
 
-#: classes/Writers/class-html-writer.php:454
+#: classes/Writers/class-html-writer.php:495
 msgid "Business Name"
 msgstr ""
 
-#: classes/Writers/class-html-writer.php:455
+#: classes/Writers/class-html-writer.php:496
 msgid "Contact Name"
 msgstr ""
 
-#: classes/Writers/class-html-writer.php:456
+#: classes/Writers/class-html-writer.php:497
 msgid "Contact Email"
 msgstr ""
 
-#: classes/Writers/class-html-writer.php:457
+#: classes/Writers/class-html-writer.php:498
 msgid "Contact Phone"
 msgstr ""
 
-#: classes/Writers/class-html-writer.php:488
+#: classes/Writers/class-html-writer.php:529
 msgid "Report Criteria"
 msgstr ""
 
@@ -13725,7 +13725,7 @@ msgstr ""
 msgid "Email was sent to %EmailAddress%."
 msgstr ""
 
-#: classes/Views/AuditLog.php:509
+#: classes/Views/AuditLog.php:508
 msgid "Add Note"
 msgstr ""
 
@@ -13745,11 +13745,11 @@ msgstr ""
 msgid "You do not have permission to install plugins."
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1364
+#: classes/Controllers/class-alert-manager.php:1366
 msgid "Completed"
 msgstr ""
 
-#: classes/Controllers/class-connection.php:278
+#: classes/Controllers/class-connection.php:294
 msgid "Error establishing a database connection. DB username or password are not valid."
 msgstr ""
 
@@ -13855,71 +13855,67 @@ msgstr ""
 msgid "This value is currently defined via the %s PHP constant and takes priority over the value saved in the database."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:518
+#: classes/Helpers/class-notices.php:566
 msgid "Failed to save the survey preference. Please try again."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:541
-#: classes/Helpers/class-notices.php:763
+#: classes/Helpers/class-notices.php:589
+#: classes/Helpers/class-notices.php:795
 msgid "Failed to dismiss the notice. Please try again."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:598
+#: classes/Helpers/class-notices.php:646
 msgid "Got 2 minutes? Help us shape the future of WP Activity Log"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:599
+#: classes/Helpers/class-notices.php:647
 msgid "Take the survey"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:621
+#: classes/Helpers/class-notices.php:669
 msgid "Great news! We've added support for LearnDash LMS."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:622
+#: classes/Helpers/class-notices.php:670
 msgid "You can now track course creation, lesson modifications, student enrollments, quiz completions, and more."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:623
+#: classes/Helpers/class-notices.php:671
 msgid "To help keep your activity log focused and efficient, we've carefully selected which events are enabled by default. You can review and customize which LearnDash events you want to track at any time."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:624
+#: classes/Helpers/class-notices.php:672
 msgid "Review Settings"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:625
+#: classes/Helpers/class-notices.php:673
 msgid "Not Now"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:790
+#: classes/Helpers/class-notices.php:831
 msgid "Upgrade to premium"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:793
+#: classes/Helpers/class-notices.php:834
 msgid "Black Friday"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:793
+#: classes/Helpers/class-notices.php:834
 msgid "sale now live!"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:795
-msgid "Get offer now"
-msgstr ""
-
 #. translators: The column name.
-#: classes/ListAdminEvents/class-list-events.php:850
+#: classes/ListAdminEvents/class-list-events.php:856
 #, php-format
 msgid "Select %s"
 msgstr ""
 
-#: classes/notification/class-notifications.php:767
+#: classes/notification/class-notifications.php:771
 msgid "One or more notification settings could not be enabled because no email was set for them. Please specify custom recipients for all notification settings enabled, or, configure at least one default recipient in the Notification Settings tab."
 msgstr ""
 
 #. translators: 1: retention period, 2: time until next scheduled cleanup.
-#: classes/Views/Settings.php:2056
+#: classes/Views/Settings.php:2155
 #, php-format
 msgid "The next scheduled purging of activity log data that is older than %1$s is in %2$s."
 msgstr ""
@@ -14431,21 +14427,23 @@ msgstr ""
 msgid "Free"
 msgstr ""
 
-#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2610
+#: classes/WPSensors/class-woocommerce-sensor-helper-second.php:2619
 msgid "No product title found"
 msgstr ""
 
-#: classes/WPSensors/class-wp-plugins-themes-sensor.php:428
-#: classes/WPSensors/class-wp-plugins-themes-sensor.php:525
-#: classes/WPSensors/class-wp-plugins-themes-sensor.php:605
-#: classes/WPSensors/class-wp-plugins-themes-sensor.php:673
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:470
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:567
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:647
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:720
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:1327
 msgid "True"
 msgstr ""
 
-#: classes/WPSensors/class-wp-plugins-themes-sensor.php:428
-#: classes/WPSensors/class-wp-plugins-themes-sensor.php:525
-#: classes/WPSensors/class-wp-plugins-themes-sensor.php:605
-#: classes/WPSensors/class-wp-plugins-themes-sensor.php:673
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:470
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:567
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:647
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:720
+#: classes/WPSensors/class-wp-plugins-themes-sensor.php:1327
 msgid "False"
 msgstr ""
 
@@ -14574,8 +14572,8 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-#: classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php:219
-#: classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php:234
+#: classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php:221
+#: classes/WPSensors/Helpers/class-wp-plugins-themes-helper.php:236
 msgid "Inactive"
 msgstr ""
 
@@ -14613,7 +14611,7 @@ msgstr ""
 msgid "User entered the wrong password while trying to access the password-protected post %PostTitle%."
 msgstr ""
 
-#: classes/MainWPAddon/class-mainwp-helper.php:210
+#: classes/MainWPAddon/class-mainwp-helper.php:211
 msgid "Access denied."
 msgstr ""
 
@@ -14788,7 +14786,13 @@ msgstr ""
 msgid "Changed the Site Icon from %old_filename% to %filename%."
 msgstr ""
 
-#: classes/Controllers/class-alert-manager.php:1366
+#. translators: %s: WordPress user the AI agent acted as.
+#: classes/AtarimAddon/class-atarim-addon.php:206
+#, php-format
+msgid "(via %s)"
+msgstr ""
+
+#: classes/Controllers/class-alert-manager.php:1368
 msgid "Disconnected"
 msgstr ""
 
@@ -14800,8 +14804,41 @@ msgstr ""
 msgid "Monitor and manage active user sessions with Premium"
 msgstr ""
 
-#: classes/Controllers/class-connection.php:294
+#: classes/Controllers/class-connection.php:310
 msgid "Error establishing a database connection."
+msgstr ""
+
+#. translators: %s: database name.
+#: classes/Controllers/class-connection.php:316
+#, php-format
+msgid "Error: Database %s is unknown."
+msgstr ""
+
+#: classes/Controllers/class-connection.php:886
+msgid "Could not connect to the archive database."
+msgstr ""
+
+#: classes/Controllers/class-connection.php:922
+#: classes/Entities/Archive/class-archive-records.php:151
+msgid "An activity log transfer is already running. Please try again later."
+msgstr ""
+
+#: classes/Entities/Archive/class-archive-records.php:80
+#: classes/Entities/Archive/class-archive-records.php:129
+msgid "Could not transfer the activity log. Check the database connection and permissions, then try again."
+msgstr ""
+
+#: classes/Entities/Archive/class-archive-records.php:177
+msgid "Another activity log transfer took over. The source records have been retained, please try again."
+msgstr ""
+
+#: classes/Entities/Archive/class-archive-records.php:530
+#: classes/Entities/Archive/class-archive-records.php:553
+msgid "A separate archive database connection is required."
+msgstr ""
+
+#: classes/Entities/Archive/class-archive-records.php:545
+msgid "Could not connect to the activity log database."
 msgstr ""
 
 #. translators: 1: Bolded "Submit & Deactivate" label. 2: Bolded "Skip & Deactivate" label.
@@ -14836,31 +14873,39 @@ msgstr ""
 msgid "Unlock Priority Support with Premium"
 msgstr ""
 
+#: classes/Free/assets/upgrade-to-premium.php:140
+msgid "Black Friday Sale"
+msgstr ""
+
 #. translators: 1: Plugin name. 2: Plugin version number.
-#: classes/Helpers/class-notices.php:199
+#: classes/Helpers/class-notices.php:247
 #, php-format
 msgid "%1$s has been updated to version %2$s"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:258
+#: classes/Helpers/class-notices.php:306
 msgid "view changelog"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:260
-#: classes/Helpers/class-notices.php:365
+#: classes/Helpers/class-notices.php:308
+#: classes/Helpers/class-notices.php:413
 msgid "Dismiss this notice"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:361
+#: classes/Helpers/class-notices.php:409
 msgid "Know about important changes before they become problems"
 msgstr ""
 
-#: classes/Helpers/class-notices.php:362
+#: classes/Helpers/class-notices.php:410
 msgid "Receive alerts for critical activity, monitor active user sessions, and keep a complete audit trail of everything happening on your site."
 msgstr ""
 
-#: classes/Helpers/class-notices.php:363
+#: classes/Helpers/class-notices.php:411
 msgid "Unlock Premium Features"
+msgstr ""
+
+#: classes/Helpers/class-notices.php:836
+msgid "Get Offer Now"
 msgstr ""
 
 #: classes/Licensing/class-licensing-factory.php:689
@@ -14879,12 +14924,12 @@ msgstr ""
 msgid "The license could not be activated."
 msgstr ""
 
-#: classes/Licensing/class-licensing-helper.php:212
+#: classes/Licensing/class-licensing-helper.php:219
 msgid "Unknown error"
 msgstr ""
 
 #. translators: 1: number of sites of the network, 2: plugin name, 3: available license activations
-#: classes/Licensing/class-licensing-helper.php:280
+#: classes/Licensing/class-licensing-helper.php:299
 #, php-format
 msgid "This network has %1$d sites, but your %2$s license only has %3$d activation available. Upgrade your license or remove sites from the network, then try again."
 msgid_plural "This network has %1$d sites, but your %2$s license only has %3$d activations available. Upgrade your license or remove sites from the network, then try again."
@@ -14892,11 +14937,11 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-#: classes/ListAdminEvents/class-list-events.php:265
+#: classes/ListAdminEvents/class-list-events.php:266
 msgid "Quickly find the exact log data you need with advanced filters and saved searches with"
 msgstr ""
 
-#: classes/ListAdminEvents/class-list-events.php:266
+#: classes/ListAdminEvents/class-list-events.php:267
 msgid "Premium"
 msgstr ""
 
@@ -14916,23 +14961,23 @@ msgstr ""
 msgid "Unlock Advanced Notifications"
 msgstr ""
 
-#: classes/Views/AuditLog.php:488
+#: classes/Views/AuditLog.php:487
 msgid "Get scheduled reports for content and publishing activity with Premium"
 msgstr ""
 
-#: classes/Views/AuditLog.php:547
+#: classes/Views/AuditLog.php:546
 msgid "Add Notes to Activity Log Entries"
 msgstr ""
 
-#: classes/Views/AuditLog.php:548
+#: classes/Views/AuditLog.php:547
 msgid "Keep important context alongside your activity log data by adding notes to individual log entries. Document investigations, explain changes, track follow-up actions, and collaborate more effectively with your team."
 msgstr ""
 
-#: classes/Views/AuditLog.php:549
+#: classes/Views/AuditLog.php:548
 msgid "Available in WP Activity Log Premium."
 msgstr ""
 
-#: classes/Views/AuditLog.php:550
+#: classes/Views/AuditLog.php:549
 msgid "Upgrade to Premium"
 msgstr ""
 
@@ -15088,19 +15133,19 @@ msgstr ""
 msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://melapress.com/?utm_source=plugin&utm_medium=wsal&utm_campaign=login-page-notification\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
 msgstr ""
 
-#: classes/Views/Settings.php:1046
+#: classes/Views/Settings.php:1074
 msgid "<a href=\"https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=wsal&utm_campaign=settings-retention-upgrade\" target=\"_blank\">Upgrade to Premium</a> to store the activity log data in an external database."
 msgstr ""
 
-#: classes/Views/Settings.php:1458
+#: classes/Views/Settings.php:1507
 msgid "If you have any questions <a href=\"https://melapress.com/contact/?utm_source=plugin&utm_medium=wsal&utm_campaign=settings-advanced-contact-us\" target=\"_blank\">contact us</a>."
 msgstr ""
 
-#: classes/Views/Settings.php:1980
+#: classes/Views/Settings.php:2079
 msgid "Old data could not be purged."
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:229
+#: classes/Views/ToggleAlerts.php:232
 msgid "Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href=\"https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugin&utm_medium=wsal&utm_campaign=toggle-events-event-ids-list\" target=\"_blank\">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of."
 msgstr ""
 
